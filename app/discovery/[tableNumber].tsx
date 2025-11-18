@@ -330,7 +330,7 @@ export default function DiscoveryScreen() {
     {
       title: 'Compte avec moi !',
       content: clickedMultiplications.size === 10 
-        ? 'Bravo ! Tu les connais toutes ! Passe à la suite.' 
+        ? 'Correct ! Tu les connais toutes ! Passe à la suite.' 
         : `Clique sur toutes les multiplications (${clickedMultiplications.size}/10)`,
       visual: (
         <View style={styles.countingContainer}>

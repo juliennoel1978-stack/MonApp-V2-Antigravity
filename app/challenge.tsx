@@ -304,7 +304,7 @@ export default function ChallengeScreen() {
               ]}
             >
               <Text style={styles.celebrationEmoji}>🎉</Text>
-              <Text style={styles.celebrationText}>Bravo !</Text>
+              <Text style={styles.celebrationText}>Correct !</Text>
               <Text style={styles.celebrationSubtext}>
                 4 bonnes réponses d&apos;affilée !
               </Text>
