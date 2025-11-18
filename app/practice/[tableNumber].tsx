@@ -161,19 +161,17 @@ export default function PracticeScreen() {
   };
 
   const finishLevel = () => {
-    const finalCorrect = correctCount + (isCorrect ? 1 : 0);
-    
     if (level === 1) {
-      if (finalCorrect === 10) {
+      if (correctCount >= 10) {
         setShowLevelTransition(true);
       } else {
-        const stars = calculateStars(finalCorrect, questions.length);
-        updateTableProgress(table.number, finalCorrect, questions.length, stars);
+        const stars = calculateStars(correctCount, questions.length);
+        updateTableProgress(table.number, correctCount, questions.length, stars);
         setShowResult(true);
       }
     } else {
-      const stars = calculateStars(finalCorrect, questions.length);
-      updateTableProgress(table.number, finalCorrect, questions.length, stars);
+      const stars = calculateStars(correctCount, questions.length);
+      updateTableProgress(table.number, correctCount, questions.length, stars);
 
       if (stars >= 3) {
         unlockBadge('perfect_score');
@@ -253,8 +251,7 @@ export default function PracticeScreen() {
   }
 
   if (showResult) {
-    const finalCorrect = correctCount + (isCorrect ? 1 : 0);
-    const stars = calculateStars(finalCorrect, questions.length);
+    const stars = calculateStars(correctCount, questions.length);
 
     return (
       <View style={styles.backgroundContainer}>
@@ -267,7 +264,7 @@ export default function PracticeScreen() {
 
             <View style={[styles.resultCard, { borderColor: tableColor }]}>
               <Text style={styles.resultScore}>
-                {finalCorrect}/{questions.length}
+                {correctCount}/{questions.length}
               </Text>
               <Text style={styles.resultLabel}>Bonnes réponses</Text>
 
