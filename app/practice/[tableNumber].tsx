@@ -257,7 +257,7 @@ export default function PracticeScreen() {
       <View style={styles.backgroundContainer}>
         <SafeAreaView style={styles.container}>
           <View style={styles.resultContainer}>
-            <Text style={styles.resultTitle}>Correct !</Text>
+            <Text style={styles.resultTitle}>Bravo !</Text>
             <Text style={styles.resultSubtitle}>
               Tu as terminé {level === 2 ? 'le niveau 2' : "l'entraînement"}
             </Text>
