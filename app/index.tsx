@@ -1,0 +1,345 @@
+import { useRouter } from 'expo-router';
+import { Sparkles, Settings as SettingsIcon, Trophy, Zap } from 'lucide-react-native';
+import React, { useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Animated,
+  Dimensions,
+  Platform,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppColors } from '@/constants/colors';
+import { useApp } from '@/contexts/AppContext';
+
+const { width } = Dimensions.get('window');
+
+export default function HomeScreen() {
+  const router = useRouter();
+  const { totalStars, progress } = useApp();
+  const scaleAnim = React.useRef(new Animated.Value(0)).current;
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [scaleAnim, fadeAnim]);
+
+  const completedTables = progress.filter(p => p.completed).length;
+  const totalTables = progress.length;
+
+  return (
+    <View style={styles.backgroundContainer}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={() => router.push('/settings' as any)}
+            testID="settings-button"
+          >
+            <SettingsIcon size={28} color={AppColors.text} />
+          </TouchableOpacity>
+        </View>
+
+        <Animated.View
+          style={[
+            styles.content,
+            {
+              opacity: fadeAnim,
+              transform: [{ scale: scaleAnim }],
+            },
+          ]}
+        >
+          <View style={styles.titleContainer}>
+            <View style={styles.sparkleLeft}>
+              <Sparkles size={32} color={AppColors.primary} />
+            </View>
+            <Text style={styles.title}>Tables Magiques</Text>
+            <View style={styles.sparkleRight}>
+              <Sparkles size={32} color={AppColors.secondary} />
+            </View>
+          </View>
+
+          <Text style={styles.subtitle}>
+            Apprends les multiplications en t&apos;amusant !
+          </Text>
+
+          <View style={styles.progressCard}>
+            <View style={styles.progressHeader}>
+              <Trophy size={32} color={AppColors.warning} />
+              <Text style={styles.progressTitle}>Ta Progression</Text>
+            </View>
+
+            <View style={styles.statsContainer}>
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{totalStars}</Text>
+                <Text style={styles.statLabel}>⭐ Étoiles</Text>
+              </View>
+
+              <View style={styles.statDivider} />
+
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>
+                  {completedTables}/{totalTables}
+                </Text>
+                <Text style={styles.statLabel}>Tables</Text>
+              </View>
+            </View>
+
+            <View style={styles.progressBarContainer}>
+              <View style={styles.progressBarBackground}>
+                <View
+                  style={[
+                    styles.progressBarFill,
+                    {
+                      width: `${(completedTables / totalTables) * 100}%`,
+                    },
+                  ]}
+                />
+              </View>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            style={styles.startButton}
+            onPress={() => router.push('/tables' as any)}
+            testID="start-button"
+          >
+            <Text style={styles.startButtonText}>Commencer</Text>
+            <Sparkles size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.challengeButton}
+            onPress={() => router.push('/challenge' as any)}
+            testID="challenge-button"
+          >
+            <Text style={styles.challengeButtonText}>Challenge</Text>
+            <Zap size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.avatarContainer}
+            onPress={() => router.push('/assistant' as any)}
+            testID="assistant-button"
+          >
+            <View style={styles.avatar}>
+              <Text style={styles.avatarEmoji}>🧙‍♂️</Text>
+            </View>
+            <Text style={styles.avatarLabel}>Ton Assistant Magique</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </SafeAreaView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  backgroundContainer: {
+    flex: 1,
+    backgroundColor: AppColors.background,
+  },
+  container: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'android' ? 10 : 0,
+  },
+  settingsButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: AppColors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    marginBottom: 12,
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+    textAlign: 'center',
+    flexShrink: 1,
+  },
+  sparkleLeft: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sparkleRight: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  subtitle: {
+    fontSize: 18,
+    color: AppColors.textSecondary,
+    textAlign: 'center',
+    marginBottom: 32,
+    paddingHorizontal: 20,
+  },
+  progressCard: {
+    width: width - 48,
+    backgroundColor: AppColors.surface,
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 24,
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  progressTitle: {
+    fontSize: 20,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statValue: {
+    fontSize: 28,
+    fontWeight: 'bold' as const,
+    color: AppColors.primary,
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 14,
+    color: AppColors.textSecondary,
+    fontWeight: '600' as const,
+  },
+  statDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: AppColors.border,
+  },
+  progressBarContainer: {
+    width: '100%',
+  },
+  progressBarBackground: {
+    height: 12,
+    backgroundColor: AppColors.borderLight,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: AppColors.primary,
+    borderRadius: 6,
+  },
+  startButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    backgroundColor: AppColors.primary,
+    paddingVertical: 18,
+    paddingHorizontal: 48,
+    borderRadius: 16,
+    shadowColor: AppColors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+    marginBottom: 16,
+  },
+  startButtonText: {
+    fontSize: 22,
+    fontWeight: 'bold' as const,
+    color: '#FFFFFF',
+  },
+  challengeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    backgroundColor: AppColors.secondary,
+    paddingVertical: 18,
+    paddingHorizontal: 48,
+    borderRadius: 16,
+    shadowColor: AppColors.secondary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+    marginBottom: 24,
+  },
+  challengeButtonText: {
+    fontSize: 22,
+    fontWeight: 'bold' as const,
+    color: '#FFFFFF',
+  },
+  avatarContainer: {
+    alignItems: 'center',
+    gap: 12,
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: AppColors.surfaceLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: AppColors.primary,
+  },
+  avatarEmoji: {
+    fontSize: 48,
+  },
+  avatarLabel: {
+    fontSize: 16,
+    color: AppColors.textSecondary,
+    fontWeight: '600' as const,
+  },
+});
