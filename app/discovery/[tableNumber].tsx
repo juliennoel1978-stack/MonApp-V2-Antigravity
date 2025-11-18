@@ -502,7 +502,7 @@ export default function DiscoveryScreen() {
             {showResult && (
               <View style={[styles.feedbackContainer, { backgroundColor: showResult === 'correct' ? AppColors.success + '20' : AppColors.error + '20' }]}>
                 <Text style={[styles.feedbackText, { color: showResult === 'correct' ? AppColors.success : AppColors.error }]}>
-                  {showResult === 'correct' ? '✓ Correct !' : '✗ Essaie encore !'}
+                  {showResult === 'correct' ? '✓ Correct !' : '✗ Incorrect !'}
                 </Text>
               </View>
             )}
@@ -1006,8 +1006,9 @@ const styles = StyleSheet.create({
   },
   phase2Content: {
     flex: 1,
-    padding: 24,
-    justifyContent: 'flex-start',
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 24,
   },
   phase2Title: {
     fontSize: 24,
@@ -1018,10 +1019,10 @@ const styles = StyleSheet.create({
   },
   phase2QuestionCard: {
     backgroundColor: AppColors.surface,
-    padding: 32,
+    padding: 24,
     borderRadius: 24,
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 20,
     borderWidth: 3,
     shadowColor: AppColors.shadow,
     shadowOffset: { width: 0, height: 4 },
@@ -1030,33 +1031,31 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   questionText: {
-    fontSize: 42,
+    fontSize: 36,
     fontWeight: 'bold' as const,
     color: AppColors.text,
     textAlign: 'center',
   },
   answerInputContainer: {
-    marginTop: 24,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   answerInput: {
-    fontSize: 48,
+    fontSize: 40,
     fontWeight: 'bold' as const,
     color: AppColors.text,
     textAlign: 'center',
     borderWidth: 3,
     borderRadius: 16,
-    paddingVertical: 16,
+    paddingVertical: 12,
     paddingHorizontal: 24,
     backgroundColor: AppColors.surface,
-    minHeight: 80,
+    minHeight: 70,
   },
   validateButton: {
-    paddingVertical: 16,
+    paddingVertical: 14,
     borderRadius: 16,
     alignItems: 'center',
-    marginTop: 8,
-    marginBottom: 24,
+    marginBottom: 16,
   },
   validateButtonText: {
     fontSize: 18,
@@ -1178,14 +1177,13 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
   },
   feedbackContainer: {
-    padding: 16,
-    borderRadius: 16,
+    padding: 12,
+    borderRadius: 12,
     alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 8,
+    marginBottom: 12,
   },
   feedbackText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold' as const,
   },
   backToTablesButton: {
