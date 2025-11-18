@@ -1,5 +1,5 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Home, ArrowRight, ArrowLeft, Volume2, X } from 'lucide-react-native';
+import { Home, ArrowRight, ArrowLeft, Volume2, X, Check, Star } from 'lucide-react-native';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
@@ -16,6 +16,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import { AppColors, NumberColors } from '@/constants/colors';
 import { getTableByNumber } from '@/constants/tables';
+import { useApp } from '@/contexts/AppContext';
+import { generateQuestions } from '@/utils/questionGenerator';
+import type { Question } from '@/types';
 
 const { width } = Dimensions.get('window');
 
@@ -23,10 +26,19 @@ export default function DiscoveryScreen() {
   const router = useRouter();
   const { tableNumber } = useLocalSearchParams();
   const table = getTableByNumber(Number(tableNumber));
+  const { updateTableProgress, unlockBadge } = useApp();
   const [currentStep, setCurrentStep] = useState(0);
   const [homeClickCount, setHomeClickCount] = useState(0);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [selectedMultiplication, setSelectedMultiplication] = useState<{ multiplier: number; result: number } | null>(null);
+  const [clickedMultiplications, setClickedMultiplications] = useState<Set<number>>(new Set());
+  const [showPhase2, setShowPhase2] = useState(false);
+  const [phase2Questions, setPhase2Questions] = useState<Question[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [userAnswer, setUserAnswer] = useState('');
+  const [showResult, setShowResult] = useState<'correct' | 'incorrect' | null>(null);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [phase2Complete, setPhase2Complete] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const modalScaleAnim = useRef(new Animated.Value(0)).current;
@@ -105,22 +117,6 @@ export default function DiscoveryScreen() {
     }
   };
 
-  const handleMultiplicationPress = useCallback((multiplier: number, result: number) => {
-    setSelectedMultiplication({ multiplier, result });
-    
-    modalScaleAnim.setValue(0);
-    Animated.spring(modalScaleAnim, {
-      toValue: 1,
-      tension: 50,
-      friction: 7,
-      useNativeDriver: true,
-    }).start();
-
-    if (table) {
-      speakMultiplication(table.number, multiplier, result);
-    }
-  }, [table, modalScaleAnim]);
-
   const closeModal = useCallback(() => {
     Animated.timing(modalScaleAnim, {
       toValue: 0,
@@ -135,6 +131,90 @@ export default function DiscoveryScreen() {
       modalSoundRef.current = null;
     }
   }, [modalScaleAnim]);
+
+  const startPhase2 = useCallback(() => {
+    if (!table) return;
+    const questions = generateQuestions(table.number, 10);
+    setPhase2Questions(questions);
+    setShowPhase2(true);
+    setCurrentQuestionIndex(0);
+    setCorrectCount(0);
+    setUserAnswer('');
+    setShowResult(null);
+  }, [table]);
+
+  const finishPhase2 = useCallback((lastCorrect: boolean) => {
+    const finalCorrect = correctCount + (lastCorrect ? 1 : 0);
+    const stars = finalCorrect === 10 ? 3 : 0;
+    
+    if (table) {
+      updateTableProgress(table.number, finalCorrect, 10, stars);
+      if (stars >= 3) {
+        unlockBadge('perfect_score');
+      }
+    }
+
+    setPhase2Complete(true);
+  }, [correctCount, table, updateTableProgress, unlockBadge]);
+
+  const handleMultiplicationPress = useCallback((multiplier: number, result: number) => {
+    setSelectedMultiplication({ multiplier, result });
+    const newSet = new Set(clickedMultiplications).add(multiplier);
+    setClickedMultiplications(newSet);
+    
+    modalScaleAnim.setValue(0);
+    Animated.spring(modalScaleAnim, {
+      toValue: 1,
+      tension: 50,
+      friction: 7,
+      useNativeDriver: true,
+    }).start();
+
+    if (table) {
+      speakMultiplication(table.number, multiplier, result);
+    }
+
+    if (newSet.size === 10) {
+      setTimeout(() => {
+        closeModal();
+        setTimeout(() => {
+          startPhase2();
+        }, 300);
+      }, 1500);
+    }
+  }, [table, modalScaleAnim, clickedMultiplications, closeModal, startPhase2]);
+
+  const handleNumberPress = useCallback((num: string) => {
+    if (showResult !== null) return;
+    setUserAnswer(prev => prev + num);
+  }, [showResult]);
+
+  const handleDeletePress = useCallback(() => {
+    setUserAnswer(prev => prev.slice(0, -1));
+  }, []);
+
+  const handleSubmitAnswer = useCallback(() => {
+    if (userAnswer === '' || showResult !== null) return;
+    
+    const currentQuestion = phase2Questions[currentQuestionIndex];
+    const correct = parseInt(userAnswer) === currentQuestion.correctAnswer;
+    
+    setShowResult(correct ? 'correct' : 'incorrect');
+    
+    if (correct) {
+      setCorrectCount(prev => prev + 1);
+    }
+
+    setTimeout(() => {
+      if (currentQuestionIndex < phase2Questions.length - 1) {
+        setCurrentQuestionIndex(prev => prev + 1);
+        setUserAnswer('');
+        setShowResult(null);
+      } else {
+        finishPhase2(correct);
+      }
+    }, 1500);
+  }, [userAnswer, showResult, phase2Questions, currentQuestionIndex, finishPhase2]);
 
   const speakTable = async () => {
     if (!table) return;
@@ -249,27 +329,35 @@ export default function DiscoveryScreen() {
     },
     {
       title: 'Compte avec moi !',
-      content: `Voici toute la table de ${table.number}`,
+      content: clickedMultiplications.size === 10 
+        ? 'Bravo ! Tu les connais toutes ! Passe à la suite.' 
+        : `Clique sur toutes les multiplications (${clickedMultiplications.size}/10)`,
       visual: (
         <View style={styles.countingContainer}>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => {
             const result = table.number * i;
+            const isClicked = clickedMultiplications.has(i);
             return (
               <TouchableOpacity
                 key={i}
                 style={[
                   styles.countingItem,
-                  { backgroundColor: tableColor + '20' },
+                  { backgroundColor: isClicked ? tableColor : tableColor + '20' },
                 ]}
                 onPress={() => handleMultiplicationPress(i, result)}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.countingNumber, { color: tableColor }]}>
+                <Text style={[styles.countingNumber, { color: isClicked ? '#FFFFFF' : tableColor }]}>
                   {result}
                 </Text>
-                <Text style={styles.countingLabel}>
+                <Text style={[styles.countingLabel, { color: isClicked ? '#FFFFFF' : AppColors.textSecondary }]}>
                   {table.number} × {i}
                 </Text>
+                {isClicked && (
+                  <View style={styles.checkmarkBadge}>
+                    <Check size={12} color="#FFFFFF" />
+                  </View>
+                )}
               </TouchableOpacity>
             );
           })}
@@ -306,6 +394,182 @@ export default function DiscoveryScreen() {
       router.push('/');
     }
   };
+
+  if (phase2Complete) {
+    const finalCorrect = correctCount;
+    const stars = finalCorrect === 10 ? 3 : 0;
+
+    return (
+      <View style={styles.backgroundContainer}>
+        <SafeAreaView style={styles.container}>
+          <View style={styles.resultContainer}>
+            <Text style={styles.resultTitle}>Félicitations !</Text>
+            <Text style={styles.resultSubtitle}>Tu as terminé la découverte</Text>
+
+            <View style={[styles.resultCard, { borderColor: tableColor }]}>
+              <Text style={styles.resultScore}>
+                {finalCorrect}/10
+              </Text>
+              <Text style={styles.resultLabel}>Bonnes réponses</Text>
+
+              <View style={styles.starsContainer}>
+                {[1, 2, 3].map(starIndex => (
+                  <Star
+                    key={starIndex}
+                    size={40}
+                    color={starIndex <= stars ? AppColors.warning : AppColors.borderLight}
+                    fill={starIndex <= stars ? AppColors.warning : 'transparent'}
+                  />
+                ))}
+              </View>
+
+              <Text style={styles.encouragement}>
+                {stars === 3 ? 'Parfait ! Tu as obtenu 3 étoiles !' : 'Continue à t\'entraîner pour obtenir 3 étoiles !'}
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.practiceButton, { backgroundColor: tableColor }]}
+              onPress={() => router.push(`/practice/${table.number}` as any)}
+            >
+              <Text style={styles.practiceButtonText}>Continuer l&apos;entraînement</Text>
+              <ArrowRight size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.backToTablesButton}
+              onPress={() => router.push('/tables')}
+            >
+              <Text style={styles.backToTablesText}>Retour aux tables</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
+
+  if (showPhase2 && phase2Questions.length > 0) {
+    const currentQuestion = phase2Questions[currentQuestionIndex];
+    const progress = ((currentQuestionIndex + 1) / phase2Questions.length) * 100;
+
+    return (
+      <View style={styles.backgroundContainer}>
+        <SafeAreaView style={styles.container} edges={['top']}>
+          <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => setShowPhase2(false)}
+              testID="back-button"
+            >
+              <ArrowLeft size={24} color={AppColors.primary} />
+            </TouchableOpacity>
+
+            <View style={styles.progressContainer}>
+              <View style={styles.progressBar}>
+                <View
+                  style={[
+                    styles.progressFill,
+                    { width: `${progress}%`, backgroundColor: tableColor },
+                  ]}
+                />
+              </View>
+              <Text style={styles.progressText}>
+                {currentQuestionIndex + 1}/{phase2Questions.length}
+              </Text>
+            </View>
+
+            <View style={styles.scoreContainer}>
+              <Text style={styles.scoreText}>{correctCount}</Text>
+              <Check size={20} color={AppColors.success} />
+            </View>
+          </View>
+
+          <View style={styles.phase2Content}>
+            <Text style={styles.phase2Title}>Maintenant, tape les réponses !</Text>
+            
+            <View style={[styles.phase2QuestionCard, { borderColor: tableColor }]}>
+              <Text style={styles.questionText}>
+                {currentQuestion.multiplicand} × {currentQuestion.multiplier} = ?
+              </Text>
+            </View>
+
+            <View style={styles.answerInputContainer}>
+              <Text style={[styles.answerInput, { borderColor: showResult === 'correct' ? AppColors.success : showResult === 'incorrect' ? AppColors.error : tableColor }]}>
+                {userAnswer || ' '}
+              </Text>
+            </View>
+
+            {showResult && (
+              <View style={[styles.feedbackContainer, { backgroundColor: showResult === 'correct' ? AppColors.success + '20' : AppColors.error + '20' }]}>
+                <Text style={[styles.feedbackText, { color: showResult === 'correct' ? AppColors.success : AppColors.error }]}>
+                  {showResult === 'correct' ? '✓ Correct !' : '✗ Essaie encore !'}
+                </Text>
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={[styles.validateButton, { backgroundColor: tableColor }]}
+              onPress={handleSubmitAnswer}
+              disabled={userAnswer === '' || showResult !== null}
+            >
+              <Text style={styles.validateButtonText}>Valider</Text>
+            </TouchableOpacity>
+
+            <View style={styles.numpadContainer}>
+              <View style={styles.numpadRow}>
+                {[1, 2, 3].map(num => (
+                  <TouchableOpacity
+                    key={num}
+                    style={styles.numpadButton}
+                    onPress={() => handleNumberPress(num.toString())}
+                  >
+                    <Text style={styles.numpadText}>{num}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <View style={styles.numpadRow}>
+                {[4, 5, 6].map(num => (
+                  <TouchableOpacity
+                    key={num}
+                    style={styles.numpadButton}
+                    onPress={() => handleNumberPress(num.toString())}
+                  >
+                    <Text style={styles.numpadText}>{num}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <View style={styles.numpadRow}>
+                {[7, 8, 9].map(num => (
+                  <TouchableOpacity
+                    key={num}
+                    style={styles.numpadButton}
+                    onPress={() => handleNumberPress(num.toString())}
+                  >
+                    <Text style={styles.numpadText}>{num}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <View style={styles.numpadRow}>
+                <View style={styles.numpadButton} />
+                <TouchableOpacity
+                  style={styles.numpadButton}
+                  onPress={() => handleNumberPress('0')}
+                >
+                  <Text style={styles.numpadText}>0</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.numpadButton}
+                  onPress={handleDeletePress}
+                >
+                  <X size={28} color={AppColors.text} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.backgroundContainer}>
@@ -728,5 +992,210 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold' as const,
     color: '#FFFFFF',
+  },
+  checkmarkBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  phase2Content: {
+    flex: 1,
+    padding: 24,
+    justifyContent: 'flex-start',
+  },
+  phase2Title: {
+    fontSize: 24,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  phase2QuestionCard: {
+    backgroundColor: AppColors.surface,
+    padding: 32,
+    borderRadius: 24,
+    alignItems: 'center',
+    marginBottom: 32,
+    borderWidth: 3,
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  questionText: {
+    fontSize: 42,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+    textAlign: 'center',
+  },
+  answerInputContainer: {
+    marginTop: 24,
+    marginBottom: 16,
+  },
+  answerInput: {
+    fontSize: 48,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+    textAlign: 'center',
+    borderWidth: 3,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    backgroundColor: AppColors.surface,
+    minHeight: 80,
+  },
+  validateButton: {
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginTop: 8,
+    marginBottom: 24,
+  },
+  validateButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold' as const,
+    color: '#FFFFFF',
+  },
+  numpadContainer: {
+    gap: 12,
+  },
+  numpadRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  numpadButton: {
+    flex: 1,
+    aspectRatio: 1.5,
+    backgroundColor: AppColors.surface,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  numpadText: {
+    fontSize: 28,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+  },
+  progressContainer: {
+    flex: 1,
+    marginHorizontal: 16,
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: AppColors.borderLight,
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 4,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  progressText: {
+    fontSize: 12,
+    color: AppColors.textSecondary,
+    textAlign: 'center',
+    fontWeight: '600' as const,
+  },
+  scoreContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: AppColors.success + '20',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  scoreText: {
+    fontSize: 16,
+    fontWeight: 'bold' as const,
+    color: AppColors.success,
+  },
+  resultContainer: {
+    flex: 1,
+    padding: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  resultTitle: {
+    fontSize: 40,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+    marginBottom: 8,
+  },
+  resultSubtitle: {
+    fontSize: 18,
+    color: AppColors.textSecondary,
+    marginBottom: 40,
+  },
+  resultCard: {
+    backgroundColor: AppColors.surface,
+    padding: 40,
+    borderRadius: 24,
+    alignItems: 'center',
+    width: width - 48,
+    borderWidth: 3,
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 5,
+    marginBottom: 32,
+  },
+  resultScore: {
+    fontSize: 64,
+    fontWeight: 'bold' as const,
+    color: AppColors.primary,
+    marginBottom: 8,
+  },
+  resultLabel: {
+    fontSize: 18,
+    color: AppColors.textSecondary,
+    marginBottom: 24,
+    fontWeight: '600' as const,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+  },
+  encouragement: {
+    fontSize: 16,
+    color: AppColors.text,
+    textAlign: 'center',
+    fontWeight: '600' as const,
+  },
+  feedbackContainer: {
+    padding: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  feedbackText: {
+    fontSize: 20,
+    fontWeight: 'bold' as const,
+  },
+  backToTablesButton: {
+    marginTop: 16,
+    paddingVertical: 12,
+  },
+  backToTablesText: {
+    fontSize: 16,
+    color: AppColors.textSecondary,
+    textAlign: 'center',
+    fontWeight: '600' as const,
   },
 });
