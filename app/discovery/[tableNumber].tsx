@@ -790,8 +790,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: AppColors.textSecondary,
     textAlign: 'center',
-    lineHeight: 26,
-    marginBottom: 32,
+    lineHeight: 24,
+    marginBottom: 24,
     paddingHorizontal: 20,
   },
   visualContainer: {

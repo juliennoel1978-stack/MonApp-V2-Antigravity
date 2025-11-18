@@ -600,6 +600,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 24,
+    paddingBottom: 120,
     justifyContent: 'center',
   },
   questionCard: {
@@ -672,13 +673,13 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   feedbackContainer: {
-    marginTop: 24,
-    padding: 16,
-    borderRadius: 16,
+    marginTop: 16,
+    padding: 12,
+    borderRadius: 12,
     alignItems: 'center',
   },
   feedbackText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold' as const,
   },
   resultContainer: {
