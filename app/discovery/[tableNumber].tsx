@@ -11,6 +11,7 @@ import {
   Dimensions,
   Platform,
   Modal,
+  PanResponder,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
@@ -21,6 +22,66 @@ import { generateQuestions } from '@/utils/questionGenerator';
 import type { Question } from '@/types';
 
 const { width } = Dimensions.get('window');
+
+function getTipExamples(tableNumber: number): string[] {
+  switch (tableNumber) {
+    case 1:
+      return [
+        '5 × 1 = 5',
+        '9 × 1 = 9'
+      ];
+    case 2:
+      return [
+        '3 × 2 = 6 (3 + 3)',
+        '5 × 2 = 10 (5 + 5)'
+      ];
+    case 3:
+      return [
+        '3 + 3 + 3 = 9',
+        '6 + 6 = 12 (2 × 6)'
+      ];
+    case 4:
+      return [
+        '3 × 4 = 12 (double de 6)',
+        '5 × 4 = 20 (double de 10)'
+      ];
+    case 5:
+      return [
+        '3 × 5 = 15 ✨',
+        '6 × 5 = 30 ✨'
+      ];
+    case 6:
+      return [
+        '4 × 6 = 24 (20 + 4)',
+        '7 × 6 = 42 (35 + 7)'
+      ];
+    case 7:
+      return [
+        '3 × 7 = 21 🎯',
+        '5 × 7 = 35 🎯'
+      ];
+    case 8:
+      return [
+        '3 × 8 = 24 (double de 12)',
+        '5 × 8 = 40 (double de 20)'
+      ];
+    case 9:
+      return [
+        '2 × 9 = 18 (2+8=10→1+8=9)',
+        '5 × 9 = 45 (4+5=9)'
+      ];
+    case 10:
+      return [
+        '4 × 10 = 40 (4 + 0)',
+        '7 × 10 = 70 (7 + 0)'
+      ];
+    default:
+      return [
+        `${tableNumber} × 2 = ${tableNumber * 2}`,
+        `${tableNumber} × 5 = ${tableNumber * 5}`
+      ];
+  }
+}
 
 export default function DiscoveryScreen() {
   const router = useRouter();
@@ -44,6 +105,22 @@ export default function DiscoveryScreen() {
   const modalScaleAnim = useRef(new Animated.Value(0)).current;
   const soundRef = useRef<Audio.Sound | null>(null);
   const modalSoundRef = useRef<Audio.Sound | null>(null);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        return Math.abs(gestureState.dx) > 20 && Math.abs(gestureState.dy) < 50;
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        const totalSteps = 4;
+        if (gestureState.dx > 50 && currentStep > 0) {
+          setCurrentStep(currentStep - 1);
+        } else if (gestureState.dx < -50 && currentStep < totalSteps - 1) {
+          setCurrentStep(currentStep + 1);
+        }
+      },
+    })
+  ).current;
 
   const animateIn = useCallback(() => {
     fadeAnim.setValue(0);
@@ -324,6 +401,13 @@ export default function DiscoveryScreen() {
         <View style={styles.tipContainer}>
           <Text style={styles.tipEmoji}>💡</Text>
           <Text style={styles.tipText}>{table.tip}</Text>
+          <View style={styles.tipExamplesContainer}>
+            {getTipExamples(table.number).map((example, idx) => (
+              <View key={idx} style={[styles.tipExampleCard, { borderColor: tableColor }]}>
+                <Text style={[styles.tipExampleText, { color: tableColor }]}>{example}</Text>
+              </View>
+            ))}
+          </View>
         </View>
       ),
     },
@@ -670,6 +754,7 @@ export default function DiscoveryScreen() {
           showsVerticalScrollIndicator={false}
         >
           <Animated.View
+            {...panResponder.panHandlers}
             style={[
               styles.content,
               {
@@ -833,6 +918,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '600' as const,
     lineHeight: 28,
+    marginBottom: 20,
+  },
+  tipExamplesContainer: {
+    width: '100%',
+    gap: 12,
+  },
+  tipExampleCard: {
+    backgroundColor: AppColors.background,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 2,
+    alignItems: 'center',
+  },
+  tipExampleText: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+    textAlign: 'center',
   },
   countingContainer: {
     flexDirection: 'row',
