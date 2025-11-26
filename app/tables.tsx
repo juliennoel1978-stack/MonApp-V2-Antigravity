@@ -15,7 +15,7 @@ import { MULTIPLICATION_TABLES } from '@/constants/tables';
 import { useApp } from '@/contexts/AppContext';
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = (width - 60) / 2;
+const CARD_WIDTH = (width - 52) / 2;
 
 export default function TablesScreen() {
   const router = useRouter();
@@ -143,7 +143,7 @@ export default function TablesScreen() {
                       {[1, 2, 3].map(starIndex => (
                         <Star
                           key={starIndex}
-                          size={16}
+                          size={14}
                           color={
                             starIndex <= stars
                               ? AppColors.warning
@@ -212,19 +212,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
+    padding: 16,
+    paddingBottom: 20,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 16,
+    gap: 12,
     justifyContent: 'space-between',
   },
   card: {
     width: CARD_WIDTH,
     backgroundColor: AppColors.surface,
-    borderRadius: 16,
+    borderRadius: 14,
     borderWidth: 2,
     overflow: 'hidden',
     shadowColor: AppColors.shadow,
@@ -234,49 +234,49 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   cardHeader: {
-    height: 50,
+    height: 42,
     justifyContent: 'center',
     alignItems: 'center',
   },
   tableNumber: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold' as const,
   },
   cardContent: {
-    padding: 10,
-    gap: 6,
+    padding: 8,
+    gap: 4,
   },
   tableTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: 'bold' as const,
     color: AppColors.text,
     textAlign: 'center',
   },
   difficultyBadge: {
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 10,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 8,
     alignSelf: 'center',
   },
   difficultyText: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '600' as const,
   },
   starsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 2,
-    marginTop: 2,
+    marginTop: 1,
   },
   completedBadge: {
     backgroundColor: AppColors.success + '20',
-    paddingVertical: 3,
-    paddingHorizontal: 6,
-    borderRadius: 6,
-    marginTop: 2,
+    paddingVertical: 2,
+    paddingHorizontal: 5,
+    borderRadius: 5,
+    marginTop: 1,
   },
   completedText: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '600' as const,
     color: AppColors.success,
     textAlign: 'center',
