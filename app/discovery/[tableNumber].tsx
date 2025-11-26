@@ -764,26 +764,23 @@ export default function DiscoveryScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.mainContent} {...panResponder.panHandlers}>
-          <Animated.View
-            style={{
-              flex: 1,
+        <Animated.View
+          style={[
+            styles.mainContent,
+            {
               opacity: fadeAnim,
               transform: [{ scale: scaleAnim }],
-            }}
-          >
-            <View style={styles.scrollView}>
-              <View style={styles.scrollContent}>
-                <View style={styles.content}>
-                  <Text style={styles.stepTitle}>{currentStepData.title}</Text>
-                  <Text style={styles.stepContent}>{currentStepData.content}</Text>
+            },
+          ]}
+          {...panResponder.panHandlers}
+        >
+          <View style={styles.content}>
+            <Text style={styles.stepTitle}>{currentStepData.title}</Text>
+            <Text style={styles.stepContent}>{currentStepData.content}</Text>
 
-                  {currentStepData.visual}
-                </View>
-              </View>
-            </View>
-          </Animated.View>
-        </View>
+            {currentStepData.visual}
+          </View>
+        </Animated.View>
 
         <View style={styles.footer}>
           {currentStep > 0 && (
@@ -872,15 +869,13 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
   },
   content: {
     alignItems: 'center',
+    width: '100%',
   },
   stepTitle: {
     fontSize: 28,
