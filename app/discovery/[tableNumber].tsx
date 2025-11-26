@@ -6,7 +6,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   Animated,
   Dimensions,
   Platform,
@@ -108,9 +107,17 @@ export default function DiscoveryScreen() {
 
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => false,
+      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => false,
       onMoveShouldSetPanResponder: (_, gestureState) => {
-        return Math.abs(gestureState.dx) > Math.abs(gestureState.dy) && Math.abs(gestureState.dx) > 20;
+        const isHorizontalSwipe = Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+        const hasMovedEnough = Math.abs(gestureState.dx) > 10;
+        return isHorizontalSwipe && hasMovedEnough;
+      },
+      onMoveShouldSetPanResponderCapture: (_, gestureState) => {
+        const isHorizontalSwipe = Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+        const hasMovedEnough = Math.abs(gestureState.dx) > 10;
+        return isHorizontalSwipe && hasMovedEnough;
       },
       onPanResponderGrant: () => {
         return true;
@@ -120,9 +127,11 @@ export default function DiscoveryScreen() {
       },
       onPanResponderRelease: (_, gestureState) => {
         const totalSteps = 4;
-        if (gestureState.dx > 100 && currentStep > 0) {
+        const swipeThreshold = 50;
+        
+        if (gestureState.dx > swipeThreshold && currentStep > 0) {
           setCurrentStep(currentStep - 1);
-        } else if (gestureState.dx < -100 && currentStep < totalSteps - 1) {
+        } else if (gestureState.dx < -swipeThreshold && currentStep < totalSteps - 1) {
           setCurrentStep(currentStep + 1);
         }
       },
@@ -763,19 +772,16 @@ export default function DiscoveryScreen() {
               transform: [{ scale: scaleAnim }],
             }}
           >
-            <ScrollView
-              style={styles.scrollView}
-              contentContainerStyle={styles.scrollContent}
-              showsVerticalScrollIndicator={false}
-              scrollEnabled={true}
-            >
-              <View style={styles.content}>
-                <Text style={styles.stepTitle}>{currentStepData.title}</Text>
-                <Text style={styles.stepContent}>{currentStepData.content}</Text>
+            <View style={styles.scrollView}>
+              <View style={styles.scrollContent}>
+                <View style={styles.content}>
+                  <Text style={styles.stepTitle}>{currentStepData.title}</Text>
+                  <Text style={styles.stepContent}>{currentStepData.content}</Text>
 
-                {currentStepData.visual}
+                  {currentStepData.visual}
+                </View>
               </View>
-            </ScrollView>
+            </View>
           </Animated.View>
         </View>
 
