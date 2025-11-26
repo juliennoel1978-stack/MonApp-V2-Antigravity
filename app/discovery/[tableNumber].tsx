@@ -749,27 +749,30 @@ export default function DiscoveryScreen() {
           </TouchableOpacity>
         </View>
 
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
+        <Animated.View
+          {...panResponder.panHandlers}
+          style={[
+            styles.mainContent,
+            {
+              opacity: fadeAnim,
+              transform: [{ scale: scaleAnim }],
+            },
+          ]}
         >
-          <Animated.View
-            {...panResponder.panHandlers}
-            style={[
-              styles.content,
-              {
-                opacity: fadeAnim,
-                transform: [{ scale: scaleAnim }],
-              },
-            ]}
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            scrollEnabled={true}
           >
-            <Text style={styles.stepTitle}>{currentStepData.title}</Text>
-            <Text style={styles.stepContent}>{currentStepData.content}</Text>
+            <View style={styles.content}>
+              <Text style={styles.stepTitle}>{currentStepData.title}</Text>
+              <Text style={styles.stepContent}>{currentStepData.content}</Text>
 
-            {currentStepData.visual}
-          </Animated.View>
-        </ScrollView>
+              {currentStepData.visual}
+            </View>
+          </ScrollView>
+        </Animated.View>
 
         <View style={styles.footer}>
           {currentStep > 0 && (
@@ -855,6 +858,9 @@ const styles = StyleSheet.create({
   },
   audioButtonActive: {
     backgroundColor: AppColors.primary + '20',
+  },
+  mainContent: {
+    flex: 1,
   },
   scrollView: {
     flex: 1,
