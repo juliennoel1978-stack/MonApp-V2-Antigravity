@@ -108,9 +108,15 @@ export default function DiscoveryScreen() {
 
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponder: () => false,
       onMoveShouldSetPanResponder: (_, gestureState) => {
-        return Math.abs(gestureState.dx) > 10;
+        return Math.abs(gestureState.dx) > Math.abs(gestureState.dy) && Math.abs(gestureState.dx) > 20;
+      },
+      onPanResponderGrant: () => {
+        return true;
+      },
+      onPanResponderMove: () => {
+        return true;
       },
       onPanResponderRelease: (_, gestureState) => {
         const totalSteps = 4;
@@ -749,30 +755,29 @@ export default function DiscoveryScreen() {
           </TouchableOpacity>
         </View>
 
-        <Animated.View
-          {...panResponder.panHandlers}
-          style={[
-            styles.mainContent,
-            {
+        <View style={styles.mainContent} {...panResponder.panHandlers}>
+          <Animated.View
+            style={{
+              flex: 1,
               opacity: fadeAnim,
               transform: [{ scale: scaleAnim }],
-            },
-          ]}
-        >
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-            scrollEnabled={true}
+            }}
           >
-            <View style={styles.content}>
-              <Text style={styles.stepTitle}>{currentStepData.title}</Text>
-              <Text style={styles.stepContent}>{currentStepData.content}</Text>
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+              scrollEnabled={true}
+            >
+              <View style={styles.content}>
+                <Text style={styles.stepTitle}>{currentStepData.title}</Text>
+                <Text style={styles.stepContent}>{currentStepData.content}</Text>
 
-              {currentStepData.visual}
-            </View>
-          </ScrollView>
-        </Animated.View>
+                {currentStepData.visual}
+              </View>
+            </ScrollView>
+          </Animated.View>
+        </View>
 
         <View style={styles.footer}>
           {currentStep > 0 && (
