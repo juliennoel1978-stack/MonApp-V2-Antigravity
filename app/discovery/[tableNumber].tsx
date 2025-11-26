@@ -108,14 +108,15 @@ export default function DiscoveryScreen() {
 
   const panResponder = useRef(
     PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: (_, gestureState) => {
-        return Math.abs(gestureState.dx) > 20 && Math.abs(gestureState.dy) < 50;
+        return Math.abs(gestureState.dx) > 10;
       },
       onPanResponderRelease: (_, gestureState) => {
         const totalSteps = 4;
-        if (gestureState.dx > 50 && currentStep > 0) {
+        if (gestureState.dx > 100 && currentStep > 0) {
           setCurrentStep(currentStep - 1);
-        } else if (gestureState.dx < -50 && currentStep < totalSteps - 1) {
+        } else if (gestureState.dx < -100 && currentStep < totalSteps - 1) {
           setCurrentStep(currentStep + 1);
         }
       },
