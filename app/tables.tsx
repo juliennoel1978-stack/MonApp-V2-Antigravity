@@ -143,7 +143,7 @@ export default function TablesScreen() {
                       {[1, 2, 3].map(starIndex => (
                         <Star
                           key={starIndex}
-                          size={20}
+                          size={16}
                           color={
                             starIndex <= stars
                               ? AppColors.warning
@@ -213,6 +213,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
+    paddingBottom: 40,
   },
   grid: {
     flexDirection: 'row',
@@ -223,59 +224,59 @@ const styles = StyleSheet.create({
   card: {
     width: CARD_WIDTH,
     backgroundColor: AppColors.surface,
-    borderRadius: 20,
-    borderWidth: 3,
+    borderRadius: 16,
+    borderWidth: 2,
     overflow: 'hidden',
     shadowColor: AppColors.shadow,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowRadius: 4,
+    elevation: 3,
   },
   cardHeader: {
-    height: 80,
+    height: 50,
     justifyContent: 'center',
     alignItems: 'center',
   },
   tableNumber: {
-    fontSize: 48,
+    fontSize: 32,
     fontWeight: 'bold' as const,
   },
   cardContent: {
-    padding: 16,
-    gap: 8,
+    padding: 10,
+    gap: 6,
   },
   tableTitle: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: 'bold' as const,
     color: AppColors.text,
     textAlign: 'center',
   },
   difficultyBadge: {
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 12,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 10,
     alignSelf: 'center',
   },
   difficultyText: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '600' as const,
   },
   starsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 4,
-    marginTop: 4,
+    gap: 2,
+    marginTop: 2,
   },
   completedBadge: {
     backgroundColor: AppColors.success + '20',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-    marginTop: 4,
+    paddingVertical: 3,
+    paddingHorizontal: 6,
+    borderRadius: 6,
+    marginTop: 2,
   },
   completedText: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '600' as const,
     color: AppColors.success,
     textAlign: 'center',
