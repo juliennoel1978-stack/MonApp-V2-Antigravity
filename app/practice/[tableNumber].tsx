@@ -272,11 +272,8 @@ export default function PracticeScreen() {
           <SafeAreaView style={styles.container}>
             <View style={styles.resultContainer}>
               <Text style={styles.resultTitle}>Presque !</Text>
-              <Text style={styles.resultSubtitle}>
-                Tu as fait {correctCount} bonnes réponses sur {questions.length}
-              </Text>
 
-              <View style={[styles.resultCard, { borderColor: tableColor }]}>
+              <View style={[styles.resultCardCompact, { borderColor: tableColor }]}>
                 <Text style={styles.resultScore}>
                   {correctCount}/{questions.length}
                 </Text>
@@ -291,7 +288,7 @@ export default function PracticeScreen() {
                 </Text>
               </View>
 
-              <View style={styles.resultButtonsColumn}>
+              <View style={styles.resultButtonsRow}>
                 <TouchableOpacity
                   style={[styles.resultButton, { backgroundColor: tableColor }]}
                   onPress={retry}
@@ -782,6 +779,20 @@ const styles = StyleSheet.create({
     elevation: 5,
     marginBottom: 32,
   },
+  resultCardCompact: {
+    backgroundColor: AppColors.surface,
+    padding: 24,
+    borderRadius: 20,
+    alignItems: 'center',
+    width: '100%',
+    borderWidth: 3,
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 5,
+    marginBottom: 24,
+  },
   resultScore: {
     fontSize: 64,
     fontWeight: 'bold' as const,
@@ -808,6 +819,11 @@ const styles = StyleSheet.create({
   resultButtons: {
     flexDirection: 'row',
     gap: 16,
+    width: '100%',
+  },
+  resultButtonsRow: {
+    flexDirection: 'row',
+    gap: 12,
     width: '100%',
   },
   resultButtonsColumn: {
