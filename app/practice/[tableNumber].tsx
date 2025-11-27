@@ -68,8 +68,9 @@ export default function PracticeScreen() {
     const correct = answer === currentQuestion.correctAnswer;
     setIsCorrect(correct);
 
+    const newCorrectCount = correct ? correctCount + 1 : correctCount;
     if (correct) {
-      setCorrectCount(correctCount + 1);
+      setCorrectCount(newCorrectCount);
       animateSuccess();
     } else {
       animateError();
@@ -79,7 +80,7 @@ export default function PracticeScreen() {
       if (currentQuestionIndex < questions.length - 1) {
         nextQuestion();
       } else {
-        finishLevel();
+        finishLevel(newCorrectCount);
       }
     }, 1500);
   };
@@ -92,8 +93,9 @@ export default function PracticeScreen() {
     const correct = answer === currentQuestion.correctAnswer;
     setIsCorrect(correct);
 
+    const newCorrectCount = correct ? correctCount + 1 : correctCount;
     if (correct) {
-      setCorrectCount(correctCount + 1);
+      setCorrectCount(newCorrectCount);
       animateSuccess();
     } else {
       animateError();
@@ -103,7 +105,7 @@ export default function PracticeScreen() {
       if (currentQuestionIndex < questions.length - 1) {
         nextQuestion();
       } else {
-        finishLevel();
+        finishLevel(newCorrectCount);
       }
     }, 1500);
   };
@@ -160,15 +162,15 @@ export default function PracticeScreen() {
     }
   };
 
-  const finishLevel = () => {
+  const finishLevel = (finalCorrectCount: number) => {
     if (level === 1) {
-      if (correctCount === 10) {
+      if (finalCorrectCount === 10) {
         setShowLevelTransition(true);
       } else {
         setShowResult(true);
       }
     } else {
-      const totalCorrectLevel2 = correctCount;
+      const totalCorrectLevel2 = finalCorrectCount;
       let stars = 4;
       if (totalCorrectLevel2 < 10) {
         stars = totalCorrectLevel2 >= 7 ? 3 : totalCorrectLevel2 >= 5 ? 2 : 1;
