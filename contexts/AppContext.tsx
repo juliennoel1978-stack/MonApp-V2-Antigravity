@@ -108,18 +108,27 @@ export const [AppProvider, useApp] = createContextHook(() => {
     tableNumber: number,
     correct: number,
     total: number,
-    stars: number
+    stars: number,
+    level?: 1 | 2
   ) => {
     const newProgress = progress.map(p => {
       if (p.tableNumber === tableNumber) {
-        return {
-          ...p,
+        const updates: Partial<UserProgress> = {
           correctAnswers: p.correctAnswers + correct,
           totalAttempts: p.totalAttempts + total,
           starsEarned: Math.max(p.starsEarned, stars),
           completed: stars >= 3,
           lastPracticed: new Date().toISOString(),
         };
+
+        if (level === 1 && correct === 10) {
+          updates.level1Completed = true;
+        }
+        if (level === 2) {
+          updates.level2Completed = true;
+        }
+
+        return { ...p, ...updates };
       }
       return p;
     });

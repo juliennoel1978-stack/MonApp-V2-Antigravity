@@ -26,9 +26,12 @@ export default function PracticeScreen() {
   const router = useRouter();
   const { tableNumber } = useLocalSearchParams();
   const table = getTableByNumber(Number(tableNumber));
-  const { updateTableProgress, unlockBadge } = useApp();
+  const { updateTableProgress, unlockBadge, getTableProgress } = useApp();
 
-  const [level, setLevel] = useState<1 | 2>(1);
+  const tableProgress = getTableProgress(Number(tableNumber));
+  const initialLevel = tableProgress?.level1Completed ? 2 : 1;
+
+  const [level, setLevel] = useState<1 | 2>(initialLevel);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -165,6 +168,7 @@ export default function PracticeScreen() {
   const finishLevel = (finalCorrectCount: number) => {
     if (level === 1) {
       if (finalCorrectCount === 10) {
+        updateTableProgress(table.number, finalCorrectCount, questions.length, 2, 1);
         setShowLevelTransition(true);
       } else {
         setShowResult(true);
@@ -176,7 +180,7 @@ export default function PracticeScreen() {
         stars = totalCorrectLevel2 >= 7 ? 3 : totalCorrectLevel2 >= 5 ? 2 : 1;
       }
       
-      updateTableProgress(table.number, totalCorrectLevel2, questions.length, stars);
+      updateTableProgress(table.number, totalCorrectLevel2, questions.length, stars, 2);
 
       if (stars >= 4) {
         unlockBadge('perfect_score');
@@ -206,7 +210,6 @@ export default function PracticeScreen() {
   };
 
   const retry = () => {
-    setLevel(1);
     setQuestions(generateQuestions(table.number, 10));
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
@@ -215,6 +218,12 @@ export default function PracticeScreen() {
     setCorrectCount(0);
     setShowResult(false);
     setShowLevelTransition(false);
+    
+    if (level === 2) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 500);
+    }
   };
 
   const handleHomePress = () => {

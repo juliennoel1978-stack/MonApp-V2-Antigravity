@@ -6,6 +6,8 @@ export interface UserProgress {
   correctAnswers: number;
   totalAttempts: number;
   averageTime?: number;
+  level1Completed?: boolean;
+  level2Completed?: boolean;
 }
 
 export interface UserSettings {
