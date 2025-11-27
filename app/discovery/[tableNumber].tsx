@@ -107,18 +107,14 @@ export default function DiscoveryScreen() {
 
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponder: () => false,
       onStartShouldSetPanResponderCapture: () => false,
       onMoveShouldSetPanResponder: (_, gestureState) => {
-        const isHorizontalSwipe = Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
-        const hasMovedEnough = Math.abs(gestureState.dx) > 10;
+        const isHorizontalSwipe = Math.abs(gestureState.dx) > Math.abs(gestureState.dy) * 2;
+        const hasMovedEnough = Math.abs(gestureState.dx) > 20;
         return isHorizontalSwipe && hasMovedEnough;
       },
-      onMoveShouldSetPanResponderCapture: (_, gestureState) => {
-        const isHorizontalSwipe = Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
-        const hasMovedEnough = Math.abs(gestureState.dx) > 10;
-        return isHorizontalSwipe && hasMovedEnough;
-      },
+      onMoveShouldSetPanResponderCapture: () => false,
       onPanResponderGrant: () => {
         return true;
       },
@@ -722,7 +718,7 @@ export default function DiscoveryScreen() {
         </View>
       </Modal>
 
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={['top']} {...panResponder.panHandlers}>
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -772,7 +768,6 @@ export default function DiscoveryScreen() {
               transform: [{ scale: scaleAnim }],
             },
           ]}
-          {...panResponder.panHandlers}
         >
           <View style={styles.content}>
             <Text style={styles.stepTitle}>{currentStepData.title}</Text>
