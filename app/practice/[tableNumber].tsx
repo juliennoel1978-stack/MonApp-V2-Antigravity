@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors, NumberColors } from '@/constants/colors';
 import { getTableByNumber } from '@/constants/tables';
 import { useApp } from '@/contexts/AppContext';
-import { generateQuestions, calculateStars } from '@/utils/questionGenerator';
+import { generateQuestions } from '@/utils/questionGenerator';
 import type { Question } from '@/types';
 
 const { width } = Dimensions.get('window');
@@ -162,11 +162,9 @@ export default function PracticeScreen() {
 
   const finishLevel = () => {
     if (level === 1) {
-      if (correctCount >= 10) {
+      if (correctCount === 10) {
         setShowLevelTransition(true);
       } else {
-        const stars = calculateStars(correctCount, questions.length);
-        updateTableProgress(table.number, correctCount, questions.length, stars);
         setShowResult(true);
       }
     } else {
@@ -266,14 +264,54 @@ export default function PracticeScreen() {
   }
 
   if (showResult) {
+    if (level === 1) {
+      return (
+        <View style={styles.backgroundContainer}>
+          <SafeAreaView style={styles.container}>
+            <View style={styles.resultContainer}>
+              <Text style={styles.resultTitle}>Presque !</Text>
+              <Text style={styles.resultSubtitle}>
+                Tu as fait {correctCount} bonnes réponses sur {questions.length}
+              </Text>
+
+              <View style={[styles.resultCard, { borderColor: tableColor }]}>
+                <Text style={styles.resultScore}>
+                  {correctCount}/{questions.length}
+                </Text>
+                <Text style={styles.resultLabel}>Bonnes réponses</Text>
+
+                <Text style={styles.encouragementLarge}>
+                  💪 Continue à t&apos;entraîner, tu vas y arriver !
+                  {correctCount >= 8 ? ' Tu es presque au niveau suivant !' : ''}
+                </Text>
+                <Text style={styles.encouragementSmall}>
+                  Il te faut 10/10 pour accéder au niveau 2
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                style={[styles.resultButton, { backgroundColor: tableColor, width: '100%' }]}
+                onPress={retry}
+              >
+                <Text style={styles.resultButtonText}>Réessayer</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.resultButton, styles.retryButton, { width: '100%', marginTop: 12 }]}
+                onPress={() => router.back()}
+              >
+                <Text style={styles.retryButtonText}>Retour</Text>
+              </TouchableOpacity>
+            </View>
+          </SafeAreaView>
+        </View>
+      );
+    }
+
     const totalCorrectLevel2 = correctCount;
     let stars = 4;
-    if (level === 2) {
-      if (totalCorrectLevel2 < 10) {
-        stars = totalCorrectLevel2 >= 7 ? 3 : totalCorrectLevel2 >= 5 ? 2 : 1;
-      }
-    } else {
-      stars = calculateStars(correctCount, questions.length);
+    if (totalCorrectLevel2 < 10) {
+      stars = totalCorrectLevel2 >= 7 ? 3 : totalCorrectLevel2 >= 5 ? 2 : 1;
     }
 
     return (
@@ -282,7 +320,7 @@ export default function PracticeScreen() {
           <View style={styles.resultContainer}>
             <Text style={styles.resultTitle}>Bravo !</Text>
             <Text style={styles.resultSubtitle}>
-              Tu as terminé {level === 2 ? 'l\'entraînement' : 'le niveau 1'}
+              Tu as terminé l&apos;entraînement
             </Text>
 
             <View style={[styles.resultCard, { borderColor: tableColor }]}>
@@ -292,39 +330,21 @@ export default function PracticeScreen() {
               <Text style={styles.resultLabel}>Bonnes réponses</Text>
 
               <View style={styles.starsContainer}>
-                {level === 2 ? (
-                  [1, 2, 3, 4].map(starIndex => (
-                    <Star
-                      key={starIndex}
-                      size={40}
-                      color={starIndex <= stars ? AppColors.warning : AppColors.borderLight}
-                      fill={starIndex <= stars ? AppColors.warning : 'transparent'}
-                    />
-                  ))
-                ) : (
-                  [1, 2, 3].map(starIndex => (
-                    <Star
-                      key={starIndex}
-                      size={40}
-                      color={starIndex <= stars ? AppColors.warning : AppColors.borderLight}
-                      fill={starIndex <= stars ? AppColors.warning : 'transparent'}
-                    />
-                  ))
-                )}
+                {[1, 2, 3, 4].map(starIndex => (
+                  <Star
+                    key={starIndex}
+                    size={40}
+                    color={starIndex <= stars ? AppColors.warning : AppColors.borderLight}
+                    fill={starIndex <= stars ? AppColors.warning : 'transparent'}
+                  />
+                ))}
               </View>
 
               <Text style={styles.encouragement}>
-                {level === 2 ? (
-                  stars === 4 ? 'Super ! Tu maîtrises parfaitement cette table !' :
-                  stars === 3 ? 'Très bien ! Continue comme ça !' :
-                  stars === 2 ? 'Bon début ! Entraîne-toi encore !' :
-                  'Continue à t\'entraîner, tu vas y arriver !'
-                ) : (
-                  stars === 3 ? 'Parfait ! Tu maîtrises cette table !' :
-                  stars === 2 ? 'Très bien ! Continue comme ça !' :
-                  stars === 1 ? 'Bon début ! Entraîne-toi encore !' :
-                  'Continue à t\'entraîner, tu vas y arriver !'
-                )}
+                {stars === 4 ? 'Super ! Tu maîtrises parfaitement cette table !' :
+                stars === 3 ? 'Très bien ! Continue comme ça !' :
+                stars === 2 ? 'Bon début ! Entraîne-toi encore !' :
+                'Continue à t&apos;entraîner, tu vas y arriver !'}
               </Text>
             </View>
 
@@ -913,5 +933,19 @@ const styles = StyleSheet.create({
     color: AppColors.textSecondary,
     marginTop: 8,
     textAlign: 'center',
+  },
+  encouragementLarge: {
+    fontSize: 18,
+    color: AppColors.text,
+    textAlign: 'center',
+    fontWeight: '600' as const,
+    marginTop: 24,
+    lineHeight: 26,
+  },
+  encouragementSmall: {
+    fontSize: 14,
+    color: AppColors.textSecondary,
+    textAlign: 'center',
+    marginTop: 12,
   },
 });
