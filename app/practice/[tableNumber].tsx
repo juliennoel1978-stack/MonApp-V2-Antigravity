@@ -170,10 +170,15 @@ export default function PracticeScreen() {
         setShowResult(true);
       }
     } else {
-      const stars = calculateStars(correctCount, questions.length);
-      updateTableProgress(table.number, correctCount, questions.length, stars);
+      const totalCorrectLevel2 = correctCount;
+      let stars = 4;
+      if (totalCorrectLevel2 < 10) {
+        stars = totalCorrectLevel2 >= 7 ? 3 : totalCorrectLevel2 >= 5 ? 2 : 1;
+      }
+      
+      updateTableProgress(table.number, totalCorrectLevel2, questions.length, stars);
 
-      if (stars >= 3) {
+      if (stars >= 4) {
         unlockBadge('perfect_score');
       }
 
@@ -228,13 +233,23 @@ export default function PracticeScreen() {
       <View style={styles.backgroundContainer}>
         <SafeAreaView style={styles.container}>
           <View style={styles.resultContainer}>
-            <Text style={styles.resultTitle}>🎉 Félicitations !</Text>
-            <Text style={styles.resultSubtitle}>Tu as réussi le niveau 1 avec 10/10 !</Text>
+            <Text style={styles.resultTitle}>🎉 Bravo !</Text>
+            <Text style={styles.resultSubtitle}>Tu commences à maîtriser la table de {table?.number} !</Text>
 
             <View style={[styles.resultCard, { borderColor: tableColor }]}>
-              <Text style={styles.transitionTitle}>Prêt pour le niveau 2 ?</Text>
+              <View style={styles.starsContainer}>
+                {[1, 2, 3, 4].map(starIndex => (
+                  <Star
+                    key={starIndex}
+                    size={40}
+                    color={starIndex <= 2 ? AppColors.warning : AppColors.borderLight}
+                    fill={starIndex <= 2 ? AppColors.warning : 'transparent'}
+                  />
+                ))}
+              </View>
+              <Text style={styles.intermediateStarsText}>2 étoiles sur 4</Text>
               <Text style={styles.transitionDescription}>
-                Tape maintenant les réponses aux multiplications !
+                Maintenant, allons plus loin ! Tape les réponses pour obtenir les 2 étoiles restantes.
               </Text>
             </View>
 
@@ -242,7 +257,7 @@ export default function PracticeScreen() {
               style={[styles.resultButton, { backgroundColor: tableColor, width: '100%' }]}
               onPress={startLevel2}
             >
-              <Text style={styles.resultButtonText}>Commencer le niveau 2</Text>
+              <Text style={styles.resultButtonText}>C&apos;est parti !</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -251,7 +266,15 @@ export default function PracticeScreen() {
   }
 
   if (showResult) {
-    const stars = calculateStars(correctCount, questions.length);
+    const totalCorrectLevel2 = correctCount;
+    let stars = 4;
+    if (level === 2) {
+      if (totalCorrectLevel2 < 10) {
+        stars = totalCorrectLevel2 >= 7 ? 3 : totalCorrectLevel2 >= 5 ? 2 : 1;
+      }
+    } else {
+      stars = calculateStars(correctCount, questions.length);
+    }
 
     return (
       <View style={styles.backgroundContainer}>
@@ -259,7 +282,7 @@ export default function PracticeScreen() {
           <View style={styles.resultContainer}>
             <Text style={styles.resultTitle}>Bravo !</Text>
             <Text style={styles.resultSubtitle}>
-              Tu as terminé {level === 2 ? 'le niveau 2' : "l'entraînement"}
+              Tu as terminé {level === 2 ? 'l\'entraînement' : 'le niveau 1'}
             </Text>
 
             <View style={[styles.resultCard, { borderColor: tableColor }]}>
@@ -269,21 +292,39 @@ export default function PracticeScreen() {
               <Text style={styles.resultLabel}>Bonnes réponses</Text>
 
               <View style={styles.starsContainer}>
-                {[1, 2, 3].map(starIndex => (
-                  <Star
-                    key={starIndex}
-                    size={40}
-                    color={starIndex <= stars ? AppColors.warning : AppColors.borderLight}
-                    fill={starIndex <= stars ? AppColors.warning : 'transparent'}
-                  />
-                ))}
+                {level === 2 ? (
+                  [1, 2, 3, 4].map(starIndex => (
+                    <Star
+                      key={starIndex}
+                      size={40}
+                      color={starIndex <= stars ? AppColors.warning : AppColors.borderLight}
+                      fill={starIndex <= stars ? AppColors.warning : 'transparent'}
+                    />
+                  ))
+                ) : (
+                  [1, 2, 3].map(starIndex => (
+                    <Star
+                      key={starIndex}
+                      size={40}
+                      color={starIndex <= stars ? AppColors.warning : AppColors.borderLight}
+                      fill={starIndex <= stars ? AppColors.warning : 'transparent'}
+                    />
+                  ))
+                )}
               </View>
 
               <Text style={styles.encouragement}>
-                {stars === 3 && 'Parfait ! Tu maîtrises cette table !'}
-                {stars === 2 && 'Très bien ! Continue comme ça !'}
-                {stars === 1 && 'Bon début ! Entraîne-toi encore !'}
-                {stars === 0 && 'Continue à t\'entraîner, tu vas y arriver !'}
+                {level === 2 ? (
+                  stars === 4 ? 'Super ! Tu maîtrises parfaitement cette table !' :
+                  stars === 3 ? 'Très bien ! Continue comme ça !' :
+                  stars === 2 ? 'Bon début ! Entraîne-toi encore !' :
+                  'Continue à t\'entraîner, tu vas y arriver !'
+                ) : (
+                  stars === 3 ? 'Parfait ! Tu maîtrises cette table !' :
+                  stars === 2 ? 'Très bien ! Continue comme ça !' :
+                  stars === 1 ? 'Bon début ! Entraîne-toi encore !' :
+                  'Continue à t\'entraîner, tu vas y arriver !'
+                )}
               </Text>
             </View>
 
@@ -775,10 +816,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   transitionDescription: {
-    fontSize: 18,
+    fontSize: 16,
     color: AppColors.textSecondary,
     textAlign: 'center',
-    lineHeight: 26,
+    lineHeight: 22,
+    paddingHorizontal: 20,
+  },
+  intermediateStarsText: {
+    fontSize: 22,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+    marginTop: 16,
+    marginBottom: 12,
   },
   keyboardAvoid: {
     flex: 1,

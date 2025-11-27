@@ -1,5 +1,5 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Home, ArrowRight, ArrowLeft, Volume2, X, Check, Star } from 'lucide-react-native';
+import { Home, ArrowRight, ArrowLeft, Volume2, X, Check } from 'lucide-react-native';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
@@ -16,9 +16,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import { AppColors, NumberColors } from '@/constants/colors';
 import { getTableByNumber } from '@/constants/tables';
-import { useApp } from '@/contexts/AppContext';
-import { generateQuestions } from '@/utils/questionGenerator';
-import type { Question } from '@/types';
 
 const { width } = Dimensions.get('window');
 
@@ -86,20 +83,11 @@ export default function DiscoveryScreen() {
   const router = useRouter();
   const { tableNumber } = useLocalSearchParams();
   const table = getTableByNumber(Number(tableNumber));
-  const { updateTableProgress, unlockBadge } = useApp();
   const [currentStep, setCurrentStep] = useState(0);
   const [homeClickCount, setHomeClickCount] = useState(0);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [selectedMultiplication, setSelectedMultiplication] = useState<{ multiplier: number; result: number } | null>(null);
   const [clickedMultiplications, setClickedMultiplications] = useState<Set<number>>(new Set());
-  const [showIntermediate, setShowIntermediate] = useState(false);
-  const [showPhase2, setShowPhase2] = useState(false);
-  const [phase2Questions, setPhase2Questions] = useState<Question[]>([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [userAnswer, setUserAnswer] = useState('');
-  const [showResult, setShowResult] = useState<'correct' | 'incorrect' | null>(null);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [phase2Complete, setPhase2Complete] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const modalScaleAnim = useRef(new Animated.Value(0)).current;
@@ -224,35 +212,11 @@ export default function DiscoveryScreen() {
     }
   }, [modalScaleAnim]);
 
-  const startPhase2 = useCallback(() => {
-    if (!table) return;
-    const questions = generateQuestions(table.number, 10);
-    setPhase2Questions(questions);
-    setShowPhase2(true);
-    setCurrentQuestionIndex(0);
-    setCorrectCount(0);
-    setUserAnswer('');
-    setShowResult(null);
-  }, [table]);
 
-  const finishPhase2 = useCallback((lastCorrect: boolean) => {
-    const finalCorrect = correctCount + (lastCorrect ? 1 : 0);
-    const stars = finalCorrect === 10 ? 4 : finalCorrect >= 7 ? 2 : 0;
-    
-    if (table) {
-      updateTableProgress(table.number, finalCorrect, 10, stars);
-      if (stars >= 4) {
-        unlockBadge('perfect_score');
-      }
-    }
-
-    setPhase2Complete(true);
-  }, [correctCount, table, updateTableProgress, unlockBadge]);
 
   const handleMultiplicationPress = useCallback((multiplier: number, result: number) => {
     setSelectedMultiplication({ multiplier, result });
-    const newSet = new Set(clickedMultiplications).add(multiplier);
-    setClickedMultiplications(newSet);
+    setClickedMultiplications(prev => new Set(prev).add(multiplier));
     
     modalScaleAnim.setValue(0);
     Animated.spring(modalScaleAnim, {
@@ -265,39 +229,9 @@ export default function DiscoveryScreen() {
     if (table) {
       speakMultiplication(table.number, multiplier, result);
     }
-  }, [table, modalScaleAnim, clickedMultiplications]);
+  }, [table, modalScaleAnim]);
 
-  const handleNumberPress = useCallback((num: string) => {
-    if (showResult !== null) return;
-    setUserAnswer(prev => prev + num);
-  }, [showResult]);
 
-  const handleDeletePress = useCallback(() => {
-    setUserAnswer(prev => prev.slice(0, -1));
-  }, []);
-
-  const handleSubmitAnswer = useCallback(() => {
-    if (userAnswer === '' || showResult !== null) return;
-    
-    const currentQuestion = phase2Questions[currentQuestionIndex];
-    const correct = parseInt(userAnswer) === currentQuestion.correctAnswer;
-    
-    setShowResult(correct ? 'correct' : 'incorrect');
-    
-    if (correct) {
-      setCorrectCount(prev => prev + 1);
-    }
-
-    setTimeout(() => {
-      if (currentQuestionIndex < phase2Questions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
-        setUserAnswer('');
-        setShowResult(null);
-      } else {
-        finishPhase2(correct);
-      }
-    }, 1500);
-  }, [userAnswer, showResult, phase2Questions, currentQuestionIndex, finishPhase2]);
 
   const speakTable = async () => {
     if (!table) return;
@@ -419,9 +353,7 @@ export default function DiscoveryScreen() {
     },
     {
       title: 'Compte avec moi !',
-      content: clickedMultiplications.size === 10 
-        ? 'Correct ! Tu les connais toutes ! Passe à la suite.' 
-        : `Clique sur toutes les multiplications (${clickedMultiplications.size}/10)`,
+      content: 'Clique sur les multiplications pour entendre comment elles se lisent !',
       visual: (
         <View style={styles.countingContainer}>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => {
@@ -456,20 +388,13 @@ export default function DiscoveryScreen() {
     },
     {
       title: 'Prêt à pratiquer ?',
-      content: clickedMultiplications.size === 10 
-        ? 'Maintenant, teste tes connaissances en tapant les réponses !'
-        : 'Tu as découvert la table ! Termine l\'étape "Compte avec moi !" pour continuer.',
+      content: 'Maintenant, teste tes connaissances avec le quiz !',
       visual: (
         <View style={styles.readyContainer}>
           <Text style={styles.readyEmoji}>🎯</Text>
           <TouchableOpacity
             style={[styles.practiceButton, { backgroundColor: tableColor }]}
-            onPress={() => {
-              if (clickedMultiplications.size === 10) {
-                setShowIntermediate(true);
-              }
-            }}
-            disabled={clickedMultiplications.size < 10}
+            onPress={() => router.push(`/practice/${table.number}` as any)}
           >
             <Text style={styles.practiceButtonText}>Commencer le quiz</Text>
             <ArrowRight size={24} color="#FFFFFF" />
@@ -492,224 +417,7 @@ export default function DiscoveryScreen() {
     }
   };
 
-  if (showIntermediate) {
-    return (
-      <View style={styles.backgroundContainer}>
-        <SafeAreaView style={styles.container}>
-          <View style={styles.resultContainer}>
-            <Text style={styles.resultTitle}>🎉 Bravo !</Text>
-            <Text style={styles.resultSubtitle}>Tu commences à maîtriser la table de {table?.number} !</Text>
 
-            <View style={[styles.resultCard, { borderColor: tableColor }]}>
-              <View style={styles.starsContainer}>
-                {[1, 2, 3, 4].map(starIndex => (
-                  <Star
-                    key={starIndex}
-                    size={40}
-                    color={starIndex <= 2 ? AppColors.warning : AppColors.borderLight}
-                    fill={starIndex <= 2 ? AppColors.warning : 'transparent'}
-                  />
-                ))}
-              </View>
-              <Text style={styles.intermediateText}>
-                2 étoiles sur 4
-              </Text>
-              <Text style={styles.intermediateDescription}>
-                Maintenant, allons plus loin ! Tape les réponses pour obtenir les 2 étoiles restantes.
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              style={[styles.practiceButton, { backgroundColor: tableColor, width: '100%' }]}
-              onPress={() => {
-                setShowIntermediate(false);
-                startPhase2();
-              }}
-            >
-              <Text style={styles.practiceButtonText}>C&apos;est parti !</Text>
-              <ArrowRight size={24} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-      </View>
-    );
-  }
-
-  if (phase2Complete) {
-    const finalCorrect = correctCount;
-    const stars = finalCorrect === 10 ? 4 : finalCorrect >= 7 ? 2 : 0;
-
-    return (
-      <View style={styles.backgroundContainer}>
-        <SafeAreaView style={styles.container}>
-          <View style={styles.resultContainer}>
-            <Text style={styles.resultTitle}>Bravo !</Text>
-            <Text style={styles.resultSubtitle}>Tu as terminé l&apos;entraînement</Text>
-
-            <View style={[styles.resultCard, { borderColor: tableColor }]}>
-              <Text style={styles.resultScore}>
-                {finalCorrect}/10
-              </Text>
-              <Text style={styles.resultLabel}>Bonnes réponses</Text>
-
-              <View style={styles.starsContainer}>
-                {[1, 2, 3, 4].map(starIndex => (
-                  <Star
-                    key={starIndex}
-                    size={40}
-                    color={starIndex <= stars ? AppColors.warning : AppColors.borderLight}
-                    fill={starIndex <= stars ? AppColors.warning : 'transparent'}
-                  />
-                ))}
-              </View>
-
-              <Text style={styles.encouragement}>
-                {stars === 4 ? 'Super ! Tu maîtrises parfaitement cette table !' : 'Continue à t\'entraîner pour obtenir 4 étoiles !'}
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              style={[styles.practiceButton, { backgroundColor: tableColor }]}
-              onPress={() => router.push(`/practice/${table.number}` as any)}
-            >
-              <Text style={styles.practiceButtonText}>Continuer l&apos;entraînement</Text>
-              <ArrowRight size={24} color="#FFFFFF" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.backToTablesButton}
-              onPress={() => router.push('/tables')}
-            >
-              <Text style={styles.backToTablesText}>Retour aux tables</Text>
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-      </View>
-    );
-  }
-
-  if (showPhase2 && phase2Questions.length > 0) {
-    const currentQuestion = phase2Questions[currentQuestionIndex];
-    const progress = ((currentQuestionIndex + 1) / phase2Questions.length) * 100;
-
-    return (
-      <View style={styles.backgroundContainer}>
-        <SafeAreaView style={styles.container} edges={['top']}>
-          <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => setShowPhase2(false)}
-              testID="back-button"
-            >
-              <ArrowLeft size={24} color={AppColors.primary} />
-            </TouchableOpacity>
-
-            <View style={styles.progressContainer}>
-              <View style={styles.progressBar}>
-                <View
-                  style={[
-                    styles.progressFill,
-                    { width: `${progress}%`, backgroundColor: tableColor },
-                  ]}
-                />
-              </View>
-              <Text style={styles.progressText}>
-                {currentQuestionIndex + 1}/{phase2Questions.length}
-              </Text>
-            </View>
-
-            <View style={styles.scoreContainer}>
-              <Text style={styles.scoreText}>{correctCount}</Text>
-              <Check size={20} color={AppColors.success} />
-            </View>
-          </View>
-
-          <View style={styles.phase2Content}>
-            <Text style={styles.phase2Title}>Maintenant, tape les réponses !</Text>
-            
-            <View style={[styles.phase2QuestionCard, { borderColor: tableColor }]}>
-              <Text style={styles.questionText}>
-                {currentQuestion.multiplicand} × {currentQuestion.multiplier} = ?
-              </Text>
-            </View>
-
-            <View style={styles.answerInputContainer}>
-              <Text style={[styles.answerInput, { borderColor: showResult === 'correct' ? AppColors.success : showResult === 'incorrect' ? AppColors.error : tableColor }]}>
-                {userAnswer || ' '}
-              </Text>
-            </View>
-
-            {showResult && (
-              <View style={[styles.feedbackContainer, { backgroundColor: showResult === 'correct' ? AppColors.success + '20' : AppColors.error + '20' }]}>
-                <Text style={[styles.feedbackText, { color: showResult === 'correct' ? AppColors.success : AppColors.error }]}>
-                  {showResult === 'correct' ? '✓ Correct !' : '✗ Incorrect !'}
-                </Text>
-              </View>
-            )}
-
-            <TouchableOpacity
-              style={[styles.validateButton, { backgroundColor: tableColor }]}
-              onPress={handleSubmitAnswer}
-              disabled={userAnswer === '' || showResult !== null}
-            >
-              <Text style={styles.validateButtonText}>Valider</Text>
-            </TouchableOpacity>
-
-            <View style={styles.numpadContainer}>
-              <View style={styles.numpadRow}>
-                {[1, 2, 3].map(num => (
-                  <TouchableOpacity
-                    key={num}
-                    style={styles.numpadButton}
-                    onPress={() => handleNumberPress(num.toString())}
-                  >
-                    <Text style={styles.numpadText}>{num}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <View style={styles.numpadRow}>
-                {[4, 5, 6].map(num => (
-                  <TouchableOpacity
-                    key={num}
-                    style={styles.numpadButton}
-                    onPress={() => handleNumberPress(num.toString())}
-                  >
-                    <Text style={styles.numpadText}>{num}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <View style={styles.numpadRow}>
-                {[7, 8, 9].map(num => (
-                  <TouchableOpacity
-                    key={num}
-                    style={styles.numpadButton}
-                    onPress={() => handleNumberPress(num.toString())}
-                  >
-                    <Text style={styles.numpadText}>{num}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <View style={styles.numpadRow}>
-                <View style={styles.numpadButton} />
-                <TouchableOpacity
-                  style={styles.numpadButton}
-                  onPress={() => handleNumberPress('0')}
-                >
-                  <Text style={styles.numpadText}>0</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.numpadButton}
-                  onPress={handleDeletePress}
-                >
-                  <X size={28} color={AppColors.text} />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </SafeAreaView>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.backgroundContainer}>
