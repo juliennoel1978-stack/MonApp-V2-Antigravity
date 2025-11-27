@@ -92,6 +92,7 @@ export default function DiscoveryScreen() {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [selectedMultiplication, setSelectedMultiplication] = useState<{ multiplier: number; result: number } | null>(null);
   const [clickedMultiplications, setClickedMultiplications] = useState<Set<number>>(new Set());
+  const [showIntermediate, setShowIntermediate] = useState(false);
   const [showPhase2, setShowPhase2] = useState(false);
   const [phase2Questions, setPhase2Questions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -236,11 +237,11 @@ export default function DiscoveryScreen() {
 
   const finishPhase2 = useCallback((lastCorrect: boolean) => {
     const finalCorrect = correctCount + (lastCorrect ? 1 : 0);
-    const stars = finalCorrect === 10 ? 3 : 0;
+    const stars = finalCorrect === 10 ? 4 : finalCorrect >= 7 ? 2 : 0;
     
     if (table) {
       updateTableProgress(table.number, finalCorrect, 10, stars);
-      if (stars >= 3) {
+      if (stars >= 4) {
         unlockBadge('perfect_score');
       }
     }
@@ -264,16 +265,7 @@ export default function DiscoveryScreen() {
     if (table) {
       speakMultiplication(table.number, multiplier, result);
     }
-
-    if (newSet.size === 10) {
-      setTimeout(() => {
-        closeModal();
-        setTimeout(() => {
-          startPhase2();
-        }, 300);
-      }, 1500);
-    }
-  }, [table, modalScaleAnim, clickedMultiplications, closeModal, startPhase2]);
+  }, [table, modalScaleAnim, clickedMultiplications]);
 
   const handleNumberPress = useCallback((num: string) => {
     if (showResult !== null) return;
@@ -464,15 +456,22 @@ export default function DiscoveryScreen() {
     },
     {
       title: 'Prêt à pratiquer ?',
-      content: 'Tu as découvert la table ! Maintenant, entraîne-toi avec des exercices amusants.',
+      content: clickedMultiplications.size === 10 
+        ? 'Maintenant, teste tes connaissances en tapant les réponses !'
+        : 'Tu as découvert la table ! Termine l\'étape "Compte avec moi !" pour continuer.',
       visual: (
         <View style={styles.readyContainer}>
           <Text style={styles.readyEmoji}>🎯</Text>
           <TouchableOpacity
             style={[styles.practiceButton, { backgroundColor: tableColor }]}
-            onPress={() => router.push(`/practice/${table.number}` as any)}
+            onPress={() => {
+              if (clickedMultiplications.size === 10) {
+                setShowIntermediate(true);
+              }
+            }}
+            disabled={clickedMultiplications.size < 10}
           >
-            <Text style={styles.practiceButtonText}>Commencer l&apos;entraînement</Text>
+            <Text style={styles.practiceButtonText}>Commencer le quiz</Text>
             <ArrowRight size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
@@ -493,16 +492,59 @@ export default function DiscoveryScreen() {
     }
   };
 
+  if (showIntermediate) {
+    return (
+      <View style={styles.backgroundContainer}>
+        <SafeAreaView style={styles.container}>
+          <View style={styles.resultContainer}>
+            <Text style={styles.resultTitle}>🎉 Bravo !</Text>
+            <Text style={styles.resultSubtitle}>Tu commences à maîtriser la table de {table?.number} !</Text>
+
+            <View style={[styles.resultCard, { borderColor: tableColor }]}>
+              <View style={styles.starsContainer}>
+                {[1, 2, 3, 4].map(starIndex => (
+                  <Star
+                    key={starIndex}
+                    size={40}
+                    color={starIndex <= 2 ? AppColors.warning : AppColors.borderLight}
+                    fill={starIndex <= 2 ? AppColors.warning : 'transparent'}
+                  />
+                ))}
+              </View>
+              <Text style={styles.intermediateText}>
+                2 étoiles sur 4
+              </Text>
+              <Text style={styles.intermediateDescription}>
+                Maintenant, allons plus loin ! Tape les réponses pour obtenir les 2 étoiles restantes.
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.practiceButton, { backgroundColor: tableColor, width: '100%' }]}
+              onPress={() => {
+                setShowIntermediate(false);
+                startPhase2();
+              }}
+            >
+              <Text style={styles.practiceButtonText}>C&apos;est parti !</Text>
+              <ArrowRight size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
+
   if (phase2Complete) {
     const finalCorrect = correctCount;
-    const stars = finalCorrect === 10 ? 3 : 0;
+    const stars = finalCorrect === 10 ? 4 : finalCorrect >= 7 ? 2 : 0;
 
     return (
       <View style={styles.backgroundContainer}>
         <SafeAreaView style={styles.container}>
           <View style={styles.resultContainer}>
-            <Text style={styles.resultTitle}>Félicitations !</Text>
-            <Text style={styles.resultSubtitle}>Tu as terminé la découverte</Text>
+            <Text style={styles.resultTitle}>Bravo !</Text>
+            <Text style={styles.resultSubtitle}>Tu as terminé l&apos;entraînement</Text>
 
             <View style={[styles.resultCard, { borderColor: tableColor }]}>
               <Text style={styles.resultScore}>
@@ -511,7 +553,7 @@ export default function DiscoveryScreen() {
               <Text style={styles.resultLabel}>Bonnes réponses</Text>
 
               <View style={styles.starsContainer}>
-                {[1, 2, 3].map(starIndex => (
+                {[1, 2, 3, 4].map(starIndex => (
                   <Star
                     key={starIndex}
                     size={40}
@@ -522,7 +564,7 @@ export default function DiscoveryScreen() {
               </View>
 
               <Text style={styles.encouragement}>
-                {stars === 3 ? 'Parfait ! Tu as obtenu 3 étoiles !' : 'Continue à t\'entraîner pour obtenir 3 étoiles !'}
+                {stars === 4 ? 'Super ! Tu maîtrises parfaitement cette table !' : 'Continue à t\'entraîner pour obtenir 4 étoiles !'}
               </Text>
             </View>
 
@@ -1288,6 +1330,20 @@ const styles = StyleSheet.create({
     color: AppColors.text,
     textAlign: 'center',
     fontWeight: '600' as const,
+  },
+  intermediateText: {
+    fontSize: 22,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+    marginTop: 16,
+    marginBottom: 12,
+  },
+  intermediateDescription: {
+    fontSize: 16,
+    color: AppColors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    paddingHorizontal: 20,
   },
   feedbackContainer: {
     padding: 12,
