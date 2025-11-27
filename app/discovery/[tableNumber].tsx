@@ -107,14 +107,18 @@ export default function DiscoveryScreen() {
 
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponder: () => false,
       onStartShouldSetPanResponderCapture: () => false,
       onMoveShouldSetPanResponder: (_, gestureState) => {
-        const isHorizontalSwipe = Math.abs(gestureState.dx) > Math.abs(gestureState.dy) * 1.5;
-        const hasMovedEnough = Math.abs(gestureState.dx) > 10;
+        const isHorizontalSwipe = Math.abs(gestureState.dx) > Math.abs(gestureState.dy) * 2;
+        const hasMovedEnough = Math.abs(gestureState.dx) > 20;
         return isHorizontalSwipe && hasMovedEnough;
       },
-      onMoveShouldSetPanResponderCapture: () => false,
+      onMoveShouldSetPanResponderCapture: (_, gestureState) => {
+        const isHorizontalSwipe = Math.abs(gestureState.dx) > Math.abs(gestureState.dy) * 2;
+        const hasMovedEnough = Math.abs(gestureState.dx) > 20;
+        return isHorizontalSwipe && hasMovedEnough;
+      },
       onPanResponderGrant: () => {},
       onPanResponderMove: () => {},
       onPanResponderRelease: (_, gestureState) => {
@@ -127,7 +131,7 @@ export default function DiscoveryScreen() {
           setCurrentStep(currentStep + 1);
         }
       },
-      onPanResponderTerminationRequest: () => true,
+      onPanResponderTerminationRequest: () => false,
       onShouldBlockNativeResponder: () => false,
     })
   ).current;
