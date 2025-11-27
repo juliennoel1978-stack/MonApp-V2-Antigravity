@@ -291,19 +291,23 @@ export default function PracticeScreen() {
                 </Text>
               </View>
 
-              <TouchableOpacity
-                style={[styles.resultButton, { backgroundColor: tableColor, width: '100%' }]}
-                onPress={retry}
-              >
-                <Text style={styles.resultButtonText}>Réessayer</Text>
-              </TouchableOpacity>
+              <View style={styles.resultButtonsColumn}>
+                <TouchableOpacity
+                  style={[styles.resultButton, { backgroundColor: tableColor }]}
+                  onPress={retry}
+                  testID="retry-button"
+                >
+                  <Text style={styles.resultButtonText}>Réessayer</Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[styles.resultButton, styles.retryButton, { width: '100%', marginTop: 12 }]}
-                onPress={() => router.back()}
-              >
-                <Text style={styles.retryButtonText}>Retour</Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.resultButton, styles.outlineButton, { borderColor: tableColor }]}
+                  onPress={() => router.back()}
+                  testID="back-button-result"
+                >
+                  <Text style={[styles.outlineButtonText, { color: tableColor }]}>Retour</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </SafeAreaView>
         </View>
@@ -806,6 +810,11 @@ const styles = StyleSheet.create({
     gap: 16,
     width: '100%',
   },
+  resultButtonsColumn: {
+    flexDirection: 'column',
+    gap: 16,
+    width: '100%',
+  },
   resultButton: {
     flex: 1,
     paddingVertical: 16,
@@ -816,6 +825,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 4,
+    width: '100%',
   },
   retryButton: {
     backgroundColor: AppColors.surfaceLight,
@@ -824,6 +834,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold' as const,
     color: AppColors.text,
+  },
+  outlineButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+  },
+  outlineButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold' as const,
   },
   resultButtonText: {
     fontSize: 16,
