@@ -56,21 +56,29 @@ export const [AppProvider, useApp] = createContextHook(() => {
         AsyncStorage.getItem(STORAGE_KEYS.CURRENT_USER),
       ]);
 
+      console.log('📦 Loading data...');
+      console.log('Users data:', usersData);
+
       if (usersData) {
         const parsedUsers = JSON.parse(usersData);
+        console.log('✅ Parsed users:', parsedUsers.length, 'users');
         setUsers(parsedUsers);
 
         if (currentUserId) {
           const user = parsedUsers.find((u: User) => u.id === currentUserId);
           if (user) {
+            console.log('👤 Current user found:', user.firstName);
             setCurrentUser(user);
             setProgress(user.progress || INITIAL_PROGRESS);
           }
         } else if (progressData) {
           setProgress(JSON.parse(progressData));
         }
-      } else if (progressData) {
-        setProgress(JSON.parse(progressData));
+      } else {
+        console.log('⚠️ No users data found in storage');
+        if (progressData) {
+          setProgress(JSON.parse(progressData));
+        }
       }
 
       if (settingsData) {
@@ -81,7 +89,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         setBadges(JSON.parse(badgesData));
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('❌ Error loading data:', error);
     }
   }, []);
 
@@ -200,10 +208,12 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
   const saveUsers = async (newUsers: User[]) => {
     try {
+      console.log('💾 Saving users:', newUsers.length, 'users');
       await AsyncStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(newUsers));
       setUsers(newUsers);
+      console.log('✅ Users saved successfully');
     } catch (error) {
-      console.error('Error saving users:', error);
+      console.error('❌ Error saving users:', error);
     }
   };
 

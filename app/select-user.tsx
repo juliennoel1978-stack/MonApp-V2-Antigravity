@@ -21,7 +21,11 @@ export default function SelectUserScreen() {
   const router = useRouter();
   const { users, selectUser } = useApp();
 
+  console.log('🎭 SelectUserScreen - Users available:', users.length);
+  users.forEach(u => console.log('  - User:', u.firstName, u.id));
+
   const handleSelectUser = async (userId: string) => {
+    console.log('👉 Selecting user:', userId);
     await selectUser(userId);
     router.replace('/' as any);
   };
