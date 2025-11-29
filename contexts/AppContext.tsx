@@ -48,19 +48,28 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
   const loadData = useCallback(async () => {
     try {
-      const [progressData, settingsData, badgesData, usersData] = await Promise.all([
+      const [progressData, settingsData, badgesData, usersData, currentUserId] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEYS.PROGRESS),
         AsyncStorage.getItem(STORAGE_KEYS.SETTINGS),
         AsyncStorage.getItem(STORAGE_KEYS.BADGES),
         AsyncStorage.getItem(STORAGE_KEYS.USERS),
+        AsyncStorage.getItem(STORAGE_KEYS.CURRENT_USER),
       ]);
 
       if (usersData) {
         const parsedUsers = JSON.parse(usersData);
         setUsers(parsedUsers);
-      }
 
-      if (progressData) {
+        if (currentUserId) {
+          const user = parsedUsers.find((u: User) => u.id === currentUserId);
+          if (user) {
+            setCurrentUser(user);
+            setProgress(user.progress || INITIAL_PROGRESS);
+          }
+        } else if (progressData) {
+          setProgress(JSON.parse(progressData));
+        }
+      } else if (progressData) {
         setProgress(JSON.parse(progressData));
       }
 

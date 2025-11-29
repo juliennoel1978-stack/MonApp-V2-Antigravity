@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX } from 'lucide-react-native';
+import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import {
   View,
@@ -31,17 +31,15 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const checkUserSelection = async () => {
-      if (users.length > 0) {
-        setIsReady(true);
+      setIsReady(true);
+      if (users.length > 0 && !currentUser) {
         setTimeout(() => {
           setShowUserModal(true);
         }, 500);
-      } else {
-        setIsReady(true);
       }
     };
     checkUserSelection();
-  }, [users]);
+  }, [users, currentUser]);
 
   useEffect(() => {
     if (isReady) {
@@ -121,6 +119,15 @@ export default function HomeScreen() {
     <View style={styles.backgroundContainer}>
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
+          {users.length > 0 && (
+            <TouchableOpacity
+              style={styles.settingsButton}
+              onPress={() => setShowUserModal(true)}
+              testID="users-button"
+            >
+              <Users size={28} color={AppColors.text} />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={styles.settingsButton}
             onPress={() => router.push('/settings' as any)}
@@ -309,6 +316,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'android' ? 10 : 0,
+    gap: 12,
   },
   settingsButton: {
     width: 48,
