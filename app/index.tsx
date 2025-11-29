@@ -243,7 +243,7 @@ export default function HomeScreen() {
           visible={showUserModal}
           transparent
           animationType="none"
-          onRequestClose={() => {}}
+          onRequestClose={closeModal}
         >
           <View style={styles.modalOverlay}>
             <Animated.View
