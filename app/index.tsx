@@ -31,6 +31,8 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const checkUserSelection = async () => {
+      console.log('[HomeScreen] Users loaded:', users.length, 'users');
+      console.log('[HomeScreen] Current user:', currentUser?.firstName || 'none');
       setIsReady(true);
       if (users.length > 0 && !currentUser) {
         setTimeout(() => {
@@ -81,6 +83,7 @@ export default function HomeScreen() {
   }, [showUserModal, modalOpacity, modalScale]);
 
   const handleSelectUser = async (userId: string) => {
+    console.log('[HomeScreen] Selecting user:', userId);
     await selectUser(userId);
     closeModal();
   };
@@ -88,6 +91,11 @@ export default function HomeScreen() {
   const handleAnonymousMode = async () => {
     await clearCurrentUser();
     closeModal();
+  };
+
+  const handleOpenModal = () => {
+    console.log('[HomeScreen] Opening user modal, users:', users.length);
+    setShowUserModal(true);
   };
 
   const closeModal = () => {
@@ -122,7 +130,7 @@ export default function HomeScreen() {
           {users.length > 0 && (
             <TouchableOpacity
               style={styles.settingsButton}
-              onPress={() => setShowUserModal(true)}
+              onPress={handleOpenModal}
               testID="users-button"
             >
               <Users size={28} color={AppColors.text} />
@@ -256,8 +264,14 @@ export default function HomeScreen() {
                 style={styles.modalScrollView}
                 contentContainerStyle={styles.modalScrollContent}
               >
-                <View style={styles.userGrid}>
-                  {users.map(user => (
+                {users.length === 0 ? (
+                  <View style={styles.emptyState}>
+                    <Text style={styles.emptyStateText}>Aucun utilisateur</Text>
+                    <Text style={styles.emptyStateSubtext}>Créez un profil dans les paramètres</Text>
+                  </View>
+                ) : (
+                  <View style={styles.userGrid}>
+                    {users.map(user => (
                     <TouchableOpacity
                       key={user.id}
                       style={styles.modalUserCard}
@@ -293,7 +307,8 @@ export default function HomeScreen() {
                     <Text style={styles.anonymousUserName}>Mode
 Anonyme</Text>
                   </TouchableOpacity>
-                </View>
+                  </View>
+                )}
               </ScrollView>
             </Animated.View>
           </View>
@@ -621,5 +636,20 @@ const styles = StyleSheet.create({
     color: AppColors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  emptyState: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  emptyStateText: {
+    fontSize: 18,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+    marginBottom: 8,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    color: AppColors.textSecondary,
+    textAlign: 'center',
   },
 });
