@@ -37,3 +37,14 @@ export interface Question {
 }
 
 export type GameMode = 'discovery' | 'practice' | 'challenge';
+
+export interface User {
+  id: string;
+  firstName: string;
+  gender: 'boy' | 'girl';
+  age: number;
+  grade: string;
+  photoUri?: string;
+  createdAt: string;
+  progress: UserProgress[];
+}

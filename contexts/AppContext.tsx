@@ -1,13 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { UserProgress, UserSettings, Badge } from '@/types';
+import type { UserProgress, UserSettings, Badge, User } from '@/types';
 import { MULTIPLICATION_TABLES } from '@/constants/tables';
 
 const STORAGE_KEYS = {
   PROGRESS: '@tables_magiques_progress',
   SETTINGS: '@tables_magiques_settings',
   BADGES: '@tables_magiques_badges',
+  USERS: '@tables_magiques_users',
+  CURRENT_USER: '@tables_magiques_current_user',
 } as const;
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -41,17 +43,38 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [badges, setBadges] = useState<Badge[]>(INITIAL_BADGES);
   const [totalStars, setTotalStars] = useState(0);
+  const [users, setUsers] = useState<User[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   const loadData = useCallback(async () => {
     try {
-      const [progressData, settingsData, badgesData] = await Promise.all([
+      const [progressData, settingsData, badgesData, usersData, currentUserId] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEYS.PROGRESS),
         AsyncStorage.getItem(STORAGE_KEYS.SETTINGS),
         AsyncStorage.getItem(STORAGE_KEYS.BADGES),
+        AsyncStorage.getItem(STORAGE_KEYS.USERS),
+        AsyncStorage.getItem(STORAGE_KEYS.CURRENT_USER),
       ]);
 
-      if (progressData) {
-        setProgress(JSON.parse(progressData));
+      if (usersData) {
+        const parsedUsers = JSON.parse(usersData);
+        setUsers(parsedUsers);
+        
+        if (currentUserId) {
+          const user = parsedUsers.find((u: User) => u.id === currentUserId);
+          if (user) {
+            setCurrentUser(user);
+            setProgress(user.progress || INITIAL_PROGRESS);
+          }
+        } else if (parsedUsers.length === 0) {
+          if (progressData) {
+            setProgress(JSON.parse(progressData));
+          }
+        }
+      } else {
+        if (progressData) {
+          setProgress(JSON.parse(progressData));
+        }
       }
 
       if (settingsData) {
@@ -79,8 +102,17 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
   const saveProgress = async (newProgress: UserProgress[]) => {
     try {
-      await AsyncStorage.setItem(STORAGE_KEYS.PROGRESS, JSON.stringify(newProgress));
       setProgress(newProgress);
+      
+      if (currentUser) {
+        const updatedUser = { ...currentUser, progress: newProgress };
+        const updatedUsers = users.map(u => u.id === currentUser.id ? updatedUser : u);
+        await AsyncStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updatedUsers));
+        setUsers(updatedUsers);
+        setCurrentUser(updatedUser);
+      } else {
+        await AsyncStorage.setItem(STORAGE_KEYS.PROGRESS, JSON.stringify(newProgress));
+      }
     } catch (error) {
       console.error('Error saving progress:', error);
     }
@@ -104,36 +136,39 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   };
 
-  const updateTableProgress = useCallback((
+  const updateTableProgress = useCallback(async (
     tableNumber: number,
     correct: number,
     total: number,
     stars: number,
     level?: 1 | 2
   ) => {
-    const newProgress = progress.map(p => {
-      if (p.tableNumber === tableNumber) {
-        const updates: Partial<UserProgress> = {
-          correctAnswers: p.correctAnswers + correct,
-          totalAttempts: p.totalAttempts + total,
-          starsEarned: Math.max(p.starsEarned, stars),
-          completed: stars >= 3,
-          lastPracticed: new Date().toISOString(),
-        };
+    setProgress(prevProgress => {
+      const newProgress = prevProgress.map(p => {
+        if (p.tableNumber === tableNumber) {
+          const updates: Partial<UserProgress> = {
+            correctAnswers: p.correctAnswers + correct,
+            totalAttempts: p.totalAttempts + total,
+            starsEarned: Math.max(p.starsEarned, stars),
+            completed: stars >= 3,
+            lastPracticed: new Date().toISOString(),
+          };
 
-        if (level === 1 && correct === 10) {
-          updates.level1Completed = true;
-        }
-        if (level === 2) {
-          updates.level2Completed = true;
-        }
+          if (level === 1 && correct === 10) {
+            updates.level1Completed = true;
+          }
+          if (level === 2) {
+            updates.level2Completed = true;
+          }
 
-        return { ...p, ...updates };
-      }
-      return p;
+          return { ...p, ...updates };
+        }
+        return p;
+      });
+      saveProgress(newProgress);
+      return newProgress;
     });
-    saveProgress(newProgress);
-  }, [progress]);
+  }, [currentUser, users]);
 
   const unlockBadge = useCallback((badgeId: string) => {
     const newBadges = badges.map(b => {
@@ -167,15 +202,81 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   }, []);
 
+  const saveUsers = async (newUsers: User[]) => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(newUsers));
+      setUsers(newUsers);
+    } catch (error) {
+      console.error('Error saving users:', error);
+    }
+  };
+
+  const addUser = useCallback(async (user: Omit<User, 'id' | 'createdAt' | 'progress'>) => {
+    const newUser: User = {
+      ...user,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      progress: INITIAL_PROGRESS,
+    };
+    const updatedUsers = [...users, newUser];
+    await saveUsers(updatedUsers);
+    return newUser;
+  }, [users]);
+
+  const deleteUser = useCallback(async (userId: string) => {
+    const updatedUsers = users.filter(u => u.id !== userId);
+    await saveUsers(updatedUsers);
+    
+    if (currentUser?.id === userId) {
+      await AsyncStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+      setCurrentUser(null);
+      setProgress(INITIAL_PROGRESS);
+    }
+  }, [users, currentUser]);
+
+  const selectUser = useCallback(async (userId: string) => {
+    const user = users.find(u => u.id === userId);
+    if (user) {
+      await AsyncStorage.setItem(STORAGE_KEYS.CURRENT_USER, userId);
+      setCurrentUser(user);
+      setProgress(user.progress || INITIAL_PROGRESS);
+    }
+  }, [users]);
+
+  const updateUser = useCallback(async (userId: string, updates: Partial<User>) => {
+    const updatedUsers = users.map(u => 
+      u.id === userId ? { ...u, ...updates } : u
+    );
+    await saveUsers(updatedUsers);
+    
+    if (currentUser?.id === userId) {
+      const updated = { ...currentUser, ...updates };
+      setCurrentUser(updated);
+    }
+  }, [users, currentUser]);
+
+  const clearCurrentUser = useCallback(async () => {
+    await AsyncStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+    setCurrentUser(null);
+    setProgress(INITIAL_PROGRESS);
+  }, []);
+
   return useMemo(() => ({
     progress,
     settings,
     badges,
     totalStars,
+    users,
+    currentUser,
     updateTableProgress,
     unlockBadge,
     getTableProgress,
     updateSettings,
     resetProgress,
-  }), [progress, settings, badges, totalStars, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress]);
+    addUser,
+    deleteUser,
+    selectUser,
+    updateUser,
+    clearCurrentUser,
+  }), [progress, settings, badges, totalStars, users, currentUser, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser]);
 });

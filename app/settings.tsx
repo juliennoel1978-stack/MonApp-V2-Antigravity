@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Volume2, VolumeX, Clock, User } from 'lucide-react-native';
+import { Volume2, VolumeX, Clock, User, Users, Trash2 } from 'lucide-react-native';
 import React from 'react';
 import {
   View,
@@ -18,7 +18,7 @@ import { useApp } from '@/contexts/AppContext';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { settings, updateSettings, resetProgress } = useApp();
+  const { settings, updateSettings, resetProgress, users, deleteUser, currentUser, clearCurrentUser } = useApp();
 
   const fontSizes = [
     { value: 'normal' as const, label: 'Normal' },
@@ -33,6 +33,100 @@ export default function SettingsScreen() {
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
         >
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Utilisateurs</Text>
+
+            <View style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <Users size={24} color={AppColors.primary} />
+                <View style={styles.settingTextContainer}>
+                  <Text style={styles.settingTitle}>Profils</Text>
+                  <Text style={styles.settingDescription}>
+                    {users.length} utilisateur{users.length > 1 ? 's' : ''}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {currentUser && (
+              <View style={styles.currentUserCard}>
+                <Text style={styles.currentUserLabel}>Utilisateur actuel :</Text>
+                <View style={styles.currentUserInfo}>
+                  <Text style={styles.currentUserName}>
+                    {currentUser.gender === 'boy' ? '👦' : '👧'} {currentUser.firstName}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.clearUserButton}
+                    onPress={() => {
+                      if (Platform.OS === 'web') {
+                        if (confirm('Voulez-vous désélectionner cet utilisateur ?')) {
+                          clearCurrentUser();
+                        }
+                      } else {
+                        Alert.alert(
+                          'Désélectionner',
+                          'Voulez-vous désélectionner cet utilisateur ?',
+                          [
+                            { text: 'Annuler', style: 'cancel' },
+                            { text: 'Oui', onPress: clearCurrentUser },
+                          ]
+                        );
+                      }
+                    }}
+                  >
+                    <Text style={styles.clearUserButtonText}>Changer</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {users.map(user => (
+              <View key={user.id} style={styles.userItem}>
+                <View style={styles.userItemLeft}>
+                  <Text style={styles.userEmoji}>
+                    {user.gender === 'boy' ? '👦' : '👧'}
+                  </Text>
+                  <View style={styles.userItemInfo}>
+                    <Text style={styles.userItemName}>{user.firstName}</Text>
+                    <Text style={styles.userItemDetails}>
+                      {user.age} ans • {user.grade}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.userItemActions}>
+                  <TouchableOpacity
+                    style={styles.userActionButton}
+                    onPress={() => {
+                      if (Platform.OS === 'web') {
+                        if (confirm(`Supprimer ${user.firstName} ?`)) {
+                          deleteUser(user.id);
+                        }
+                      } else {
+                        Alert.alert(
+                          'Supprimer',
+                          `Êtes-vous sûr de vouloir supprimer ${user.firstName} ?`,
+                          [
+                            { text: 'Annuler', style: 'cancel' },
+                            { text: 'Supprimer', style: 'destructive', onPress: () => deleteUser(user.id) },
+                          ]
+                        );
+                      }
+                    }}
+                  >
+                    <Trash2 size={20} color={AppColors.error} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+
+            <TouchableOpacity
+              style={styles.addUserButton}
+              onPress={() => router.push('/user-form' as any)}
+            >
+              <Text style={styles.addUserButtonText}>+ Ajouter un utilisateur</Text>
+            </TouchableOpacity>
+          </View>
+
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Audio</Text>
 
@@ -453,5 +547,99 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: AppColors.textSecondary,
     fontWeight: '500' as const,
+  },
+  currentUserCard: {
+    backgroundColor: AppColors.primary + '10',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: AppColors.primary,
+  },
+  currentUserLabel: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: AppColors.textSecondary,
+    marginBottom: 8,
+  },
+  currentUserInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  currentUserName: {
+    fontSize: 16,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+  },
+  clearUserButton: {
+    backgroundColor: AppColors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  clearUserButtonText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: '#FFFFFF',
+  },
+  userItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: AppColors.surface,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  userItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  userEmoji: {
+    fontSize: 32,
+  },
+  userItemInfo: {
+    flex: 1,
+  },
+  userItemName: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: AppColors.text,
+    marginBottom: 2,
+  },
+  userItemDetails: {
+    fontSize: 13,
+    color: AppColors.textSecondary,
+  },
+  userItemActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  userActionButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: AppColors.borderLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addUserButton: {
+    backgroundColor: AppColors.primary,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  addUserButtonText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: '#FFFFFF',
   },
 });

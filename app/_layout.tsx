@@ -13,6 +13,8 @@ function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerBackTitle: "Retour" }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="select-user" options={{ headerShown: false }} />
+      <Stack.Screen name="user-form" options={{ headerShown: false, presentation: "modal" }} />
       <Stack.Screen name="tables" options={{ headerShown: false }} />
       <Stack.Screen 
         name="discovery/[tableNumber]" 

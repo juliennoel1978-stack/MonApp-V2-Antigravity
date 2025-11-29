@@ -18,28 +18,46 @@ const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { totalStars, progress } = useApp();
+  const { totalStars, progress, users, currentUser } = useApp();
   const scaleAnim = React.useRef(new Animated.Value(0)).current;
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const [isReady, setIsReady] = React.useState(false);
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        tension: 50,
-        friction: 7,
-        useNativeDriver: true,
-      }),
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [scaleAnim, fadeAnim]);
+    const checkUserSelection = async () => {
+      if (users.length > 0 && !currentUser) {
+        router.replace('/select-user' as any);
+      } else {
+        setIsReady(true);
+      }
+    };
+    checkUserSelection();
+  }, [users, currentUser, router]);
+
+  useEffect(() => {
+    if (isReady) {
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 50,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [scaleAnim, fadeAnim, isReady]);
 
   const completedTables = progress.filter(p => p.completed).length;
   const totalTables = progress.length;
+
+  if (!isReady) {
+    return null;
+  }
 
   return (
     <View style={styles.backgroundContainer}>
@@ -67,7 +85,12 @@ export default function HomeScreen() {
             <View style={styles.sparkleLeft}>
               <Sparkles size={32} color={AppColors.primary} />
             </View>
-            <Text style={styles.title}>Tables Magiques</Text>
+            <View style={styles.titleContent}>
+              <Text style={styles.title}>Tables Magiques</Text>
+              {currentUser && (
+                <Text style={styles.userName}>Bonjour {currentUser.firstName} !</Text>
+              )}
+            </View>
             <View style={styles.sparkleRight}>
               <Sparkles size={32} color={AppColors.secondary} />
             </View>
@@ -188,12 +211,23 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 20,
   },
+  titleContent: {
+    alignItems: 'center',
+    flexShrink: 1,
+  },
   title: {
     fontSize: 32,
     fontWeight: 'bold' as const,
     color: AppColors.text,
     textAlign: 'center',
     flexShrink: 1,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: AppColors.primary,
+    textAlign: 'center',
+    marginTop: 4,
   },
   sparkleLeft: {
     width: 32,
