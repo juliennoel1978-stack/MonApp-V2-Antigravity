@@ -104,6 +104,7 @@ export default function HomeScreen() {
   const handleOpenModal = () => {
     console.log('[HomeScreen] Opening user modal manually');
     console.log('[HomeScreen] Users available:', users.length);
+    console.log('[HomeScreen] Users array:', JSON.stringify(users, null, 2));
     if (users.length === 0) {
       console.error('[HomeScreen] WARNING: No users found when opening modal!');
     }
@@ -259,6 +260,7 @@ export default function HomeScreen() {
         </Animated.View>
 
         <Modal
+          key={`user-modal-${users.length}`}
           visible={showUserModal}
           transparent
           animationType="none"
@@ -296,35 +298,38 @@ export default function HomeScreen() {
                   {users.length === 0 && (
                     <View style={{ width: '100%', padding: 20, alignItems: 'center' }}>
                       <Text style={{ fontSize: 16, color: AppColors.textSecondary, textAlign: 'center' }}>
-                        Aucun utilisateur trouvé.
+                        Aucun utilisateur trouvé ({users.length})
                       </Text>
                       <Text style={{ fontSize: 14, color: AppColors.textSecondary, marginTop: 10, textAlign: 'center' }}>
                         Crée un profil pour commencer !
                       </Text>
                     </View>
                   )}
-                  {users.map(user => (
-                    <TouchableOpacity
-                      key={user.id}
-                      style={styles.modalUserCard}
-                      onPress={() => handleSelectUser(user.id)}
-                      testID={`modal-user-${user.id}`}
-                    >
-                      <View style={styles.modalAvatarContainer}>
-                        {user.photoUri ? (
-                          <Image source={{ uri: user.photoUri }} style={styles.modalAvatar} />
-                        ) : (
-                          <View style={styles.modalAvatarPlaceholder}>
-                            <Text style={styles.modalAvatarEmoji}>
-                              {user.gender === 'boy' ? '👦' : '👧'}
-                            </Text>
-                          </View>
-                        )}
-                      </View>
-                      <Text style={styles.modalUserName}>{user.firstName}</Text>
-                      <Text style={styles.modalUserInfo}>{user.age} ans</Text>
-                    </TouchableOpacity>
-                  ))}
+                  {users.map(user => {
+                    console.log('[Modal Render] Rendering user:', user.firstName, user.id);
+                    return (
+                      <TouchableOpacity
+                        key={user.id}
+                        style={styles.modalUserCard}
+                        onPress={() => handleSelectUser(user.id)}
+                        testID={`modal-user-${user.id}`}
+                      >
+                        <View style={styles.modalAvatarContainer}>
+                          {user.photoUri ? (
+                            <Image source={{ uri: user.photoUri }} style={styles.modalAvatar} />
+                          ) : (
+                            <View style={styles.modalAvatarPlaceholder}>
+                              <Text style={styles.modalAvatarEmoji}>
+                                {user.gender === 'boy' ? '👦' : '👧'}
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                        <Text style={styles.modalUserName}>{user.firstName}</Text>
+                        <Text style={styles.modalUserInfo}>{user.age} ans</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
 
                   <TouchableOpacity
                     style={[styles.modalUserCard, styles.addUserCard]}
