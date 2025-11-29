@@ -11,6 +11,8 @@ import {
   Alert,
   Platform,
   Image,
+  KeyboardAvoidingView,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
@@ -25,6 +27,9 @@ export default function UserFormScreen() {
   const [age, setAge] = useState('');
   const [grade, setGrade] = useState('');
   const [photoUri, setPhotoUri] = useState<string | undefined>(undefined);
+  const firstNameRef = React.useRef<TextInput>(null);
+  const ageRef = React.useRef<TextInput>(null);
+  const gradeRef = React.useRef<TextInput>(null);
 
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -135,10 +140,17 @@ export default function UserFormScreen() {
           <View style={styles.placeholder} />
         </View>
 
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
+        <KeyboardAvoidingView
+          style={styles.keyboardView}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
           <View style={styles.photoSection}>
             <TouchableOpacity
               style={styles.photoContainer}
@@ -177,11 +189,14 @@ export default function UserFormScreen() {
           <View style={styles.section}>
             <Text style={styles.label}>Prénom *</Text>
             <TextInput
+              ref={firstNameRef}
               style={styles.input}
               value={firstName}
               onChangeText={setFirstName}
               placeholder="Ex: Marie"
               placeholderTextColor={AppColors.textSecondary}
+              returnKeyType="next"
+              onSubmitEditing={() => ageRef.current?.focus()}
             />
           </View>
 
@@ -227,23 +242,32 @@ export default function UserFormScreen() {
           <View style={styles.section}>
             <Text style={styles.label}>Âge *</Text>
             <TextInput
+              ref={ageRef}
               style={styles.input}
               value={age}
               onChangeText={setAge}
               placeholder="Ex: 8"
               placeholderTextColor={AppColors.textSecondary}
               keyboardType="number-pad"
+              returnKeyType="next"
+              onSubmitEditing={() => gradeRef.current?.focus()}
             />
           </View>
 
           <View style={styles.section}>
             <Text style={styles.label}>Classe *</Text>
             <TextInput
+              ref={gradeRef}
               style={styles.input}
               value={grade}
               onChangeText={setGrade}
               placeholder="Ex: CE2"
               placeholderTextColor={AppColors.textSecondary}
+              returnKeyType="done"
+              onSubmitEditing={() => {
+                Keyboard.dismiss();
+                handleSave();
+              }}
             />
           </View>
 
@@ -254,7 +278,8 @@ export default function UserFormScreen() {
             <Save size={24} color="#FFFFFF" />
             <Text style={styles.saveButtonText}>Enregistrer</Text>
           </TouchableOpacity>
-        </ScrollView>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </View>
   );
@@ -297,6 +322,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
+    paddingBottom: 100,
+  },
+  keyboardView: {
+    flex: 1,
   },
   photoSection: {
     alignItems: 'center',
