@@ -129,23 +129,23 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   }, [currentUser, users]);
 
-  const saveSettings = async (newSettings: UserSettings) => {
+  const saveSettings = useCallback(async (newSettings: UserSettings) => {
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(newSettings));
       setSettings(newSettings);
     } catch (error) {
       console.error('Error saving settings:', error);
     }
-  };
+  }, []);
 
-  const saveBadges = async (newBadges: Badge[]) => {
+  const saveBadges = useCallback(async (newBadges: Badge[]) => {
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.BADGES, JSON.stringify(newBadges));
       setBadges(newBadges);
     } catch (error) {
       console.error('Error saving badges:', error);
     }
-  };
+  }, []);
 
   const updateTableProgress = useCallback(async (
     tableNumber: number,
@@ -189,7 +189,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       return b;
     });
     saveBadges(newBadges);
-  }, [badges]);
+  }, [badges, saveBadges]);
 
   const getTableProgress = useCallback((tableNumber: number): UserProgress | undefined => {
     return progress.find(p => p.tableNumber === tableNumber);
@@ -197,7 +197,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
   const updateSettings = useCallback((newSettings: Partial<UserSettings>) => {
     saveSettings({ ...settings, ...newSettings });
-  }, [settings]);
+  }, [settings, saveSettings]);
 
   const resetProgress = useCallback(async () => {
     try {
@@ -213,7 +213,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   }, []);
 
-  const saveUsers = async (newUsers: User[]) => {
+  const saveUsers = useCallback(async (newUsers: User[]) => {
     try {
       console.log('💾 Saving users:', newUsers.length, 'users');
       await AsyncStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(newUsers));
@@ -222,7 +222,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     } catch (error) {
       console.error('❌ Error saving users:', error);
     }
-  };
+  }, []);
 
   const addUser = useCallback(async (user: Omit<User, 'id' | 'createdAt' | 'progress'>) => {
     const newUser: User = {
@@ -234,7 +234,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     const updatedUsers = [...users, newUser];
     await saveUsers(updatedUsers);
     return newUser;
-  }, [users]);
+  }, [users, saveUsers]);
 
   const deleteUser = useCallback(async (userId: string) => {
     const updatedUsers = users.filter(u => u.id !== userId);
@@ -245,7 +245,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       setCurrentUser(null);
       setProgress(INITIAL_PROGRESS);
     }
-  }, [users, currentUser]);
+  }, [users, currentUser, saveUsers]);
 
   const selectUser = useCallback(async (userId: string) => {
     const user = users.find(u => u.id === userId);
@@ -266,7 +266,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       const updated = { ...currentUser, ...updates };
       setCurrentUser(updated);
     }
-  }, [users, currentUser]);
+  }, [users, currentUser, saveUsers]);
 
   const clearCurrentUser = useCallback(async () => {
     try {
