@@ -370,7 +370,7 @@ export default function PracticeScreen() {
 
               <TouchableOpacity
                 style={[styles.resultButton, { backgroundColor: tableColor }]}
-                onPress={() => router.back()}
+                onPress={() => router.push('/tables')}
               >
                 <Text style={styles.resultButtonText}>Terminer</Text>
               </TouchableOpacity>
