@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users } from 'lucide-react-native';
+import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import {
   View,
@@ -256,21 +256,24 @@ export default function HomeScreen() {
               ]}
             >
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Qui es-tu ?</Text>
-                <Text style={styles.modalSubtitle}>Choisis ton profil</Text>
+                <TouchableOpacity
+                  style={styles.modalCloseButton}
+                  onPress={closeModal}
+                  testID="modal-close"
+                >
+                  <X size={24} color={AppColors.text} />
+                </TouchableOpacity>
+                <View style={styles.modalHeaderContent}>
+                  <Text style={styles.modalTitle}>Qui es-tu ?</Text>
+                  <Text style={styles.modalSubtitle}>Choisis ton profil</Text>
+                </View>
               </View>
 
               <ScrollView
                 style={styles.modalScrollView}
                 contentContainerStyle={styles.modalScrollContent}
               >
-                {users.length === 0 ? (
-                  <View style={styles.emptyState}>
-                    <Text style={styles.emptyStateText}>Aucun utilisateur</Text>
-                    <Text style={styles.emptyStateSubtext}>Créez un profil dans les paramètres</Text>
-                  </View>
-                ) : (
-                  <View style={styles.userGrid}>
+                <View style={styles.userGrid}>
                     {users.map(user => (
                     <TouchableOpacity
                       key={user.id}
@@ -295,20 +298,37 @@ export default function HomeScreen() {
                   ))}
 
                   <TouchableOpacity
-                    style={[styles.modalUserCard, styles.anonymousCard]}
-                    onPress={handleAnonymousMode}
-                    testID="modal-anonymous"
+                    style={[styles.modalUserCard, styles.addUserCard]}
+                    onPress={() => {
+                      closeModal();
+                      router.push('/select-user' as any);
+                    }}
+                    testID="modal-add-user"
                   >
                     <View style={styles.modalAvatarContainer}>
-                      <View style={styles.anonymousAvatarPlaceholder}>
-                        <UserX size={40} color={AppColors.textSecondary} />
+                      <View style={styles.addAvatarPlaceholder}>
+                        <Plus size={48} color={AppColors.primary} />
                       </View>
                     </View>
-                    <Text style={styles.anonymousUserName}>Mode
-Anonyme</Text>
+                    <Text style={styles.addUserName}>Ajouter</Text>
                   </TouchableOpacity>
-                  </View>
-                )}
+
+                  {users.length > 0 && (
+                    <TouchableOpacity
+                      style={[styles.modalUserCard, styles.anonymousCard]}
+                      onPress={handleAnonymousMode}
+                      testID="modal-anonymous"
+                    >
+                      <View style={styles.modalAvatarContainer}>
+                        <View style={styles.anonymousAvatarPlaceholder}>
+                          <UserX size={40} color={AppColors.textSecondary} />
+                        </View>
+                      </View>
+                      <Text style={styles.anonymousUserName}>Mode
+Anonyme</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </ScrollView>
             </Animated.View>
           </View>
@@ -546,10 +566,21 @@ const styles = StyleSheet.create({
   },
   modalHeader: {
     paddingHorizontal: 24,
-    paddingTop: 32,
+    paddingTop: 20,
     paddingBottom: 24,
-    alignItems: 'center',
     backgroundColor: AppColors.surface,
+  },
+  modalCloseButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: AppColors.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalHeaderContent: {
+    alignItems: 'center',
   },
   modalTitle: {
     fontSize: 28,
@@ -637,19 +668,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
   },
-  emptyState: {
-    padding: 40,
+  addUserCard: {
+    borderWidth: 2,
+    borderStyle: 'dashed' as const,
+    borderColor: AppColors.primary,
+    backgroundColor: AppColors.surface,
+  },
+  addAvatarPlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: AppColors.primary + '10',
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  emptyStateText: {
-    fontSize: 18,
-    fontWeight: 'bold' as const,
-    color: AppColors.text,
-    marginBottom: 8,
-  },
-  emptyStateSubtext: {
-    fontSize: 14,
-    color: AppColors.textSecondary,
+  addUserName: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: AppColors.primary,
     textAlign: 'center',
   },
 });

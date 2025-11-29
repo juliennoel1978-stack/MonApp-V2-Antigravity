@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Plus } from 'lucide-react-native';
+import { Plus, ArrowLeft } from 'lucide-react-native';
 import React from 'react';
 import {
   View,
@@ -29,6 +29,15 @@ export default function SelectUserScreen() {
   return (
     <View style={styles.backgroundContainer}>
       <SafeAreaView style={styles.container}>
+        <View style={styles.topBar}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+            testID="back-button"
+          >
+            <ArrowLeft size={24} color={AppColors.text} />
+          </TouchableOpacity>
+        </View>
         <View style={styles.header}>
           <Text style={styles.title}>Qui es-tu ?</Text>
           <Text style={styles.subtitle}>Choisis ton profil</Text>
@@ -88,9 +97,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  topBar: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  backButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: AppColors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
   header: {
     paddingHorizontal: 24,
-    paddingTop: 20,
+    paddingTop: 12,
     paddingBottom: 24,
     alignItems: 'center',
   },
