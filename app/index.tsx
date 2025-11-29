@@ -94,7 +94,7 @@ export default function HomeScreen() {
   };
 
   const handleOpenModal = () => {
-    console.log('[HomeScreen] Opening user modal, users:', users.length);
+    console.log('[HomeScreen] Opening user modal, users:', users.length, users);
     setShowUserModal(true);
   };
 
@@ -273,8 +273,18 @@ export default function HomeScreen() {
                 style={styles.modalScrollView}
                 contentContainerStyle={styles.modalScrollContent}
               >
+                {users.length === 0 && (
+                  <View style={{ padding: 20, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 16, color: AppColors.textSecondary, textAlign: 'center' }}>
+                      Aucun utilisateur trouvé. Les données ne sont peut-être pas chargées.
+                    </Text>
+                    <Text style={{ fontSize: 12, color: AppColors.textSecondary, marginTop: 10 }}>
+                      Debug: users.length = {users.length}
+                    </Text>
+                  </View>
+                )}
                 <View style={styles.userGrid}>
-                    {users.map(user => (
+                  {users.map(user => (
                     <TouchableOpacity
                       key={user.id}
                       style={styles.modalUserCard}
