@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Sparkles, Settings as SettingsIcon, Trophy, Zap } from 'lucide-react-native';
+import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import {
   View,
@@ -21,7 +21,7 @@ const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { totalStars, progress, users, currentUser, selectUser } = useApp();
+  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser } = useApp();
   const scaleAnim = React.useRef(new Animated.Value(0)).current;
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const modalOpacity = React.useRef(new Animated.Value(0)).current;
@@ -31,7 +31,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const checkUserSelection = async () => {
-      if (users.length > 0 && !currentUser) {
+      if (users.length > 0) {
         setIsReady(true);
         setTimeout(() => {
           setShowUserModal(true);
@@ -41,7 +41,7 @@ export default function HomeScreen() {
       }
     };
     checkUserSelection();
-  }, [users, currentUser]);
+  }, [users]);
 
   useEffect(() => {
     if (isReady) {
@@ -84,6 +84,15 @@ export default function HomeScreen() {
 
   const handleSelectUser = async (userId: string) => {
     await selectUser(userId);
+    closeModal();
+  };
+
+  const handleAnonymousMode = async () => {
+    await clearCurrentUser();
+    closeModal();
+  };
+
+  const closeModal = () => {
     Animated.parallel([
       Animated.timing(modalOpacity, {
         toValue: 0,
@@ -263,6 +272,20 @@ export default function HomeScreen() {
                       <Text style={styles.modalUserInfo}>{user.age} ans</Text>
                     </TouchableOpacity>
                   ))}
+
+                  <TouchableOpacity
+                    style={[styles.modalUserCard, styles.anonymousCard]}
+                    onPress={handleAnonymousMode}
+                    testID="modal-anonymous"
+                  >
+                    <View style={styles.modalAvatarContainer}>
+                      <View style={styles.anonymousAvatarPlaceholder}>
+                        <UserX size={40} color={AppColors.textSecondary} />
+                      </View>
+                    </View>
+                    <Text style={styles.anonymousUserName}>Mode
+Anonyme</Text>
+                  </TouchableOpacity>
                 </View>
               </ScrollView>
             </Animated.View>
@@ -569,5 +592,26 @@ const styles = StyleSheet.create({
   modalUserInfo: {
     fontSize: 14,
     color: AppColors.textSecondary,
+  },
+  anonymousCard: {
+    borderWidth: 2,
+    borderStyle: 'dashed' as const,
+    borderColor: AppColors.textSecondary,
+    backgroundColor: AppColors.background,
+  },
+  anonymousAvatarPlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: AppColors.borderLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  anonymousUserName: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: AppColors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
   },
 });

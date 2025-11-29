@@ -48,33 +48,20 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
   const loadData = useCallback(async () => {
     try {
-      const [progressData, settingsData, badgesData, usersData, currentUserId] = await Promise.all([
+      const [progressData, settingsData, badgesData, usersData] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEYS.PROGRESS),
         AsyncStorage.getItem(STORAGE_KEYS.SETTINGS),
         AsyncStorage.getItem(STORAGE_KEYS.BADGES),
         AsyncStorage.getItem(STORAGE_KEYS.USERS),
-        AsyncStorage.getItem(STORAGE_KEYS.CURRENT_USER),
       ]);
 
       if (usersData) {
         const parsedUsers = JSON.parse(usersData);
         setUsers(parsedUsers);
-        
-        if (currentUserId) {
-          const user = parsedUsers.find((u: User) => u.id === currentUserId);
-          if (user) {
-            setCurrentUser(user);
-            setProgress(user.progress || INITIAL_PROGRESS);
-          }
-        } else if (parsedUsers.length === 0) {
-          if (progressData) {
-            setProgress(JSON.parse(progressData));
-          }
-        }
-      } else {
-        if (progressData) {
-          setProgress(JSON.parse(progressData));
-        }
+      }
+
+      if (progressData) {
+        setProgress(JSON.parse(progressData));
       }
 
       if (settingsData) {
@@ -256,9 +243,20 @@ export const [AppProvider, useApp] = createContextHook(() => {
   }, [users, currentUser]);
 
   const clearCurrentUser = useCallback(async () => {
-    await AsyncStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
-    setCurrentUser(null);
-    setProgress(INITIAL_PROGRESS);
+    try {
+      await AsyncStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+      setCurrentUser(null);
+      
+      const progressData = await AsyncStorage.getItem(STORAGE_KEYS.PROGRESS);
+      if (progressData) {
+        setProgress(JSON.parse(progressData));
+      } else {
+        setProgress(INITIAL_PROGRESS);
+      }
+    } catch (error) {
+      console.error('Error clearing current user:', error);
+      setProgress(INITIAL_PROGRESS);
+    }
   }, []);
 
   return useMemo(() => ({
