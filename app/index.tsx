@@ -21,7 +21,7 @@ const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser } = useApp();
+  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading } = useApp();
   const scaleAnim = React.useRef(new Animated.Value(0)).current;
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const modalOpacity = React.useRef(new Animated.Value(0)).current;
@@ -31,17 +31,25 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const checkUserSelection = async () => {
+      console.log('[HomeScreen] isLoading:', isLoading);
       console.log('[HomeScreen] Users loaded:', users.length, 'users');
       console.log('[HomeScreen] Current user:', currentUser?.firstName || 'none');
-      setIsReady(true);
-      if (users.length > 0 && !currentUser) {
-        setTimeout(() => {
-          setShowUserModal(true);
-        }, 500);
+      
+      if (!isLoading) {
+        if (!isReady) {
+          setIsReady(true);
+        }
+        
+        if (isReady && users.length > 0 && !currentUser) {
+          setTimeout(() => {
+            console.log('[HomeScreen] Opening user modal - users:', users.length);
+            setShowUserModal(true);
+          }, 500);
+        }
       }
     };
     checkUserSelection();
-  }, [users, currentUser]);
+  }, [users, currentUser, isReady, isLoading]);
 
   useEffect(() => {
     if (isReady) {
@@ -94,7 +102,14 @@ export default function HomeScreen() {
   };
 
   const handleOpenModal = () => {
-    console.log('[HomeScreen] Opening user modal, users:', users.length, users);
+    console.log('[HomeScreen] Opening user modal manually');
+    console.log('[HomeScreen] Users available:', users.length);
+    if (users.length === 0) {
+      console.error('[HomeScreen] WARNING: No users found when opening modal!');
+    }
+    users.forEach((u, idx) => {
+      console.log(`  User ${idx + 1}:`, u.firstName, u.id);
+    });
     setShowUserModal(true);
   };
 
@@ -119,8 +134,12 @@ export default function HomeScreen() {
   const completedTables = progress.filter(p => p.completed).length;
   const totalTables = progress.length;
 
-  if (!isReady) {
-    return null;
+  if (!isReady || isLoading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: AppColors.background, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ fontSize: 24, color: AppColors.text }}>Chargement...</Text>
+      </View>
+    );
   }
 
   return (
@@ -273,17 +292,17 @@ export default function HomeScreen() {
                 style={styles.modalScrollView}
                 contentContainerStyle={styles.modalScrollContent}
               >
-                {users.length === 0 && (
-                  <View style={{ padding: 20, alignItems: 'center' }}>
-                    <Text style={{ fontSize: 16, color: AppColors.textSecondary, textAlign: 'center' }}>
-                      Aucun utilisateur trouvé. Les données ne sont peut-être pas chargées.
-                    </Text>
-                    <Text style={{ fontSize: 12, color: AppColors.textSecondary, marginTop: 10 }}>
-                      Debug: users.length = {users.length}
-                    </Text>
-                  </View>
-                )}
                 <View style={styles.userGrid}>
+                  {users.length === 0 && (
+                    <View style={{ width: '100%', padding: 20, alignItems: 'center' }}>
+                      <Text style={{ fontSize: 16, color: AppColors.textSecondary, textAlign: 'center' }}>
+                        Aucun utilisateur trouvé.
+                      </Text>
+                      <Text style={{ fontSize: 14, color: AppColors.textSecondary, marginTop: 10, textAlign: 'center' }}>
+                        Crée un profil pour commencer !
+                      </Text>
+                    </View>
+                  )}
                   {users.map(user => (
                     <TouchableOpacity
                       key={user.id}

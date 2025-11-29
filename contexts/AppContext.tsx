@@ -45,9 +45,11 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const [totalStars, setTotalStars] = useState(0);
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadData = useCallback(async () => {
     try {
+      setIsLoading(true);
       const [progressData, settingsData, badgesData, usersData, currentUserId] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEYS.PROGRESS),
         AsyncStorage.getItem(STORAGE_KEYS.SETTINGS),
@@ -97,6 +99,9 @@ export const [AppProvider, useApp] = createContextHook(() => {
       }
     } catch (error) {
       console.error('❌ Error loading data:', error);
+    } finally {
+      setIsLoading(false);
+      console.log('✅ Data loading complete');
     }
   }, []);
 
@@ -292,6 +297,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     totalStars,
     users,
     currentUser,
+    isLoading,
     updateTableProgress,
     unlockBadge,
     getTableProgress,
@@ -302,5 +308,5 @@ export const [AppProvider, useApp] = createContextHook(() => {
     selectUser,
     updateUser,
     clearCurrentUser,
-  }), [progress, settings, badges, totalStars, users, currentUser, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser]);
+  }), [progress, settings, badges, totalStars, users, currentUser, isLoading, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser]);
 });
