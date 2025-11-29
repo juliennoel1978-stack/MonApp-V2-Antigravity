@@ -70,13 +70,20 @@ export const [AppProvider, useApp] = createContextHook(() => {
             console.log('👤 Current user found:', user.firstName);
             setCurrentUser(user);
             setProgress(user.progress || INITIAL_PROGRESS);
+          } else {
+            console.log('⚠️ Current user ID not found in users list');
+            if (progressData) {
+              setProgress(JSON.parse(progressData));
+            }
           }
         } else if (progressData) {
+          console.log('📊 Loading global progress data');
           setProgress(JSON.parse(progressData));
         }
       } else {
         console.log('⚠️ No users data found in storage');
         if (progressData) {
+          console.log('📊 Loading global progress data (no users)');
           setProgress(JSON.parse(progressData));
         }
       }
@@ -104,7 +111,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
 
 
-  const saveProgress = async (newProgress: UserProgress[]) => {
+  const saveProgress = useCallback(async (newProgress: UserProgress[]) => {
     try {
       setProgress(newProgress);
       
@@ -120,7 +127,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     } catch (error) {
       console.error('Error saving progress:', error);
     }
-  };
+  }, [currentUser, users]);
 
   const saveSettings = async (newSettings: UserSettings) => {
     try {
@@ -172,7 +179,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       saveProgress(newProgress);
       return newProgress;
     });
-  }, [currentUser, users]);
+  }, [saveProgress]);
 
   const unlockBadge = useCallback((badgeId: string) => {
     const newBadges = badges.map(b => {
