@@ -9,6 +9,9 @@ import {
   Animated,
   Dimensions,
   Platform,
+  Modal,
+  ScrollView,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
@@ -18,21 +21,27 @@ const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { totalStars, progress, users, currentUser } = useApp();
+  const { totalStars, progress, users, currentUser, selectUser } = useApp();
   const scaleAnim = React.useRef(new Animated.Value(0)).current;
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const modalOpacity = React.useRef(new Animated.Value(0)).current;
+  const modalScale = React.useRef(new Animated.Value(0.9)).current;
   const [isReady, setIsReady] = React.useState(false);
+  const [showUserModal, setShowUserModal] = React.useState(false);
 
   useEffect(() => {
     const checkUserSelection = async () => {
       if (users.length > 0 && !currentUser) {
-        router.replace('/select-user' as any);
+        setIsReady(true);
+        setTimeout(() => {
+          setShowUserModal(true);
+        }, 500);
       } else {
         setIsReady(true);
       }
     };
     checkUserSelection();
-  }, [users, currentUser, router]);
+  }, [users, currentUser]);
 
   useEffect(() => {
     if (isReady) {
@@ -51,6 +60,46 @@ export default function HomeScreen() {
       ]).start();
     }
   }, [scaleAnim, fadeAnim, isReady]);
+
+  useEffect(() => {
+    if (showUserModal) {
+      Animated.parallel([
+        Animated.timing(modalOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(modalScale, {
+          toValue: 1,
+          tension: 50,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      modalOpacity.setValue(0);
+      modalScale.setValue(0.9);
+    }
+  }, [showUserModal, modalOpacity, modalScale]);
+
+  const handleSelectUser = async (userId: string) => {
+    await selectUser(userId);
+    Animated.parallel([
+      Animated.timing(modalOpacity, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.spring(modalScale, {
+        toValue: 0.9,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setShowUserModal(false);
+    });
+  };
 
   const completedTables = progress.filter(p => p.completed).length;
   const totalTables = progress.length;
@@ -165,6 +214,60 @@ export default function HomeScreen() {
             <Text style={styles.avatarLabel}>Ton Assistant Magique</Text>
           </TouchableOpacity>
         </Animated.View>
+
+        <Modal
+          visible={showUserModal}
+          transparent
+          animationType="none"
+          onRequestClose={() => {}}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View
+              style={[
+                styles.modalContent,
+                {
+                  opacity: modalOpacity,
+                  transform: [{ scale: modalScale }],
+                },
+              ]}
+            >
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Qui es-tu ?</Text>
+                <Text style={styles.modalSubtitle}>Choisis ton profil</Text>
+              </View>
+
+              <ScrollView
+                style={styles.modalScrollView}
+                contentContainerStyle={styles.modalScrollContent}
+              >
+                <View style={styles.userGrid}>
+                  {users.map(user => (
+                    <TouchableOpacity
+                      key={user.id}
+                      style={styles.modalUserCard}
+                      onPress={() => handleSelectUser(user.id)}
+                      testID={`modal-user-${user.id}`}
+                    >
+                      <View style={styles.modalAvatarContainer}>
+                        {user.photoUri ? (
+                          <Image source={{ uri: user.photoUri }} style={styles.modalAvatar} />
+                        ) : (
+                          <View style={styles.modalAvatarPlaceholder}>
+                            <Text style={styles.modalAvatarEmoji}>
+                              {user.gender === 'boy' ? '👦' : '👧'}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                      <Text style={styles.modalUserName}>{user.firstName}</Text>
+                      <Text style={styles.modalUserInfo}>{user.age} ans</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            </Animated.View>
+          </View>
+        </Modal>
       </SafeAreaView>
     </View>
   );
@@ -375,5 +478,96 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: AppColors.textSecondary,
     fontWeight: '600' as const,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    width: width - 40,
+    maxHeight: '80%',
+    backgroundColor: AppColors.background,
+    borderRadius: 24,
+    overflow: 'hidden',
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  modalHeader: {
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 24,
+    alignItems: 'center',
+    backgroundColor: AppColors.surface,
+  },
+  modalTitle: {
+    fontSize: 28,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+    marginBottom: 8,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: AppColors.textSecondary,
+  },
+  modalScrollView: {
+    flex: 1,
+  },
+  modalScrollContent: {
+    padding: 20,
+  },
+  userGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+    justifyContent: 'center',
+  },
+  modalUserCard: {
+    width: (width - 100) / 2,
+    backgroundColor: AppColors.surface,
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  modalAvatarContainer: {
+    marginBottom: 12,
+  },
+  modalAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: AppColors.borderLight,
+  },
+  modalAvatarPlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: AppColors.primary + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalAvatarEmoji: {
+    fontSize: 48,
+  },
+  modalUserName: {
+    fontSize: 18,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  modalUserInfo: {
+    fontSize: 14,
+    color: AppColors.textSecondary,
   },
 });
