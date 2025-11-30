@@ -1,4 +1,4 @@
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import {
@@ -21,7 +21,7 @@ const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData } = useApp();
+  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading } = useApp();
   
   console.log('[HomeScreen RENDER] users.length:', users.length);
   const scaleAnim = React.useRef(new Animated.Value(0)).current;
@@ -30,15 +30,6 @@ export default function HomeScreen() {
   const modalScale = React.useRef(new Animated.Value(0.9)).current;
   const [isReady, setIsReady] = React.useState(false);
   const [showUserModal, setShowUserModal] = React.useState(false);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      console.log('🔄 [HomeScreen] Screen focused - reloading users');
-      if (reloadData) {
-        reloadData();
-      }
-    }, [reloadData])
-  );
 
   useEffect(() => {
     const checkUserSelection = async () => {

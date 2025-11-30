@@ -325,7 +325,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
       selectUser,
       updateUser,
       clearCurrentUser,
-      reloadData: loadData,
     };
-  }, [progress, settings, badges, totalStars, users, currentUser, isLoading, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser, loadData]);
+  }, [progress, settings, badges, totalStars, users, currentUser, isLoading, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser]);
 });
