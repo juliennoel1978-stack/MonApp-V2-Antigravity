@@ -229,9 +229,13 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const saveUsers = useCallback(async (newUsers: User[]) => {
     try {
       console.log('💾 Saving users:', newUsers.length, 'users');
+      newUsers.forEach((u, idx) => {
+        console.log(`  Saving user ${idx + 1}:`, u.firstName, 'ID:', u.id);
+      });
       await AsyncStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(newUsers));
+      console.log('📝 Setting users state with', newUsers.length, 'users');
       setUsers(newUsers);
-      console.log('✅ Users saved successfully');
+      console.log('✅ Users saved and state updated successfully');
     } catch (error) {
       console.error('❌ Error saving users:', error);
     }
@@ -298,23 +302,26 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   }, []);
 
-  return useMemo(() => ({
-    progress,
-    settings,
-    badges,
-    totalStars,
-    users,
-    currentUser,
-    isLoading,
-    updateTableProgress,
-    unlockBadge,
-    getTableProgress,
-    updateSettings,
-    resetProgress,
-    addUser,
-    deleteUser,
-    selectUser,
-    updateUser,
-    clearCurrentUser,
-  }), [progress, settings, badges, totalStars, users, currentUser, isLoading, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser]);
+  return useMemo(() => {
+    console.log('🔄 AppContext useMemo recalculated - users count:', users.length);
+    return {
+      progress,
+      settings,
+      badges,
+      totalStars,
+      users,
+      currentUser,
+      isLoading,
+      updateTableProgress,
+      unlockBadge,
+      getTableProgress,
+      updateSettings,
+      resetProgress,
+      addUser,
+      deleteUser,
+      selectUser,
+      updateUser,
+      clearCurrentUser,
+    };
+  }, [progress, settings, badges, totalStars, users, currentUser, isLoading, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser]);
 });

@@ -22,6 +22,8 @@ const { width } = Dimensions.get('window');
 export default function HomeScreen() {
   const router = useRouter();
   const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading } = useApp();
+  
+  console.log('[HomeScreen RENDER] users.length:', users.length);
   const scaleAnim = React.useRef(new Animated.Value(0)).current;
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const modalOpacity = React.useRef(new Animated.Value(0)).current;
@@ -31,9 +33,9 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const checkUserSelection = async () => {
-      console.log('[HomeScreen] isLoading:', isLoading);
-      console.log('[HomeScreen] Users loaded:', users.length, 'users');
-      console.log('[HomeScreen] Current user:', currentUser?.firstName || 'none');
+      console.log('[HomeScreen useEffect] isLoading:', isLoading);
+      console.log('[HomeScreen useEffect] Users loaded:', users.length, 'users');
+      console.log('[HomeScreen useEffect] Current user:', currentUser?.firstName || 'none');
       
       if (!isLoading) {
         if (!isReady) {
