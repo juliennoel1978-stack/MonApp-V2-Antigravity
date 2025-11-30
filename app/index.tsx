@@ -259,55 +259,53 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </Animated.View>
 
-        <Modal
-          key={`user-modal-${users.length}`}
-          visible={showUserModal}
-          transparent
-          animationType="none"
-          onRequestClose={closeModal}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View
-              style={[
-                styles.modalContent,
-                {
-                  opacity: modalOpacity,
-                  transform: [{ scale: modalScale }],
-                },
-              ]}
-            >
-              <View style={styles.modalHeader}>
-                <TouchableOpacity
-                  style={styles.modalCloseButton}
-                  onPress={closeModal}
-                  testID="modal-close"
-                >
-                  <X size={24} color={AppColors.text} />
-                </TouchableOpacity>
-                <View style={styles.modalHeaderContent}>
-                  <Text style={styles.modalTitle}>Qui es-tu ?</Text>
-                  <Text style={styles.modalSubtitle}>Choisis ton profil</Text>
-                </View>
-              </View>
-
-              <ScrollView
-                style={styles.modalScrollView}
-                contentContainerStyle={styles.modalScrollContent}
+        {showUserModal && (
+          <Modal
+            visible={true}
+            transparent
+            animationType="none"
+            onRequestClose={closeModal}
+          >
+            <View style={styles.modalOverlay}>
+              <Animated.View
+                style={[
+                  styles.modalContent,
+                  {
+                    opacity: modalOpacity,
+                    transform: [{ scale: modalScale }],
+                  },
+                ]}
               >
-                <View style={styles.userGrid}>
-                  {users.length === 0 && (
-                    <View style={{ width: '100%', padding: 20, alignItems: 'center' }}>
-                      <Text style={{ fontSize: 16, color: AppColors.textSecondary, textAlign: 'center' }}>
-                        Aucun utilisateur trouvé ({users.length})
-                      </Text>
-                      <Text style={{ fontSize: 14, color: AppColors.textSecondary, marginTop: 10, textAlign: 'center' }}>
-                        Crée un profil pour commencer !
-                      </Text>
-                    </View>
-                  )}
-                  {users.map(user => {
-                    console.log('[Modal Render] Rendering user:', user.firstName, user.id);
-                    return (
+                <View style={styles.modalHeader}>
+                  <TouchableOpacity
+                    style={styles.modalCloseButton}
+                    onPress={closeModal}
+                    testID="modal-close"
+                  >
+                    <X size={24} color={AppColors.text} />
+                  </TouchableOpacity>
+                  <View style={styles.modalHeaderContent}>
+                    <Text style={styles.modalTitle}>Qui es-tu ?</Text>
+                    <Text style={styles.modalSubtitle}>Choisis ton profil</Text>
+                  </View>
+                </View>
+
+                <ScrollView
+                  style={styles.modalScrollView}
+                  contentContainerStyle={styles.modalScrollContent}
+                >
+                  <View style={styles.userGrid}>
+                    {users.length === 0 && (
+                      <View style={{ width: '100%', padding: 20, alignItems: 'center' }}>
+                        <Text style={{ fontSize: 16, color: AppColors.textSecondary, textAlign: 'center' }}>
+                          Aucun utilisateur trouvé
+                        </Text>
+                        <Text style={{ fontSize: 14, color: AppColors.textSecondary, marginTop: 10, textAlign: 'center' }}>
+                          Crée un profil pour commencer !
+                        </Text>
+                      </View>
+                    )}
+                    {users.map(user => (
                       <TouchableOpacity
                         key={user.id}
                         style={styles.modalUserCard}
@@ -328,45 +326,45 @@ export default function HomeScreen() {
                         <Text style={styles.modalUserName}>{user.firstName}</Text>
                         <Text style={styles.modalUserInfo}>{user.age} ans</Text>
                       </TouchableOpacity>
-                    );
-                  })}
+                    ))}
 
-                  <TouchableOpacity
-                    style={[styles.modalUserCard, styles.addUserCard]}
-                    onPress={() => {
-                      closeModal();
-                      router.push('/select-user' as any);
-                    }}
-                    testID="modal-add-user"
-                  >
-                    <View style={styles.modalAvatarContainer}>
-                      <View style={styles.addAvatarPlaceholder}>
-                        <Plus size={48} color={AppColors.primary} />
-                      </View>
-                    </View>
-                    <Text style={styles.addUserName}>Ajouter</Text>
-                  </TouchableOpacity>
-
-                  {users.length > 0 && (
                     <TouchableOpacity
-                      style={[styles.modalUserCard, styles.anonymousCard]}
-                      onPress={handleAnonymousMode}
-                      testID="modal-anonymous"
+                      style={[styles.modalUserCard, styles.addUserCard]}
+                      onPress={() => {
+                        closeModal();
+                        router.push('/select-user' as any);
+                      }}
+                      testID="modal-add-user"
                     >
                       <View style={styles.modalAvatarContainer}>
-                        <View style={styles.anonymousAvatarPlaceholder}>
-                          <UserX size={40} color={AppColors.textSecondary} />
+                        <View style={styles.addAvatarPlaceholder}>
+                          <Plus size={48} color={AppColors.primary} />
                         </View>
                       </View>
-                      <Text style={styles.anonymousUserName}>Mode
-Anonyme</Text>
+                      <Text style={styles.addUserName}>Ajouter</Text>
                     </TouchableOpacity>
-                  )}
-                </View>
-              </ScrollView>
-            </Animated.View>
-          </View>
-        </Modal>
+
+                    {users.length > 0 && (
+                      <TouchableOpacity
+                        style={[styles.modalUserCard, styles.anonymousCard]}
+                        onPress={handleAnonymousMode}
+                        testID="modal-anonymous"
+                      >
+                        <View style={styles.modalAvatarContainer}>
+                          <View style={styles.anonymousAvatarPlaceholder}>
+                            <UserX size={40} color={AppColors.textSecondary} />
+                          </View>
+                        </View>
+                        <Text style={styles.anonymousUserName}>Mode
+Anonyme</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </ScrollView>
+              </Animated.View>
+            </View>
+          </Modal>
+        )}
       </SafeAreaView>
     </View>
   );
