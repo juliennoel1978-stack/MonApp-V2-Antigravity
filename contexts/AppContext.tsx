@@ -304,6 +304,9 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
   return useMemo(() => {
     console.log('🔄 AppContext useMemo recalculated - users count:', users.length);
+    users.forEach((u, idx) => {
+      console.log(`  📋 User ${idx + 1}:`, u.firstName, 'ID:', u.id);
+    });
     return {
       progress,
       settings,
@@ -322,6 +325,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       selectUser,
       updateUser,
       clearCurrentUser,
+      reloadData: loadData,
     };
-  }, [progress, settings, badges, totalStars, users, currentUser, isLoading, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser]);
+  }, [progress, settings, badges, totalStars, users, currentUser, isLoading, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser, loadData]);
 });

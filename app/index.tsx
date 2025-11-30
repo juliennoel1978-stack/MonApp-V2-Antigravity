@@ -1,6 +1,6 @@
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X } from 'lucide-react-native';
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading } = useApp();
+  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData } = useApp();
   
   console.log('[HomeScreen RENDER] users.length:', users.length);
   const scaleAnim = React.useRef(new Animated.Value(0)).current;
@@ -30,6 +30,13 @@ export default function HomeScreen() {
   const modalScale = React.useRef(new Animated.Value(0.9)).current;
   const [isReady, setIsReady] = React.useState(false);
   const [showUserModal, setShowUserModal] = React.useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      console.log('🔄 [HomeScreen] Screen focused - reloading data');
+      reloadData();
+    }, [reloadData])
+  );
 
   useEffect(() => {
     const checkUserSelection = async () => {
@@ -113,6 +120,9 @@ export default function HomeScreen() {
     if (users.length === 0) {
       console.error('[HomeScreen] ⚠️ WARNING: No users found when opening modal!');
       console.log('[HomeScreen] This should not happen if users were created in settings');
+      console.log('[HomeScreen] Opening settings instead to create users');
+      router.push('/settings' as any);
+      return;
     } else {
       users.forEach((u, idx) => {
         console.log(`[HomeScreen]   User ${idx + 1}:`, u.firstName, 'ID:', u.id, 'Age:', u.age);
@@ -311,6 +321,9 @@ export default function HomeScreen() {
                         </Text>
                         <Text style={{ fontSize: 14, color: AppColors.textSecondary, marginTop: 10, textAlign: 'center' }}>
                           Crée un profil pour commencer !
+                        </Text>
+                        <Text style={{ fontSize: 12, color: AppColors.error, marginTop: 10, textAlign: 'center' }}>
+                          DEBUG: users.length = {users.length}
                         </Text>
                       </View>
                     )}
