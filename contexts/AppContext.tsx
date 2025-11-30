@@ -59,11 +59,15 @@ export const [AppProvider, useApp] = createContextHook(() => {
       ]);
 
       console.log('📦 Loading data...');
-      console.log('Users data:', usersData);
+      console.log('🔍 Raw users data from storage:', usersData);
+      console.log('🔍 Current user ID from storage:', currentUserId);
 
       if (usersData) {
         const parsedUsers = JSON.parse(usersData);
         console.log('✅ Parsed users:', parsedUsers.length, 'users');
+        parsedUsers.forEach((u: User, idx: number) => {
+          console.log(`  User ${idx + 1}: ${u.firstName} (ID: ${u.id})`);
+        });
         setUsers(parsedUsers);
 
         if (currentUserId) {
@@ -78,12 +82,16 @@ export const [AppProvider, useApp] = createContextHook(() => {
               setProgress(JSON.parse(progressData));
             }
           }
-        } else if (progressData) {
-          console.log('📊 Loading global progress data');
-          setProgress(JSON.parse(progressData));
+        } else {
+          console.log('ℹ️ No current user ID set');
+          if (progressData) {
+            console.log('📊 Loading global progress data');
+            setProgress(JSON.parse(progressData));
+          }
         }
       } else {
         console.log('⚠️ No users data found in storage');
+        setUsers([]);
         if (progressData) {
           console.log('📊 Loading global progress data (no users)');
           setProgress(JSON.parse(progressData));

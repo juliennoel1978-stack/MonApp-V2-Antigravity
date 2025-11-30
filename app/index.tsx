@@ -102,15 +102,22 @@ export default function HomeScreen() {
   };
 
   const handleOpenModal = () => {
-    console.log('[HomeScreen] Opening user modal manually');
-    console.log('[HomeScreen] Users available:', users.length);
+    console.log('[HomeScreen] ========== OPENING USER MODAL ==========');
+    console.log('[HomeScreen] Users state length:', users.length);
+    console.log('[HomeScreen] Is loading:', isLoading);
+    console.log('[HomeScreen] Current user:', currentUser?.firstName || 'none');
     console.log('[HomeScreen] Users array:', JSON.stringify(users, null, 2));
+    
     if (users.length === 0) {
-      console.error('[HomeScreen] WARNING: No users found when opening modal!');
+      console.error('[HomeScreen] ⚠️ WARNING: No users found when opening modal!');
+      console.log('[HomeScreen] This should not happen if users were created in settings');
+    } else {
+      users.forEach((u, idx) => {
+        console.log(`[HomeScreen]   User ${idx + 1}:`, u.firstName, 'ID:', u.id, 'Age:', u.age);
+      });
     }
-    users.forEach((u, idx) => {
-      console.log(`  User ${idx + 1}:`, u.firstName, u.id);
-    });
+    
+    console.log('[HomeScreen] ================================================');
     setShowUserModal(true);
   };
 
