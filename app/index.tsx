@@ -1,6 +1,6 @@
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X } from 'lucide-react-native';
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -32,9 +32,11 @@ export default function HomeScreen() {
   const [showUserModal, setShowUserModal] = React.useState(false);
 
   useFocusEffect(
-    useCallback(() => {
-      console.log('🔄 [HomeScreen] Screen focused - reloading data');
-      reloadData();
+    React.useCallback(() => {
+      console.log('🔄 [HomeScreen] Screen focused - reloading users');
+      if (reloadData) {
+        reloadData();
+      }
     }, [reloadData])
   );
 
