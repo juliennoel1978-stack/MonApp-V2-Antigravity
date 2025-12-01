@@ -1,6 +1,6 @@
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X } from 'lucide-react-native';
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -21,8 +21,15 @@ const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading } = useApp();
+  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData } = useApp();
   
+  useFocusEffect(
+    useCallback(() => {
+      console.log('🔄 [HomeScreen] Screen focused - reloading data');
+      reloadData();
+    }, [reloadData])
+  );
+
   console.log('[HomeScreen RENDER] users.length:', users.length);
   const scaleAnim = React.useRef(new Animated.Value(0)).current;
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -299,6 +306,11 @@ export default function HomeScreen() {
                   <View style={styles.modalHeaderContent}>
                     <Text style={styles.modalTitle}>Qui es-tu ?</Text>
                     <Text style={styles.modalSubtitle}>Choisis ton profil</Text>
+                    {users.length > 0 && (
+                      <Text style={{ fontSize: 10, color: AppColors.textSecondary, marginTop: 4 }}>
+                        ({users.length} utilisateurs disponibles)
+                      </Text>
+                    )}
                   </View>
                 </View>
 
@@ -640,7 +652,7 @@ const styles = StyleSheet.create({
     color: AppColors.textSecondary,
   },
   modalScrollView: {
-    flex: 1,
+    width: '100%',
   },
   modalScrollContent: {
     padding: 20,
