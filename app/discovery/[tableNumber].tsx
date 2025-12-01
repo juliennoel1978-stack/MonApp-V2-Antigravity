@@ -11,7 +11,6 @@ import {
   Platform,
   Modal,
   PanResponder,
-  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
@@ -375,48 +374,42 @@ export default function DiscoveryScreen() {
       title: 'Compte avec moi !',
       content: 'Clique sur les multiplications pour entendre comment elles se lisent !',
       visual: (
-        <ScrollView 
-          contentContainerStyle={styles.countingScrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.countingContainer}>
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => {
-              const result = table.number * i;
-              const isClicked = clickedMultiplications.has(i);
-              return (
-                <TouchableOpacity
-                  key={i}
-                  style={[
-                    styles.countingItem,
-                    { backgroundColor: isClicked ? tableColor : tableColor + '20' },
-                  ]}
-                  onPress={() => handleMultiplicationPress(i, result)}
-                  activeOpacity={0.7}
+        <View style={styles.countingContainer}>
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => {
+            const result = table.number * i;
+            const isClicked = clickedMultiplications.has(i);
+            return (
+              <TouchableOpacity
+                key={i}
+                style={[
+                  styles.countingItem,
+                  { 
+                    backgroundColor: isClicked ? tableColor : tableColor + '20',
+                    borderColor: isClicked ? tableColor : 'transparent',
+                  },
+                ]}
+                onPress={() => handleMultiplicationPress(i, result)}
+                activeOpacity={0.7}
+              >
+                <Text 
+                  style={[styles.countingNumber, { color: isClicked ? '#FFFFFF' : tableColor }]}
                 >
-                  <Text 
-                    style={[styles.countingNumber, { color: isClicked ? '#FFFFFF' : tableColor }]}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                  >
-                    {result}
-                  </Text>
-                  <Text 
-                    style={[styles.countingLabel, { color: isClicked ? '#FFFFFF' : AppColors.textSecondary }]}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                  >
-                    {table.number} × {i}
-                  </Text>
-                  {isClicked && (
-                    <View style={styles.checkmarkBadge}>
-                      <Check size={12} color="#FFFFFF" />
-                    </View>
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </ScrollView>
+                  {result}
+                </Text>
+                <Text 
+                  style={[styles.countingLabel, { color: isClicked ? '#FFFFFF' : AppColors.textSecondary }]}
+                >
+                  {table.number} × {i}
+                </Text>
+                {isClicked && (
+                  <View style={styles.checkmarkBadge}>
+                    <Check size={10} color="#FFFFFF" />
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       ),
     },
     {
@@ -741,18 +734,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     width: '100%',
   },
-  countingScrollContent: {
-    paddingBottom: 20,
-    alignItems: 'center',
-  },
   countingContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 8,
     justifyContent: 'center',
-    marginTop: 0,
-    marginBottom: 0,
-    maxWidth: width - 32,
+    width: '100%',
+    paddingHorizontal: 8,
   },
   readyTitle: {
     fontSize: 42,
@@ -762,18 +750,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   countingItem: {
-    width: (width - 64) / 2, // Changed to 2 columns for better visibility
-    padding: 12,
-    borderRadius: 16,
+    width: (width - 80) / 3,
+    aspectRatio: 1,
+    padding: 8,
+    borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
   },
   countingNumber: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold' as const,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   countingLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: AppColors.textSecondary,
     fontWeight: '600' as const,
   },
@@ -922,12 +913,12 @@ const styles = StyleSheet.create({
   },
   checkmarkBadge: {
     position: 'absolute',
-    top: 4,
-    right: 4,
+    top: 2,
+    right: 2,
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 10,
-    width: 20,
-    height: 20,
+    borderRadius: 8,
+    width: 16,
+    height: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
