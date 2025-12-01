@@ -84,6 +84,7 @@ export default function DiscoveryScreen() {
   const { tableNumber } = useLocalSearchParams();
   const table = getTableByNumber(Number(tableNumber));
   const [currentStep, setCurrentStep] = useState(0);
+  const currentStepRef = useRef(0);
   const [homeClickCount, setHomeClickCount] = useState(0);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [selectedMultiplication, setSelectedMultiplication] = useState<{ multiplier: number; result: number } | null>(null);
@@ -111,13 +112,14 @@ export default function DiscoveryScreen() {
       onPanResponderGrant: () => {},
       onPanResponderMove: () => {},
       onPanResponderRelease: (_, gestureState) => {
+        const step = currentStepRef.current;
         const totalSteps = 4;
         const swipeThreshold = 50;
         
-        if (gestureState.dx > swipeThreshold && currentStep > 0) {
-          setCurrentStep(currentStep - 1);
-        } else if (gestureState.dx < -swipeThreshold && currentStep < totalSteps - 1) {
-          setCurrentStep(currentStep + 1);
+        if (gestureState.dx > swipeThreshold && step > 0) {
+          setCurrentStep(step - 1);
+        } else if (gestureState.dx < -swipeThreshold && step < totalSteps - 1) {
+          setCurrentStep(step + 1);
         }
       },
       onPanResponderTerminationRequest: () => false,
@@ -145,6 +147,7 @@ export default function DiscoveryScreen() {
   }, [fadeAnim, scaleAnim]);
 
   useEffect(() => {
+    currentStepRef.current = currentStep;
     animateIn();
   }, [currentStep, animateIn]);
 
