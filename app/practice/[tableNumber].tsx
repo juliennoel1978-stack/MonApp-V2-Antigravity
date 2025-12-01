@@ -14,7 +14,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as Speech from 'expo-speech';
+import { speak, stop } from '@/utils/speech';
 import { AppColors, NumberColors } from '@/constants/colors';
 import { getTableByNumber, TIPS_BY_TABLE } from '@/constants/tables';
 import { useApp } from '@/contexts/AppContext';
@@ -92,7 +92,7 @@ export default function PracticeScreen() {
         .replace(/\bX\b/g, "quelque chose");
 
       const speechText = `${question.multiplicand} fois ${question.multiplier} égale ${question.correctAnswer}. ${errorText}`;
-      Speech.speak(speechText, { language: 'fr-FR' });
+      speak(speechText);
     }
   };
 
@@ -159,13 +159,13 @@ export default function PracticeScreen() {
 
   const handleContinueAfterError = () => {
     setShowErrorFeedback(false);
-    Speech.stop();
+    stop();
     nextQuestion(correctCount);
   };
 
   const handleRetryQuestion = () => {
     setShowErrorFeedback(false);
-    Speech.stop();
+    stop();
     setSelectedAnswer(null);
     setUserInput('');
     setIsCorrect(null);
