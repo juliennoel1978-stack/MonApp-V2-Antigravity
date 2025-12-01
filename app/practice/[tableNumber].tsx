@@ -379,26 +379,32 @@ export default function PracticeScreen() {
             
             <View style={styles.resultButtonsColumn}>
                <TouchableOpacity
-                style={[styles.resultButton, { backgroundColor: tableColor, paddingVertical: 20 }]}
+                style={[styles.primaryButton, { backgroundColor: tableColor }]}
                 onPress={startLevel2}
               >
-                <Text style={styles.resultButtonTextLarge}>C&apos;est parti ! 🚀</Text>
-                <Text style={styles.resultButtonSubtitle}>Cap vers les étoiles ! ✨</Text>
+                <Text style={styles.primaryButtonText}>Passer au niveau 2 🚀</Text>
               </TouchableOpacity>
               
               {questionsToReview.length > 0 && (
-                 <View style={styles.reviewContainer}>
-                    <Text style={styles.reviewText}>
-                       Tu veux revoir les questions qui t&apos;ont posé problème ?
+                 <View style={styles.reviewSectionContainer}>
+                    <Text style={styles.reviewSectionTitle}>
+                       Tu veux d&apos;abord revoir tes erreurs ?
                     </Text>
                     <TouchableOpacity
-                      style={[styles.resultButton, styles.retryButton]}
+                      style={styles.reviewButtonSecondary}
                       onPress={startReview}
                     >
-                      <Text style={styles.retryButtonText}>Oui, réviser ({questionsToReview.length})</Text>
+                      <Text style={styles.reviewButtonSecondaryText}>Oui, réviser mes {questionsToReview.length} erreur{questionsToReview.length > 1 ? 's' : ''}</Text>
                     </TouchableOpacity>
                  </View>
               )}
+              
+              <TouchableOpacity
+                style={styles.backToMenuButton}
+                onPress={() => router.push('/tables' as any)}
+              >
+                <Text style={styles.backToMenuButtonText}>Retour au menu</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </SafeAreaView>
@@ -523,35 +529,35 @@ export default function PracticeScreen() {
 
              <View style={styles.resultButtonsColumn}>
                 {questionsToReview.length > 0 && (
-                   <View style={styles.reviewContainer}>
-                      <Text style={styles.reviewText}>
-                         Tu veux revoir uniquement les questions qui t&apos;ont posé problème ?
+                   <View style={styles.reviewSectionContainer}>
+                      <Text style={styles.reviewSectionTitle}>
+                         Tu veux revoir tes erreurs avant de continuer ?
                       </Text>
                       <TouchableOpacity
-                        style={[styles.resultButton, styles.retryButton, { marginBottom: 10 }]}
+                        style={styles.reviewButtonSecondary}
                         onPress={startReview}
                       >
-                        <Text style={styles.retryButtonText}>Oui, réviser ({questionsToReview.length})</Text>
+                        <Text style={styles.reviewButtonSecondaryText}>Oui, réviser mes {questionsToReview.length} erreur{questionsToReview.length > 1 ? 's' : ''}</Text>
                       </TouchableOpacity>
                    </View>
                 )}
             
                 <View style={styles.resultButtonsRow}>
                   <TouchableOpacity
-                    style={[styles.resultButton, passed ? styles.retryButton : { backgroundColor: tableColor }]}
+                    style={[styles.actionButton, passed ? styles.retryButtonStyle : { backgroundColor: tableColor }]}
                     onPress={retry}
                   >
-                    <Text style={passed ? styles.retryButtonText : styles.resultButtonText}>
-                        {passed ? 'Réessayer' : 'Refaire le niveau'}
+                    <Text style={[styles.actionButtonText, passed && { color: AppColors.text }]}>
+                        {passed ? '↻ Réessayer' : '↻ Refaire le niveau'}
                     </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={[styles.resultButton, passed ? { backgroundColor: tableColor } : styles.outlineButton, passed ? {} : { borderColor: tableColor }]}
+                    style={[styles.actionButton, passed ? { backgroundColor: tableColor } : styles.actionButtonOutline, passed ? {} : { borderColor: tableColor }]}
                     onPress={() => router.push('/tables')}
                   >
-                    <Text style={passed ? styles.resultButtonText : [styles.outlineButtonText, { color: tableColor }]}>
-                        {passed ? 'Terminer' : 'Non, autre table'}
+                    <Text style={[styles.actionButtonText, !passed && { color: tableColor }]}>
+                        {passed ? '✓ Terminer' : 'Changer de table'}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -1193,6 +1199,98 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 12,
     fontWeight: '600',
+  },
+  primaryButton: {
+    paddingVertical: 18,
+    paddingHorizontal: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+    marginBottom: 12,
+  },
+  primaryButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  reviewSectionContainer: {
+    backgroundColor: AppColors.warning + '15',
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: AppColors.warning + '30',
+  },
+  reviewSectionTitle: {
+    fontSize: 16,
+    color: AppColors.text,
+    textAlign: 'center',
+    marginBottom: 14,
+    fontWeight: '600',
+  },
+  reviewButtonSecondary: {
+    backgroundColor: AppColors.surface,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: AppColors.warning,
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  reviewButtonSecondaryText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: AppColors.warning,
+  },
+  backToMenuButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  backToMenuButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: AppColors.textSecondary,
+  },
+  actionButton: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  actionButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  actionButtonOutline: {
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+  },
+  retryButtonStyle: {
+    backgroundColor: AppColors.surfaceLight,
+    borderWidth: 2,
+    borderColor: AppColors.border,
   },
   fullScreenOverlay: {
     position: 'absolute',
