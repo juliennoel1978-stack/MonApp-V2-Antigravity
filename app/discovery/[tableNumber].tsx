@@ -744,10 +744,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   readyTitle: {
-    fontSize: 42,
+    fontSize: 32,
     fontWeight: 'bold' as const,
     color: AppColors.text,
-    marginBottom: 12,
+    marginBottom: 8,
     textAlign: 'center',
   },
   countingItem: {
@@ -774,16 +774,17 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   readyEmoji: {
-    fontSize: 100,
-    marginBottom: 16,
+    fontSize: 64,
+    marginBottom: 12,
   },
   encouragementText: {
-    fontSize: 20,
+    fontSize: 16,
     color: AppColors.textSecondary,
     fontWeight: '600' as const,
-    marginBottom: 32,
+    marginBottom: 24,
     textAlign: 'center',
     paddingHorizontal: 20,
+    lineHeight: 22,
   },
   practiceButton: {
     flexDirection: 'row',
