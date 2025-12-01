@@ -656,27 +656,29 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     paddingHorizontal: 24,
+    paddingTop: 20,
   },
   content: {
     alignItems: 'center',
     width: '100%',
   },
   stepTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold' as const,
     color: AppColors.text,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
+    paddingTop: 8,
   },
   stepContent: {
-    fontSize: 18,
+    fontSize: 16,
     color: AppColors.textSecondary,
     textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 24,
+    lineHeight: 22,
+    marginBottom: 20,
     paddingHorizontal: 20,
   },
   visualContainer: {
@@ -740,7 +742,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   countingScrollContent: {
-    paddingBottom: 100,
+    paddingBottom: 20,
     alignItems: 'center',
   },
   countingContainer: {
@@ -748,8 +750,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 12,
     justifyContent: 'center',
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: 0,
+    marginBottom: 0,
     maxWidth: width - 32,
   },
   readyTitle: {
