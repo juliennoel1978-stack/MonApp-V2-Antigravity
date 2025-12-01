@@ -347,7 +347,13 @@ export default function DiscoveryScreen() {
           <View style={styles.tipExamplesContainer}>
             {getTipExamples(table.number).map((example, idx) => (
               <View key={idx} style={[styles.tipExampleCard, { borderColor: tableColor }]}>
-                <Text style={[styles.tipExampleText, { color: tableColor }]}>{example}</Text>
+                <Text 
+                  style={[styles.tipExampleText, { color: tableColor }]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {example}
+                </Text>
               </View>
             ))}
           </View>
@@ -372,10 +378,18 @@ export default function DiscoveryScreen() {
                 onPress={() => handleMultiplicationPress(i, result)}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.countingNumber, { color: isClicked ? '#FFFFFF' : tableColor }]}>
+                <Text 
+                  style={[styles.countingNumber, { color: isClicked ? '#FFFFFF' : tableColor }]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
                   {result}
                 </Text>
-                <Text style={[styles.countingLabel, { color: isClicked ? '#FFFFFF' : AppColors.textSecondary }]}>
+                <Text 
+                  style={[styles.countingLabel, { color: isClicked ? '#FFFFFF' : AppColors.textSecondary }]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
                   {table.number} × {i}
                 </Text>
                 {isClicked && (
@@ -690,13 +704,14 @@ const styles = StyleSheet.create({
   },
   tipExampleCard: {
     backgroundColor: AppColors.background,
-    padding: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 16,
     borderRadius: 16,
     borderWidth: 2,
     alignItems: 'center',
   },
   tipExampleText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700' as const,
     textAlign: 'center',
   },
@@ -706,6 +721,7 @@ const styles = StyleSheet.create({
     gap: 12,
     justifyContent: 'center',
     marginTop: 20,
+    marginBottom: 20,
     maxWidth: width - 48,
   },
   countingItem: {
