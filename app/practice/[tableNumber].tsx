@@ -13,7 +13,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppColors, NumberColors } from '@/constants/colors';
 import { getTableByNumber } from '@/constants/tables';
 import { useApp } from '@/contexts/AppContext';
@@ -27,6 +27,7 @@ export default function PracticeScreen() {
   const { tableNumber } = useLocalSearchParams();
   const table = getTableByNumber(Number(tableNumber));
   const { updateTableProgress, unlockBadge, getTableProgress } = useApp();
+  const insets = useSafeAreaInsets();
 
   const tableProgress = getTableProgress(Number(tableNumber));
   const initialLevel = tableProgress?.level1Completed ? 2 : 1;
@@ -414,80 +415,89 @@ export default function PracticeScreen() {
             </View>
           </View>
 
-          <Animated.View
-            style={[
-              styles.content,
-              {
+          <ScrollView 
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <Animated.View
+              style={{
                 opacity: fadeAnim,
                 transform: [{ scale: scaleAnim }],
-              },
-            ]}
-          >
-            <View style={[styles.questionCard, { borderColor: tableColor }]}>
-              <Text style={styles.questionLabel}>Combien font :</Text>
-              <View style={styles.questionRow}>
-                <Text style={[styles.questionNumber, { color: tableColor }]}>
-                  {currentQuestion.multiplicand}
-                </Text>
-                <Text style={styles.questionOperator}>×</Text>
-                <Text style={[styles.questionNumber, { color: tableColor }]}>
-                  {currentQuestion.multiplier}
-                </Text>
+                width: '100%',
+              }}
+            >
+              <View style={[styles.questionCard, { borderColor: tableColor }]}>
+                <Text style={styles.questionLabel}>Combien font :</Text>
+                <View style={styles.questionRow}>
+                  <Text style={[styles.questionNumber, { color: tableColor }]}>
+                    {currentQuestion.multiplicand}
+                  </Text>
+                  <Text style={styles.questionOperator}>×</Text>
+                  <Text style={[styles.questionNumber, { color: tableColor }]}>
+                    {currentQuestion.multiplier}
+                  </Text>
+                </View>
               </View>
-            </View>
 
-            <View style={styles.optionsContainer}>
-              {currentQuestion.options.map((option, index) => {
-                const isSelected = selectedAnswer === option;
-                const isCorrectAnswer = option === currentQuestion.correctAnswer;
-                const showCorrect = selectedAnswer !== null && isCorrectAnswer;
-                const showWrong = isSelected && !isCorrect;
+              <View style={styles.optionsContainer}>
+                {currentQuestion.options.map((option, index) => {
+                  const isSelected = selectedAnswer === option;
+                  const isCorrectAnswer = option === currentQuestion.correctAnswer;
+                  const showCorrect = selectedAnswer !== null && isCorrectAnswer;
+                  const showWrong = isSelected && !isCorrect;
 
-                return (
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.optionButton,
-                      showCorrect && styles.optionCorrect,
-                      showWrong && styles.optionWrong,
-                    ]}
-                    onPress={() => handleAnswerSelect(option)}
-                    disabled={selectedAnswer !== null}
-                    testID={`option-${index}`}
-                  >
-                    <Text
+                  return (
+                    <TouchableOpacity
+                      key={index}
                       style={[
-                        styles.optionText,
-                        (showCorrect || showWrong) && styles.optionTextSelected,
+                        styles.optionButton,
+                        showCorrect && styles.optionCorrect,
+                        showWrong && styles.optionWrong,
                       ]}
+                      onPress={() => handleAnswerSelect(option)}
+                      disabled={selectedAnswer !== null}
+                      testID={`option-${index}`}
                     >
-                      {option}
-                    </Text>
-                    {showCorrect && <Check size={24} color="#FFFFFF" />}
-                    {showWrong && <X size={24} color="#FFFFFF" />}
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+                      <Text
+                        style={[
+                          styles.optionText,
+                          (showCorrect || showWrong) && styles.optionTextSelected,
+                        ]}
+                      >
+                        {option}
+                      </Text>
+                      {showCorrect && <Check size={24} color="#FFFFFF" />}
+                      {showWrong && <X size={24} color="#FFFFFF" />}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+              <View style={{ height: 100 }} />
+            </Animated.View>
+          </ScrollView>
 
-            {isCorrect !== null && (
-              <View
-                style={[
-                  styles.feedbackContainer,
-                  { backgroundColor: isCorrect ? AppColors.success + '20' : AppColors.error + '20' },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.feedbackText,
-                    { color: isCorrect ? AppColors.success : AppColors.error },
-                  ]}
-                >
-                  {isCorrect ? '✓ Correct !' : '✗ Pas tout à fait...'}
+          {isCorrect !== null && (
+            <View
+              style={[
+                styles.feedbackOverlay,
+                { 
+                  backgroundColor: isCorrect ? AppColors.success : AppColors.error,
+                  paddingBottom: Math.max(20, insets.bottom + 20)
+                },
+              ]}
+            >
+              <View style={styles.feedbackContent}>
+                {isCorrect ? (
+                  <Check size={32} color="#FFFFFF" strokeWidth={3} />
+                ) : (
+                  <X size={32} color="#FFFFFF" strokeWidth={3} />
+                )}
+                <Text style={styles.feedbackOverlayText}>
+                  {isCorrect ? 'Excellent !' : 'Pas tout à fait...'}
                 </Text>
               </View>
-            )}
-          </Animated.View>
+            </View>
+          )}
         </SafeAreaView>
       </View>
     );
@@ -755,6 +765,35 @@ const styles = StyleSheet.create({
   feedbackText: {
     fontSize: 20,
     fontWeight: 'bold' as const,
+  },
+  feedbackOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 24,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: -4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 20,
+    zIndex: 100,
+  },
+  feedbackContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  feedbackOverlayText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
   resultContainer: {
     flex: 1,
