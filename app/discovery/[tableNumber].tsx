@@ -99,7 +99,7 @@ export default function DiscoveryScreen() {
 
   const panResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (_, gestureState) => {
+      onMoveShouldSetPanResponderCapture: (_, gestureState) => {
         // Only activate if horizontal swipe is dominant and significant
         return Math.abs(gestureState.dx) > 20 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
       },
@@ -424,9 +424,9 @@ export default function DiscoveryScreen() {
       content: 'Maintenant, teste tes connaissances avec le quiz !',
       visual: (
         <View style={styles.readyContainer}>
-          <Text style={styles.readyEmoji}>🚀 🎲</Text>
-          <Text style={styles.readyTitle}>Tu es prêt ?</Text>
-          <Text style={styles.encouragementText}>Tu vas assurer comme un champion !</Text>
+          <Text style={styles.readyEmoji}>🚀 🌟</Text>
+          <Text style={styles.readyTitle}>C&apos;est parti !</Text>
+          <Text style={styles.encouragementText}>Tu vas assurer comme un champion ! {"\n"} Prêt à gagner des étoiles ?</Text>
           <TouchableOpacity
             style={[styles.practiceButton, { backgroundColor: tableColor }]}
             onPress={() => router.push(`/practice/${table.number}` as any)}
@@ -734,12 +734,13 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   tipExampleText: {
-    fontSize: 18, // Reduced slightly to fit
+    fontSize: 16, // Reduced slightly to fit
     fontWeight: '700' as const,
     textAlign: 'center',
+    width: '100%',
   },
   countingScrollContent: {
-    paddingBottom: 20,
+    paddingBottom: 40,
     alignItems: 'center',
   },
   countingContainer: {
@@ -752,10 +753,10 @@ const styles = StyleSheet.create({
     maxWidth: width - 32,
   },
   readyTitle: {
-    fontSize: 32,
+    fontSize: 42,
     fontWeight: 'bold' as const,
     color: AppColors.text,
-    marginBottom: 8,
+    marginBottom: 12,
     textAlign: 'center',
   },
   countingItem: {
@@ -783,11 +784,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   encouragementText: {
-    fontSize: 18,
+    fontSize: 20,
     color: AppColors.textSecondary,
     fontWeight: '600' as const,
     marginBottom: 32,
     textAlign: 'center',
+    paddingHorizontal: 20,
   },
   practiceButton: {
     flexDirection: 'row',
