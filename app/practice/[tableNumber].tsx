@@ -264,10 +264,11 @@ export default function PracticeScreen() {
             </View>
 
             <TouchableOpacity
-              style={[styles.resultButton, { backgroundColor: tableColor, width: '100%' }]}
+              style={[styles.resultButton, { backgroundColor: tableColor, width: '100%', paddingVertical: 20 }]}
               onPress={startLevel2}
             >
-              <Text style={styles.resultButtonText}>C&apos;est parti !</Text>
+              <Text style={styles.resultButtonTextLarge}>C&apos;est parti ! 🚀</Text>
+              <Text style={styles.resultButtonSubtitle}>Cap vers les étoiles ! ✨</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -1031,5 +1032,18 @@ const styles = StyleSheet.create({
     color: AppColors.textSecondary,
     textAlign: 'center',
     marginTop: 12,
+  },
+  resultButtonTextLarge: {
+    fontSize: 26,
+    fontWeight: 'bold' as const,
+    color: '#FFFFFF',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  resultButtonSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '600' as const,
+    textAlign: 'center',
   },
 });
