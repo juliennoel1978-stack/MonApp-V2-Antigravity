@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import type { UserProgress, UserSettings, Badge, User } from '@/types';
 import { MULTIPLICATION_TABLES } from '@/constants/tables';
 
@@ -302,23 +302,29 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   }, []);
 
-  return {
-    progress,
-    settings,
-    badges,
-    totalStars,
-    users,
-    currentUser,
-    isLoading,
-    updateTableProgress,
-    unlockBadge,
-    getTableProgress,
-    updateSettings,
-    resetProgress,
-    addUser,
-    deleteUser,
-    selectUser,
-    updateUser,
-    clearCurrentUser,
-  };
+  return useMemo(() => {
+    console.log('🔄 AppContext useMemo recalculated - users count:', users.length);
+    users.forEach((u, idx) => {
+      console.log(`  📋 User ${idx + 1}:`, u.firstName, 'ID:', u.id);
+    });
+    return {
+      progress,
+      settings,
+      badges,
+      totalStars,
+      users,
+      currentUser,
+      isLoading,
+      updateTableProgress,
+      unlockBadge,
+      getTableProgress,
+      updateSettings,
+      resetProgress,
+      addUser,
+      deleteUser,
+      selectUser,
+      updateUser,
+      clearCurrentUser,
+    };
+  }, [progress, settings, badges, totalStars, users, currentUser, isLoading, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser]);
 });
