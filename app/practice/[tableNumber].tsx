@@ -13,7 +13,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Speech from 'expo-speech';
 import { AppColors, NumberColors } from '@/constants/colors';
 import { getTableByNumber, TIPS_BY_TABLE } from '@/constants/tables';
@@ -227,38 +227,26 @@ export default function PracticeScreen() {
 
   const finishLevel = (finalCorrectCount: number) => {
     if (isReviewMode) {
-      // Logic for review mode end
       setIsReviewMode(false);
-      setQuestionsToReview([]); // Clear review list as they are done
-      // We could show a specific review success screen, but standard result is fine
-      // Or maybe just go back to main menu?
-      // Let's reuse the standard result screen but with correct context
+      setQuestionsToReview([]); 
+      setShowResult(true);
+      return;
     }
 
     if (level === 1) {
-      // Level 1 Logic
-      if (finalCorrectCount === 10) {
-        updateTableProgress(table.number, finalCorrectCount, questions.length, 2, 1);
-        // Clear review list if perfect score (logic says "vide éventuellement questionsARevoir")
-        setQuestionsToReview([]);
-        // Unlock Level 2
-        setShowLevelTransition(true);
-      } else if (finalCorrectCount >= 7) {
-        // 7 to 9 correct
-        updateTableProgress(table.number, finalCorrectCount, questions.length, 1, 1);
-        // Unlock Level 2
+      if (finalCorrectCount >= 7) {
+        updateTableProgress(table.number, finalCorrectCount, questions.length, finalCorrectCount === 10 ? 2 : 1, 1);
+        if (finalCorrectCount === 10) setQuestionsToReview([]);
         setShowLevelTransition(true);
       } else {
-        // <= 6
         setShowResult(true);
       }
     } else {
-      // Level 2 Logic
       const totalCorrectLevel2 = finalCorrectCount;
-      let stars = 4;
-      if (totalCorrectLevel2 < 10) {
-        stars = totalCorrectLevel2 >= 7 ? 3 : totalCorrectLevel2 >= 5 ? 2 : 1;
-      }
+      let stars = 1;
+      if (totalCorrectLevel2 === 10) stars = 4;
+      else if (totalCorrectLevel2 >= 7) stars = 3;
+      else if (totalCorrectLevel2 >= 5) stars = 2;
       
       updateTableProgress(table.number, totalCorrectLevel2, questions.length, stars, 2);
 

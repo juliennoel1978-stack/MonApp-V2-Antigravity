@@ -2,8 +2,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
+import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AppProvider } from "@/contexts/AppContext";
+
+// Polyfill for Reanimated on Web to prevent crashes
+if (Platform.OS === 'web') {
+  // @ts-ignore
+  global.__reanimatedLoggerConfig = {};
+}
 
 SplashScreen.preventAutoHideAsync();
 

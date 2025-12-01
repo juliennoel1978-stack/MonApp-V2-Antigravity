@@ -11,6 +11,7 @@ import {
   Platform,
   Modal,
   PanResponder,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
@@ -99,7 +100,8 @@ export default function DiscoveryScreen() {
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, gestureState) => {
-        return Math.abs(gestureState.dx) > 20;
+        // Only activate if horizontal swipe is dominant and significant
+        return Math.abs(gestureState.dx) > 20 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
       },
       onPanResponderEnd: (_, gestureState) => {
         const step = currentStepRef.current;
@@ -114,6 +116,14 @@ export default function DiscoveryScreen() {
       },
     })
   ).current;
+
+  // Sync step from params when it changes
+  useEffect(() => {
+    if (step !== undefined) {
+      setCurrentStep(Number(step));
+    }
+  }, [step]);
+
 
   const animateIn = useCallback(() => {
     fadeAnim.setValue(0);
@@ -365,43 +375,48 @@ export default function DiscoveryScreen() {
       title: 'Compte avec moi !',
       content: 'Clique sur les multiplications pour entendre comment elles se lisent !',
       visual: (
-        <View style={styles.countingContainer}>
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => {
-            const result = table.number * i;
-            const isClicked = clickedMultiplications.has(i);
-            return (
-              <TouchableOpacity
-                key={i}
-                style={[
-                  styles.countingItem,
-                  { backgroundColor: isClicked ? tableColor : tableColor + '20' },
-                ]}
-                onPress={() => handleMultiplicationPress(i, result)}
-                activeOpacity={0.7}
-              >
-                <Text 
-                  style={[styles.countingNumber, { color: isClicked ? '#FFFFFF' : tableColor }]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
+        <ScrollView 
+          contentContainerStyle={styles.countingScrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.countingContainer}>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => {
+              const result = table.number * i;
+              const isClicked = clickedMultiplications.has(i);
+              return (
+                <TouchableOpacity
+                  key={i}
+                  style={[
+                    styles.countingItem,
+                    { backgroundColor: isClicked ? tableColor : tableColor + '20' },
+                  ]}
+                  onPress={() => handleMultiplicationPress(i, result)}
+                  activeOpacity={0.7}
                 >
-                  {result}
-                </Text>
-                <Text 
-                  style={[styles.countingLabel, { color: isClicked ? '#FFFFFF' : AppColors.textSecondary }]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  {table.number} × {i}
-                </Text>
-                {isClicked && (
-                  <View style={styles.checkmarkBadge}>
-                    <Check size={12} color="#FFFFFF" />
-                  </View>
-                )}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+                  <Text 
+                    style={[styles.countingNumber, { color: isClicked ? '#FFFFFF' : tableColor }]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                  >
+                    {result}
+                  </Text>
+                  <Text 
+                    style={[styles.countingLabel, { color: isClicked ? '#FFFFFF' : AppColors.textSecondary }]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                  >
+                    {table.number} × {i}
+                  </Text>
+                  {isClicked && (
+                    <View style={styles.checkmarkBadge}>
+                      <Check size={12} color="#FFFFFF" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </ScrollView>
       ),
     },
     {
@@ -409,8 +424,9 @@ export default function DiscoveryScreen() {
       content: 'Maintenant, teste tes connaissances avec le quiz !',
       visual: (
         <View style={styles.readyContainer}>
-          <Text style={styles.readyEmoji}>🚀</Text>
-          <Text style={styles.encouragementText}>Tu vas assurer !</Text>
+          <Text style={styles.readyEmoji}>🚀 🎲</Text>
+          <Text style={styles.readyTitle}>Tu es prêt ?</Text>
+          <Text style={styles.encouragementText}>Tu vas assurer comme un champion !</Text>
           <TouchableOpacity
             style={[styles.practiceButton, { backgroundColor: tableColor }]}
             onPress={() => router.push(`/practice/${table.number}` as any)}
@@ -706,29 +722,41 @@ const styles = StyleSheet.create({
   },
   tipExamplesContainer: {
     width: '100%',
-    gap: 12,
+    gap: 8,
   },
   tipExampleCard: {
     backgroundColor: AppColors.background,
-    paddingHorizontal: 12,
-    paddingVertical: 16,
+    paddingHorizontal: 8,
+    paddingVertical: 12,
     borderRadius: 16,
     borderWidth: 2,
     alignItems: 'center',
+    width: '100%',
   },
   tipExampleText: {
-    fontSize: 16,
+    fontSize: 18, // Reduced slightly to fit
     fontWeight: '700' as const,
     textAlign: 'center',
+  },
+  countingScrollContent: {
+    paddingBottom: 20,
+    alignItems: 'center',
   },
   countingContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
     justifyContent: 'center',
-    marginTop: 20,
-    marginBottom: 60,
+    marginTop: 10,
+    marginBottom: 20,
     maxWidth: width - 32,
+  },
+  readyTitle: {
+    fontSize: 32,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+    marginBottom: 8,
+    textAlign: 'center',
   },
   countingItem: {
     width: (width - 64) / 3,

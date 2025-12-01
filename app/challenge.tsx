@@ -48,8 +48,17 @@ export default function ChallengeScreen() {
   const celebrationAnim = React.useRef(new Animated.Value(0)).current;
   const inputRef = useRef<TextInput>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleTimeOut = useCallback(() => {
+    if (!isMounted.current) return;
     setIncorrectCount(prev => prev + 1);
     setTotalQuestions(prev => prev + 1);
     setConsecutiveCorrect(0);
@@ -102,7 +111,9 @@ export default function ChallengeScreen() {
     setTimeRemaining(settings.timerDuration);
     
     setTimeout(() => {
-      inputRef.current?.focus();
+      if (isMounted.current) {
+        inputRef.current?.focus();
+      }
     }, 100);
   }, [settings.timerDuration]);
 
@@ -126,7 +137,9 @@ export default function ChallengeScreen() {
             }
             handleTimeOut();
             setTimeout(() => {
-              generateNewQuestion();
+              if (isMounted.current) {
+                generateNewQuestion();
+              }
             }, 2000);
             return 0;
           }
@@ -189,14 +202,18 @@ export default function ChallengeScreen() {
         }).start();
 
         setTimeout(() => {
-          setShowCelebration(false);
-          celebrationAnim.setValue(0);
-          setConsecutiveCorrect(0);
-          generateNewQuestion();
+          if (isMounted.current) {
+            setShowCelebration(false);
+            celebrationAnim.setValue(0);
+            setConsecutiveCorrect(0);
+            generateNewQuestion();
+          }
         }, 3000);
       } else {
         setTimeout(() => {
-          generateNewQuestion();
+          if (isMounted.current) {
+            generateNewQuestion();
+          }
         }, 1500);
       }
     } else {
@@ -204,8 +221,10 @@ export default function ChallengeScreen() {
 
       if (attempts === 0) {
         setTimeout(() => {
-          setShowFeedback(false);
-          setUserAnswer('');
+          if (isMounted.current) {
+            setShowFeedback(false);
+            setUserAnswer('');
+          }
         }, 1500);
       } else {
         setIncorrectCount(prev => prev + 1);
@@ -213,7 +232,9 @@ export default function ChallengeScreen() {
         setShowCorrectAnswer(true);
 
         setTimeout(() => {
-          generateNewQuestion();
+          if (isMounted.current) {
+            generateNewQuestion();
+          }
         }, 3000);
       }
     }
