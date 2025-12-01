@@ -7,7 +7,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors, NumberColors } from '@/constants/colors';
@@ -15,7 +14,7 @@ import { MULTIPLICATION_TABLES } from '@/constants/tables';
 import { useApp } from '@/contexts/AppContext';
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = (width - 60) / 2;
+const CARD_WIDTH = (width - 48) / 2;
 
 export default function TablesScreen() {
   const router = useRouter();
@@ -62,11 +61,7 @@ export default function TablesScreen() {
           <View style={styles.placeholder} />
         </View>
 
-        <ScrollView 
-          style={styles.contentContainer}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
+        <View style={styles.contentContainer}>
           <View style={styles.grid}>
             {MULTIPLICATION_TABLES.map(table => {
               const tableProgress = progress.find(
@@ -143,7 +138,7 @@ export default function TablesScreen() {
                       {[1, 2, 3].map(starIndex => (
                         <Star
                           key={starIndex}
-                          size={14}
+                          size={12}
                           color={
                             starIndex <= stars
                               ? AppColors.warning
@@ -160,7 +155,7 @@ export default function TablesScreen() {
 
                     {isCompleted && (
                       <View style={styles.completedBadge}>
-                        <Text style={styles.completedText}>✓ Complété</Text>
+                        <Text style={styles.completedText}>✓</Text>
                       </View>
                     )}
                   </View>
@@ -168,7 +163,7 @@ export default function TablesScreen() {
               );
             })}
           </View>
-        </ScrollView>
+        </View>
       </SafeAreaView>
     </View>
   );
@@ -210,22 +205,22 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-  },
-  scrollContent: {
     paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 24,
+    paddingTop: 12,
+    paddingBottom: 12,
   },
   grid: {
+    flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
     justifyContent: 'space-between',
+    alignContent: 'flex-start',
   },
   card: {
     width: CARD_WIDTH,
     backgroundColor: AppColors.surface,
-    borderRadius: 12,
+    borderRadius: 10,
     borderWidth: 2,
     overflow: 'hidden',
     shadowColor: AppColors.shadow,
@@ -235,20 +230,20 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   cardHeader: {
-    height: 48,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
   },
   tableNumber: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold' as const,
   },
   cardContent: {
-    padding: 8,
-    gap: 4,
+    padding: 6,
+    gap: 3,
   },
   tableTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: 'bold' as const,
     color: AppColors.text,
     textAlign: 'center',
@@ -260,13 +255,13 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   difficultyText: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '600' as const,
   },
   starsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 3,
+    gap: 2,
     marginTop: 1,
   },
   completedBadge: {
