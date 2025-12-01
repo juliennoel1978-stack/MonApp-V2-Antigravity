@@ -339,7 +339,7 @@ export default function DiscoveryScreen() {
       title: `Découvre la table de ${table.number}`,
       content: table.story,
       visual: (
-        <View style={[styles.visualContainer, { backgroundColor: tableColor + '20' }]}>
+        <View style={[styles.visualContainer, { backgroundColor: tableColor + '20', padding: 28, marginTop: 12 }]}>
           <Text style={[styles.bigNumber, { color: tableColor }]}>
             {table.number}
           </Text>
@@ -771,7 +771,7 @@ const styles = StyleSheet.create({
   },
   readyContainer: {
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 4,
   },
   readyEmoji: {
     fontSize: 48,
