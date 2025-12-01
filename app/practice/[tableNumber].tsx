@@ -427,18 +427,28 @@ export default function PracticeScreen() {
                 <View style={styles.resultButtonsRow}>
                   <TouchableOpacity
                     style={[styles.resultButton, { backgroundColor: tableColor }]}
+                    onPress={() => router.push(`/discovery/${table.number}?step=2` as any)}
+                    testID="review-lesson-button"
+                  >
+                    <Text style={styles.resultButtonText}>Réviser la table</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.resultButtonsRow}>
+                  <TouchableOpacity
+                    style={[styles.resultButton, styles.secondaryButton]}
                     onPress={retry}
                     testID="retry-button"
                   >
-                    <Text style={styles.resultButtonText}>Réessayer tout</Text>
+                    <Text style={styles.secondaryButtonText}>Réessayer le quiz</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={[styles.resultButton, styles.outlineButton, { borderColor: tableColor }]}
-                    onPress={() => router.push('/tables')}
+                    onPress={() => router.push('/tables' as any)}
                     testID="back-button-result"
                   >
-                    <Text style={[styles.outlineButtonText, { color: tableColor }]}>Non, autre table</Text>
+                    <Text style={[styles.outlineButtonText, { color: tableColor }]}>Autre table</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -690,19 +700,11 @@ export default function PracticeScreen() {
 
         {/* Success Feedback Overlay */}
         {isCorrect && !showErrorFeedback && (
-          <View
-            style={[
-              styles.feedbackOverlay,
-              { 
-                backgroundColor: AppColors.success,
-                paddingBottom: Math.max(20, insets.bottom + 20)
-              },
-            ]}
-          >
-            <View style={styles.feedbackContent}>
-              <Check size={32} color="#FFFFFF" strokeWidth={3} />
-              <Text style={styles.feedbackOverlayText}>Excellent !</Text>
-            </View>
+          <View style={styles.feedbackCenterOverlay}>
+             <View style={styles.feedbackCenterContent}>
+               <Check size={80} color="#FFFFFF" strokeWidth={4} />
+               <Text style={styles.feedbackCenterText}>Excellent !</Text>
+             </View>
           </View>
         )}
         
@@ -886,34 +888,44 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginRight: 8,
   },
-  feedbackOverlay: {
+  feedbackCenterOverlay: {
     position: 'absolute',
-    bottom: 0,
+    top: 0,
     left: 0,
     right: 0,
-    padding: 24,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: -4,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 20,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     zIndex: 100,
   },
-  feedbackContent: {
-    flexDirection: 'row',
+  feedbackCenterContent: {
+    backgroundColor: AppColors.success,
+    padding: 40,
+    borderRadius: 32,
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 12,
+    transform: [{ scale: 1.1 }],
   },
-  feedbackOverlayText: {
-    fontSize: 28,
+  feedbackCenterText: {
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#FFFFFF',
+    marginTop: 16,
+  },
+  secondaryButton: {
+    backgroundColor: AppColors.surface,
+    borderWidth: 2,
+    borderColor: AppColors.border,
+  },
+  secondaryButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: AppColors.text,
   },
   resultContainer: {
     flex: 1,

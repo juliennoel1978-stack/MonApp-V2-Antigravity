@@ -10,12 +10,13 @@ import {
   Dimensions,
   Platform,
   Modal,
-  PanResponder,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import { AppColors, NumberColors } from '@/constants/colors';
 import { getTableByNumber } from '@/constants/tables';
+import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 
@@ -95,37 +96,19 @@ export default function DiscoveryScreen() {
   const soundRef = useRef<Audio.Sound | null>(null);
   const modalSoundRef = useRef<Audio.Sound | null>(null);
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => false,
-      onStartShouldSetPanResponderCapture: () => false,
-      onMoveShouldSetPanResponder: (_, gestureState) => {
-        const isHorizontalSwipe = Math.abs(gestureState.dx) > Math.abs(gestureState.dy) * 2;
-        const hasMovedEnough = Math.abs(gestureState.dx) > 20;
-        return isHorizontalSwipe && hasMovedEnough;
-      },
-      onMoveShouldSetPanResponderCapture: (_, gestureState) => {
-        const isHorizontalSwipe = Math.abs(gestureState.dx) > Math.abs(gestureState.dy) * 2;
-        const hasMovedEnough = Math.abs(gestureState.dx) > 20;
-        return isHorizontalSwipe && hasMovedEnough;
-      },
-      onPanResponderGrant: () => {},
-      onPanResponderMove: () => {},
-      onPanResponderRelease: (_, gestureState) => {
-        const step = currentStepRef.current;
-        const totalSteps = 4;
-        const swipeThreshold = 50;
-        
-        if (gestureState.dx > swipeThreshold && step > 0) {
-          setCurrentStep(step - 1);
-        } else if (gestureState.dx < -swipeThreshold && step < totalSteps - 1) {
-          setCurrentStep(step + 1);
-        }
-      },
-      onPanResponderTerminationRequest: () => false,
-      onShouldBlockNativeResponder: () => false,
-    })
-  ).current;
+  const panGesture = Gesture.Pan()
+    .activeOffsetX([-20, 20])
+    .onEnd((e) => {
+      const step = currentStepRef.current;
+      const totalSteps = 4;
+      const swipeThreshold = 50;
+
+      if (e.translationX > swipeThreshold && step > 0) {
+        runOnJS(setCurrentStep)(step - 1);
+      } else if (e.translationX < -swipeThreshold && step < totalSteps - 1) {
+        runOnJS(setCurrentStep)(step + 1);
+      }
+    });
 
   const animateIn = useCallback(() => {
     fadeAnim.setValue(0);
@@ -404,11 +387,12 @@ export default function DiscoveryScreen() {
       ),
     },
     {
-      title: 'Prêt à pratiquer ?',
+      title: 'C\'est parti !',
       content: 'Maintenant, teste tes connaissances avec le quiz !',
       visual: (
         <View style={styles.readyContainer}>
-          <Text style={styles.readyEmoji}>🎯</Text>
+          <Text style={styles.readyEmoji}>🚀</Text>
+          <Text style={styles.encouragementText}>Tu vas assurer !</Text>
           <TouchableOpacity
             style={[styles.practiceButton, { backgroundColor: tableColor }]}
             onPress={() => router.push(`/practice/${table.number}` as any)}
@@ -529,23 +513,24 @@ export default function DiscoveryScreen() {
           </TouchableOpacity>
         </View>
 
-        <Animated.View
-          style={[
-            styles.mainContent,
-            {
-              opacity: fadeAnim,
-              transform: [{ scale: scaleAnim }],
-            },
-          ]}
-          {...panResponder.panHandlers}
-        >
-          <View style={styles.content}>
-            <Text style={styles.stepTitle}>{currentStepData.title}</Text>
-            <Text style={styles.stepContent}>{currentStepData.content}</Text>
+        <GestureDetector gesture={panGesture}>
+          <Animated.View
+            style={[
+              styles.mainContent,
+              {
+                opacity: fadeAnim,
+                transform: [{ scale: scaleAnim }],
+              },
+            ]}
+          >
+            <View style={styles.content}>
+              <Text style={styles.stepTitle}>{currentStepData.title}</Text>
+              <Text style={styles.stepContent}>{currentStepData.content}</Text>
 
-            {currentStepData.visual}
-          </View>
-        </Animated.View>
+              {currentStepData.visual}
+            </View>
+          </Animated.View>
+        </GestureDetector>
 
         <View style={styles.footer}>
           {currentStep > 0 && (
@@ -658,7 +643,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   visualContainer: {
-    width: width - 80,
+    width: width - 40,
     padding: 40,
     borderRadius: 24,
     alignItems: 'center',
@@ -679,7 +664,7 @@ const styles = StyleSheet.create({
     padding: 32,
     borderRadius: 24,
     alignItems: 'center',
-    width: width - 80,
+    width: width - 40,
     shadowColor: AppColors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -718,25 +703,25 @@ const styles = StyleSheet.create({
   countingContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 8,
     justifyContent: 'center',
     marginTop: 20,
-    marginBottom: 20,
-    maxWidth: width - 48,
+    marginBottom: 60,
+    maxWidth: width - 32,
   },
   countingItem: {
-    width: (width - 120) / 3,
-    padding: 12,
+    width: (width - 64) / 3,
+    padding: 8,
     borderRadius: 16,
     alignItems: 'center',
   },
   countingNumber: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold' as const,
     marginBottom: 4,
   },
   countingLabel: {
-    fontSize: 14,
+    fontSize: 12,
     color: AppColors.textSecondary,
     fontWeight: '600' as const,
   },
@@ -745,8 +730,15 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   readyEmoji: {
-    fontSize: 80,
+    fontSize: 100,
+    marginBottom: 16,
+  },
+  encouragementText: {
+    fontSize: 18,
+    color: AppColors.textSecondary,
+    fontWeight: '600' as const,
     marginBottom: 32,
+    textAlign: 'center',
   },
   practiceButton: {
     flexDirection: 'row',

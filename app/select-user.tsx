@@ -19,7 +19,7 @@ const CARD_WIDTH = (width - 60) / 2;
 
 export default function SelectUserScreen() {
   const router = useRouter();
-  const { users, selectUser } = useApp();
+  const { users, selectUser, clearCurrentUser } = useApp();
 
   console.log('🎭 SelectUserScreen - Users available:', users.length);
   users.forEach(u => console.log('  - User:', u.firstName, u.id));
@@ -27,6 +27,12 @@ export default function SelectUserScreen() {
   const handleSelectUser = async (userId: string) => {
     console.log('👉 Selecting user:', userId);
     await selectUser(userId);
+    router.replace('/' as any);
+  };
+
+  const handleGuestMode = async () => {
+    console.log('👉 Selecting guest mode');
+    await clearCurrentUser();
     router.replace('/' as any);
   };
 
@@ -70,7 +76,13 @@ export default function SelectUserScreen() {
                     </View>
                   )}
                 </View>
-                <Text style={styles.userName}>{user.firstName}</Text>
+                <Text 
+                  style={styles.userName} 
+                  numberOfLines={1} 
+                  adjustsFontSizeToFit
+                >
+                  {user.firstName}
+                </Text>
                 <Text style={styles.userAge}>{user.age} ans</Text>
                 <Text style={styles.userGrade}>{user.grade}</Text>
               </TouchableOpacity>
@@ -82,9 +94,20 @@ export default function SelectUserScreen() {
               testID="add-user"
             >
               <View style={styles.addIconContainer}>
-                <Plus size={48} color={AppColors.primary} />
+                <Plus size={40} color={AppColors.primary} />
               </View>
               <Text style={styles.addText}>Ajouter</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.userCard, styles.guestCard]}
+              onPress={handleGuestMode}
+              testID="guest-mode"
+            >
+              <View style={[styles.addIconContainer, styles.guestIconContainer]}>
+                <Text style={{ fontSize: 32 }}>🕵️</Text>
+              </View>
+              <Text style={[styles.addText, styles.guestText]}>Mode Invité</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -104,12 +127,12 @@ const styles = StyleSheet.create({
   topBar: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 8,
+    paddingBottom: 0,
   },
   backButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: AppColors.surface,
     justifyContent: 'center',
     alignItems: 'center',
@@ -121,18 +144,18 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: 24,
+    paddingTop: 4,
+    paddingBottom: 16,
     alignItems: 'center',
   },
   title: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: 'bold' as const,
     color: AppColors.text,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 16,
     color: AppColors.textSecondary,
   },
   scrollView: {
@@ -140,17 +163,19 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
+    paddingTop: 0,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 20,
+    gap: 16,
+    justifyContent: 'center',
   },
   userCard: {
     width: CARD_WIDTH,
     backgroundColor: AppColors.surface,
     borderRadius: 20,
-    padding: 16,
+    padding: 12,
     alignItems: 'center',
     shadowColor: AppColors.shadow,
     shadowOffset: { width: 0, height: 4 },
@@ -159,39 +184,42 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   avatarContainer: {
-    marginBottom: 12,
+    marginBottom: 8,
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: AppColors.borderLight,
   },
   avatarPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: AppColors.primary + '20',
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarEmoji: {
-    fontSize: 48,
+    fontSize: 32,
   },
   userName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold' as const,
     color: AppColors.text,
-    marginBottom: 4,
+    marginBottom: 2,
+    textAlign: 'center',
+    width: '100%',
   },
   userAge: {
-    fontSize: 14,
+    fontSize: 12,
     color: AppColors.textSecondary,
-    marginBottom: 2,
+    marginBottom: 0,
   },
   userGrade: {
-    fontSize: 14,
+    fontSize: 12,
     color: AppColors.textSecondary,
+    display: 'none', // Hide grade to save space as requested to keep it compact? Or just keep it small.
   },
   addCard: {
     backgroundColor: AppColors.surface,
@@ -200,17 +228,28 @@ const styles = StyleSheet.create({
     borderColor: AppColors.primary,
   },
   addIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: AppColors.primary + '10',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   addText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600' as const,
     color: AppColors.primary,
+  },
+  guestCard: {
+    backgroundColor: AppColors.surface,
+    borderWidth: 1,
+    borderColor: AppColors.borderLight,
+  },
+  guestIconContainer: {
+    backgroundColor: AppColors.textSecondary + '10',
+  },
+  guestText: {
+    color: AppColors.textSecondary,
   },
 });
