@@ -653,7 +653,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 24,
     paddingTop: 20,
-    paddingBottom: 80,
+    paddingBottom: 20,
   },
   content: {
     alignItems: 'center',
@@ -772,7 +772,7 @@ const styles = StyleSheet.create({
   readyContainer: {
     alignItems: 'center',
     marginTop: 20,
-    paddingBottom: 24,
+    paddingBottom: 100,
   },
   readyEmoji: {
     fontSize: 100,
