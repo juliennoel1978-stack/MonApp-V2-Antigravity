@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors, NumberColors } from '@/constants/colors';
@@ -61,7 +62,11 @@ export default function TablesScreen() {
           <View style={styles.placeholder} />
         </View>
 
-        <View style={styles.contentContainer}>
+        <ScrollView 
+          style={styles.contentContainer}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.grid}>
             {MULTIPLICATION_TABLES.map(table => {
               const tableProgress = progress.find(
@@ -163,7 +168,7 @@ export default function TablesScreen() {
               );
             })}
           </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
@@ -205,9 +210,11 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
+  },
+  scrollContent: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    justifyContent: 'center',
+    paddingTop: 16,
+    paddingBottom: 24,
   },
   grid: {
     flexDirection: 'row',
