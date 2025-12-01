@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { UserProgress, UserSettings, Badge, User } from '@/types';
 import { MULTIPLICATION_TABLES } from '@/constants/tables';
 
@@ -302,7 +302,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   }, []);
 
-  return {
+  return useMemo(() => ({
     progress,
     settings,
     badges,
@@ -320,5 +320,5 @@ export const [AppProvider, useApp] = createContextHook(() => {
     selectUser,
     updateUser,
     clearCurrentUser,
-  };
+  }), [progress, settings, badges, totalStars, users, currentUser, isLoading, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser]);
 });
