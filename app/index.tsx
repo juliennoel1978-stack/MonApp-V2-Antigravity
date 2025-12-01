@@ -350,7 +350,7 @@ export default function HomeScreen() {
                             </View>
                           )}
                         </View>
-                        <Text style={styles.modalUserName}>{user.firstName}</Text>
+                        <Text style={styles.modalUserName} numberOfLines={1} adjustsFontSizeToFit>{user.firstName}</Text>
                         <Text style={styles.modalUserInfo}>{user.age} ans</Text>
                       </TouchableOpacity>
                     ))}
@@ -625,27 +625,27 @@ const styles = StyleSheet.create({
   },
   modalHeader: {
     paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 24,
+    paddingTop: 16,
+    paddingBottom: 16,
     backgroundColor: AppColors.surface,
   },
   modalCloseButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: AppColors.background,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 8,
   },
   modalHeaderContent: {
     alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold' as const,
     color: AppColors.text,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   modalSubtitle: {
     fontSize: 16,
@@ -667,7 +667,7 @@ const styles = StyleSheet.create({
     width: (width - 100) / 2,
     backgroundColor: AppColors.surface,
     borderRadius: 20,
-    padding: 20,
+    padding: 12,
     alignItems: 'center',
     shadowColor: AppColors.shadow,
     shadowOffset: { width: 0, height: 4 },
@@ -676,30 +676,30 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   modalAvatarContainer: {
-    marginBottom: 12,
+    marginBottom: 8,
   },
   modalAvatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: AppColors.borderLight,
   },
   modalAvatarPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: AppColors.primary + '20',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalAvatarEmoji: {
-    fontSize: 48,
+    fontSize: 40,
   },
   modalUserName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold' as const,
     color: AppColors.text,
-    marginBottom: 4,
+    marginBottom: 2,
     textAlign: 'center',
   },
   modalUserInfo: {
@@ -713,19 +713,19 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.background,
   },
   anonymousAvatarPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: AppColors.borderLight,
     justifyContent: 'center',
     alignItems: 'center',
   },
   anonymousUserName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600' as const,
     color: AppColors.textSecondary,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 20,
   },
   addUserCard: {
     borderWidth: 2,
@@ -734,9 +734,9 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.surface,
   },
   addAvatarPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: AppColors.primary + '10',
     justifyContent: 'center',
     alignItems: 'center',
