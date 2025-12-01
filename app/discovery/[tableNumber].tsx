@@ -10,13 +10,12 @@ import {
   Dimensions,
   Platform,
   Modal,
+  PanResponder,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import { AppColors, NumberColors } from '@/constants/colors';
 import { getTableByNumber } from '@/constants/tables';
-import { GestureDetector, Gesture } from 'react-native-gesture-handler';
-import { runOnJS } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 
@@ -95,20 +94,26 @@ export default function DiscoveryScreen() {
   const modalScaleAnim = useRef(new Animated.Value(0)).current;
   const soundRef = useRef<Audio.Sound | null>(null);
   const modalSoundRef = useRef<Audio.Sound | null>(null);
+  const isMounted = useRef(true);
 
-  const panGesture = Gesture.Pan()
-    .activeOffsetX([-20, 20])
-    .onEnd((e) => {
-      const step = currentStepRef.current;
-      const totalSteps = 4;
-      const swipeThreshold = 50;
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        return Math.abs(gestureState.dx) > 20;
+      },
+      onPanResponderEnd: (_, gestureState) => {
+        const step = currentStepRef.current;
+        const totalSteps = 4;
+        const swipeThreshold = 50;
 
-      if (e.translationX > swipeThreshold && step > 0) {
-        runOnJS(setCurrentStep)(step - 1);
-      } else if (e.translationX < -swipeThreshold && step < totalSteps - 1) {
-        runOnJS(setCurrentStep)(step + 1);
-      }
-    });
+        if (gestureState.dx > swipeThreshold && step > 0) {
+          setCurrentStep(step - 1);
+        } else if (gestureState.dx < -swipeThreshold && step < totalSteps - 1) {
+          setCurrentStep(step + 1);
+        }
+      },
+    })
+  ).current;
 
   const animateIn = useCallback(() => {
     fadeAnim.setValue(0);
@@ -135,7 +140,9 @@ export default function DiscoveryScreen() {
   }, [currentStep, animateIn]);
 
   useEffect(() => {
+    isMounted.current = true;
     return () => {
+      isMounted.current = false;
       if (soundRef.current) {
         soundRef.current.unloadAsync();
       }
@@ -242,13 +249,16 @@ export default function DiscoveryScreen() {
       }
 
       for (let i = 0; i < utterances.length; i++) {
+        if (!isMounted.current) break;
         await new Promise<void>((resolve) => {
           utterances[i].onend = () => resolve();
           window.speechSynthesis.speak(utterances[i]);
         });
       }
 
-      setIsPlayingAudio(false);
+      if (isMounted.current) {
+        setIsPlayingAudio(false);
+      }
     } else {
       if (isPlayingAudio) {
         if (soundRef.current) {
@@ -256,11 +266,15 @@ export default function DiscoveryScreen() {
           await soundRef.current.unloadAsync();
           soundRef.current = null;
         }
-        setIsPlayingAudio(false);
+        if (isMounted.current) {
+          setIsPlayingAudio(false);
+        }
         return;
       }
 
-      setIsPlayingAudio(true);
+      if (isMounted.current) {
+        setIsPlayingAudio(true);
+      }
 
       try {
         await Audio.setAudioModeAsync({
@@ -282,7 +296,9 @@ export default function DiscoveryScreen() {
           { shouldPlay: true },
           (status) => {
             if (status.isLoaded && status.didJustFinish) {
-              setIsPlayingAudio(false);
+              if (isMounted.current) {
+                setIsPlayingAudio(false);
+              }
               sound.unloadAsync();
             }
           }
@@ -291,7 +307,9 @@ export default function DiscoveryScreen() {
         soundRef.current = sound;
       } catch (error) {
         console.error('Error playing audio:', error);
-        setIsPlayingAudio(false);
+        if (isMounted.current) {
+          setIsPlayingAudio(false);
+        }
       }
     }
   };
@@ -513,7 +531,10 @@ export default function DiscoveryScreen() {
           </TouchableOpacity>
         </View>
 
-        <GestureDetector gesture={panGesture}>
+        <View
+          style={{ flex: 1 }}
+          {...panResponder.panHandlers}
+        >
           <Animated.View
             style={[
               styles.mainContent,
@@ -530,7 +551,7 @@ export default function DiscoveryScreen() {
               {currentStepData.visual}
             </View>
           </Animated.View>
-        </GestureDetector>
+        </View>
 
         <View style={styles.footer}>
           {currentStep > 0 && (

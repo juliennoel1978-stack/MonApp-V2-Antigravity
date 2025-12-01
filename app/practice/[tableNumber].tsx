@@ -28,7 +28,6 @@ export default function PracticeScreen() {
   const { tableNumber } = useLocalSearchParams();
   const table = getTableByNumber(Number(tableNumber));
   const { updateTableProgress, unlockBadge, getTableProgress, settings } = useApp();
-  const insets = useSafeAreaInsets();
 
   const tableProgress = getTableProgress(Number(tableNumber));
   const initialLevel = tableProgress?.level1Completed ? 2 : 1;
@@ -52,6 +51,14 @@ export default function PracticeScreen() {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const inputRef = useRef<TextInput>(null);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (table) {
@@ -92,7 +99,9 @@ export default function PracticeScreen() {
       setCorrectCount(newCorrectCount);
       animateSuccess();
       setTimeout(() => {
-        nextQuestion(newCorrectCount);
+        if (isMounted.current) {
+          nextQuestion(newCorrectCount);
+        }
       }, 1000);
     } else {
       animateError();
@@ -121,7 +130,9 @@ export default function PracticeScreen() {
       setCorrectCount(newCorrectCount);
       animateSuccess();
       setTimeout(() => {
-        nextQuestion(newCorrectCount);
+        if (isMounted.current) {
+          nextQuestion(newCorrectCount);
+        }
       }, 1000);
     } else {
       animateError();
@@ -151,7 +162,9 @@ export default function PracticeScreen() {
     // Focus input if level 2
     if (level === 2) {
       setTimeout(() => {
-        inputRef.current?.focus();
+        if (isMounted.current) {
+          inputRef.current?.focus();
+        }
       }, 350);
     }
   };
@@ -273,7 +286,9 @@ export default function PracticeScreen() {
     setQuestionsToReview([]);
     
     setTimeout(() => {
-      inputRef.current?.focus();
+      if (isMounted.current) {
+        inputRef.current?.focus();
+      }
     }, 500);
   };
 
@@ -290,7 +305,9 @@ export default function PracticeScreen() {
     
     if (level === 2) {
       setTimeout(() => {
-        inputRef.current?.focus();
+        if (isMounted.current) {
+          inputRef.current?.focus();
+        }
       }, 500);
     }
   };
@@ -308,7 +325,9 @@ export default function PracticeScreen() {
     
     if (level === 2) {
       setTimeout(() => {
-        inputRef.current?.focus();
+        if (isMounted.current) {
+          inputRef.current?.focus();
+        }
       }, 500);
     }
   };
@@ -317,7 +336,11 @@ export default function PracticeScreen() {
     if (homeClickCount === 0) {
       setHomeClickCount(1);
       router.push('/tables');
-      setTimeout(() => setHomeClickCount(0), 2000);
+      setTimeout(() => {
+        if (isMounted.current) {
+          setHomeClickCount(0);
+        }
+      }, 2000);
     } else {
       setHomeClickCount(0);
       router.push('/');
