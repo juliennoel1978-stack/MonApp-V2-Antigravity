@@ -8,6 +8,59 @@ export interface MultiplicationTable {
   tip: string;
 }
 
+export const TIPS_BY_TABLE: Record<number, { astuce: string; indice: string; erreur: string }> = {
+  1: {
+    astuce: "Quand on multiplie par 1, le résultat ne change jamais.",
+    indice: "C’est le même nombre : on ne le multiplie pas vraiment.",
+    erreur: "1 × X = X. On garde exactement le même nombre."
+  },
+  2: {
+    astuce: "On double le nombre : 2, 4, 6, 8…",
+    indice: "Si tu connais +2, tu connais la table de 2.",
+    erreur: "2 × X = X + X. On double le nombre."
+  },
+  3: {
+    astuce: "On ajoute 3 à chaque fois, comme 3, 6, 9, 12…",
+    indice: "Pense aux multiples de 3 : 3, 6, 9, 12, 15…",
+    erreur: "3 × X = X + X + X. On ajoute 3 à chaque fois."
+  },
+  4: {
+    astuce: "4, 8, 12, 16… on ajoute toujours 4.",
+    indice: "Tu peux faire ×2 puis encore ×2 : on double deux fois !",
+    erreur: "4 × X = (2 × X) × 2. On double deux fois pour trouver le résultat."
+  },
+  5: {
+    astuce: "Les résultats finissent toujours par 0 ou 5.",
+    indice: "Compte de 5 en 5 : 5, 10, 15, 20…",
+    erreur: "5 × X = un nombre qui finit par 0 ou 5. Compte de 5 en 5 pour vérifier."
+  },
+  6: {
+    astuce: "Si tu connais ×3, double le résultat : 6 = 3+3.",
+    indice: "Pense à faire 3 × X, puis tu doubles.",
+    erreur: "6 × X = 3 × X + 3 × X. On double le résultat de la table de 3."
+  },
+  7: {
+    astuce: "Table plus difficile : pense à la décomposition (5 × X + 2 × X).",
+    indice: "Fais 5 × X, puis ajoute encore 2 × X.",
+    erreur: "7 × X = 5 × X + 2 × X. On peut la découper pour trouver plus facilement."
+  },
+  8: {
+    astuce: "8, c’est 2 × 2 × 2 : on double trois fois !",
+    indice: "Double, puis redouble, puis redouble encore.",
+    erreur: "8 × X = on double 3 fois : X → 2X → 4X → 8X."
+  },
+  9: {
+    astuce: "La somme des chiffres du résultat fait souvent 9.",
+    indice: "Ex : 9 × 4 = 36 → 3 + 6 = 9.",
+    erreur: "Vérifie la somme des chiffres : elle doit souvent faire 9 pour ×9."
+  },
+  10: {
+    astuce: "On ajoute un 0 à la fin du nombre.",
+    indice: "10 × X = X avec un zéro derrière.",
+    erreur: "10 × X = X0. Il suffit d’écrire un zéro à la fin."
+  }
+};
+
 export const MULTIPLICATION_TABLES: MultiplicationTable[] = [
   {
     number: 1,
