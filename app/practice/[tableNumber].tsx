@@ -310,7 +310,7 @@ export default function PracticeScreen() {
 
                 <TouchableOpacity
                   style={[styles.resultButton, styles.outlineButton, { borderColor: tableColor }]}
-                  onPress={() => router.push(`/discovery/${table.number}` as any)}
+                  onPress={() => router.push(`/discovery/${table.number}?step=2` as any)}
                   testID="back-button-result"
                 >
                   <Text style={[styles.outlineButtonText, { color: tableColor }]}>Réviser la table</Text>

@@ -81,9 +81,9 @@ function getTipExamples(tableNumber: number): string[] {
 
 export default function DiscoveryScreen() {
   const router = useRouter();
-  const { tableNumber } = useLocalSearchParams();
+  const { tableNumber, step } = useLocalSearchParams();
   const table = getTableByNumber(Number(tableNumber));
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(step ? Number(step) : 0);
   const currentStepRef = useRef(0);
   const [homeClickCount, setHomeClickCount] = useState(0);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
