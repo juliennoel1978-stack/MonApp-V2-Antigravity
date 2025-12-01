@@ -772,7 +772,7 @@ const styles = StyleSheet.create({
   readyContainer: {
     alignItems: 'center',
     marginTop: 20,
-    paddingBottom: 100,
+    paddingBottom: 20,
   },
   readyEmoji: {
     fontSize: 100,
