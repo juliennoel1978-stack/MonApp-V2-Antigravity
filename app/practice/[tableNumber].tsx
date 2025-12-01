@@ -544,20 +544,33 @@ export default function PracticeScreen() {
             
                 <View style={styles.resultButtonsRow}>
                   <TouchableOpacity
-                    style={[styles.actionButton, passed ? styles.retryButtonStyle : { backgroundColor: tableColor }]}
+                    style={[
+                      styles.actionButton, 
+                      passed ? styles.retryButtonStyle : { backgroundColor: tableColor }
+                    ]}
                     onPress={retry}
                   >
-                    <Text style={[styles.actionButtonText, passed && { color: AppColors.text }]}>
-                        {passed ? '↻ Réessayer' : '↻ Refaire le niveau'}
+                    <Text style={[
+                      styles.actionButtonText, 
+                      passed && { color: AppColors.text }
+                    ]}>
+                      {passed ? 'Refaire le niveau' : 'Refaire le niveau'}
                     </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={[styles.actionButton, passed ? { backgroundColor: tableColor } : styles.actionButtonOutline, passed ? {} : { borderColor: tableColor }]}
+                    style={[
+                      styles.actionButton, 
+                      passed ? { backgroundColor: tableColor } : styles.actionButtonOutline, 
+                      !passed && { borderColor: tableColor }
+                    ]}
                     onPress={() => router.push('/tables')}
                   >
-                    <Text style={[styles.actionButtonText, !passed && { color: tableColor }]}>
-                        {passed ? '✓ Terminer' : 'Changer de table'}
+                    <Text style={[
+                      styles.actionButtonText, 
+                      !passed && { color: tableColor }
+                    ]}>
+                      {passed ? 'Non, autre table' : 'Non, autre table'}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -1268,27 +1281,31 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    paddingVertical: 16,
-    borderRadius: 14,
+    paddingVertical: 18,
+    paddingHorizontal: 16,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: AppColors.shadow,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
+    minHeight: 56,
   },
   actionButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#FFFFFF',
+    textAlign: 'center',
+    lineHeight: 20,
   },
   actionButtonOutline: {
-    backgroundColor: 'transparent',
+    backgroundColor: AppColors.surface,
     borderWidth: 2,
   },
   retryButtonStyle: {
-    backgroundColor: AppColors.surfaceLight,
+    backgroundColor: AppColors.surface,
     borderWidth: 2,
     borderColor: AppColors.border,
   },
