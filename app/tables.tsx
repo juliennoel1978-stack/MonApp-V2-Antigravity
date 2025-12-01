@@ -15,7 +15,7 @@ import { MULTIPLICATION_TABLES } from '@/constants/tables';
 import { useApp } from '@/contexts/AppContext';
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = (width - 52) / 2;
+const CARD_WIDTH = (width - 48) / 2;
 
 export default function TablesScreen() {
   const router = useRouter();
@@ -143,7 +143,7 @@ export default function TablesScreen() {
                       {[1, 2, 3].map(starIndex => (
                         <Star
                           key={starIndex}
-                          size={14}
+                          size={16}
                           color={
                             starIndex <= stars
                               ? AppColors.warning
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 16,
+    padding: 12,
     paddingBottom: 20,
   },
   grid: {
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   card: {
     width: CARD_WIDTH,
     backgroundColor: AppColors.surface,
-    borderRadius: 14,
+    borderRadius: 12,
     borderWidth: 2,
     overflow: 'hidden',
     shadowColor: AppColors.shadow,
@@ -234,49 +234,49 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   cardHeader: {
-    height: 42,
+    height: 60,
     justifyContent: 'center',
     alignItems: 'center',
   },
   tableNumber: {
-    fontSize: 28,
+    fontSize: 36,
     fontWeight: 'bold' as const,
   },
   cardContent: {
-    padding: 8,
-    gap: 4,
+    padding: 10,
+    gap: 6,
   },
   tableTitle: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 'bold' as const,
     color: AppColors.text,
     textAlign: 'center',
   },
   difficultyBadge: {
-    paddingVertical: 2,
-    paddingHorizontal: 6,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
     borderRadius: 8,
     alignSelf: 'center',
   },
   difficultyText: {
-    fontSize: 9,
+    fontSize: 11,
     fontWeight: '600' as const,
   },
   starsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 2,
-    marginTop: 1,
+    gap: 4,
+    marginTop: 2,
   },
   completedBadge: {
     backgroundColor: AppColors.success + '20',
-    paddingVertical: 2,
-    paddingHorizontal: 5,
-    borderRadius: 5,
-    marginTop: 1,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    marginTop: 2,
   },
   completedText: {
-    fontSize: 9,
+    fontSize: 11,
     fontWeight: '600' as const,
     color: AppColors.success,
     textAlign: 'center',
