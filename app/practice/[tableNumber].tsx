@@ -355,7 +355,7 @@ export default function PracticeScreen() {
               </View>
 
               <Text style={styles.encouragement}>
-                {stars === 4 ? 'Super ! Tu maîtrises parfaitement cette table !' :
+                {stars === 4 ? `Super ! Tu maîtrises parfaitement la table de ${table.number} !` :
                 stars === 3 ? 'Très bien ! Continue comme ça !' :
                 stars === 2 ? 'Bon début ! Entraîne-toi encore !' :
                 'Continue à t&apos;entraîner, tu vas y arriver !'}
