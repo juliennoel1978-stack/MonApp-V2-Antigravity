@@ -740,13 +740,13 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   countingScrollContent: {
-    paddingBottom: 40,
+    paddingBottom: 100,
     alignItems: 'center',
   },
   countingContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 12,
     justifyContent: 'center',
     marginTop: 10,
     marginBottom: 20,
@@ -760,8 +760,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   countingItem: {
-    width: (width - 64) / 3,
-    padding: 8,
+    width: (width - 64) / 2, // Changed to 2 columns for better visibility
+    padding: 12,
     borderRadius: 16,
     alignItems: 'center',
   },

@@ -81,7 +81,17 @@ export default function PracticeScreen() {
   const speakCorrection = (question: Question) => {
     if (settings?.voiceEnabled) {
       const tip = TIPS_BY_TABLE[table.number];
-      const speechText = `${question.multiplicand} fois ${question.multiplier} égale ${question.correctAnswer}. ${tip?.erreur || ''}`;
+      let errorText = tip?.erreur || '';
+      
+      // Improve speech for the error tip to be more natural
+      // Replaces "5 × X =" with "5 fois quelque chose égale"
+      errorText = errorText
+        .replace(/(\d+)\s*[×]\s*X\s*=/g, "$1 fois quelque chose égale")
+        .replace(/×/g, "fois")
+        .replace(/=/g, "égale")
+        .replace(/\bX\b/g, "quelque chose");
+
+      const speechText = `${question.multiplicand} fois ${question.multiplier} égale ${question.correctAnswer}. ${errorText}`;
       Speech.speak(speechText, { language: 'fr-FR' });
     }
   };
