@@ -29,7 +29,7 @@ const CORRECT_PHRASES = [
 ];
 
 const ERROR_PHRASES = [
-  "On révisera cette table 😉, si besoin",
+  "Ce n'est pas grave, On révisera cette table 😉, si besoin",
   "Presque ! On la reverra un peu plus tard.",
   "Tu progresseras en la revoyant plusieurs fois, c'est normal.",
   "On corrige ensemble, et on continue tranquillement.",
