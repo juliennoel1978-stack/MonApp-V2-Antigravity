@@ -70,6 +70,10 @@ export default function ChallengeScreen() {
   const [currentErrorPhrase, setCurrentErrorPhrase] = useState<string>('');
   const [maxQuestions, setMaxQuestions] = useState<number>(15);
   const [isFinished, setIsFinished] = useState<boolean>(false);
+  const [bestStreak, setBestStreak] = useState<number>(0);
+  const [wrongAnswers, setWrongAnswers] = useState<{ num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]>([]); 
+  const [tableStats, setTableStats] = useState<Record<number, { correct: number; total: number }>>({}); 
+  const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
   const celebrationAnim = React.useRef(new Animated.Value(0)).current;
   const inputRef = useRef<TextInput>(null);
@@ -105,38 +109,47 @@ export default function ChallengeScreen() {
       clearInterval(timerRef.current);
     }
     
-    const num1 = Math.floor(Math.random() * 10) + 1;
-    const num2 = Math.floor(Math.random() * 10) + 1;
-    const result = num1 * num2;
+    let question: Question;
     
-    const questionTypes: QuestionType[] = ['result', 'multiplier', 'multiplicand'];
-    const randomType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
-    
-    let answer: number;
-    let displayText: string;
-    
-    switch (randomType) {
-      case 'result':
-        answer = result;
-        displayText = `${num1} × ${num2} = ?`;
-        break;
-      case 'multiplier':
-        answer = num2;
-        displayText = `${num1} × ? = ${result}`;
-        break;
-      case 'multiplicand':
-        answer = num1;
-        displayText = `? × ${num2} = ${result}`;
-        break;
+    if (isReviewMode && wrongAnswers.length > 0) {
+      const index = totalQuestions % wrongAnswers.length;
+      question = wrongAnswers[index];
+    } else {
+      const num1 = Math.floor(Math.random() * 10) + 1;
+      const num2 = Math.floor(Math.random() * 10) + 1;
+      const result = num1 * num2;
+      
+      const questionTypes: QuestionType[] = ['result', 'multiplier', 'multiplicand'];
+      const randomType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+      
+      let answer: number;
+      let displayText: string;
+      
+      switch (randomType) {
+        case 'result':
+          answer = result;
+          displayText = `${num1} × ${num2} = ?`;
+          break;
+        case 'multiplier':
+          answer = num2;
+          displayText = `${num1} × ? = ${result}`;
+          break;
+        case 'multiplicand':
+          answer = num1;
+          displayText = `? × ${num2} = ${result}`;
+          break;
+      }
+      
+      question = {
+        num1,
+        num2,
+        answer,
+        type: randomType,
+        displayText,
+      };
     }
     
-    setCurrentQuestion({
-      num1,
-      num2,
-      answer,
-      type: randomType,
-      displayText,
-    });
+    setCurrentQuestion(question);
     setUserAnswer('');
     setAttempts(0);
     setShowFeedback(false);
@@ -152,7 +165,7 @@ export default function ChallengeScreen() {
         inputRef.current?.focus();
       }
     }, 100);
-  }, [settings.timerDuration, settings.timerEnabled, currentUser]);
+  }, [settings.timerDuration, settings.timerEnabled, currentUser, isReviewMode, wrongAnswers, totalQuestions]);
 
   useEffect(() => {
     generateNewQuestion();
@@ -238,6 +251,23 @@ export default function ChallengeScreen() {
       setTotalQuestions(newTotalQuestions);
       setConsecutiveCorrect(newConsecutive);
       setCurrentCorrectPhrase(getRandomPhrase(CORRECT_PHRASES));
+      
+      if (newConsecutive > bestStreak) {
+        setBestStreak(newConsecutive);
+      }
+      
+      setTableStats(prev => {
+        const table = currentQuestion.num1 <= 10 && currentQuestion.num2 <= 10 
+          ? Math.max(currentQuestion.num1, currentQuestion.num2) 
+          : currentQuestion.num1;
+        return {
+          ...prev,
+          [table]: {
+            correct: (prev[table]?.correct || 0) + 1,
+            total: (prev[table]?.total || 0) + 1,
+          },
+        };
+      });
 
       if (newTotalQuestions >= maxQuestions) {
         console.log('🎯 Challenge finished! Answered', newTotalQuestions, 'questions');
@@ -290,6 +320,21 @@ export default function ChallengeScreen() {
         setTotalQuestions(newTotalQuestions);
         setShowCorrectAnswer(true);
         setCurrentErrorPhrase(getRandomPhrase(ERROR_PHRASES));
+        
+        setWrongAnswers(prev => [...prev, currentQuestion]);
+        
+        setTableStats(prev => {
+          const table = currentQuestion.num1 <= 10 && currentQuestion.num2 <= 10 
+            ? Math.max(currentQuestion.num1, currentQuestion.num2) 
+            : currentQuestion.num1;
+          return {
+            ...prev,
+            [table]: {
+              correct: prev[table]?.correct || 0,
+              total: (prev[table]?.total || 0) + 1,
+            },
+          };
+        });
 
         if (newTotalQuestions >= maxQuestions) {
           console.log('🎯 Challenge finished! Answered', newTotalQuestions, 'questions');
@@ -310,39 +355,138 @@ export default function ChallengeScreen() {
   };
 
   if (isFinished) {
+    const precision = Math.round((correctCount / maxQuestions) * 100);
+    
+    let bestTable = -1;
+    let worstTable = -1;
+    let bestTableRate = -1;
+    let worstTableRate = 2;
+    
+    Object.entries(tableStats).forEach(([table, stats]) => {
+      const rate = stats.correct / stats.total;
+      if (rate > bestTableRate) {
+        bestTableRate = rate;
+        bestTable = parseInt(table);
+      }
+      if (rate < worstTableRate && stats.total > 0 && stats.correct < stats.total) {
+        worstTableRate = rate;
+        worstTable = parseInt(table);
+      }
+    });
+    
     return (
       <View style={styles.backgroundContainer}>
         <SafeAreaView style={styles.container} edges={['top']}>
-          <View style={styles.finishedContainer}>
-            <Text style={styles.finishedEmoji}>🎉</Text>
-            <Text style={styles.finishedTitle}>Challenge terminé !</Text>
-            <View style={styles.finishedStats}>
-              <View style={styles.finishedStatItem}>
-                <Text style={styles.finishedStatLabel}>Bonnes réponses</Text>
-                <Text style={[styles.finishedStatValue, { color: AppColors.success }]}>
-                  {correctCount}
-                </Text>
+          <ScrollView 
+            contentContainerStyle={styles.finishedScrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.finishedContainer}>
+              <Text style={styles.finishedEmoji}>🎉</Text>
+              <Text style={styles.finishedTitle}>Challenge terminé !</Text>
+              
+              <View style={styles.finishedStats}>
+                <View style={styles.finishedStatRow}>
+                  <Text style={styles.finishedStatLabel}>Précision</Text>
+                  <Text style={[styles.finishedStatValue, { color: AppColors.primary }]}>
+                    {correctCount} bonnes / {maxQuestions} → {precision}% 👍
+                  </Text>
+                </View>
+                
+                {bestStreak > 0 && (
+                  <View style={styles.finishedStatRow}>
+                    <Text style={styles.finishedStatLabel}>Ta meilleure série</Text>
+                    <Text style={[styles.finishedStatValue, { color: AppColors.success }]}>
+                      {bestStreak} {bestStreak === 1 ? 'bonne' : 'bonnes'} d&apos;affilée ✨
+                    </Text>
+                  </View>
+                )}
+                
+                {bestTable > 0 && (
+                  <View style={styles.finishedStatRow}>
+                    <Text style={styles.finishedStatLabel}>Table la plus solide</Text>
+                    <Text style={[styles.finishedStatValue, { color: AppColors.success }]}>
+                      {bestTable}
+                    </Text>
+                  </View>
+                )}
+                
+                {worstTable > 0 && (
+                  <View style={styles.finishedStatRow}>
+                    <Text style={styles.finishedStatLabel}>Table à surveiller</Text>
+                    <Text style={[styles.finishedStatValue, { color: AppColors.timerMiddle }]}>
+                      {worstTable}
+                    </Text>
+                  </View>
+                )}
               </View>
-              <View style={styles.finishedStatItem}>
-                <Text style={styles.finishedStatLabel}>Mauvaises réponses</Text>
-                <Text style={[styles.finishedStatValue, { color: AppColors.error }]}>
-                  {incorrectCount}
-                </Text>
-              </View>
-              <View style={styles.finishedStatItem}>
-                <Text style={styles.finishedStatLabel}>Score</Text>
-                <Text style={[styles.finishedStatValue, { color: AppColors.primary }]}>
-                  {Math.round((correctCount / maxQuestions) * 100)}%
-                </Text>
+              
+              <View style={styles.finishedButtonsContainer}>
+                {wrongAnswers.length > 0 && (
+                  <TouchableOpacity
+                    style={[styles.finishedButton, styles.finishedButtonSecondary]}
+                    onPress={() => {
+                      setIsFinished(false);
+                      setIsReviewMode(true);
+                      setCorrectCount(0);
+                      setIncorrectCount(0);
+                      setTotalQuestions(0);
+                      setConsecutiveCorrect(0);
+                      setMaxQuestions(wrongAnswers.length);
+                      const firstWrongQuestion = wrongAnswers[0];
+                      setCurrentQuestion(firstWrongQuestion);
+                      setUserAnswer('');
+                      setAttempts(0);
+                      setShowFeedback(false);
+                      setShowCorrectAnswer(false);
+                      setIsTimeout(false);
+                      const duration = currentUser 
+                        ? (currentUser.timerSettings?.enabled ? (currentUser.timerSettings.duration || 0) : 0)
+                        : (settings.timerEnabled ? settings.timerDuration : 0);
+                      setTimeRemaining(duration);
+                      
+                      setTimeout(() => {
+                        if (isMounted.current) {
+                          inputRef.current?.focus();
+                        }
+                      }, 100);
+                    }}
+                  >
+                    <Text style={styles.finishedButtonText}>Revoir mes erreurs</Text>
+                  </TouchableOpacity>
+                )}
+                
+                <TouchableOpacity
+                  style={styles.finishedButton}
+                  onPress={() => {
+                    setIsFinished(false);
+                    setIsReviewMode(false);
+                    setCorrectCount(0);
+                    setIncorrectCount(0);
+                    setTotalQuestions(0);
+                    setConsecutiveCorrect(0);
+                    setBestStreak(0);
+                    setWrongAnswers([]);
+                    setTableStats({});
+                    const questions = currentUser 
+                      ? (currentUser.challengeQuestions || 15)
+                      : (settings.challengeQuestions || 15);
+                    setMaxQuestions(questions);
+                    generateNewQuestion();
+                  }}
+                >
+                  <Text style={styles.finishedButtonText}>Refaire un Challenge</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.finishedButton, styles.finishedButtonOutline]}
+                  onPress={() => router.replace('/')}
+                >
+                  <Text style={[styles.finishedButtonText, styles.finishedButtonOutlineText]}>Retour à l&apos;accueil</Text>
+                </TouchableOpacity>
               </View>
             </View>
-            <TouchableOpacity
-              style={styles.finishedButton}
-              onPress={() => router.replace('/')}
-            >
-              <Text style={styles.finishedButtonText}>Retour à l&apos;accueil</Text>
-            </TouchableOpacity>
-          </View>
+          </ScrollView>
         </SafeAreaView>
       </View>
     );
@@ -852,13 +996,26 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     textAlign: 'center',
   },
+  finishedScrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
   finishedStats: {
     width: '100%',
     backgroundColor: AppColors.surface,
     borderRadius: 16,
     padding: 24,
-    marginBottom: 32,
+    marginBottom: 24,
     gap: 16,
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  finishedStatRow: {
+    gap: 8,
   },
   finishedStatItem: {
     flexDirection: 'row',
@@ -866,24 +1023,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   finishedStatLabel: {
-    fontSize: 16,
+    fontSize: 14,
     color: AppColors.textSecondary,
     fontWeight: '600' as const,
   },
   finishedStatValue: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: 'bold' as const,
+  },
+  finishedButtonsContainer: {
+    width: '100%',
+    gap: 12,
   },
   finishedButton: {
     backgroundColor: AppColors.primary,
     paddingVertical: 16,
-    paddingHorizontal: 48,
+    paddingHorizontal: 32,
     borderRadius: 16,
     shadowColor: AppColors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,
+    alignItems: 'center',
+  },
+  finishedButtonSecondary: {
+    backgroundColor: AppColors.timerMiddle,
+  },
+  finishedButtonOutline: {
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: AppColors.primary,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  finishedButtonOutlineText: {
+    color: AppColors.primary,
   },
   finishedButtonText: {
     fontSize: 18,
