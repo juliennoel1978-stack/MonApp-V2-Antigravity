@@ -1,6 +1,6 @@
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Camera, Image as ImageIcon, Save, X } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -21,15 +21,31 @@ import { useApp } from '@/contexts/AppContext';
 
 export default function UserFormScreen() {
   const router = useRouter();
-  const { addUser } = useApp();
+  const { userId } = useLocalSearchParams<{ userId?: string }>();
+  const { addUser, updateUser, users } = useApp();
   const [firstName, setFirstName] = useState('');
   const [gender, setGender] = useState<'boy' | 'girl'>('boy');
   const [age, setAge] = useState('');
   const [grade, setGrade] = useState('');
   const [photoUri, setPhotoUri] = useState<string | undefined>(undefined);
+  const [isEditing, setIsEditing] = useState(false);
   const firstNameRef = React.useRef<TextInput>(null);
   const ageRef = React.useRef<TextInput>(null);
   const gradeRef = React.useRef<TextInput>(null);
+
+  useEffect(() => {
+    if (userId) {
+      const user = users.find(u => u.id === userId);
+      if (user) {
+        setFirstName(user.firstName);
+        setGender(user.gender);
+        setAge(String(user.age));
+        setGrade(user.grade);
+        setPhotoUri(user.photoUri);
+        setIsEditing(true);
+      }
+    }
+  }, [userId, users]);
 
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -112,13 +128,23 @@ export default function UserFormScreen() {
     }
 
     try {
-      await addUser({
-        firstName: firstName.trim(),
-        gender,
-        age: Number(age),
-        grade: grade.trim(),
-        photoUri,
-      });
+      if (isEditing && userId) {
+        await updateUser(userId, {
+          firstName: firstName.trim(),
+          gender,
+          age: Number(age),
+          grade: grade.trim(),
+          photoUri,
+        });
+      } else {
+        await addUser({
+          firstName: firstName.trim(),
+          gender,
+          age: Number(age),
+          grade: grade.trim(),
+          photoUri,
+        });
+      }
 
       router.back();
     } catch (error) {
@@ -142,7 +168,7 @@ export default function UserFormScreen() {
           >
             <X size={24} color={AppColors.text} />
           </TouchableOpacity>
-          <Text style={styles.title}>Nouvel utilisateur</Text>
+          <Text style={styles.title}>{isEditing ? 'Modifier utilisateur' : 'Nouvel utilisateur'}</Text>
           <View style={styles.placeholder} />
         </View>
 

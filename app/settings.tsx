@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Volume2, VolumeX, Clock, User, Users, Trash2 } from 'lucide-react-native';
+import { Volume2, VolumeX, Clock, User, Users, Trash2, Edit, RotateCcw } from 'lucide-react-native';
 import React from 'react';
 import {
   View,
@@ -18,7 +18,7 @@ import { useApp } from '@/contexts/AppContext';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { settings, updateSettings, resetProgress, users, deleteUser, currentUser, clearCurrentUser } = useApp();
+  const { settings, updateSettings, resetProgress, users, deleteUser, currentUser, clearCurrentUser, selectUser, updateUser } = useApp();
 
   const fontSizes = [
     { value: 'normal' as const, label: 'Normal' },
@@ -82,7 +82,29 @@ export default function SettingsScreen() {
             )}
 
             {users.map(user => (
-              <View key={user.id} style={styles.userItem}>
+              <TouchableOpacity
+                key={user.id}
+                style={styles.userItem}
+                onPress={() => {
+                  if (!currentUser || currentUser.id !== user.id) {
+                    if (Platform.OS === 'web') {
+                      // @ts-ignore
+                      if (window.confirm(`Sélectionner ${user.firstName} ?`)) {
+                        selectUser(user.id);
+                      }
+                    } else {
+                      Alert.alert(
+                        'Sélectionner',
+                        `Voulez-vous utiliser le profil de ${user.firstName} ?`,
+                        [
+                          { text: 'Annuler', style: 'cancel' },
+                          { text: 'Oui', onPress: () => selectUser(user.id) },
+                        ]
+                      );
+                    }
+                  }
+                }}
+              >
                 <View style={styles.userItemLeft}>
                   <Text style={styles.userEmoji}>
                     {user.gender === 'boy' ? '👦' : '👧'}
@@ -92,12 +114,78 @@ export default function SettingsScreen() {
                     <Text style={styles.userItemDetails}>
                       {user.age} ans • {user.grade}
                     </Text>
+                    {currentUser?.id === user.id && (
+                      <Text style={styles.currentUserBadge}>✓ Actuel</Text>
+                    )}
                   </View>
                 </View>
                 <View style={styles.userItemActions}>
                   <TouchableOpacity
                     style={styles.userActionButton}
-                    onPress={() => {
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      router.push(`/user-form?userId=${user.id}` as any);
+                    }}
+                  >
+                    <Edit size={18} color={AppColors.primary} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.userActionButton}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      if (Platform.OS === 'web') {
+                        // @ts-ignore
+                        if (window.confirm(`Réinitialiser la progression de ${user.firstName} ?`)) {
+                          const resetUser = {
+                            ...user,
+                            progress: user.progress.map(p => ({
+                              ...p,
+                              starsEarned: 0,
+                              completed: false,
+                              correctAnswers: 0,
+                              totalAttempts: 0,
+                              level1Completed: false,
+                              level2Completed: false,
+                            }))
+                          };
+                          updateUser(user.id, resetUser);
+                        }
+                      } else {
+                        Alert.alert(
+                          'Réinitialiser',
+                          `Voulez-vous réinitialiser la progression de ${user.firstName} ?`,
+                          [
+                            { text: 'Annuler', style: 'cancel' },
+                            {
+                              text: 'Réinitialiser',
+                              style: 'destructive',
+                              onPress: () => {
+                                const resetUser = {
+                                  ...user,
+                                  progress: user.progress.map(p => ({
+                                    ...p,
+                                    starsEarned: 0,
+                                    completed: false,
+                                    correctAnswers: 0,
+                                    totalAttempts: 0,
+                                    level1Completed: false,
+                                    level2Completed: false,
+                                  }))
+                                };
+                                updateUser(user.id, resetUser);
+                              }
+                            },
+                          ]
+                        );
+                      }
+                    }}
+                  >
+                    <RotateCcw size={18} color={AppColors.warning} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.userActionButton}
+                    onPress={(e) => {
+                      e.stopPropagation();
                       if (Platform.OS === 'web') {
                         // @ts-ignore
                         if (window.confirm(`Supprimer ${user.firstName} ?`)) {
@@ -115,10 +203,10 @@ export default function SettingsScreen() {
                       }
                     }}
                   >
-                    <Trash2 size={20} color={AppColors.error} />
+                    <Trash2 size={18} color={AppColors.error} />
                   </TouchableOpacity>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
 
             <TouchableOpacity
@@ -600,6 +688,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  currentUserBadge: {
+    fontSize: 11,
+    fontWeight: '600' as const,
+    color: AppColors.primary,
+    marginTop: 4,
+  },
   userItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -627,8 +721,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   userActionButton: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     borderRadius: 8,
     backgroundColor: AppColors.borderLight,
     justifyContent: 'center',
