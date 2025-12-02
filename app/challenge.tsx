@@ -19,6 +19,27 @@ import { useApp } from '@/contexts/AppContext';
 
 const { width } = Dimensions.get('window');
 
+const CORRECT_PHRASES = [
+  "Bravo, c'est exactement ça !",
+  "Super, ta table est bien en place 💪",
+  "Parfait, tu vas de plus en plus vite ✨",
+  "Nickel, on continue sur cette lancée !",
+  "Génial ! On sent que tu maîtrises ! 🔥",
+  "Top ! Tu deviens vraiment fort(e) avec cette table 🚀",
+];
+
+const ERROR_PHRASES = [
+  "Ce n'est pas grave, on réessaiera cette table 😉",
+  "Presque ! On la reverra un peu plus tard.",
+  "Tu progresseras en la revoyant plusieurs fois, c'est normal.",
+  "On corrige ensemble, et on continue tranquillement.",
+  "L'important, c'est de rester dans le jeu, pas d'être parfait.",
+];
+
+const getRandomPhrase = (phrases: string[]) => {
+  return phrases[Math.floor(Math.random() * phrases.length)];
+};
+
 type QuestionType = 'result' | 'multiplier' | 'multiplicand';
 
 type Question = {
@@ -45,6 +66,8 @@ export default function ChallengeScreen() {
   const [showCorrectAnswer, setShowCorrectAnswer] = useState<boolean>(false);
   const [isTimeout, setIsTimeout] = useState<boolean>(false);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
+  const [currentCorrectPhrase, setCurrentCorrectPhrase] = useState<string>('');
+  const [currentErrorPhrase, setCurrentErrorPhrase] = useState<string>('');
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
   const celebrationAnim = React.useRef(new Animated.Value(0)).current;
   const inputRef = useRef<TextInput>(null);
@@ -205,6 +228,7 @@ export default function ChallengeScreen() {
       setCorrectCount(prev => prev + 1);
       setTotalQuestions(prev => prev + 1);
       setConsecutiveCorrect(newConsecutive);
+      setCurrentCorrectPhrase(getRandomPhrase(CORRECT_PHRASES));
 
       if (newConsecutive === 4) {
         setShowCelebration(true);
@@ -244,6 +268,7 @@ export default function ChallengeScreen() {
         setIncorrectCount(prev => prev + 1);
         setTotalQuestions(prev => prev + 1);
         setShowCorrectAnswer(true);
+        setCurrentErrorPhrase(getRandomPhrase(ERROR_PHRASES));
 
         setTimeout(() => {
           if (isMounted.current) {
@@ -416,6 +441,9 @@ export default function ChallengeScreen() {
                       <Text style={[styles.feedbackText, { color: AppColors.success }]}>
                         Correct !
                       </Text>
+                      <Text style={styles.encouragementText}>
+                        {currentCorrectPhrase}
+                      </Text>
                     </View>
                   ) : isTimeout ? (
                     <View style={styles.feedbackBox}>
@@ -453,9 +481,9 @@ export default function ChallengeScreen() {
                     </View>
                   ) : (
                     <View style={styles.feedbackBox}>
-                      <X size={48} color={AppColors.error} />
-                      <Text style={[styles.feedbackText, { color: AppColors.error }]}>
-                        {attempts === 1 ? 'Essaie encore !' : 'Pas tout à fait...'}
+                      <X size={48} color={attempts === 1 ? AppColors.timerMiddle : AppColors.timerEnd} />
+                      <Text style={[styles.feedbackText, { color: attempts === 1 ? AppColors.timerMiddle : AppColors.timerEnd }]}>
+                        {attempts === 1 ? 'On réessaie 😌' : 'Pas tout à fait...'}
                       </Text>
                       {showCorrectAnswer && (
                         <View style={styles.answerContainer}>
@@ -480,6 +508,9 @@ export default function ChallengeScreen() {
                               {currentQuestion.type !== 'result' && currentQuestion.num1 * currentQuestion.num2}
                             </Text>
                           </View>
+                          <Text style={styles.kindPhraseText}>
+                            {currentErrorPhrase}
+                          </Text>
                         </View>
                       )}
                     </View>
@@ -639,6 +670,21 @@ const styles = StyleSheet.create({
   feedbackText: {
     fontSize: 18,
     fontWeight: 'bold' as const,
+  },
+  encouragementText: {
+    fontSize: 16,
+    color: AppColors.success,
+    textAlign: 'center' as const,
+    marginTop: 4,
+    fontWeight: '500' as const,
+  },
+  kindPhraseText: {
+    fontSize: 15,
+    color: AppColors.textSecondary,
+    textAlign: 'center' as const,
+    marginTop: 8,
+    fontStyle: 'italic' as const,
+    paddingHorizontal: 16,
   },
   answerContainer: {
     alignItems: 'center',
