@@ -293,7 +293,7 @@ export default function PracticeScreen() {
     }
 
     if (level === 1) {
-      if (finalCorrectCount >= 7) {
+      if (finalCorrectCount >= 8) {
         updateTableProgress(table.number, finalCorrectCount, questions.length, finalCorrectCount === 10 ? 2 : 1, 1);
         if (finalCorrectCount === 10) setQuestionsToReview([]);
         setShowLevelTransition(true);
@@ -304,7 +304,7 @@ export default function PracticeScreen() {
       const totalCorrectLevel2 = finalCorrectCount;
       let stars = 1;
       if (totalCorrectLevel2 === 10) stars = 4;
-      else if (totalCorrectLevel2 >= 7) stars = 3;
+      else if (totalCorrectLevel2 >= 8) stars = 3;
       else if (totalCorrectLevel2 >= 5) stars = 2;
       
       updateTableProgress(table.number, totalCorrectLevel2, questions.length, stars, 2);
@@ -399,7 +399,7 @@ export default function PracticeScreen() {
   };
 
   if (showLevelTransition) {
-    // Logic for transition (success Level 1 -> Level 2)
+    const starsEarnedLevel1 = correctCount === 10 ? 2 : 1;
     return (
       <View style={styles.backgroundContainer}>
         <SafeAreaView style={styles.container}>
@@ -419,14 +419,14 @@ export default function PracticeScreen() {
                   <Star
                     key={starIndex}
                     size={40}
-                    color={starIndex <= 2 ? AppColors.warning : AppColors.borderLight}
-                    fill={starIndex <= 2 ? AppColors.warning : 'transparent'}
+                    color={starIndex <= starsEarnedLevel1 ? AppColors.warning : AppColors.borderLight}
+                    fill={starIndex <= starsEarnedLevel1 ? AppColors.warning : 'transparent'}
                   />
                 ))}
               </View>
-              <Text style={styles.intermediateStarsText}>2 étoiles sur 4</Text>
+              <Text style={styles.intermediateStarsText}>{starsEarnedLevel1} étoile{starsEarnedLevel1 > 1 ? 's' : ''} sur 4</Text>
               <Text style={styles.transitionDescription}>
-                Maintenant, allons plus loin ! Tape les réponses pour obtenir les 2 étoiles restantes.
+                Maintenant, allons plus loin ! Tape les réponses pour obtenir les {4 - starsEarnedLevel1} étoile{4 - starsEarnedLevel1 > 1 ? 's' : ''} restante{4 - starsEarnedLevel1 > 1 ? 's' : ''}.
               </Text>
             </View>
             
@@ -521,7 +521,7 @@ export default function PracticeScreen() {
                   💪 Continue à t&apos;entraîner, tu vas y arriver !
                 </Text>
                 <Text style={styles.encouragementSmall}>
-                  Il te faut au moins 7/10 pour passer au niveau suivant.
+                  Il te faut au moins 8/10 pour passer au niveau suivant.
                 </Text>
               </View>
 
@@ -614,9 +614,9 @@ export default function PracticeScreen() {
     const totalCorrectLevel2 = correctCount;
     let stars = 4;
     if (totalCorrectLevel2 < 10) {
-      stars = totalCorrectLevel2 >= 7 ? 3 : totalCorrectLevel2 >= 5 ? 2 : 1;
+      stars = totalCorrectLevel2 >= 8 ? 3 : totalCorrectLevel2 >= 5 ? 2 : 1;
     }
-    const passed = stars >= 3; // Score >= 7
+    const passed = stars >= 3;
 
     return (
       <View style={styles.backgroundContainer}>
