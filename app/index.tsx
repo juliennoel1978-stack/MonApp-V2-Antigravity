@@ -117,17 +117,9 @@ export default function HomeScreen() {
     console.log('[HomeScreen] Current user:', currentUser?.firstName || 'none');
     console.log('[HomeScreen] Users array:', JSON.stringify(users, null, 2));
     
-    if (users.length === 0) {
-      console.error('[HomeScreen] ⚠️ WARNING: No users found when opening modal!');
-      console.log('[HomeScreen] This should not happen if users were created in settings');
-      console.log('[HomeScreen] Opening settings instead to create users');
-      router.push('/settings' as any);
-      return;
-    } else {
-      users.forEach((u, idx) => {
-        console.log(`[HomeScreen]   User ${idx + 1}:`, u.firstName, 'ID:', u.id, 'Age:', u.age);
-      });
-    }
+    users.forEach((u, idx) => {
+      console.log(`[HomeScreen]   User ${idx + 1}:`, u.firstName, 'ID:', u.id, 'Age:', u.age);
+    });
     
     console.log('[HomeScreen] ================================================');
     setShowUserModal(true);
@@ -181,15 +173,13 @@ export default function HomeScreen() {
       )}
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          {users.length > 0 && (
-            <TouchableOpacity
-              style={styles.settingsButton}
-              onPress={handleOpenModal}
-              testID="users-button"
-            >
-              <Users size={28} color={AppColors.text} />
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={handleOpenModal}
+            testID="users-button"
+          >
+            <Users size={28} color={AppColors.text} />
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.settingsButton}
             onPress={() => router.push('/settings' as any)}
