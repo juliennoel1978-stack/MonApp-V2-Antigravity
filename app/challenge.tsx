@@ -183,9 +183,7 @@ export default function ChallengeScreen() {
       clearInterval(timerRef.current);
     }
     
-    if (timerEnabled && timerDuration > 0 && !showFeedback && !showCelebration) {
-      setTimeRemaining(timerDuration);
-      
+    if (timerEnabled && timerDuration > 0 && !showFeedback && !showCelebration && currentQuestion) {
       timerRef.current = setInterval(() => {
         setTimeRemaining(prev => {
           if (prev <= 1) {
