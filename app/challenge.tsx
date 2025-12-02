@@ -29,7 +29,7 @@ const CORRECT_PHRASES = [
 ];
 
 const ERROR_PHRASES = [
-  "Ce n'est pas grave, on réessaiera cette table 😉",
+  "On révisera cette table 😉, si besoin",
   "Presque ! On la reverra un peu plus tard.",
   "Tu progresseras en la revoyant plusieurs fois, c'est normal.",
   "On corrige ensemble, et on continue tranquillement.",
@@ -660,12 +660,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   feedbackContainer: {
-    marginTop: 16,
+    marginTop: 8,
     marginBottom: 16,
   },
   feedbackBox: {
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   feedbackText: {
     fontSize: 18,
@@ -682,14 +682,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: AppColors.textSecondary,
     textAlign: 'center' as const,
-    marginTop: 8,
+    marginTop: 6,
     fontStyle: 'italic' as const,
     paddingHorizontal: 16,
   },
   answerContainer: {
     alignItems: 'center',
-    marginTop: 8,
-    gap: 16,
+    marginTop: 4,
+    gap: 8,
   },
   correctAnswerLabel: {
     fontSize: 15,
@@ -698,7 +698,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   correctAnswerValue: {
-    fontSize: 44,
+    fontSize: 32,
     fontWeight: 'bold' as const,
     color: AppColors.primary,
   },
