@@ -441,7 +441,7 @@ export default function DiscoveryScreen() {
       setTimeout(() => setHomeClickCount(0), 2000);
     } else {
       setHomeClickCount(0);
-      router.push('/');
+      router.replace('/');
     }
   };
 
