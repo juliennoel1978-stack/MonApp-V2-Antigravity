@@ -286,6 +286,7 @@ export default function PracticeScreen() {
           }, 500);
         }
       } else {
+        setQuestionsToReview([]);
         setShowResult(true);
       }
       return;
@@ -467,6 +468,42 @@ export default function PracticeScreen() {
   if (showResult) {
     // Logic for Final Result Screen (Level 1 Fail OR Level 2 End)
     if (level === 1) {
+      // Check if we just finished a review session successfully
+      const justFinishedReview = questions.length < 10 && correctCount === questions.length && !isReviewMode;
+      
+      if (justFinishedReview) {
+        return (
+          <View style={styles.backgroundContainer}>
+            <SafeAreaView style={styles.container}>
+              <View style={styles.resultContainer}>
+                <Text style={styles.resultTitle}>Bravo ! 🎉</Text>
+                <Text style={styles.resultSubtitle}>
+                  Tu as réussi toutes les questions de révision !
+                </Text>
+
+                <View style={styles.resultButtonsColumn}>
+                  <TouchableOpacity
+                    style={[styles.resultButton, { backgroundColor: tableColor }]}
+                    onPress={retry}
+                    testID="retry-button"
+                  >
+                    <Text style={styles.resultButtonText}>Recommencer le quiz complet</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.resultButton, styles.outlineButton, { borderColor: tableColor }]}
+                    onPress={() => router.push('/tables' as any)}
+                    testID="back-button-result"
+                  >
+                    <Text style={[styles.outlineButtonText, { color: tableColor }]}>Aller à une autre table</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </SafeAreaView>
+          </View>
+        );
+      }
+      
       // Level 1 Failed (Score <= 6)
       return (
         <View style={styles.backgroundContainer}>
@@ -537,6 +574,42 @@ export default function PracticeScreen() {
       );
     }
 
+    // Check if we just finished a review session successfully for Level 2
+    const justFinishedReviewL2 = questions.length < 10 && correctCount === questions.length && !isReviewMode;
+    
+    if (justFinishedReviewL2) {
+      return (
+        <View style={styles.backgroundContainer}>
+          <SafeAreaView style={styles.container}>
+            <View style={styles.resultContainer}>
+              <Text style={styles.resultTitle}>Bravo ! 🎉</Text>
+              <Text style={styles.resultSubtitle}>
+                Tu as réussi toutes les questions de révision !
+              </Text>
+
+              <View style={styles.resultButtonsColumn}>
+                <TouchableOpacity
+                  style={[styles.resultButton, { backgroundColor: tableColor }]}
+                  onPress={retry}
+                  testID="retry-button"
+                >
+                  <Text style={styles.resultButtonText}>Recommencer le quiz complet</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.resultButton, styles.outlineButton, { borderColor: tableColor }]}
+                  onPress={() => router.push('/tables' as any)}
+                  testID="back-button-result"
+                >
+                  <Text style={[styles.outlineButtonText, { color: tableColor }]}>Aller à une autre table</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </SafeAreaView>
+        </View>
+      );
+    }
+    
     // Level 2 Finished
     const totalCorrectLevel2 = correctCount;
     let stars = 4;
