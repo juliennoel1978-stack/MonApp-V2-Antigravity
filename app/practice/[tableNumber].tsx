@@ -495,10 +495,10 @@ export default function PracticeScreen() {
                          Tu veux revoir uniquement les questions qui t&apos;ont posé problème ?
                       </Text>
                       <TouchableOpacity
-                        style={[styles.resultButton, styles.retryButton, { marginBottom: 10 }]}
+                        style={styles.reviewConfirmButton}
                         onPress={startReview}
                       >
-                        <Text style={styles.retryButtonText}>Oui, réviser ({questionsToReview.length})</Text>
+                        <Text style={styles.reviewConfirmButtonText}>Oui</Text>
                       </TouchableOpacity>
                    </View>
                 )}
@@ -519,7 +519,7 @@ export default function PracticeScreen() {
                     onPress={retry}
                     testID="retry-button"
                   >
-                    <Text style={styles.secondaryButtonText}>Réessayer le quiz</Text>
+                    <Text style={styles.secondaryButtonText}>Réessayer{"\n"}le quiz</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -527,7 +527,7 @@ export default function PracticeScreen() {
                     onPress={() => router.push('/tables' as any)}
                     testID="back-button-result"
                   >
-                    <Text style={[styles.outlineButtonText, { color: tableColor }]}>Autre table</Text>
+                    <Text style={[styles.outlineButtonText, { color: tableColor }]}>Autre{"\n"}table</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1017,9 +1017,11 @@ const styles = StyleSheet.create({
     borderColor: AppColors.border,
   },
   secondaryButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     color: AppColors.text,
+    textAlign: 'center',
+    lineHeight: 20,
   },
   resultContainer: {
     flex: 1,
@@ -1055,7 +1057,7 @@ const styles = StyleSheet.create({
   },
   resultCardCompact: {
     backgroundColor: AppColors.surface,
-    padding: 24,
+    padding: 20,
     borderRadius: 20,
     alignItems: 'center',
     width: '100%',
@@ -1065,18 +1067,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 5,
-    marginBottom: 24,
+    marginBottom: 20,
   },
   resultScore: {
-    fontSize: 64,
+    fontSize: 56,
     fontWeight: 'bold',
     color: AppColors.primary,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   resultLabel: {
-    fontSize: 18,
+    fontSize: 16,
     color: AppColors.textSecondary,
-    marginBottom: 24,
+    marginBottom: 16,
     fontWeight: '600',
   },
   starsContainer: {
@@ -1125,8 +1127,10 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   outlineButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
+    textAlign: 'center',
+    lineHeight: 20,
   },
   resultButtonText: {
     fontSize: 16,
@@ -1228,18 +1232,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   encouragementLarge: {
-    fontSize: 18,
+    fontSize: 16,
     color: AppColors.text,
     textAlign: 'center',
     fontWeight: '600',
-    marginTop: 24,
-    lineHeight: 26,
+    marginTop: 20,
+    lineHeight: 24,
   },
   encouragementSmall: {
-    fontSize: 14,
+    fontSize: 13,
     color: AppColors.textSecondary,
     textAlign: 'center',
-    marginTop: 12,
+    marginTop: 8,
+    lineHeight: 18,
   },
   resultButtonTextLarge: {
     fontSize: 26,
@@ -1262,11 +1267,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   reviewText: {
-    fontSize: 16,
+    fontSize: 15,
     color: AppColors.text,
     textAlign: 'center',
     marginBottom: 12,
     fontWeight: '600',
+    lineHeight: 22,
+  },
+  reviewConfirmButton: {
+    backgroundColor: AppColors.warning,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  reviewConfirmButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
   primaryButton: {
     paddingVertical: 18,
