@@ -179,12 +179,12 @@ export default function ChallengeScreen() {
       ? (currentUser.timerSettings?.duration || 0)
       : settings.timerDuration;
     
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    
     if (timerEnabled && timerDuration > 0 && !showFeedback && !showCelebration) {
       setTimeRemaining(timerDuration);
-      
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
       
       timerRef.current = setInterval(() => {
         setTimeRemaining(prev => {
@@ -209,10 +209,6 @@ export default function ChallengeScreen() {
           clearInterval(timerRef.current);
         }
       };
-    } else {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
     }
   }, [currentQuestion, showFeedback, showCelebration, settings.timerEnabled, settings.timerDuration, currentUser, handleTimeOut, generateNewQuestion]);
 
