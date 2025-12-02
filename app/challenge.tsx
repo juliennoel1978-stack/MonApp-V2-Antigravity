@@ -660,12 +660,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   feedbackContainer: {
-    marginTop: 8,
+    marginTop: 0,
     marginBottom: 16,
   },
   feedbackBox: {
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
   },
   feedbackText: {
     fontSize: 18,
@@ -682,14 +682,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: AppColors.textSecondary,
     textAlign: 'center' as const,
-    marginTop: 6,
+    marginTop: 4,
     fontStyle: 'italic' as const,
     paddingHorizontal: 16,
   },
   answerContainer: {
     alignItems: 'center',
-    marginTop: 4,
-    gap: 8,
+    marginTop: 2,
+    gap: 6,
   },
   correctAnswerLabel: {
     fontSize: 15,
