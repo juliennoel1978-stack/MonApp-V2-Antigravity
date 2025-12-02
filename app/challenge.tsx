@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Home, X, Check, Timer } from 'lucide-react-native';
+import { Home, X, Check, Timer, Clock } from 'lucide-react-native';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
@@ -43,6 +43,7 @@ export default function ChallengeScreen() {
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
   const [showCelebration, setShowCelebration] = useState<boolean>(false);
   const [showCorrectAnswer, setShowCorrectAnswer] = useState<boolean>(false);
+  const [isTimeout, setIsTimeout] = useState<boolean>(false);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
   const celebrationAnim = React.useRef(new Animated.Value(0)).current;
@@ -59,12 +60,14 @@ export default function ChallengeScreen() {
 
   const handleTimeOut = useCallback(() => {
     if (!isMounted.current) return;
-    setIncorrectCount(prev => prev + 1);
+    
+    // In both modes, we don't count it as "incorrect" (failure), just not successful in time
     setTotalQuestions(prev => prev + 1);
     setConsecutiveCorrect(0);
     setShowCorrectAnswer(true);
     setShowFeedback(true);
     setIsCorrect(false);
+    setIsTimeout(true);
   }, []);
 
   const generateNewQuestion = useCallback(() => {
@@ -108,6 +111,7 @@ export default function ChallengeScreen() {
     setAttempts(0);
     setShowFeedback(false);
     setShowCorrectAnswer(false);
+    setIsTimeout(false);
     const duration = currentUser 
       ? (currentUser.timerSettings?.enabled ? (currentUser.timerSettings.duration || 0) : 0)
       : (settings.timerEnabled ? settings.timerDuration : 0);
@@ -301,6 +305,12 @@ export default function ChallengeScreen() {
             ? (currentUser.timerSettings?.displayMode || 'chronometer')
             : settings.timerDisplayMode;
           
+          const timerColor = timeRemaining > timerDuration * 0.66 
+            ? AppColors.timerStart 
+            : timeRemaining > timerDuration * 0.33 
+            ? AppColors.timerMiddle 
+            : AppColors.timerEnd;
+
           if (!timerEnabled || timerDuration === 0 || showCelebration) return null;
           
           return (
@@ -309,12 +319,12 @@ export default function ChallengeScreen() {
                 <>
                   <Timer 
                     size={20} 
-                    color={timeRemaining <= timerDuration / 2 ? AppColors.error : AppColors.success} 
+                    color={timerColor} 
                   />
                   <Text 
                     style={[
                       styles.timerText,
-                      { color: timeRemaining <= timerDuration / 2 ? AppColors.error : AppColors.success }
+                      { color: timerColor }
                     ]}
                   >
                     {timeRemaining}s
@@ -327,11 +337,7 @@ export default function ChallengeScreen() {
                       styles.progressBar,
                       { 
                         width: `${(timeRemaining / timerDuration) * 100}%`,
-                        backgroundColor: timeRemaining <= timerDuration / 3 
-                          ? AppColors.error 
-                          : timeRemaining <= timerDuration * 2 / 3 
-                          ? AppColors.warning 
-                          : AppColors.success
+                        backgroundColor: timerColor
                       }
                     ]} 
                   />
@@ -410,6 +416,20 @@ export default function ChallengeScreen() {
                       <Text style={[styles.feedbackText, { color: AppColors.success }]}>
                         Correct !
                       </Text>
+                    </View>
+                  ) : isTimeout ? (
+                    <View style={styles.feedbackBox}>
+                      <Clock size={48} color={AppColors.timerMiddle} />
+                      <Text style={[styles.feedbackText, { color: AppColors.timerMiddle, textAlign: 'center' }]}>
+                        {(currentUser?.timerSettings?.displayMode || settings.timerDisplayMode) === 'bar' 
+                          ? "Prends ton temps,\non regarde la réponse ensemble."
+                          : "Temps écoulé !"}
+                      </Text>
+                      {showCorrectAnswer && (
+                        <Text style={styles.correctAnswerText}>
+                          La bonne réponse est : {currentQuestion.answer}
+                        </Text>
+                      )}
                     </View>
                   ) : (
                     <View style={styles.feedbackBox}>

@@ -18,6 +18,10 @@ export const AppColors = {
   warning: '#FFC107',
   error: '#FF5252',
   
+  timerStart: '#86EFAC', // Soft Green
+  timerMiddle: '#FBBF24', // Amber/Orange
+  timerEnd: '#F97316', // Orange
+  
   background: '#F8F9FE',
   surface: '#FFFFFF',
   surfaceLight: '#F5F7FF',
