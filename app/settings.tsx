@@ -340,62 +340,107 @@ export default function SettingsScreen() {
             </View>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Mode de jeu</Text>
+          {!currentUser && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Mode de jeu</Text>
+              <Text style={styles.sectionNote}>
+                ℹ️ Ces paramètres sont utilisés uniquement en mode anonyme. Configurez le chronomètre pour chaque utilisateur dans leur profil.
+              </Text>
 
-            <View style={styles.settingItem}>
-              <View style={styles.settingLeft}>
-                <Clock size={24} color={AppColors.primary} />
-                <View style={styles.settingTextContainer}>
-                  <Text style={styles.settingTitle}>Chronomètre</Text>
-                  <Text style={styles.settingDescription}>
-                    Activer le mode challenge avec chrono
-                  </Text>
+              <View style={styles.settingItem}>
+                <View style={styles.settingLeft}>
+                  <Clock size={24} color={AppColors.primary} />
+                  <View style={styles.settingTextContainer}>
+                    <Text style={styles.settingTitle}>Chronomètre</Text>
+                    <Text style={styles.settingDescription}>
+                      Activer le mode challenge avec chrono
+                    </Text>
+                  </View>
                 </View>
-              </View>
-              <Switch
-                value={settings.timerEnabled}
-                onValueChange={value =>
-                  updateSettings({ timerEnabled: value })
-                }
-                trackColor={{
-                  false: AppColors.borderLight,
-                  true: AppColors.primary,
-                }}
-                thumbColor="#FFFFFF"
-              />
-            </View>
-
-            {settings.timerEnabled && (
-              <View style={styles.timerConfig}>
-                <Text style={styles.timerLabel}>
-                  Durée du chronomètre : {settings.timerDuration === 0 ? 'Désactivé' : `${settings.timerDuration} sec`}
-                </Text>
-                <Slider
-                  style={styles.slider}
-                  minimumValue={0}
-                  maximumValue={30}
-                  step={5}
-                  value={settings.timerDuration}
+                <Switch
+                  value={settings.timerEnabled}
                   onValueChange={value =>
-                    updateSettings({ timerDuration: value })
+                    updateSettings({ timerEnabled: value })
                   }
-                  minimumTrackTintColor={AppColors.primary}
-                  maximumTrackTintColor={AppColors.borderLight}
-                  thumbTintColor={AppColors.primary}
+                  trackColor={{
+                    false: AppColors.borderLight,
+                    true: AppColors.primary,
+                  }}
+                  thumbColor="#FFFFFF"
                 />
-                <View style={styles.sliderLabels}>
-                  <Text style={styles.sliderLabelText}>0</Text>
-                  <Text style={styles.sliderLabelText}>5</Text>
-                  <Text style={styles.sliderLabelText}>10</Text>
-                  <Text style={styles.sliderLabelText}>15</Text>
-                  <Text style={styles.sliderLabelText}>20</Text>
-                  <Text style={styles.sliderLabelText}>25</Text>
-                  <Text style={styles.sliderLabelText}>30</Text>
-                </View>
               </View>
-            )}
-          </View>
+
+              {settings.timerEnabled && (
+                <View style={styles.timerConfig}>
+                  <View style={styles.timerModeSection}>
+                    <Text style={styles.timerSubLabel}>Mode d&apos;affichage</Text>
+                    <View style={styles.timerModeButtons}>
+                      <TouchableOpacity
+                        style={[
+                          styles.timerModeButton,
+                          settings.timerDisplayMode === 'bar' && styles.timerModeButtonActive,
+                        ]}
+                        onPress={() => updateSettings({ timerDisplayMode: 'bar' })}
+                      >
+                        <Text
+                          style={[
+                            styles.timerModeButtonText,
+                            settings.timerDisplayMode === 'bar' && styles.timerModeButtonTextActive,
+                          ]}
+                        >
+                          📊 Barre
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[
+                          styles.timerModeButton,
+                          settings.timerDisplayMode === 'chronometer' && styles.timerModeButtonActive,
+                        ]}
+                        onPress={() => updateSettings({ timerDisplayMode: 'chronometer' })}
+                      >
+                        <Text
+                          style={[
+                            styles.timerModeButtonText,
+                            settings.timerDisplayMode === 'chronometer' && styles.timerModeButtonTextActive,
+                          ]}
+                        >
+                          ⏱️ Chrono
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  <View style={styles.timerDurationSection}>
+                    <Text style={styles.timerSubLabel}>
+                      Durée : {settings.timerDuration === 0 ? 'Désactivé' : `${settings.timerDuration} sec`}
+                    </Text>
+                    <Slider
+                      style={styles.slider}
+                      minimumValue={0}
+                      maximumValue={30}
+                      step={5}
+                      value={settings.timerDuration}
+                      onValueChange={value =>
+                        updateSettings({ timerDuration: value })
+                      }
+                      minimumTrackTintColor={AppColors.primary}
+                      maximumTrackTintColor={AppColors.borderLight}
+                      thumbTintColor={AppColors.primary}
+                    />
+                    <View style={styles.sliderLabels}>
+                      <Text style={styles.sliderLabelText}>0</Text>
+                      <Text style={styles.sliderLabelText}>5</Text>
+                      <Text style={styles.sliderLabelText}>10</Text>
+                      <Text style={styles.sliderLabelText}>15</Text>
+                      <Text style={styles.sliderLabelText}>20</Text>
+                      <Text style={styles.sliderLabelText}>25</Text>
+                      <Text style={styles.sliderLabelText}>30</Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+            </View>
+          )}
 
           <TouchableOpacity
             style={styles.resetButton}
@@ -638,6 +683,50 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: AppColors.textSecondary,
     fontWeight: '500' as const,
+  },
+  sectionNote: {
+    fontSize: 13,
+    color: AppColors.textSecondary,
+    marginBottom: 12,
+    paddingHorizontal: 4,
+    fontStyle: 'italic' as const,
+  },
+  timerModeSection: {
+    gap: 8,
+  },
+  timerSubLabel: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: AppColors.text,
+    marginBottom: 4,
+  },
+  timerModeButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  timerModeButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: AppColors.surface,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: AppColors.border,
+  },
+  timerModeButtonActive: {
+    backgroundColor: AppColors.primary + '20',
+    borderColor: AppColors.primary,
+  },
+  timerModeButtonText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: AppColors.textSecondary,
+  },
+  timerModeButtonTextActive: {
+    color: AppColors.primary,
+  },
+  timerDurationSection: {
+    gap: 8,
   },
   currentUserCard: {
     backgroundColor: AppColors.primary + '10',

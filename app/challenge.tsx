@@ -31,7 +31,7 @@ type Question = {
 
 export default function ChallengeScreen() {
   const router = useRouter();
-  const { settings } = useApp();
+  const { settings, currentUser } = useApp();
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [userAnswer, setUserAnswer] = useState<string>('');
   const [attempts, setAttempts] = useState<number>(0);
@@ -108,22 +108,28 @@ export default function ChallengeScreen() {
     setAttempts(0);
     setShowFeedback(false);
     setShowCorrectAnswer(false);
-    setTimeRemaining(settings.timerDuration);
+    const duration = currentUser?.timerSettings?.enabled 
+      ? currentUser.timerSettings.duration 
+      : (settings.timerEnabled ? settings.timerDuration : 0);
+    setTimeRemaining(duration);
     
     setTimeout(() => {
       if (isMounted.current) {
         inputRef.current?.focus();
       }
     }, 100);
-  }, [settings.timerDuration]);
+  }, [settings.timerDuration, settings.timerEnabled, currentUser]);
 
   useEffect(() => {
     generateNewQuestion();
   }, [generateNewQuestion]);
 
   useEffect(() => {
-    if (settings.timerEnabled && settings.timerDuration > 0 && !showFeedback && !showCelebration) {
-      setTimeRemaining(settings.timerDuration);
+    const timerEnabled = currentUser?.timerSettings?.enabled ?? settings.timerEnabled;
+    const timerDuration = currentUser?.timerSettings?.duration ?? settings.timerDuration;
+    
+    if (timerEnabled && timerDuration > 0 && !showFeedback && !showCelebration) {
+      setTimeRemaining(timerDuration);
       
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -157,7 +163,7 @@ export default function ChallengeScreen() {
         clearInterval(timerRef.current);
       }
     }
-  }, [currentQuestion, showFeedback, showCelebration, settings.timerEnabled, settings.timerDuration, handleTimeOut, generateNewQuestion]);
+  }, [currentQuestion, showFeedback, showCelebration, settings.timerEnabled, settings.timerDuration, currentUser, handleTimeOut, generateNewQuestion]);
 
   const checkAnswer = () => {
     if (!currentQuestion || userAnswer.trim() === '') return;
@@ -280,22 +286,50 @@ export default function ChallengeScreen() {
           </View>
         </View>
 
-        {settings.timerEnabled && settings.timerDuration > 0 && !showCelebration && (
-          <View style={styles.timerContainer}>
-            <Timer 
-              size={20} 
-              color={timeRemaining <= settings.timerDuration / 2 ? AppColors.error : AppColors.success} 
-            />
-            <Text 
-              style={[
-                styles.timerText,
-                { color: timeRemaining <= settings.timerDuration / 2 ? AppColors.error : AppColors.success }
-              ]}
-            >
-              {timeRemaining}s
-            </Text>
-          </View>
-        )}
+        {(() => {
+          const timerEnabled = currentUser?.timerSettings?.enabled ?? settings.timerEnabled;
+          const timerDuration = currentUser?.timerSettings?.duration ?? settings.timerDuration;
+          const displayMode = currentUser?.timerSettings?.displayMode ?? settings.timerDisplayMode;
+          
+          if (!timerEnabled || timerDuration === 0 || showCelebration) return null;
+          
+          return (
+            <View style={styles.timerContainer}>
+              {displayMode === 'chronometer' ? (
+                <>
+                  <Timer 
+                    size={20} 
+                    color={timeRemaining <= timerDuration / 2 ? AppColors.error : AppColors.success} 
+                  />
+                  <Text 
+                    style={[
+                      styles.timerText,
+                      { color: timeRemaining <= timerDuration / 2 ? AppColors.error : AppColors.success }
+                    ]}
+                  >
+                    {timeRemaining}s
+                  </Text>
+                </>
+              ) : (
+                <View style={styles.progressBarContainer}>
+                  <View 
+                    style={[
+                      styles.progressBar,
+                      { 
+                        width: `${(timeRemaining / timerDuration) * 100}%`,
+                        backgroundColor: timeRemaining <= timerDuration / 3 
+                          ? AppColors.error 
+                          : timeRemaining <= timerDuration * 2 / 3 
+                          ? AppColors.warning 
+                          : AppColors.success
+                      }
+                    ]} 
+                  />
+                </View>
+              )}
+            </View>
+          );
+        })()}
 
         <KeyboardAvoidingView
           style={styles.keyboardAvoid}
@@ -574,5 +608,16 @@ const styles = StyleSheet.create({
   timerText: {
     fontSize: 20,
     fontWeight: 'bold' as const,
+  },
+  progressBarContainer: {
+    width: '100%',
+    height: 8,
+    backgroundColor: AppColors.borderLight,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    borderRadius: 4,
   },
 });

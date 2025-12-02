@@ -16,6 +16,7 @@ export interface UserSettings {
   fontSize: 'normal' | 'large' | 'xlarge';
   timerEnabled: boolean;
   timerDuration: number;
+  timerDisplayMode: 'bar' | 'chronometer';
   soundEnabled: boolean;
   avatarId: string;
 }

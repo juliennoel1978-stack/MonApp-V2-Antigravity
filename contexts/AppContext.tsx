@@ -18,6 +18,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   fontSize: 'large',
   timerEnabled: false,
   timerDuration: 10,
+  timerDisplayMode: 'chronometer',
   soundEnabled: true,
   avatarId: 'avatar1',
 };
