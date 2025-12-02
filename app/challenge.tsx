@@ -108,8 +108,8 @@ export default function ChallengeScreen() {
     setAttempts(0);
     setShowFeedback(false);
     setShowCorrectAnswer(false);
-    const duration = currentUser?.timerSettings?.enabled 
-      ? currentUser.timerSettings.duration 
+    const duration = currentUser 
+      ? (currentUser.timerSettings?.enabled ? (currentUser.timerSettings.duration || 0) : 0)
       : (settings.timerEnabled ? settings.timerDuration : 0);
     setTimeRemaining(duration);
     
@@ -125,8 +125,12 @@ export default function ChallengeScreen() {
   }, [generateNewQuestion]);
 
   useEffect(() => {
-    const timerEnabled = currentUser?.timerSettings?.enabled ?? settings.timerEnabled;
-    const timerDuration = currentUser?.timerSettings?.duration ?? settings.timerDuration;
+    const timerEnabled = currentUser 
+      ? (currentUser.timerSettings?.enabled || false)
+      : settings.timerEnabled;
+    const timerDuration = currentUser
+      ? (currentUser.timerSettings?.duration || 0)
+      : settings.timerDuration;
     
     if (timerEnabled && timerDuration > 0 && !showFeedback && !showCelebration) {
       setTimeRemaining(timerDuration);
@@ -287,9 +291,15 @@ export default function ChallengeScreen() {
         </View>
 
         {(() => {
-          const timerEnabled = currentUser?.timerSettings?.enabled ?? settings.timerEnabled;
-          const timerDuration = currentUser?.timerSettings?.duration ?? settings.timerDuration;
-          const displayMode = currentUser?.timerSettings?.displayMode ?? settings.timerDisplayMode;
+          const timerEnabled = currentUser 
+            ? (currentUser.timerSettings?.enabled || false)
+            : settings.timerEnabled;
+          const timerDuration = currentUser
+            ? (currentUser.timerSettings?.duration || 0)
+            : settings.timerDuration;
+          const displayMode = currentUser
+            ? (currentUser.timerSettings?.displayMode || 'chronometer')
+            : settings.timerDisplayMode;
           
           if (!timerEnabled || timerDuration === 0 || showCelebration) return null;
           
