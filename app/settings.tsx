@@ -42,7 +42,7 @@ export default function SettingsScreen() {
                 <View style={styles.settingTextContainer}>
                   <Text style={styles.settingTitle}>Profils</Text>
                   <Text style={styles.settingDescription}>
-                    {users.length} utilisateur{users.length > 1 ? 's' : ''}
+                    {users.filter(u => u && u.firstName && u.gender && u.age && u.grade).length} utilisateur{users.filter(u => u && u.firstName && u.gender && u.age && u.grade).length > 1 ? 's' : ''}
                   </Text>
                 </View>
               </View>
@@ -81,7 +81,7 @@ export default function SettingsScreen() {
               </View>
             )}
 
-            {users.map(user => (
+            {users.filter(user => user && user.firstName && user.gender && user.age && user.grade).map(user => (
               <TouchableOpacity
                 key={user.id}
                 style={styles.userItem}

@@ -68,7 +68,21 @@ export const [AppProvider, useApp] = createContextHook(() => {
         parsedUsers.forEach((u: User, idx: number) => {
           console.log(`  User ${idx + 1}: ${u.firstName} (ID: ${u.id})`);
         });
-        setUsers(parsedUsers);
+        
+        const validUsers = parsedUsers.filter((u: User) => {
+          const isValid = u && u.id && u.firstName && u.gender && u.age && u.grade && u.createdAt && u.progress;
+          if (!isValid) {
+            console.log('⚠️ Filtering out invalid user:', u);
+          }
+          return isValid;
+        });
+        
+        if (validUsers.length !== parsedUsers.length) {
+          console.log(`🧹 Cleaned ${parsedUsers.length - validUsers.length} invalid user(s)`);
+          await AsyncStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(validUsers));
+        }
+        
+        setUsers(validUsers);
 
         if (currentUserId) {
           const user = parsedUsers.find((u: User) => u.id === currentUserId);
