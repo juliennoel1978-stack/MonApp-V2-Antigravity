@@ -154,7 +154,7 @@ export default function ChallengeScreen() {
               if (isMounted.current) {
                 generateNewQuestion();
               }
-            }, 2000);
+            }, 4000);
             return 0;
           }
           return prev - 1;
@@ -249,7 +249,7 @@ export default function ChallengeScreen() {
           if (isMounted.current) {
             generateNewQuestion();
           }
-        }, 3000);
+        }, 5000);
       }
     }
   };
@@ -601,9 +601,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold' as const,
   },
   correctAnswerText: {
-    fontSize: 18,
-    color: AppColors.text,
-    marginTop: 6,
+    fontSize: 32,
+    fontWeight: 'bold' as const,
+    color: AppColors.primary,
+    marginTop: 12,
     textAlign: 'center',
   },
   celebrationContainer: {
