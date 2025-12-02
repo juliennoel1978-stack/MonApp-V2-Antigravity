@@ -483,19 +483,19 @@ export default function PracticeScreen() {
 
                 <View style={styles.resultButtonsColumn}>
                   <TouchableOpacity
-                    style={[styles.resultButton, { backgroundColor: tableColor }]}
+                    style={[styles.primaryButton, { backgroundColor: tableColor }]}
                     onPress={retry}
                     testID="retry-button"
                   >
-                    <Text style={styles.resultButtonText}>Recommencer le quiz complet</Text>
+                    <Text style={styles.primaryButtonText}>Recommencer le quiz complet</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={[styles.resultButton, styles.outlineButton, { borderColor: tableColor }]}
+                    style={[styles.primaryButton, styles.outlineButton, { borderColor: tableColor, backgroundColor: 'transparent' }]}
                     onPress={() => router.push('/tables' as any)}
                     testID="back-button-result"
                   >
-                    <Text style={[styles.outlineButtonText, { color: tableColor }]}>Aller à une autre table</Text>
+                    <Text style={[styles.primaryButtonText, { color: tableColor }]}>Aller à une autre table</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -589,19 +589,19 @@ export default function PracticeScreen() {
 
               <View style={styles.resultButtonsColumn}>
                 <TouchableOpacity
-                  style={[styles.resultButton, { backgroundColor: tableColor }]}
+                  style={[styles.primaryButton, { backgroundColor: tableColor }]}
                   onPress={retry}
                   testID="retry-button"
                 >
-                  <Text style={styles.resultButtonText}>Recommencer le quiz complet</Text>
+                  <Text style={styles.primaryButtonText}>Recommencer le quiz complet</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.resultButton, styles.outlineButton, { borderColor: tableColor }]}
+                  style={[styles.primaryButton, styles.outlineButton, { borderColor: tableColor, backgroundColor: 'transparent' }]}
                   onPress={() => router.push('/tables' as any)}
                   testID="back-button-result"
                 >
-                  <Text style={[styles.outlineButtonText, { color: tableColor }]}>Aller à une autre table</Text>
+                  <Text style={[styles.primaryButtonText, { color: tableColor }]}>Aller à une autre table</Text>
                 </TouchableOpacity>
               </View>
             </View>
