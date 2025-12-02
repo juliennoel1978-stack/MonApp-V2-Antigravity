@@ -46,6 +46,7 @@ export default function PracticeScreen() {
   const [questionsToReview, setQuestionsToReview] = useState<Question[]>([]);
   const [showErrorFeedback, setShowErrorFeedback] = useState(false);
   const [isReviewMode, setIsReviewMode] = useState(false);
+  const [reviewErrors, setReviewErrors] = useState<Question[]>([]);
   
 
 
@@ -124,11 +125,20 @@ export default function PracticeScreen() {
       }, 1000);
     } else {
       animateError();
-      const alreadyInReview = questionsToReview.some(
-        q => q.multiplicand === currentQuestion.multiplicand && q.multiplier === currentQuestion.multiplier
-      );
-      if (!alreadyInReview) {
-        setQuestionsToReview([...questionsToReview, currentQuestion]);
+      if (isReviewMode) {
+        const alreadyInReviewErrors = reviewErrors.some(
+          q => q.multiplicand === currentQuestion.multiplicand && q.multiplier === currentQuestion.multiplier
+        );
+        if (!alreadyInReviewErrors) {
+          setReviewErrors([...reviewErrors, currentQuestion]);
+        }
+      } else {
+        const alreadyInReview = questionsToReview.some(
+          q => q.multiplicand === currentQuestion.multiplicand && q.multiplier === currentQuestion.multiplier
+        );
+        if (!alreadyInReview) {
+          setQuestionsToReview([...questionsToReview, currentQuestion]);
+        }
       }
       setShowErrorFeedback(true);
       speakCorrection(currentQuestion);
@@ -155,11 +165,20 @@ export default function PracticeScreen() {
       }, 1000);
     } else {
       animateError();
-      const alreadyInReview = questionsToReview.some(
-        q => q.multiplicand === currentQuestion.multiplicand && q.multiplier === currentQuestion.multiplier
-      );
-      if (!alreadyInReview) {
-        setQuestionsToReview([...questionsToReview, currentQuestion]);
+      if (isReviewMode) {
+        const alreadyInReviewErrors = reviewErrors.some(
+          q => q.multiplicand === currentQuestion.multiplicand && q.multiplier === currentQuestion.multiplier
+        );
+        if (!alreadyInReviewErrors) {
+          setReviewErrors([...reviewErrors, currentQuestion]);
+        }
+      } else {
+        const alreadyInReview = questionsToReview.some(
+          q => q.multiplicand === currentQuestion.multiplicand && q.multiplier === currentQuestion.multiplier
+        );
+        if (!alreadyInReview) {
+          setQuestionsToReview([...questionsToReview, currentQuestion]);
+        }
       }
       setShowErrorFeedback(true);
       speakCorrection(currentQuestion);
@@ -246,8 +265,29 @@ export default function PracticeScreen() {
   const finishLevel = (finalCorrectCount: number) => {
     if (isReviewMode) {
       setIsReviewMode(false);
-      setQuestionsToReview([]); 
-      setShowResult(true);
+      
+      if (reviewErrors.length > 0) {
+        setQuestionsToReview([...reviewErrors]);
+        setReviewErrors([]);
+        setQuestions([...reviewErrors]);
+        setCurrentQuestionIndex(0);
+        setSelectedAnswer(null);
+        setUserInput('');
+        setIsCorrect(null);
+        setCorrectCount(0);
+        setShowResult(false);
+        setIsReviewMode(true);
+        
+        if (level === 2) {
+          setTimeout(() => {
+            if (isMounted.current) {
+              inputRef.current?.focus();
+            }
+          }, 500);
+        }
+      } else {
+        setShowResult(true);
+      }
       return;
     }
 
@@ -290,6 +330,7 @@ export default function PracticeScreen() {
     setCorrectCount(0);
     setShowLevelTransition(false);
     setQuestionsToReview([]);
+    setReviewErrors([]);
     
     setTimeout(() => {
       if (isMounted.current) {
@@ -308,6 +349,7 @@ export default function PracticeScreen() {
     setShowResult(false);
     setShowLevelTransition(false);
     setQuestionsToReview([]);
+    setReviewErrors([]);
     
     if (level === 2) {
       setTimeout(() => {
@@ -319,15 +361,17 @@ export default function PracticeScreen() {
   };
 
   const startReview = () => {
+    const reviewQuestions = [...questionsToReview];
     setIsReviewMode(true);
-    setQuestions([...questionsToReview]);
-    setQuestionsToReview([]);
+    setQuestions(reviewQuestions);
+    setReviewErrors([]);
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
     setUserInput('');
     setIsCorrect(null);
     setCorrectCount(0);
     setShowResult(false);
+    setShowLevelTransition(false);
     
     if (level === 2) {
       setTimeout(() => {
@@ -1091,10 +1135,11 @@ const styles = StyleSheet.create({
   },
   transitionDescription: {
     fontSize: 16,
-    color: AppColors.textSecondary,
+    color: AppColors.text,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 24,
     paddingHorizontal: 20,
+    fontWeight: '600',
   },
   intermediateStarsText: {
     fontSize: 22,
