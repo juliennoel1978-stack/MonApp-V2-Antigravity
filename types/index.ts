@@ -38,6 +38,12 @@ export interface Question {
 
 export type GameMode = 'discovery' | 'practice' | 'challenge';
 
+export interface TimerSettings {
+  enabled: boolean;
+  duration: number;
+  displayMode: 'bar' | 'chronometer';
+}
+
 export interface User {
   id: string;
   firstName: string;
@@ -47,4 +53,5 @@ export interface User {
   photoUri?: string;
   createdAt: string;
   progress: UserProgress[];
+  timerSettings?: TimerSettings;
 }

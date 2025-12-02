@@ -1,5 +1,5 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Camera, Image as ImageIcon, Save, X } from 'lucide-react-native';
+import { Camera, Image as ImageIcon, Save, X, Clock } from 'lucide-react-native';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -29,6 +29,9 @@ export default function UserFormScreen() {
   const [grade, setGrade] = useState('');
   const [photoUri, setPhotoUri] = useState<string | undefined>(undefined);
   const [isEditing, setIsEditing] = useState(false);
+  const [timerEnabled, setTimerEnabled] = useState(false);
+  const [timerDuration, setTimerDuration] = useState(15);
+  const [timerDisplayMode, setTimerDisplayMode] = useState<'bar' | 'chronometer'>('bar');
   const firstNameRef = React.useRef<TextInput>(null);
   const ageRef = React.useRef<TextInput>(null);
   const gradeRef = React.useRef<TextInput>(null);
@@ -43,6 +46,11 @@ export default function UserFormScreen() {
         setGrade(user.grade);
         setPhotoUri(user.photoUri);
         setIsEditing(true);
+        if (user.timerSettings) {
+          setTimerEnabled(user.timerSettings.enabled);
+          setTimerDuration(user.timerSettings.duration);
+          setTimerDisplayMode(user.timerSettings.displayMode);
+        }
       }
     }
   }, [userId, users]);
@@ -127,6 +135,12 @@ export default function UserFormScreen() {
       return;
     }
 
+    const timerSettings = timerEnabled ? {
+      enabled: timerEnabled,
+      duration: timerDuration,
+      displayMode: timerDisplayMode,
+    } : undefined;
+
     try {
       if (isEditing && userId) {
         await updateUser(userId, {
@@ -135,6 +149,7 @@ export default function UserFormScreen() {
           age: Number(age),
           grade: grade.trim(),
           photoUri,
+          timerSettings,
         });
       } else {
         await addUser({
@@ -143,6 +158,7 @@ export default function UserFormScreen() {
           age: Number(age),
           grade: grade.trim(),
           photoUri,
+          timerSettings,
         });
       }
 
@@ -301,6 +317,96 @@ export default function UserFormScreen() {
                 handleSave();
               }}
             />
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.label}>Chronomètre</Text>
+            <TouchableOpacity
+              style={[
+                styles.timerToggle,
+                timerEnabled && styles.timerToggleActive,
+              ]}
+              onPress={() => setTimerEnabled(!timerEnabled)}
+            >
+              <Clock size={24} color={timerEnabled ? AppColors.primary : AppColors.textSecondary} />
+              <Text
+                style={[
+                  styles.timerToggleText,
+                  timerEnabled && styles.timerToggleTextActive,
+                ]}
+              >
+                {timerEnabled ? 'Activé' : 'Désactivé'}
+              </Text>
+            </TouchableOpacity>
+
+            {timerEnabled && (
+              <View style={styles.timerConfig}>
+                <View style={styles.timerModeSection}>
+                  <Text style={styles.timerSubLabel}>Mode d&apos;affichage</Text>
+                  <View style={styles.timerModeButtons}>
+                    <TouchableOpacity
+                      style={[
+                        styles.timerModeButton,
+                        timerDisplayMode === 'bar' && styles.timerModeButtonActive,
+                      ]}
+                      onPress={() => setTimerDisplayMode('bar')}
+                    >
+                      <Text
+                        style={[
+                          styles.timerModeButtonText,
+                          timerDisplayMode === 'bar' && styles.timerModeButtonTextActive,
+                        ]}
+                      >
+                        📊 Barre
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.timerModeButton,
+                        timerDisplayMode === 'chronometer' && styles.timerModeButtonActive,
+                      ]}
+                      onPress={() => setTimerDisplayMode('chronometer')}
+                    >
+                      <Text
+                        style={[
+                          styles.timerModeButtonText,
+                          timerDisplayMode === 'chronometer' && styles.timerModeButtonTextActive,
+                        ]}
+                      >
+                        ⏱️ Chrono
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View style={styles.timerDurationSection}>
+                  <Text style={styles.timerSubLabel}>
+                    Durée : {timerDuration} sec
+                  </Text>
+                  <View style={styles.timerDurationButtons}>
+                    {[5, 10, 15, 20, 30].map((duration) => (
+                      <TouchableOpacity
+                        key={duration}
+                        style={[
+                          styles.timerDurationButton,
+                          timerDuration === duration && styles.timerDurationButtonActive,
+                        ]}
+                        onPress={() => setTimerDuration(duration)}
+                      >
+                        <Text
+                          style={[
+                            styles.timerDurationButtonText,
+                            timerDuration === duration && styles.timerDurationButtonTextActive,
+                          ]}
+                        >
+                          {duration}s
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            )}
           </View>
 
           <TouchableOpacity
@@ -468,6 +574,95 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: 18,
     fontWeight: 'bold' as const,
+    color: '#FFFFFF',
+  },
+  timerToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: AppColors.surface,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: AppColors.border,
+  },
+  timerToggleActive: {
+    backgroundColor: AppColors.primary + '10',
+    borderColor: AppColors.primary,
+  },
+  timerToggleText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: AppColors.textSecondary,
+  },
+  timerToggleTextActive: {
+    color: AppColors.primary,
+  },
+  timerConfig: {
+    marginTop: 16,
+    gap: 16,
+  },
+  timerModeSection: {
+    gap: 8,
+  },
+  timerSubLabel: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: AppColors.text,
+    marginBottom: 4,
+  },
+  timerModeButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  timerModeButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: AppColors.surface,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: AppColors.border,
+  },
+  timerModeButtonActive: {
+    backgroundColor: AppColors.primary + '20',
+    borderColor: AppColors.primary,
+  },
+  timerModeButtonText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: AppColors.textSecondary,
+  },
+  timerModeButtonTextActive: {
+    color: AppColors.primary,
+  },
+  timerDurationSection: {
+    gap: 8,
+  },
+  timerDurationButtons: {
+    flexDirection: 'row',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  timerDurationButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    backgroundColor: AppColors.surface,
+    borderWidth: 2,
+    borderColor: AppColors.border,
+  },
+  timerDurationButtonActive: {
+    backgroundColor: AppColors.primary,
+    borderColor: AppColors.primary,
+  },
+  timerDurationButtonText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: AppColors.textSecondary,
+  },
+  timerDurationButtonTextActive: {
     color: '#FFFFFF',
   },
 });

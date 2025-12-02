@@ -1,5 +1,6 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Home, Check, X, Star, RefreshCw, ArrowRight } from 'lucide-react-native';
+import TimerDisplay from '@/components/TimerDisplay';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
@@ -27,7 +28,7 @@ export default function PracticeScreen() {
   const router = useRouter();
   const { tableNumber } = useLocalSearchParams();
   const table = getTableByNumber(Number(tableNumber));
-  const { updateTableProgress, unlockBadge, getTableProgress, settings } = useApp();
+  const { updateTableProgress, unlockBadge, getTableProgress, settings, currentUser } = useApp();
 
   const tableProgress = getTableProgress(Number(tableNumber));
   const initialLevel = tableProgress?.level1Completed ? 2 : 1;
@@ -43,10 +44,13 @@ export default function PracticeScreen() {
   const [homeClickCount, setHomeClickCount] = useState(0);
   const [showLevelTransition, setShowLevelTransition] = useState(false);
   
-  // New states for error handling and review
   const [questionsToReview, setQuestionsToReview] = useState<Question[]>([]);
   const [showErrorFeedback, setShowErrorFeedback] = useState(false);
   const [isReviewMode, setIsReviewMode] = useState(false);
+  
+  const [timeRemaining, setTimeRemaining] = useState<number>(0);
+  const [timerActive, setTimerActive] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -57,14 +61,75 @@ export default function PracticeScreen() {
     isMounted.current = true;
     return () => {
       isMounted.current = false;
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
     };
   }, []);
+
+  const handleTimeUp = () => {
+    if (selectedAnswer !== null) return;
+    
+    const correct = false;
+    setIsCorrect(correct);
+    
+    const alreadyInReview = questionsToReview.some(
+      q => q.multiplicand === currentQuestion.multiplicand && q.multiplier === currentQuestion.multiplier
+    );
+    if (!alreadyInReview) {
+      setQuestionsToReview([...questionsToReview, currentQuestion]);
+    }
+    setShowErrorFeedback(true);
+    speakCorrection(currentQuestion);
+  };
+
+  useEffect(() => {
+    if (currentUser?.timerSettings?.enabled && timerActive && timeRemaining > 0) {
+      timerRef.current = setInterval(() => {
+        setTimeRemaining(prev => {
+          if (prev <= 1) {
+            setTimerActive(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [timerActive, timeRemaining, currentUser]);
+
+  useEffect(() => {
+    if (timeRemaining === 0 && selectedAnswer === null && questions.length > 0) {
+      handleTimeUp();
+    }
+  }, [timeRemaining, selectedAnswer, questions.length]);
 
   useEffect(() => {
     if (table) {
       setQuestions(generateQuestions(table.number, 10));
+      if (currentUser?.timerSettings?.enabled) {
+        setTimeRemaining(currentUser.timerSettings.duration);
+        setTimerActive(true);
+      }
     }
-  }, [table]);
+  }, [table, currentUser]);
+
+  useEffect(() => {
+    if (currentQuestionIndex >= 0 && questions.length > 0 && selectedAnswer === null) {
+      if (currentUser?.timerSettings?.enabled) {
+        setTimeRemaining(currentUser.timerSettings.duration);
+        setTimerActive(true);
+      }
+    }
+  }, [currentQuestionIndex, questions.length, currentUser, selectedAnswer]);
 
   if (!table || questions.length === 0) {
     return (
@@ -99,6 +164,7 @@ export default function PracticeScreen() {
   const handleAnswerSelect = (answer: number) => {
     if (selectedAnswer !== null) return;
 
+    setTimerActive(false);
     setSelectedAnswer(answer);
     const correct = answer === currentQuestion.correctAnswer;
     setIsCorrect(correct);
@@ -129,6 +195,7 @@ export default function PracticeScreen() {
   const handleInputSubmit = () => {
     if (userInput.trim() === '' || selectedAnswer !== null) return;
 
+    setTimerActive(false);
     const answer = parseInt(userInput, 10);
     setSelectedAnswer(answer);
     const correct = answer === currentQuestion.correctAnswer;
@@ -160,6 +227,10 @@ export default function PracticeScreen() {
   const handleContinueAfterError = () => {
     setShowErrorFeedback(false);
     stop();
+    if (currentUser?.timerSettings?.enabled) {
+      setTimeRemaining(currentUser.timerSettings.duration);
+      setTimerActive(true);
+    }
     nextQuestion(correctCount);
   };
 
@@ -169,7 +240,10 @@ export default function PracticeScreen() {
     setSelectedAnswer(null);
     setUserInput('');
     setIsCorrect(null);
-    // Focus input if level 2
+    if (currentUser?.timerSettings?.enabled) {
+      setTimeRemaining(currentUser.timerSettings.duration);
+      setTimerActive(true);
+    }
     if (level === 2) {
       setTimeout(() => {
         if (isMounted.current) {
@@ -283,6 +357,11 @@ export default function PracticeScreen() {
     setShowLevelTransition(false);
     setQuestionsToReview([]);
     
+    if (currentUser?.timerSettings?.enabled) {
+      setTimeRemaining(currentUser.timerSettings.duration);
+      setTimerActive(true);
+    }
+    
     setTimeout(() => {
       if (isMounted.current) {
         inputRef.current?.focus();
@@ -301,6 +380,11 @@ export default function PracticeScreen() {
     setShowLevelTransition(false);
     setQuestionsToReview([]);
     
+    if (currentUser?.timerSettings?.enabled) {
+      setTimeRemaining(currentUser.timerSettings.duration);
+      setTimerActive(true);
+    }
+    
     if (level === 2) {
       setTimeout(() => {
         if (isMounted.current) {
@@ -312,14 +396,19 @@ export default function PracticeScreen() {
 
   const startReview = () => {
     setIsReviewMode(true);
-    setQuestions([...questionsToReview]); // Copy questions to review
-    setQuestionsToReview([]); // Clear the list for new attempts? Or keep it? The prompt says "puis vide cette liste à la fin".
+    setQuestions([...questionsToReview]);
+    setQuestionsToReview([]);
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
     setUserInput('');
     setIsCorrect(null);
     setCorrectCount(0);
     setShowResult(false);
+    
+    if (currentUser?.timerSettings?.enabled) {
+      setTimeRemaining(currentUser.timerSettings.duration);
+      setTimerActive(true);
+    }
     
     if (level === 2) {
       setTimeout(() => {
@@ -612,6 +701,14 @@ export default function PracticeScreen() {
             <Check size={20} color={AppColors.success} />
           </View>
         </View>
+
+        {currentUser?.timerSettings?.enabled && (
+          <TimerDisplay
+            duration={currentUser.timerSettings.duration}
+            timeRemaining={timeRemaining}
+            mode={currentUser.timerSettings.displayMode}
+          />
+        )}
 
         <KeyboardAvoidingView
           style={styles.keyboardAvoid}
