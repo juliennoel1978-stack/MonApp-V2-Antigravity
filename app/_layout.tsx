@@ -1,9 +1,11 @@
 import './polyfill';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { TouchableOpacity } from "react-native";
+import { X } from "lucide-react-native";
 import { AppProvider } from "@/contexts/AppContext";
 
 
@@ -12,6 +14,8 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
+  const router = useRouter();
+  
   return (
     <Stack screenOptions={{ headerBackTitle: "Retour" }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -36,7 +40,18 @@ function RootLayoutNav() {
         name="settings" 
         options={{ 
           title: "Paramètres",
-          presentation: "modal"
+          presentation: "modal",
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => {
+                router.dismissAll();
+                router.replace('/');
+              }}
+              style={{ marginRight: 8 }}
+            >
+              <X size={24} color="#000" />
+            </TouchableOpacity>
+          ),
         }} 
       />
       <Stack.Screen 
