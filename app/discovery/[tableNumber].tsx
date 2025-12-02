@@ -348,12 +348,16 @@ export default function DiscoveryScreen() {
       title: `Découvre la table de ${table.number}`,
       content: table.story,
       visual: (
-        <View style={[styles.visualContainer, { backgroundColor: tableColor + '20', padding: 28, marginTop: 12 }]}>
+        <TouchableOpacity 
+          style={[styles.visualContainer, { backgroundColor: tableColor + '20', padding: 28, marginTop: 12 }]}
+          onPress={() => setCurrentStep(1)}
+          activeOpacity={0.8}
+        >
           <Text style={[styles.bigNumber, { color: tableColor }]}>
             {table.number}
           </Text>
           <Text style={styles.visualText}>Table de {table.number}</Text>
-        </View>
+        </TouchableOpacity>
       ),
     },
     {
