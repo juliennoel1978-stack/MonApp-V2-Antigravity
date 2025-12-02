@@ -154,7 +154,7 @@ export default function ChallengeScreen() {
               if (isMounted.current) {
                 generateNewQuestion();
               }
-            }, 4000);
+            }, 6000);
             return 0;
           }
           return prev - 1;
@@ -249,7 +249,7 @@ export default function ChallengeScreen() {
           if (isMounted.current) {
             generateNewQuestion();
           }
-        }, 5000);
+        }, 7000);
       }
     }
   };
@@ -426,9 +426,29 @@ export default function ChallengeScreen() {
                           : "Temps écoulé !"}
                       </Text>
                       {showCorrectAnswer && (
-                        <Text style={styles.correctAnswerText}>
-                          La bonne réponse est : {currentQuestion.answer}
-                        </Text>
+                        <View style={styles.answerContainer}>
+                          <Text style={styles.correctAnswerLabel}>
+                            La bonne réponse est : <Text style={styles.correctAnswerValue}>{currentQuestion.answer}</Text>
+                          </Text>
+                          <View style={styles.equationContainer}>
+                            <Text style={styles.equationText}>
+                              {currentQuestion.type === 'multiplicand' && (
+                                <Text style={styles.underlined}>{currentQuestion.num1}</Text>
+                              )}
+                              {currentQuestion.type !== 'multiplicand' && currentQuestion.num1}
+                              {' × '}
+                              {currentQuestion.type === 'multiplier' && (
+                                <Text style={styles.underlined}>{currentQuestion.num2}</Text>
+                              )}
+                              {currentQuestion.type !== 'multiplier' && currentQuestion.num2}
+                              {' = '}
+                              {currentQuestion.type === 'result' && (
+                                <Text style={styles.underlined}>{currentQuestion.answer}</Text>
+                              )}
+                              {currentQuestion.type !== 'result' && currentQuestion.num1 * currentQuestion.num2}
+                            </Text>
+                          </View>
+                        </View>
                       )}
                     </View>
                   ) : (
@@ -438,9 +458,29 @@ export default function ChallengeScreen() {
                         {attempts === 1 ? 'Essaie encore !' : 'Pas tout à fait...'}
                       </Text>
                       {showCorrectAnswer && (
-                        <Text style={styles.correctAnswerText}>
-                          La bonne réponse est : {currentQuestion.answer}
-                        </Text>
+                        <View style={styles.answerContainer}>
+                          <Text style={styles.correctAnswerLabel}>
+                            La bonne réponse est : <Text style={styles.correctAnswerValue}>{currentQuestion.answer}</Text>
+                          </Text>
+                          <View style={styles.equationContainer}>
+                            <Text style={styles.equationText}>
+                              {currentQuestion.type === 'multiplicand' && (
+                                <Text style={styles.underlined}>{currentQuestion.num1}</Text>
+                              )}
+                              {currentQuestion.type !== 'multiplicand' && currentQuestion.num1}
+                              {' × '}
+                              {currentQuestion.type === 'multiplier' && (
+                                <Text style={styles.underlined}>{currentQuestion.num2}</Text>
+                              )}
+                              {currentQuestion.type !== 'multiplier' && currentQuestion.num2}
+                              {' = '}
+                              {currentQuestion.type === 'result' && (
+                                <Text style={styles.underlined}>{currentQuestion.answer}</Text>
+                              )}
+                              {currentQuestion.type !== 'result' && currentQuestion.num1 * currentQuestion.num2}
+                            </Text>
+                          </View>
+                        </View>
                       )}
                     </View>
                   )}
@@ -597,15 +637,44 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   feedbackText: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold' as const,
   },
-  correctAnswerText: {
-    fontSize: 32,
+  answerContainer: {
+    alignItems: 'center',
+    marginTop: 16,
+    gap: 12,
+  },
+  correctAnswerLabel: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: AppColors.textSecondary,
+    textAlign: 'center',
+  },
+  correctAnswerValue: {
+    fontSize: 36,
     fontWeight: 'bold' as const,
     color: AppColors.primary,
-    marginTop: 12,
+  },
+  equationContainer: {
+    backgroundColor: AppColors.surfaceLight,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: AppColors.primary,
+  },
+  equationText: {
+    fontSize: 28,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
     textAlign: 'center',
+  },
+  underlined: {
+    textDecorationLine: 'underline',
+    textDecorationColor: AppColors.primary,
+    textDecorationStyle: 'solid',
+    color: AppColors.primary,
   },
   celebrationContainer: {
     alignItems: 'center',
