@@ -52,7 +52,7 @@ export default function TablesScreen() {
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.homeButton}
-            onPress={() => router.push('/')}
+            onPress={() => router.dismissAll()}
             testID="home-button"
           >
             <Home size={24} color={AppColors.text} />

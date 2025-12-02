@@ -154,7 +154,7 @@ export default function HomeScreen() {
   const completedTables = progress.filter(p => p.completed).length;
   const totalTables = progress.length;
 
-  if (!isReady || isLoading) {
+  if (!isReady) {
     return (
       <View style={{ flex: 1, backgroundColor: AppColors.background, justifyContent: 'center', alignItems: 'center' }}>
         <Text style={{ fontSize: 24, color: AppColors.text }}>Chargement...</Text>
@@ -164,6 +164,21 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.backgroundContainer}>
+      {isLoading && (
+        <View style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(255,255,255,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+        }}>
+          <Text style={{ fontSize: 18, color: AppColors.text }}>Mise à jour...</Text>
+        </View>
+      )}
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           {users.length > 0 && (

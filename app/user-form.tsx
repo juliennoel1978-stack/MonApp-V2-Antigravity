@@ -36,7 +36,8 @@ export default function UserFormScreen() {
 
     if (permissionResult.granted === false) {
       if (Platform.OS === 'web') {
-        alert('Permission d\'accès à la galerie requise');
+        // @ts-ignore
+        window.alert('Permission d\'accès à la galerie requise');
       } else {
         Alert.alert('Permission requise', 'Permission d\'accès à la galerie requise');
       }
@@ -60,7 +61,8 @@ export default function UserFormScreen() {
 
     if (permissionResult.granted === false) {
       if (Platform.OS === 'web') {
-        alert('Permission d\'accès à la caméra requise');
+        // @ts-ignore
+        window.alert('Permission d\'accès à la caméra requise');
       } else {
         Alert.alert('Permission requise', 'Permission d\'accès à la caméra requise');
       }
@@ -81,7 +83,8 @@ export default function UserFormScreen() {
   const handleSave = async () => {
     if (!firstName.trim()) {
       if (Platform.OS === 'web') {
-        alert('Le prénom est requis');
+        // @ts-ignore
+        window.alert('Le prénom est requis');
       } else {
         Alert.alert('Erreur', 'Le prénom est requis');
       }
@@ -90,7 +93,8 @@ export default function UserFormScreen() {
 
     if (!age || isNaN(Number(age)) || Number(age) <= 0) {
       if (Platform.OS === 'web') {
-        alert('L\'âge doit être un nombre valide');
+        // @ts-ignore
+        window.alert('L\'âge doit être un nombre valide');
       } else {
         Alert.alert('Erreur', 'L\'âge doit être un nombre valide');
       }
@@ -99,7 +103,8 @@ export default function UserFormScreen() {
 
     if (!grade.trim()) {
       if (Platform.OS === 'web') {
-        alert('La classe est requise');
+        // @ts-ignore
+        window.alert('La classe est requise');
       } else {
         Alert.alert('Erreur', 'La classe est requise');
       }
@@ -119,7 +124,8 @@ export default function UserFormScreen() {
     } catch (error) {
       console.error('Error adding user:', error);
       if (Platform.OS === 'web') {
-        alert('Erreur lors de l\'ajout de l\'utilisateur');
+        // @ts-ignore
+        window.alert('Erreur lors de l\'ajout de l\'utilisateur');
       } else {
         Alert.alert('Erreur', 'Erreur lors de l\'ajout de l\'utilisateur');
       }

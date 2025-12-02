@@ -341,7 +341,7 @@ export default function PracticeScreen() {
       }, 2000);
     } else {
       setHomeClickCount(0);
-      router.replace('/');
+      router.dismissAll();
     }
   };
 

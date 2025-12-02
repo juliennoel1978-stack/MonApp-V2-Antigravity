@@ -7,9 +7,13 @@ export async function speak(text: string) {
   await stop(); // Stop any current speech
 
   if (Platform.OS === 'web') {
+    // @ts-ignore
     const utterance = new SpeechSynthesisUtterance(text);
+    // @ts-ignore
     utterance.lang = 'fr-FR';
+    // @ts-ignore
     utterance.rate = 0.8; // Match the rate in Discovery
+    // @ts-ignore
     window.speechSynthesis.speak(utterance);
   } else {
     try {
@@ -44,6 +48,7 @@ export async function speak(text: string) {
 
 export async function stop() {
   if (Platform.OS === 'web') {
+    // @ts-ignore
     window.speechSynthesis.cancel();
   } else {
     if (currentSound) {

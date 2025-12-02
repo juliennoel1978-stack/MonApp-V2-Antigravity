@@ -59,7 +59,8 @@ export default function SettingsScreen() {
                     style={styles.clearUserButton}
                     onPress={() => {
                       if (Platform.OS === 'web') {
-                        if (confirm('Voulez-vous désélectionner cet utilisateur ?')) {
+                        // @ts-ignore
+                        if (window.confirm('Voulez-vous désélectionner cet utilisateur ?')) {
                           clearCurrentUser();
                         }
                       } else {
@@ -98,7 +99,8 @@ export default function SettingsScreen() {
                     style={styles.userActionButton}
                     onPress={() => {
                       if (Platform.OS === 'web') {
-                        if (confirm(`Supprimer ${user.firstName} ?`)) {
+                        // @ts-ignore
+                        if (window.confirm(`Supprimer ${user.firstName} ?`)) {
                           deleteUser(user.id);
                         }
                       } else {
@@ -311,7 +313,8 @@ export default function SettingsScreen() {
             style={styles.resetButton}
             onPress={() => {
               if (Platform.OS === 'web') {
-                if (confirm('Êtes-vous sûr de vouloir réinitialiser tous vos scores et votre progression ?')) {
+                // @ts-ignore
+                if (window.confirm('Êtes-vous sûr de vouloir réinitialiser tous vos scores et votre progression ?')) {
                   resetProgress();
                 }
               } else {

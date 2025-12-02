@@ -165,9 +165,13 @@ export default function DiscoveryScreen() {
     const text = `${tableNum} fois ${multiplier} égale ${result}`;
 
     if (Platform.OS === 'web') {
+      // @ts-ignore
       const utterance = new SpeechSynthesisUtterance(text);
+      // @ts-ignore
       utterance.lang = 'fr-FR';
+      // @ts-ignore
       utterance.rate = 0.8;
+      // @ts-ignore
       window.speechSynthesis.speak(utterance);
     } else {
       try {
@@ -240,17 +244,20 @@ export default function DiscoveryScreen() {
 
     if (Platform.OS === 'web') {
       if (isPlayingAudio) {
+        // @ts-ignore
         window.speechSynthesis.cancel();
         setIsPlayingAudio(false);
         return;
       }
 
       setIsPlayingAudio(true);
+      // @ts-ignore
       const utterances: SpeechSynthesisUtterance[] = [];
 
       for (let i = 1; i <= 10; i++) {
         const result = table.number * i;
         const text = `${table.number} fois ${i} égale ${result}`;
+        // @ts-ignore
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'fr-FR';
         utterance.rate = 0.8;
@@ -260,7 +267,9 @@ export default function DiscoveryScreen() {
       for (let i = 0; i < utterances.length; i++) {
         if (!isMounted.current) break;
         await new Promise<void>((resolve) => {
+          // @ts-ignore
           utterances[i].onend = () => resolve();
+          // @ts-ignore
           window.speechSynthesis.speak(utterances[i]);
         });
       }
@@ -441,7 +450,7 @@ export default function DiscoveryScreen() {
       setTimeout(() => setHomeClickCount(0), 2000);
     } else {
       setHomeClickCount(0);
-      router.replace('/');
+      router.dismissAll();
     }
   };
 
@@ -677,13 +686,13 @@ const styles = StyleSheet.create({
   },
   visualContainer: {
     width: width - 40,
-    padding: 40,
+    padding: 24,
     borderRadius: 24,
     alignItems: 'center',
     marginTop: 20,
   },
   bigNumber: {
-    fontSize: 120,
+    fontSize: 80,
     fontWeight: 'bold' as const,
     marginBottom: 16,
   },
@@ -705,16 +714,16 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   tipEmoji: {
-    fontSize: 64,
-    marginBottom: 16,
+    fontSize: 48,
+    marginBottom: 12,
   },
   tipText: {
-    fontSize: 20,
+    fontSize: 18,
     color: AppColors.text,
     textAlign: 'center',
     fontWeight: '600' as const,
-    lineHeight: 28,
-    marginBottom: 20,
+    lineHeight: 26,
+    marginBottom: 16,
   },
   tipExamplesContainer: {
     width: '100%',
@@ -744,7 +753,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   readyTitle: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: 'bold' as const,
     color: AppColors.text,
     marginBottom: 6,
@@ -774,7 +783,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   readyEmoji: {
-    fontSize: 48,
+    fontSize: 40,
     marginBottom: 8,
   },
   encouragementText: {
