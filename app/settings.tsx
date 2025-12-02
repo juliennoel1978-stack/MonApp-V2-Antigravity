@@ -344,8 +344,42 @@ export default function SettingsScreen() {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Mode de jeu</Text>
               <Text style={styles.sectionNote}>
-                ℹ️ Ces paramètres sont utilisés uniquement en mode anonyme. Configurez le chronomètre pour chaque utilisateur dans leur profil.
+                ℹ️ Ces paramètres sont utilisés uniquement en mode anonyme. Configurez ces paramètres pour chaque utilisateur dans leur profil.
               </Text>
+
+              <View style={styles.settingItem}>
+                <View style={styles.settingLeft}>
+                  <Text style={styles.settingIcon}>🎯</Text>
+                  <View style={styles.settingTextContainer}>
+                    <Text style={styles.settingTitle}>Challenge - Questions</Text>
+                    <Text style={styles.settingDescription}>
+                      {settings.challengeQuestions || 15} questions par challenge
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.challengeQuestionsButtons}>
+                {[12, 15, 20, 25, 30, 40, 50].map((num) => (
+                  <TouchableOpacity
+                    key={num}
+                    style={[
+                      styles.challengeQuestionButton,
+                      (settings.challengeQuestions || 15) === num && styles.challengeQuestionButtonActive,
+                    ]}
+                    onPress={() => updateSettings({ challengeQuestions: num })}
+                  >
+                    <Text
+                      style={[
+                        styles.challengeQuestionButtonText,
+                        (settings.challengeQuestions || 15) === num && styles.challengeQuestionButtonTextActive,
+                      ]}
+                    >
+                      {num}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
 
               <View style={styles.settingItem}>
                 <View style={styles.settingLeft}>
@@ -826,6 +860,36 @@ const styles = StyleSheet.create({
   addUserButtonText: {
     fontSize: 16,
     fontWeight: '600' as const,
+    color: '#FFFFFF',
+  },
+  challengeQuestionsButtons: {
+    flexDirection: 'row',
+    gap: 8,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    marginBottom: 12,
+  },
+  challengeQuestionButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    backgroundColor: AppColors.surface,
+    borderWidth: 2,
+    borderColor: AppColors.border,
+    minWidth: 48,
+    alignItems: 'center',
+  },
+  challengeQuestionButtonActive: {
+    backgroundColor: AppColors.primary,
+    borderColor: AppColors.primary,
+  },
+  challengeQuestionButtonText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: AppColors.textSecondary,
+  },
+  challengeQuestionButtonTextActive: {
     color: '#FFFFFF',
   },
 });

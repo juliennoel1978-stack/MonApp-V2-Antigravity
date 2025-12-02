@@ -68,6 +68,8 @@ export default function ChallengeScreen() {
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [currentCorrectPhrase, setCurrentCorrectPhrase] = useState<string>('');
   const [currentErrorPhrase, setCurrentErrorPhrase] = useState<string>('');
+  const [maxQuestions, setMaxQuestions] = useState<number>(15);
+  const [isFinished, setIsFinished] = useState<boolean>(false);
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
   const celebrationAnim = React.useRef(new Animated.Value(0)).current;
   const inputRef = useRef<TextInput>(null);
@@ -76,10 +78,15 @@ export default function ChallengeScreen() {
 
   useEffect(() => {
     isMounted.current = true;
+    const questions = currentUser 
+      ? (currentUser.challengeQuestions || 15)
+      : (settings.challengeQuestions || 15);
+    setMaxQuestions(questions);
+    console.log('🎯 Challenge initialized with', questions, 'questions');
     return () => {
       isMounted.current = false;
     };
-  }, []);
+  }, [currentUser, settings]);
 
   const handleTimeOut = useCallback(() => {
     if (!isMounted.current) return;
@@ -225,10 +232,18 @@ export default function ChallengeScreen() {
 
     if (correct) {
       const newConsecutive = consecutiveCorrect + 1;
-      setCorrectCount(prev => prev + 1);
-      setTotalQuestions(prev => prev + 1);
+      const newCorrectCount = correctCount + 1;
+      const newTotalQuestions = totalQuestions + 1;
+      setCorrectCount(newCorrectCount);
+      setTotalQuestions(newTotalQuestions);
       setConsecutiveCorrect(newConsecutive);
       setCurrentCorrectPhrase(getRandomPhrase(CORRECT_PHRASES));
+
+      if (newTotalQuestions >= maxQuestions) {
+        console.log('🎯 Challenge finished! Answered', newTotalQuestions, 'questions');
+        setIsFinished(true);
+        return;
+      }
 
       if (newConsecutive === 4) {
         setShowCelebration(true);
@@ -244,13 +259,17 @@ export default function ChallengeScreen() {
             setShowCelebration(false);
             celebrationAnim.setValue(0);
             setConsecutiveCorrect(0);
-            generateNewQuestion();
+            if (totalQuestions + 1 < maxQuestions) {
+              generateNewQuestion();
+            }
           }
         }, 3000);
       } else {
         setTimeout(() => {
           if (isMounted.current) {
-            generateNewQuestion();
+            if (newTotalQuestions < maxQuestions) {
+              generateNewQuestion();
+            }
           }
         }, 1500);
       }
@@ -265,19 +284,69 @@ export default function ChallengeScreen() {
           }
         }, 1500);
       } else {
-        setIncorrectCount(prev => prev + 1);
-        setTotalQuestions(prev => prev + 1);
+        const newIncorrectCount = incorrectCount + 1;
+        const newTotalQuestions = totalQuestions + 1;
+        setIncorrectCount(newIncorrectCount);
+        setTotalQuestions(newTotalQuestions);
         setShowCorrectAnswer(true);
         setCurrentErrorPhrase(getRandomPhrase(ERROR_PHRASES));
 
-        setTimeout(() => {
-          if (isMounted.current) {
-            generateNewQuestion();
-          }
-        }, 7000);
+        if (newTotalQuestions >= maxQuestions) {
+          console.log('🎯 Challenge finished! Answered', newTotalQuestions, 'questions');
+          setTimeout(() => {
+            if (isMounted.current) {
+              setIsFinished(true);
+            }
+          }, 7000);
+        } else {
+          setTimeout(() => {
+            if (isMounted.current) {
+              generateNewQuestion();
+            }
+          }, 7000);
+        }
       }
     }
   };
+
+  if (isFinished) {
+    return (
+      <View style={styles.backgroundContainer}>
+        <SafeAreaView style={styles.container} edges={['top']}>
+          <View style={styles.finishedContainer}>
+            <Text style={styles.finishedEmoji}>🎉</Text>
+            <Text style={styles.finishedTitle}>Challenge terminé !</Text>
+            <View style={styles.finishedStats}>
+              <View style={styles.finishedStatItem}>
+                <Text style={styles.finishedStatLabel}>Bonnes réponses</Text>
+                <Text style={[styles.finishedStatValue, { color: AppColors.success }]}>
+                  {correctCount}
+                </Text>
+              </View>
+              <View style={styles.finishedStatItem}>
+                <Text style={styles.finishedStatLabel}>Mauvaises réponses</Text>
+                <Text style={[styles.finishedStatValue, { color: AppColors.error }]}>
+                  {incorrectCount}
+                </Text>
+              </View>
+              <View style={styles.finishedStatItem}>
+                <Text style={styles.finishedStatLabel}>Score</Text>
+                <Text style={[styles.finishedStatValue, { color: AppColors.primary }]}>
+                  {Math.round((correctCount / maxQuestions) * 100)}%
+                </Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={styles.finishedButton}
+              onPress={() => router.replace('/')}
+            >
+              <Text style={styles.finishedButtonText}>Retour à l&apos;accueil</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
 
   if (!currentQuestion) {
     return null;
@@ -314,7 +383,7 @@ export default function ChallengeScreen() {
           <View style={styles.statBox}>
             <Text style={styles.statLabel}>Total</Text>
             <Text style={[styles.statValue, { color: AppColors.primary }]}>
-              {totalQuestions}
+              {totalQuestions}/{maxQuestions}
             </Text>
           </View>
         </View>
@@ -765,5 +834,60 @@ const styles = StyleSheet.create({
   progressBar: {
     height: '100%',
     borderRadius: 4,
+  },
+  finishedContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  finishedEmoji: {
+    fontSize: 120,
+    marginBottom: 24,
+  },
+  finishedTitle: {
+    fontSize: 32,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+    marginBottom: 32,
+    textAlign: 'center',
+  },
+  finishedStats: {
+    width: '100%',
+    backgroundColor: AppColors.surface,
+    borderRadius: 16,
+    padding: 24,
+    marginBottom: 32,
+    gap: 16,
+  },
+  finishedStatItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  finishedStatLabel: {
+    fontSize: 16,
+    color: AppColors.textSecondary,
+    fontWeight: '600' as const,
+  },
+  finishedStatValue: {
+    fontSize: 28,
+    fontWeight: 'bold' as const,
+  },
+  finishedButton: {
+    backgroundColor: AppColors.primary,
+    paddingVertical: 16,
+    paddingHorizontal: 48,
+    borderRadius: 16,
+    shadowColor: AppColors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  finishedButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold' as const,
+    color: '#FFFFFF',
   },
 });

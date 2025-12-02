@@ -32,6 +32,7 @@ export default function UserFormScreen() {
   const [timerEnabled, setTimerEnabled] = useState(false);
   const [timerDuration, setTimerDuration] = useState(15);
   const [timerDisplayMode, setTimerDisplayMode] = useState<'bar' | 'chronometer'>('bar');
+  const [challengeQuestions, setChallengeQuestions] = useState(15);
   const firstNameRef = React.useRef<TextInput>(null);
   const ageRef = React.useRef<TextInput>(null);
   const gradeRef = React.useRef<TextInput>(null);
@@ -50,6 +51,9 @@ export default function UserFormScreen() {
           setTimerEnabled(user.timerSettings.enabled);
           setTimerDuration(user.timerSettings.duration);
           setTimerDisplayMode(user.timerSettings.displayMode);
+        }
+        if (user.challengeQuestions) {
+          setChallengeQuestions(user.challengeQuestions);
         }
       }
     }
@@ -150,6 +154,7 @@ export default function UserFormScreen() {
           grade: grade.trim(),
           photoUri,
           timerSettings,
+          challengeQuestions,
         });
       } else {
         await addUser({
@@ -159,6 +164,7 @@ export default function UserFormScreen() {
           grade: grade.trim(),
           photoUri,
           timerSettings,
+          challengeQuestions,
         });
       }
 
@@ -317,6 +323,37 @@ export default function UserFormScreen() {
                 handleSave();
               }}
             />
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.label}>Challenge - Nombre de questions</Text>
+            <Text style={styles.challengeSubLabel}>
+              Définir combien de questions seront posées dans le challenge (12-50 questions)
+            </Text>
+            <Text style={styles.challengeCurrentValue}>
+              Questions : {challengeQuestions}
+            </Text>
+            <View style={styles.challengeQuestionsButtons}>
+              {[12, 15, 20, 25, 30, 40, 50].map((num) => (
+                <TouchableOpacity
+                  key={num}
+                  style={[
+                    styles.challengeQuestionButton,
+                    challengeQuestions === num && styles.challengeQuestionButtonActive,
+                  ]}
+                  onPress={() => setChallengeQuestions(num)}
+                >
+                  <Text
+                    style={[
+                      styles.challengeQuestionButtonText,
+                      challengeQuestions === num && styles.challengeQuestionButtonTextActive,
+                    ]}
+                  >
+                    {num}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
           <View style={styles.section}>
@@ -663,6 +700,47 @@ const styles = StyleSheet.create({
     color: AppColors.textSecondary,
   },
   timerDurationButtonTextActive: {
+    color: '#FFFFFF',
+  },
+  challengeSubLabel: {
+    fontSize: 13,
+    color: AppColors.textSecondary,
+    marginBottom: 12,
+    fontStyle: 'italic' as const,
+  },
+  challengeCurrentValue: {
+    fontSize: 18,
+    fontWeight: 'bold' as const,
+    color: AppColors.primary,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  challengeQuestionsButtons: {
+    flexDirection: 'row',
+    gap: 8,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  challengeQuestionButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    backgroundColor: AppColors.surface,
+    borderWidth: 2,
+    borderColor: AppColors.border,
+    minWidth: 50,
+    alignItems: 'center',
+  },
+  challengeQuestionButtonActive: {
+    backgroundColor: AppColors.primary,
+    borderColor: AppColors.primary,
+  },
+  challengeQuestionButtonText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: AppColors.textSecondary,
+  },
+  challengeQuestionButtonTextActive: {
     color: '#FFFFFF',
   },
 });

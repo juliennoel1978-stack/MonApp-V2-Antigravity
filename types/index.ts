@@ -19,6 +19,7 @@ export interface UserSettings {
   timerDisplayMode: 'bar' | 'chronometer';
   soundEnabled: boolean;
   avatarId: string;
+  challengeQuestions?: number;
 }
 
 export interface Badge {
@@ -55,4 +56,5 @@ export interface User {
   createdAt: string;
   progress: UserProgress[];
   timerSettings?: TimerSettings;
+  challengeQuestions?: number;
 }

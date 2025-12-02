@@ -21,6 +21,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   timerDisplayMode: 'chronometer',
   soundEnabled: true,
   avatarId: 'avatar1',
+  challengeQuestions: 15,
 };
 
 const INITIAL_BADGES: Badge[] = [
