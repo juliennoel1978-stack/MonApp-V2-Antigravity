@@ -642,17 +642,17 @@ const styles = StyleSheet.create({
   },
   answerContainer: {
     alignItems: 'center',
-    marginTop: 16,
-    gap: 12,
+    marginTop: 8,
+    gap: 16,
   },
   correctAnswerLabel: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600' as const,
     color: AppColors.textSecondary,
     textAlign: 'center',
   },
   correctAnswerValue: {
-    fontSize: 36,
+    fontSize: 44,
     fontWeight: 'bold' as const,
     color: AppColors.primary,
   },
