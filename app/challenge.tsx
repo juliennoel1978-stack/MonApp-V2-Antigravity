@@ -54,7 +54,7 @@ type Question = {
 
 export default function ChallengeScreen() {
   const router = useRouter();
-  const { settings, currentUser, updateUser } = useApp();
+  const { settings, currentUser, updateUser, incrementChallengesCompleted, anonymousChallengesCompleted } = useApp();
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [userAnswer, setUserAnswer] = useState<string>('');
   const [attempts, setAttempts] = useState<number>(0);
@@ -368,6 +368,9 @@ export default function ChallengeScreen() {
 
       if (newTotalQuestions >= maxQuestions) {
         console.log('🎯 Challenge finished! Answered', newTotalQuestions, 'questions');
+        if (!isReviewMode) {
+          incrementChallengesCompleted();
+        }
         setTimeout(() => {
           if (isMounted.current) {
             setIsFinished(true);
@@ -416,6 +419,9 @@ export default function ChallengeScreen() {
 
         if (newTotalQuestions >= maxQuestions) {
           console.log('🎯 Challenge finished! Answered', newTotalQuestions, 'questions');
+          if (!isReviewMode) {
+            incrementChallengesCompleted();
+          }
           setTimeout(() => {
             if (isMounted.current) {
               setIsFinished(true);
@@ -532,7 +538,9 @@ export default function ChallengeScreen() {
               <Text style={styles.finishedTitle}>
                 {currentUser ? `Bravo ${currentUser.firstName} !` : 'Félicitations !'}
               </Text>
-              <Text style={styles.finishedSubtitle}>Challenge terminé !</Text>
+              <Text style={styles.finishedSubtitle}>
+                Challenge terminé ! (n°{currentUser ? (currentUser.challengesCompleted || 0) : anonymousChallengesCompleted})
+              </Text>
               
               <View style={styles.finishedStats}>
                 <View style={styles.finishedStatRow}>

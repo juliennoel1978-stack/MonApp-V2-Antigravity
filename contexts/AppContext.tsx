@@ -10,6 +10,7 @@ const STORAGE_KEYS = {
   BADGES: '@tables_magiques_badges',
   USERS: '@tables_magiques_users',
   CURRENT_USER: '@tables_magiques_current_user',
+  ANONYMOUS_CHALLENGES: '@tables_magiques_anonymous_challenges',
 } as const;
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -49,16 +50,18 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [anonymousChallengesCompleted, setAnonymousChallengesCompleted] = useState(0);
 
   const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const [progressData, settingsData, badgesData, usersData, currentUserId] = await Promise.all([
+      const [progressData, settingsData, badgesData, usersData, currentUserId, anonymousChallenges] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEYS.PROGRESS),
         AsyncStorage.getItem(STORAGE_KEYS.SETTINGS),
         AsyncStorage.getItem(STORAGE_KEYS.BADGES),
         AsyncStorage.getItem(STORAGE_KEYS.USERS),
         AsyncStorage.getItem(STORAGE_KEYS.CURRENT_USER),
+        AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_CHALLENGES),
       ]);
 
       console.log('📦 Loading data...');
@@ -121,6 +124,11 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
       if (badgesData) {
         setBadges(JSON.parse(badgesData));
+      }
+
+      if (anonymousChallenges) {
+        setAnonymousChallengesCompleted(parseInt(anonymousChallenges, 10) || 0);
+        console.log('🏆 Anonymous challenges loaded:', anonymousChallenges);
       }
     } catch (error) {
       console.error('❌ Error loading data:', error);
@@ -319,6 +327,27 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   }, []);
 
+  const incrementChallengesCompleted = useCallback(async () => {
+    try {
+      if (currentUser) {
+        const newCount = (currentUser.challengesCompleted || 0) + 1;
+        const updatedUser = { ...currentUser, challengesCompleted: newCount };
+        const updatedUsers = users.map(u => u.id === currentUser.id ? updatedUser : u);
+        await AsyncStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updatedUsers));
+        setUsers(updatedUsers);
+        setCurrentUser(updatedUser);
+        console.log('🏆 User challenges completed:', newCount);
+      } else {
+        const newCount = anonymousChallengesCompleted + 1;
+        await AsyncStorage.setItem(STORAGE_KEYS.ANONYMOUS_CHALLENGES, newCount.toString());
+        setAnonymousChallengesCompleted(newCount);
+        console.log('🏆 Anonymous challenges completed:', newCount);
+      }
+    } catch (error) {
+      console.error('Error incrementing challenges completed:', error);
+    }
+  }, [currentUser, users, anonymousChallengesCompleted]);
+
   return useMemo(() => ({
     progress,
     settings,
@@ -327,6 +356,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     users,
     currentUser,
     isLoading,
+    anonymousChallengesCompleted,
     updateTableProgress,
     unlockBadge,
     getTableProgress,
@@ -337,6 +367,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     selectUser,
     updateUser,
     clearCurrentUser,
+    incrementChallengesCompleted,
     reloadData: loadData,
-  }), [progress, settings, badges, totalStars, users, currentUser, isLoading, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser, loadData]);
+  }), [progress, settings, badges, totalStars, users, currentUser, isLoading, anonymousChallengesCompleted, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser, incrementChallengesCompleted, loadData]);
 });

@@ -62,6 +62,7 @@ export interface User {
   challengeQuestions?: number;
   challengeBadges?: string[];
   badgeTheme?: BadgeTheme;
+  challengesCompleted?: number;
 }
 
 export type StreakTier = '4' | '8' | '12' | '20' | '30' | 'max' | null;
