@@ -214,7 +214,7 @@ export default function HomeScreen() {
           </View>
 
           <Text style={styles.subtitle}>
-            Apprends les multiplications en t&apos;amusant !
+            Apprends les multiplications en jouant : chasse les étoiles, décroche tes badges !
           </Text>
 
           <View style={styles.progressCard}>
