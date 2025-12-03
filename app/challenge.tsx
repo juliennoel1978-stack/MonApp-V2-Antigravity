@@ -392,7 +392,10 @@ export default function ChallengeScreen() {
           >
             <View style={styles.finishedContainer}>
               <Text style={styles.finishedEmoji}>🎉</Text>
-              <Text style={styles.finishedTitle}>Challenge terminé !</Text>
+              <Text style={styles.finishedTitle}>
+                {currentUser ? `Bravo ${currentUser.firstName} !` : 'Félicitations !'}
+              </Text>
+              <Text style={styles.finishedSubtitle}>Challenge terminé !</Text>
               
               <View style={styles.finishedStats}>
                 <View style={styles.finishedStatRow}>
@@ -1014,14 +1017,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   finishedEmoji: {
-    fontSize: 120,
-    marginBottom: 24,
+    fontSize: 80,
+    marginBottom: 16,
   },
   finishedTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold' as const,
     color: AppColors.text,
-    marginBottom: 32,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  finishedSubtitle: {
+    fontSize: 18,
+    color: AppColors.textSecondary,
+    marginBottom: 24,
     textAlign: 'center',
   },
   finishedScrollContent: {
@@ -1033,9 +1042,9 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: AppColors.surface,
     borderRadius: 16,
-    padding: 24,
-    marginBottom: 24,
-    gap: 16,
+    padding: 20,
+    marginBottom: 20,
+    gap: 12,
     shadowColor: AppColors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -1043,7 +1052,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   finishedStatRow: {
-    gap: 8,
+    alignItems: 'center',
   },
   finishedStatItem: {
     flexDirection: 'row',
@@ -1051,12 +1060,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   finishedStatLabel: {
-    fontSize: 14,
+    fontSize: 13,
     color: AppColors.textSecondary,
     fontWeight: '600' as const,
+    marginBottom: 4,
   },
   finishedStatValue: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold' as const,
   },
   finishedButtonsContainer: {
