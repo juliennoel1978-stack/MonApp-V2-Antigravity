@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors, NumberColors } from '@/constants/colors';
-import { FontFamily } from '@/constants/fonts';
 import { MULTIPLICATION_TABLES } from '@/constants/tables';
 import { useApp } from '@/contexts/AppContext';
 
@@ -198,7 +197,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 20,
-    fontFamily: FontFamily.title,
+    fontWeight: 'bold' as const,
     color: AppColors.text,
   },
   placeholder: {
@@ -237,7 +236,7 @@ const styles = StyleSheet.create({
   },
   tableNumber: {
     fontSize: 24,
-    fontFamily: FontFamily.title,
+    fontWeight: 'bold' as const,
   },
   cardContent: {
     padding: 6,
@@ -245,7 +244,7 @@ const styles = StyleSheet.create({
   },
   tableTitle: {
     fontSize: 12,
-    fontFamily: FontFamily.bodyBold,
+    fontWeight: 'bold' as const,
     color: AppColors.text,
     textAlign: 'center',
   },
@@ -257,7 +256,7 @@ const styles = StyleSheet.create({
   },
   difficultyText: {
     fontSize: 9,
-    fontFamily: FontFamily.body,
+    fontWeight: '600' as const,
   },
   starsContainer: {
     flexDirection: 'row',
@@ -274,7 +273,7 @@ const styles = StyleSheet.create({
   },
   completedText: {
     fontSize: 10,
-    fontFamily: FontFamily.body,
+    fontWeight: '600' as const,
     color: AppColors.success,
     textAlign: 'center',
   },

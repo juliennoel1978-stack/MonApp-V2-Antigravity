@@ -15,7 +15,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import { AppColors, NumberColors } from '@/constants/colors';
-import { FontFamily } from '@/constants/fonts';
 import { getTableByNumber } from '@/constants/tables';
 
 const { width } = Dimensions.get('window');
@@ -675,7 +674,7 @@ const styles = StyleSheet.create({
   },
   stepTitle: {
     fontSize: 24,
-    fontFamily: FontFamily.title,
+    fontWeight: 'bold' as const,
     color: AppColors.text,
     textAlign: 'center',
     marginBottom: 12,
@@ -683,7 +682,6 @@ const styles = StyleSheet.create({
   },
   stepContent: {
     fontSize: 16,
-    fontFamily: FontFamily.bodyRegular,
     color: AppColors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
@@ -699,12 +697,12 @@ const styles = StyleSheet.create({
   },
   bigNumber: {
     fontSize: 80,
-    fontFamily: FontFamily.title,
+    fontWeight: 'bold' as const,
     marginBottom: 16,
   },
   visualText: {
     fontSize: 24,
-    fontFamily: FontFamily.titleMedium,
+    fontWeight: '600' as const,
     color: AppColors.text,
   },
   tipContainer: {
@@ -725,9 +723,9 @@ const styles = StyleSheet.create({
   },
   tipText: {
     fontSize: 18,
-    fontFamily: FontFamily.body,
     color: AppColors.text,
     textAlign: 'center',
+    fontWeight: '600' as const,
     lineHeight: 26,
     marginBottom: 16,
   },
@@ -745,8 +743,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   tipExampleText: {
-    fontSize: 16,
-    fontFamily: FontFamily.bodyBold,
+    fontSize: 16, // Reduced slightly to fit
+    fontWeight: '700' as const,
     textAlign: 'center',
     width: '100%',
   },
@@ -760,7 +758,7 @@ const styles = StyleSheet.create({
   },
   readyTitle: {
     fontSize: 24,
-    fontFamily: FontFamily.title,
+    fontWeight: 'bold' as const,
     color: AppColors.text,
     marginBottom: 6,
     textAlign: 'center',
@@ -776,13 +774,13 @@ const styles = StyleSheet.create({
   },
   countingNumber: {
     fontSize: 22,
-    fontFamily: FontFamily.title,
+    fontWeight: 'bold' as const,
     marginBottom: 2,
   },
   countingLabel: {
     fontSize: 11,
-    fontFamily: FontFamily.body,
     color: AppColors.textSecondary,
+    fontWeight: '600' as const,
   },
   readyContainer: {
     alignItems: 'center',
@@ -794,8 +792,8 @@ const styles = StyleSheet.create({
   },
   encouragementText: {
     fontSize: 14,
-    fontFamily: FontFamily.body,
     color: AppColors.textSecondary,
+    fontWeight: '600' as const,
     marginBottom: 20,
     textAlign: 'center',
     paddingHorizontal: 20,
@@ -816,7 +814,7 @@ const styles = StyleSheet.create({
   },
   practiceButtonText: {
     fontSize: 16,
-    fontFamily: FontFamily.titleMedium,
+    fontWeight: 'bold' as const,
     color: '#FFFFFF',
   },
   footer: {
@@ -848,12 +846,12 @@ const styles = StyleSheet.create({
   },
   navButtonText: {
     fontSize: 16,
-    fontFamily: FontFamily.body,
+    fontWeight: '600' as const,
     color: AppColors.text,
   },
   nextButtonText: {
     fontSize: 16,
-    fontFamily: FontFamily.body,
+    fontWeight: '600' as const,
     color: '#FFFFFF',
   },
   modalOverlay: {
@@ -902,12 +900,12 @@ const styles = StyleSheet.create({
   },
   modalNumber: {
     fontSize: 120,
-    fontFamily: FontFamily.title,
+    fontWeight: 'bold' as const,
     marginBottom: 24,
   },
   modalEquation: {
     fontSize: 32,
-    fontFamily: FontFamily.title,
+    fontWeight: 'bold' as const,
     marginBottom: 32,
   },
   repeatButton: {
@@ -925,7 +923,7 @@ const styles = StyleSheet.create({
   },
   repeatButtonText: {
     fontSize: 18,
-    fontFamily: FontFamily.titleMedium,
+    fontWeight: 'bold' as const,
     color: '#FFFFFF',
   },
   checkmarkBadge: {
