@@ -18,6 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { AppColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
+import type { BadgeTheme } from '@/types';
 
 export default function UserFormScreen() {
   const router = useRouter();
@@ -33,6 +34,7 @@ export default function UserFormScreen() {
   const [timerDuration, setTimerDuration] = useState(15);
   const [timerDisplayMode, setTimerDisplayMode] = useState<'bar' | 'chronometer'>('bar');
   const [challengeQuestions, setChallengeQuestions] = useState(15);
+  const [badgeTheme, setBadgeTheme] = useState<BadgeTheme>('space');
   const firstNameRef = React.useRef<TextInput>(null);
   const ageRef = React.useRef<TextInput>(null);
   const gradeRef = React.useRef<TextInput>(null);
@@ -54,6 +56,9 @@ export default function UserFormScreen() {
         }
         if (user.challengeQuestions) {
           setChallengeQuestions(user.challengeQuestions);
+        }
+        if (user.badgeTheme) {
+          setBadgeTheme(user.badgeTheme);
         }
       }
     }
@@ -155,6 +160,7 @@ export default function UserFormScreen() {
           photoUri,
           timerSettings,
           challengeQuestions,
+          badgeTheme,
         });
       } else {
         await addUser({
@@ -165,6 +171,7 @@ export default function UserFormScreen() {
           photoUri,
           timerSettings,
           challengeQuestions,
+          badgeTheme,
         });
       }
 
@@ -353,6 +360,68 @@ export default function UserFormScreen() {
                   </Text>
                 </TouchableOpacity>
               ))}
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.label}>Thème des badges</Text>
+            <Text style={styles.badgeThemeSubLabel}>
+              Choisis le style des badges gagnés pendant les challenges
+            </Text>
+            <View style={styles.badgeThemeButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.badgeThemeButton,
+                  badgeTheme === 'space' && styles.badgeThemeButtonActive,
+                ]}
+                onPress={() => setBadgeTheme('space')}
+              >
+                <Text style={styles.badgeThemeEmoji}>🚀</Text>
+                <Text
+                  style={[
+                    styles.badgeThemeButtonText,
+                    badgeTheme === 'space' && styles.badgeThemeButtonTextActive,
+                  ]}
+                >
+                  Espace
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.badgeThemeButton,
+                  badgeTheme === 'heroes' && styles.badgeThemeButtonActive,
+                ]}
+                onPress={() => setBadgeTheme('heroes')}
+              >
+                <Text style={styles.badgeThemeEmoji}>⚡️</Text>
+                <Text
+                  style={[
+                    styles.badgeThemeButtonText,
+                    badgeTheme === 'heroes' && styles.badgeThemeButtonTextActive,
+                  ]}
+                >
+                  Héros
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.badgeThemeButton,
+                  badgeTheme === 'animals' && styles.badgeThemeButtonActive,
+                ]}
+                onPress={() => setBadgeTheme('animals')}
+              >
+                <Text style={styles.badgeThemeEmoji}>🐯</Text>
+                <Text
+                  style={[
+                    styles.badgeThemeButtonText,
+                    badgeTheme === 'animals' && styles.badgeThemeButtonTextActive,
+                  ]}
+                >
+                  Animaux
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -742,5 +811,40 @@ const styles = StyleSheet.create({
   },
   challengeQuestionButtonTextActive: {
     color: '#FFFFFF',
+  },
+  badgeThemeSubLabel: {
+    fontSize: 13,
+    color: AppColors.textSecondary,
+    marginBottom: 12,
+    fontStyle: 'italic' as const,
+  },
+  badgeThemeButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  badgeThemeButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: AppColors.surface,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: AppColors.border,
+    gap: 4,
+  },
+  badgeThemeButtonActive: {
+    backgroundColor: AppColors.primary + '20',
+    borderColor: AppColors.primary,
+  },
+  badgeThemeEmoji: {
+    fontSize: 28,
+  },
+  badgeThemeButtonText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: AppColors.textSecondary,
+  },
+  badgeThemeButtonTextActive: {
+    color: AppColors.primary,
   },
 });
