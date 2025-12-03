@@ -271,16 +271,7 @@ export default function HomeScreen() {
             <Zap size={24} color="#FFFFFF" />
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={styles.avatarContainer}
-            onPress={() => router.push('/assistant' as any)}
-            testID="assistant-button"
-          >
-            <View style={styles.avatar}>
-              <Text style={styles.avatarEmoji}>🧙‍♂️</Text>
-            </View>
-            <Text style={styles.avatarLabel}>Ton Assistant Magique</Text>
-          </TouchableOpacity>
+
         </Animated.View>
 
         {showUserModal && (
@@ -589,28 +580,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold' as const,
     color: '#FFFFFF',
   },
-  avatarContainer: {
-    alignItems: 'center',
-    gap: 10,
-  },
-  avatar: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: AppColors.surfaceLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: AppColors.primary,
-  },
-  avatarEmoji: {
-    fontSize: 40,
-  },
-  avatarLabel: {
-    fontSize: 15,
-    color: AppColors.textSecondary,
-    fontWeight: '600' as const,
-  },
+
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',

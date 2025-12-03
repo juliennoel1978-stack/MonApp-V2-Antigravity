@@ -54,13 +54,7 @@ function RootLayoutNav() {
           ),
         }} 
       />
-      <Stack.Screen 
-        name="assistant" 
-        options={{ 
-          headerShown: false,
-          presentation: "card"
-        }} 
-      />
+
       <Stack.Screen 
         name="challenge" 
         options={{ 
