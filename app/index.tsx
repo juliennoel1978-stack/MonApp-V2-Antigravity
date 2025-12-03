@@ -1,8 +1,6 @@
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X } from 'lucide-react-native';
 import React, { useEffect, useCallback } from 'react';
-import { useFonts, FredokaOne_400Regular } from '@expo-google-fonts/fredoka-one';
-import { Nunito_600SemiBold } from '@expo-google-fonts/nunito';
 import {
   View,
   Text,
@@ -24,11 +22,6 @@ const { width } = Dimensions.get('window');
 export default function HomeScreen() {
   const router = useRouter();
   const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData } = useApp();
-  
-  const [fontsLoaded] = useFonts({
-    FredokaOne_400Regular,
-    Nunito_600SemiBold,
-  });
   
   useFocusEffect(
     useCallback(() => {
@@ -153,7 +146,7 @@ export default function HomeScreen() {
   const completedTables = progress.filter(p => p.completed).length;
   const totalTables = progress.length;
 
-  if (!isReady || !fontsLoaded) {
+  if (!isReady) {
     return (
       <View style={{ flex: 1, backgroundColor: AppColors.background, justifyContent: 'center', alignItems: 'center' }}>
         <Text style={{ fontSize: 24, color: AppColors.text }}>Chargement...</Text>
@@ -210,9 +203,9 @@ export default function HomeScreen() {
               <Sparkles size={32} color={AppColors.primary} />
             </View>
             <View style={styles.titleContent}>
-              <Text style={styles.title} allowFontScaling={false}>Tables Magiques</Text>
+              <Text style={styles.title}>Tables Magiques</Text>
               {currentUser && (
-                <Text style={styles.userName} allowFontScaling={false}>Bonjour {currentUser.firstName} !</Text>
+                <Text style={styles.userName}>Bonjour {currentUser.firstName} !</Text>
               )}
             </View>
             <View style={styles.sparkleRight}>
@@ -220,7 +213,7 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <Text style={styles.subtitle} allowFontScaling={false}>
+          <Text style={styles.subtitle}>
             Apprends les multiplications en jouant : chasse les étoiles, décroche tes badges !
           </Text>
 
@@ -232,14 +225,14 @@ export default function HomeScreen() {
 
             <View style={styles.statsContainer}>
               <View style={styles.statItem}>
-                <Text style={styles.statValue} allowFontScaling={false}>{totalStars}</Text>
+                <Text style={styles.statValue}>{totalStars}</Text>
                 <Text style={styles.statLabel}>⭐ Étoiles</Text>
               </View>
 
               <View style={styles.statDivider} />
 
               <View style={styles.statItem}>
-                <Text style={styles.statValue} allowFontScaling={false}>
+                <Text style={styles.statValue}>
                   {completedTables}/{totalTables}
                 </Text>
                 <Text style={styles.statLabel}>Tables</Text>
@@ -448,14 +441,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontFamily: 'FredokaOne_400Regular',
+    fontWeight: 'bold' as const,
     color: AppColors.text,
     textAlign: 'center',
     flexShrink: 1,
   },
   userName: {
     fontSize: 15,
-    fontFamily: 'Nunito_600SemiBold',
+    fontWeight: '600' as const,
     color: AppColors.primary,
     textAlign: 'center',
     marginTop: 4,
@@ -474,7 +467,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: 'Nunito_600SemiBold',
     color: AppColors.textSecondary,
     textAlign: 'center',
     marginBottom: 24,
@@ -516,7 +508,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 24,
-    fontFamily: 'FredokaOne_400Regular',
+    fontWeight: 'bold' as const,
     color: AppColors.primary,
     marginBottom: 4,
   },
