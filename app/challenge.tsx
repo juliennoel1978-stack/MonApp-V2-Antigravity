@@ -351,7 +351,19 @@ export default function ChallengeScreen() {
       });
 
       if (isReviewMode) {
-        setReviewQuestions(prev => prev.filter((_, idx) => idx !== (totalQuestions % reviewQuestions.length)));
+        const currentIndex = (totalQuestions - 1) % reviewQuestions.length;
+        const updatedReviewQuestions = reviewQuestions.filter((_, idx) => idx !== currentIndex);
+        setReviewQuestions(updatedReviewQuestions);
+        
+        if (updatedReviewQuestions.length === 0) {
+          console.log('✅ All review questions corrected!');
+          setTimeout(() => {
+            if (isMounted.current) {
+              setIsFinished(true);
+            }
+          }, 2000);
+          return;
+        }
       }
 
       if (newTotalQuestions >= maxQuestions) {
@@ -421,6 +433,74 @@ export default function ChallengeScreen() {
   };
 
   if (isFinished) {
+    if (isReviewMode) {
+      const correctedCount = correctCount;
+      const correctionMessages = [
+        "Une erreur de moins, bravo. Le Pro s'installe.",
+        "Chaque correction compte. Tu t'améliores vraiment.",
+        "Bien joué ! Tu as tout compris cette fois-ci 🎯",
+        "Super ! C'est comme ça qu'on progresse 💪",
+      ];
+      const randomMessage = correctionMessages[Math.floor(Math.random() * correctionMessages.length)];
+      
+      return (
+        <View style={styles.backgroundContainer}>
+          <SafeAreaView style={styles.container} edges={['top']}>
+            <ScrollView 
+              contentContainerStyle={styles.finishedScrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.finishedContainer}>
+                <Text style={styles.finishedEmoji}>✅</Text>
+                <Text style={styles.finishedTitle}>
+                  Bien joué{currentUser ? ` ${currentUser.firstName}` : ''} !
+                </Text>
+                <Text style={styles.finishedSubtitle}>Tu as corrigé tes erreurs</Text>
+                
+                <View style={styles.finishedStats}>
+                  <Text style={styles.correctionMessage}>
+                    {randomMessage}
+                  </Text>
+                </View>
+                
+                <View style={styles.finishedButtonsContainer}>
+                  <TouchableOpacity
+                    style={styles.finishedButton}
+                    onPress={() => {
+                      setIsFinished(false);
+                      setIsReviewMode(false);
+                      setReviewQuestions([]);
+                      setCorrectCount(0);
+                      setIncorrectCount(0);
+                      setTotalQuestions(0);
+                      setConsecutiveCorrect(0);
+                      setBestStreak(0);
+                      setWrongAnswers([]);
+                      setTableStats({});
+                      const questions = currentUser 
+                        ? (currentUser.challengeQuestions || 15)
+                        : (settings.challengeQuestions || 15);
+                      setMaxQuestions(questions);
+                      generateNewQuestion();
+                    }}
+                  >
+                    <Text style={styles.finishedButtonText}>Refaire un Challenge</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    style={[styles.finishedButton, styles.finishedButtonOutline]}
+                    onPress={() => router.replace('/')}
+                  >
+                    <Text style={[styles.finishedButtonText, styles.finishedButtonOutlineText]}>Retour à l&apos;accueil</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </ScrollView>
+          </SafeAreaView>
+        </View>
+      );
+    }
+    
     const precision = Math.round((correctCount / maxQuestions) * 100);
     
     let bestTable = -1;
@@ -491,7 +571,7 @@ export default function ChallengeScreen() {
               </View>
               
               <View style={styles.finishedButtonsContainer}>
-                {wrongAnswers.length > 0 && !isReviewMode && (
+                {wrongAnswers.length > 0 && (
                   <TouchableOpacity
                     style={[styles.finishedButton, styles.finishedButtonSecondary]}
                     onPress={() => {
@@ -503,7 +583,8 @@ export default function ChallengeScreen() {
                       setTotalQuestions(0);
                       setConsecutiveCorrect(0);
                       setMaxQuestions(wrongAnswers.length);
-                      const firstWrongQuestion = wrongAnswers[0];
+                      setWrongAnswers([]);
+                      const firstWrongQuestion = reviewQuestions[0] || wrongAnswers[0];
                       setCurrentQuestion(firstWrongQuestion);
                       setUserAnswer('');
                       setAttempts(0);
@@ -1258,5 +1339,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold' as const,
     color: AppColors.text,
     textAlign: 'center',
+  },
+  correctionMessage: {
+    fontSize: 17,
+    color: AppColors.textSecondary,
+    textAlign: 'center' as const,
+    lineHeight: 24,
+    fontStyle: 'italic' as const,
+    paddingHorizontal: 8,
   },
 });
