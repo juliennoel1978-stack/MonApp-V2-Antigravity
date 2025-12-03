@@ -212,9 +212,11 @@ export default function ChallengeScreen() {
 
   const checkAnswer = () => {
     if (!currentQuestion || userAnswer.trim() === '') return;
+    if (showFeedback) return;
 
     if (timerRef.current) {
       clearInterval(timerRef.current);
+      timerRef.current = null;
     }
 
     const answer = parseInt(userAnswer, 10);
