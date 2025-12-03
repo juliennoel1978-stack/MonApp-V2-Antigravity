@@ -271,7 +271,11 @@ export default function ChallengeScreen() {
 
       if (newTotalQuestions >= maxQuestions) {
         console.log('🎯 Challenge finished! Answered', newTotalQuestions, 'questions');
-        setIsFinished(true);
+        setTimeout(() => {
+          if (isMounted.current) {
+            setIsFinished(true);
+          }
+        }, 2000);
         return;
       }
 
@@ -283,6 +287,12 @@ export default function ChallengeScreen() {
           friction: 7,
           useNativeDriver: true,
         }).start();
+      } else {
+        setTimeout(() => {
+          if (isMounted.current && !showCelebration) {
+            generateNewQuestion();
+          }
+        }, 1500);
       }
     } else {
       setConsecutiveCorrect(0);
@@ -642,19 +652,6 @@ export default function ChallengeScreen() {
                       <Text style={styles.encouragementText}>
                         {currentCorrectPhrase}
                       </Text>
-                      <TouchableOpacity
-                        style={styles.continueButton}
-                        onPress={() => {
-                          if (totalQuestions >= maxQuestions) {
-                            console.log('🎯 Challenge finished! Answered', totalQuestions, 'questions');
-                            setIsFinished(true);
-                          } else {
-                            generateNewQuestion();
-                          }
-                        }}
-                      >
-                        <Text style={styles.continueButtonText}>Continuer</Text>
-                      </TouchableOpacity>
                     </View>
                   ) : isTimeout ? (
                     <View style={styles.feedbackBox}>
