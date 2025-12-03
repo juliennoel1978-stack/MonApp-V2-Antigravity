@@ -149,6 +149,7 @@ export default function ChallengeScreen() {
       };
     }
     
+    console.log('🔄 Generating new question:', question.displayText);
     setCurrentQuestion(question);
     setUserAnswer('');
     setAttempts(0);
@@ -168,8 +169,11 @@ export default function ChallengeScreen() {
   }, [settings.timerDuration, settings.timerEnabled, currentUser, isReviewMode, wrongAnswers, totalQuestions]);
 
   useEffect(() => {
-    generateNewQuestion();
-  }, [generateNewQuestion]);
+    if (totalQuestions === 0 && !currentQuestion) {
+      console.log('🎬 Initial question generation');
+      generateNewQuestion();
+    }
+  }, []);
 
   useEffect(() => {
     const timerEnabled = currentUser 
@@ -279,25 +283,6 @@ export default function ChallengeScreen() {
           friction: 7,
           useNativeDriver: true,
         }).start();
-
-        setTimeout(() => {
-          if (isMounted.current) {
-            setShowCelebration(false);
-            celebrationAnim.setValue(0);
-            setConsecutiveCorrect(0);
-            if (totalQuestions + 1 < maxQuestions) {
-              generateNewQuestion();
-            }
-          }
-        }, 3000);
-      } else {
-        setTimeout(() => {
-          if (isMounted.current) {
-            if (newTotalQuestions < maxQuestions) {
-              generateNewQuestion();
-            }
-          }
-        }, 1500);
       }
     } else {
       setConsecutiveCorrect(0);
@@ -334,17 +319,6 @@ export default function ChallengeScreen() {
 
         if (newTotalQuestions >= maxQuestions) {
           console.log('🎯 Challenge finished! Answered', newTotalQuestions, 'questions');
-          setTimeout(() => {
-            if (isMounted.current) {
-              setIsFinished(true);
-            }
-          }, 7000);
-        } else {
-          setTimeout(() => {
-            if (isMounted.current) {
-              generateNewQuestion();
-            }
-          }, 7000);
         }
       }
     }
@@ -613,6 +587,21 @@ export default function ChallengeScreen() {
               <Text style={styles.celebrationSubtext}>
                 4 bonnes réponses d&apos;affilée !
               </Text>
+              <TouchableOpacity
+                style={styles.continueButton}
+                onPress={() => {
+                  setShowCelebration(false);
+                  celebrationAnim.setValue(0);
+                  setConsecutiveCorrect(0);
+                  if (totalQuestions < maxQuestions) {
+                    generateNewQuestion();
+                  } else {
+                    setIsFinished(true);
+                  }
+                }}
+              >
+                <Text style={styles.continueButtonText}>Continuer</Text>
+              </TouchableOpacity>
             </Animated.View>
           ) : (
             <>
@@ -644,7 +633,7 @@ export default function ChallengeScreen() {
                     { transform: [{ scale: scaleAnim }] },
                   ]}
                 >
-                  {isCorrect ? (
+                  {isCorrect && !showCelebration ? (
                     <View style={styles.feedbackBox}>
                       <Check size={48} color={AppColors.success} />
                       <Text style={[styles.feedbackText, { color: AppColors.success }]}>
@@ -653,6 +642,19 @@ export default function ChallengeScreen() {
                       <Text style={styles.encouragementText}>
                         {currentCorrectPhrase}
                       </Text>
+                      <TouchableOpacity
+                        style={styles.continueButton}
+                        onPress={() => {
+                          if (totalQuestions >= maxQuestions) {
+                            console.log('🎯 Challenge finished! Answered', totalQuestions, 'questions');
+                            setIsFinished(true);
+                          } else {
+                            generateNewQuestion();
+                          }
+                        }}
+                      >
+                        <Text style={styles.continueButtonText}>Continuer</Text>
+                      </TouchableOpacity>
                     </View>
                   ) : isTimeout ? (
                     <View style={styles.feedbackBox}>
@@ -721,6 +723,21 @@ export default function ChallengeScreen() {
                             {currentErrorPhrase}
                           </Text>
                         </View>
+                      )}
+                      {showCorrectAnswer && (
+                        <TouchableOpacity
+                          style={styles.continueButton}
+                          onPress={() => {
+                            if (totalQuestions >= maxQuestions) {
+                              console.log('🎯 Challenge finished! Answered', totalQuestions, 'questions');
+                              setIsFinished(true);
+                            } else {
+                              generateNewQuestion();
+                            }
+                          }}
+                        >
+                          <Text style={styles.continueButtonText}>Continuer</Text>
+                        </TouchableOpacity>
                       )}
                     </View>
                   )}
@@ -894,6 +911,23 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontStyle: 'italic' as const,
     paddingHorizontal: 16,
+  },
+  continueButton: {
+    backgroundColor: AppColors.primary,
+    paddingVertical: 14,
+    paddingHorizontal: 48,
+    borderRadius: 14,
+    marginTop: 16,
+    shadowColor: AppColors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  continueButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold' as const,
+    color: '#FFFFFF',
   },
   answerContainer: {
     alignItems: 'center',
