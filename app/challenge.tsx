@@ -287,6 +287,19 @@ export default function ChallengeScreen() {
           friction: 7,
           useNativeDriver: true,
         }).start();
+        
+        setTimeout(() => {
+          if (isMounted.current) {
+            setShowCelebration(false);
+            celebrationAnim.setValue(0);
+            setConsecutiveCorrect(0);
+            if (totalQuestions < maxQuestions) {
+              generateNewQuestion();
+            } else {
+              setIsFinished(true);
+            }
+          }
+        }, 1500);
       } else {
         setTimeout(() => {
           if (isMounted.current && !showCelebration) {
@@ -329,6 +342,17 @@ export default function ChallengeScreen() {
 
         if (newTotalQuestions >= maxQuestions) {
           console.log('🎯 Challenge finished! Answered', newTotalQuestions, 'questions');
+          setTimeout(() => {
+            if (isMounted.current) {
+              setIsFinished(true);
+            }
+          }, 3000);
+        } else {
+          setTimeout(() => {
+            if (isMounted.current) {
+              generateNewQuestion();
+            }
+          }, 3000);
         }
       }
     }
@@ -593,25 +617,10 @@ export default function ChallengeScreen() {
               ]}
             >
               <Text style={styles.celebrationEmoji}>🎉</Text>
-              <Text style={styles.celebrationText}>Correct !</Text>
+              <Text style={styles.celebrationText}>Bravo !</Text>
               <Text style={styles.celebrationSubtext}>
                 4 bonnes réponses d&apos;affilée !
               </Text>
-              <TouchableOpacity
-                style={styles.continueButton}
-                onPress={() => {
-                  setShowCelebration(false);
-                  celebrationAnim.setValue(0);
-                  setConsecutiveCorrect(0);
-                  if (totalQuestions < maxQuestions) {
-                    generateNewQuestion();
-                  } else {
-                    setIsFinished(true);
-                  }
-                }}
-              >
-                <Text style={styles.continueButtonText}>Continuer</Text>
-              </TouchableOpacity>
             </Animated.View>
           ) : (
             <>
@@ -720,21 +729,6 @@ export default function ChallengeScreen() {
                             {currentErrorPhrase}
                           </Text>
                         </View>
-                      )}
-                      {showCorrectAnswer && (
-                        <TouchableOpacity
-                          style={styles.continueButton}
-                          onPress={() => {
-                            if (totalQuestions >= maxQuestions) {
-                              console.log('🎯 Challenge finished! Answered', totalQuestions, 'questions');
-                              setIsFinished(true);
-                            } else {
-                              generateNewQuestion();
-                            }
-                          }}
-                        >
-                          <Text style={styles.continueButtonText}>Continuer</Text>
-                        </TouchableOpacity>
                       )}
                     </View>
                   )}
