@@ -57,4 +57,7 @@ export interface User {
   progress: UserProgress[];
   timerSettings?: TimerSettings;
   challengeQuestions?: number;
+  challengeBadges?: string[];
 }
+
+export type StreakTier = '4' | '8' | '12' | '20' | '30' | 'max' | null;

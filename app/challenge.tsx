@@ -16,6 +16,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
+import { processStreakLogic } from '@/utils/streakLogic';
+import type { StreakTier } from '@/types';
 
 const { width } = Dimensions.get('window');
 
@@ -52,7 +54,7 @@ type Question = {
 
 export default function ChallengeScreen() {
   const router = useRouter();
-  const { settings, currentUser } = useApp();
+  const { settings, currentUser, updateUser } = useApp();
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [userAnswer, setUserAnswer] = useState<string>('');
   const [attempts, setAttempts] = useState<number>(0);
@@ -75,8 +77,15 @@ export default function ChallengeScreen() {
   const [tableStats, setTableStats] = useState<Record<number, { correct: number; total: number }>>({}); 
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
   const [reviewQuestions, setReviewQuestions] = useState<{ num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]>([]);
+  const [lastTierShown, setLastTierShown] = useState<StreakTier>(null);
+  const [userBadges, setUserBadges] = useState<string[]>([]);
+  const [streakToast, setStreakToast] = useState<string | null>(null);
+  const [showBadgeAnimation, setShowBadgeAnimation] = useState<boolean>(false);
+  const [newBadge, setNewBadge] = useState<string | null>(null);
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
   const celebrationAnim = React.useRef(new Animated.Value(0)).current;
+  const toastAnim = React.useRef(new Animated.Value(0)).current;
+  const badgeAnim = React.useRef(new Animated.Value(0)).current;
   const inputRef = useRef<TextInput>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isMounted = useRef(true);
@@ -87,11 +96,61 @@ export default function ChallengeScreen() {
       ? (currentUser.challengeQuestions || 15)
       : (settings.challengeQuestions || 15);
     setMaxQuestions(questions);
+    const badges = currentUser?.challengeBadges || [];
+    setUserBadges(badges);
     console.log('🎯 Challenge initialized with', questions, 'questions');
+    console.log('🏅 User badges loaded:', badges);
     return () => {
       isMounted.current = false;
     };
   }, [currentUser, settings]);
+
+  const showStreakToast = useCallback((message: string) => {
+    setStreakToast(message);
+    toastAnim.setValue(0);
+    Animated.sequence([
+      Animated.timing(toastAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.delay(2500),
+      Animated.timing(toastAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      if (isMounted.current) {
+        setStreakToast(null);
+      }
+    });
+  }, [toastAnim]);
+
+  const showBadgeUnlocked = useCallback((badge: string) => {
+    setNewBadge(badge);
+    setShowBadgeAnimation(true);
+    badgeAnim.setValue(0);
+    Animated.sequence([
+      Animated.spring(badgeAnim, {
+        toValue: 1,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+      Animated.delay(2000),
+      Animated.timing(badgeAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      if (isMounted.current) {
+        setShowBadgeAnimation(false);
+        setNewBadge(null);
+      }
+    });
+  }, [badgeAnim]);
 
   const handleTimeOut = useCallback(() => {
     if (!isMounted.current) return;
@@ -245,16 +304,35 @@ export default function ChallengeScreen() {
     ]).start();
 
     if (correct) {
-      const newConsecutive = consecutiveCorrect + 1;
       const newCorrectCount = correctCount + 1;
       const newTotalQuestions = totalQuestions + 1;
       setCorrectCount(newCorrectCount);
       setTotalQuestions(newTotalQuestions);
-      setConsecutiveCorrect(newConsecutive);
       setCurrentCorrectPhrase(getRandomPhrase(CORRECT_PHRASES));
       
-      if (newConsecutive > bestStreak) {
-        setBestStreak(newConsecutive);
+      const streakResult = processStreakLogic({
+        lastAnswerIsCorrect: true,
+        currentStreak: consecutiveCorrect,
+        bestStreak,
+        challengeQuestionCount: maxQuestions,
+        userBadges,
+        lastTierShown,
+      });
+      
+      setConsecutiveCorrect(streakResult.updatedCurrentStreak);
+      setBestStreak(streakResult.updatedBestStreak);
+      setLastTierShown(streakResult.updatedLastTierShown);
+      setUserBadges(streakResult.updatedUserBadges);
+      
+      if (streakResult.messageToast) {
+        showStreakToast(streakResult.messageToast);
+      }
+      
+      if (streakResult.showBadgeAnimation && streakResult.badgeUnlocked) {
+        showBadgeUnlocked(streakResult.badgeUnlocked);
+        if (currentUser) {
+          updateUser(currentUser.id, { challengeBadges: streakResult.updatedUserBadges });
+        }
       }
       
       setTableStats(prev => {
@@ -284,34 +362,11 @@ export default function ChallengeScreen() {
         return;
       }
 
-      if (newConsecutive === 4) {
-        setShowCelebration(true);
-        Animated.spring(celebrationAnim, {
-          toValue: 1,
-          tension: 50,
-          friction: 7,
-          useNativeDriver: true,
-        }).start();
-        
-        setTimeout(() => {
-          if (isMounted.current) {
-            setShowCelebration(false);
-            celebrationAnim.setValue(0);
-            setConsecutiveCorrect(0);
-            if (totalQuestions < maxQuestions) {
-              generateNewQuestion();
-            } else {
-              setIsFinished(true);
-            }
-          }
-        }, 1500);
-      } else {
-        setTimeout(() => {
-          if (isMounted.current && !showCelebration) {
-            generateNewQuestion();
-          }
-        }, 1500);
-      }
+      setTimeout(() => {
+        if (isMounted.current && !showCelebration) {
+          generateNewQuestion();
+        }
+      }, 1500);
     } else {
       setConsecutiveCorrect(0);
 
@@ -513,6 +568,48 @@ export default function ChallengeScreen() {
   return (
     <View style={styles.backgroundContainer}>
       <SafeAreaView style={styles.container} edges={['top']}>
+        {streakToast && (
+          <Animated.View
+            style={[
+              styles.toastContainer,
+              {
+                opacity: toastAnim,
+                transform: [{
+                  translateY: toastAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-50, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
+            <Text style={styles.toastText}>{streakToast}</Text>
+          </Animated.View>
+        )}
+
+        {showBadgeAnimation && newBadge && (
+          <Animated.View
+            style={[
+              styles.badgeOverlay,
+              {
+                opacity: badgeAnim,
+                transform: [{
+                  scale: badgeAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.5, 1],
+                  }),
+                }],
+              },
+            ]}
+            pointerEvents="none"
+          >
+            <View style={styles.badgeCard}>
+              <Text style={styles.badgeTitle}>Nouveau badge !</Text>
+              <Text style={styles.badgeEmoji}>{newBadge}</Text>
+            </View>
+          </Animated.View>
+        )}
+
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.homeButton}
@@ -1102,5 +1199,62 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold' as const,
     color: '#FFFFFF',
+  },
+  toastContainer: {
+    position: 'absolute',
+    top: 100,
+    left: 20,
+    right: 20,
+    backgroundColor: AppColors.success,
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  toastText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600' as const,
+    textAlign: 'center',
+  },
+  badgeOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1001,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  badgeCard: {
+    backgroundColor: AppColors.surface,
+    borderRadius: 24,
+    paddingVertical: 32,
+    paddingHorizontal: 40,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 20,
+  },
+  badgeTitle: {
+    fontSize: 20,
+    fontWeight: 'bold' as const,
+    color: AppColors.primary,
+    marginBottom: 16,
+  },
+  badgeEmoji: {
+    fontSize: 32,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+    textAlign: 'center',
   },
 });
