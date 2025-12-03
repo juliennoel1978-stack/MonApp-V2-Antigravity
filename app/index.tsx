@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
+import { FontFamily } from '@/constants/fonts';
 import { useApp } from '@/contexts/AppContext';
 
 const { width } = Dimensions.get('window');
@@ -441,14 +442,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: AppColors.text,
     textAlign: 'center',
     flexShrink: 1,
   },
   userName: {
     fontSize: 15,
-    fontWeight: '600' as const,
+    fontFamily: FontFamily.body,
     color: AppColors.primary,
     textAlign: 'center',
     marginTop: 4,
@@ -467,6 +468,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
+    fontFamily: FontFamily.bodyRegular,
     color: AppColors.textSecondary,
     textAlign: 'center',
     marginBottom: 24,
@@ -493,7 +495,7 @@ const styles = StyleSheet.create({
   },
   progressTitle: {
     fontSize: 18,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.titleMedium,
     color: AppColors.text,
   },
   statsContainer: {
@@ -508,14 +510,14 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 24,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: AppColors.primary,
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 13,
+    fontFamily: FontFamily.body,
     color: AppColors.textSecondary,
-    fontWeight: '600' as const,
   },
   statDivider: {
     width: 1,
@@ -555,7 +557,7 @@ const styles = StyleSheet.create({
   },
   startButtonText: {
     fontSize: 20,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: '#FFFFFF',
   },
   challengeButton: {
@@ -577,7 +579,7 @@ const styles = StyleSheet.create({
   },
   challengeButtonText: {
     fontSize: 20,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: '#FFFFFF',
   },
 
@@ -620,12 +622,13 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 24,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: AppColors.text,
     marginBottom: 4,
   },
   modalSubtitle: {
     fontSize: 16,
+    fontFamily: FontFamily.bodyRegular,
     color: AppColors.textSecondary,
   },
   modalScrollView: {
@@ -674,13 +677,14 @@ const styles = StyleSheet.create({
   },
   modalUserName: {
     fontSize: 16,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.bodyBold,
     color: AppColors.text,
     marginBottom: 2,
     textAlign: 'center',
   },
   modalUserInfo: {
     fontSize: 14,
+    fontFamily: FontFamily.bodyRegular,
     color: AppColors.textSecondary,
   },
   anonymousCard: {

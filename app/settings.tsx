@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
 import { AppColors } from '@/constants/colors';
+import { FontFamily } from '@/constants/fonts';
 import { useApp } from '@/contexts/AppContext';
 
 export default function SettingsScreen() {
@@ -530,7 +531,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: AppColors.text,
     marginBottom: 16,
   },
@@ -567,7 +568,7 @@ const styles = StyleSheet.create({
   },
   settingTitle: {
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontFamily: FontFamily.body,
     color: AppColors.text,
     marginBottom: 2,
     flexWrap: 'wrap',
@@ -575,6 +576,7 @@ const styles = StyleSheet.create({
   },
   settingDescription: {
     fontSize: 13,
+    fontFamily: FontFamily.bodyRegular,
     color: AppColors.textSecondary,
     flexWrap: 'wrap',
     flexShrink: 1,
@@ -602,7 +604,7 @@ const styles = StyleSheet.create({
   },
   voiceTitle: {
     fontSize: 16,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.bodyBold,
     color: AppColors.text,
     marginBottom: 4,
   },
@@ -671,7 +673,7 @@ const styles = StyleSheet.create({
   },
   resetButtonText: {
     fontSize: 16,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.titleMedium,
     color: '#FFFFFF',
   },
   closeButton: {
@@ -683,7 +685,7 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 18,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: '#FFFFFF',
   },
   timerConfig: {
@@ -783,7 +785,7 @@ const styles = StyleSheet.create({
   },
   currentUserName: {
     fontSize: 16,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.bodyBold,
     color: AppColors.text,
   },
   clearUserButton: {
@@ -831,12 +833,13 @@ const styles = StyleSheet.create({
   },
   userItemName: {
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontFamily: FontFamily.body,
     color: AppColors.text,
     marginBottom: 2,
   },
   userItemDetails: {
     fontSize: 13,
+    fontFamily: FontFamily.bodyRegular,
     color: AppColors.textSecondary,
   },
   userItemActions: {
@@ -859,7 +862,7 @@ const styles = StyleSheet.create({
   },
   addUserButtonText: {
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontFamily: FontFamily.body,
     color: '#FFFFFF',
   },
   challengeQuestionsButtons: {

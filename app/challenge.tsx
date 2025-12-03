@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
+import { FontFamily } from '@/constants/fonts';
 import { useApp } from '@/contexts/AppContext';
 import { processStreakLogic } from '@/utils/streakLogic';
 import type { StreakTier } from '@/types';
@@ -979,7 +980,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: AppColors.text,
   },
   placeholder: {
@@ -999,13 +1000,13 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
+    fontFamily: FontFamily.body,
     color: AppColors.textSecondary,
     marginBottom: 4,
-    fontWeight: '600' as const,
   },
   statValue: {
     fontSize: 24,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
   },
   keyboardAvoid: {
     flex: 1,
@@ -1031,7 +1032,7 @@ const styles = StyleSheet.create({
   },
   questionText: {
     fontSize: 26,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: AppColors.text,
     textAlign: 'center',
   },
@@ -1045,7 +1046,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     fontSize: 22,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: AppColors.text,
     textAlign: 'center',
     borderWidth: 2,
@@ -1071,7 +1072,7 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     fontSize: 20,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: '#FFFFFF',
   },
   feedbackContainer: {
@@ -1084,14 +1085,14 @@ const styles = StyleSheet.create({
   },
   feedbackText: {
     fontSize: 18,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.titleMedium,
   },
   encouragementText: {
     fontSize: 16,
+    fontFamily: FontFamily.body,
     color: AppColors.success,
     textAlign: 'center' as const,
     marginTop: 4,
-    fontWeight: '500' as const,
   },
   kindPhraseText: {
     fontSize: 15,
@@ -1131,7 +1132,7 @@ const styles = StyleSheet.create({
   },
   correctAnswerValue: {
     fontSize: 32,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: AppColors.primary,
   },
   equationContainer: {
@@ -1144,7 +1145,7 @@ const styles = StyleSheet.create({
   },
   equationText: {
     fontSize: 28,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: AppColors.text,
     textAlign: 'center',
   },
@@ -1164,7 +1165,7 @@ const styles = StyleSheet.create({
   },
   celebrationText: {
     fontSize: 48,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: AppColors.primary,
   },
   celebrationSubtext: {
@@ -1185,7 +1186,7 @@ const styles = StyleSheet.create({
   },
   timerText: {
     fontSize: 20,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
   },
   progressBarContainer: {
     width: '100%',
@@ -1210,13 +1211,14 @@ const styles = StyleSheet.create({
   },
   finishedTitle: {
     fontSize: 28,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: AppColors.text,
     marginBottom: 8,
     textAlign: 'center',
   },
   finishedSubtitle: {
     fontSize: 18,
+    fontFamily: FontFamily.body,
     color: AppColors.textSecondary,
     marginBottom: 24,
     textAlign: 'center',
@@ -1249,13 +1251,13 @@ const styles = StyleSheet.create({
   },
   finishedStatLabel: {
     fontSize: 13,
+    fontFamily: FontFamily.body,
     color: AppColors.textSecondary,
-    fontWeight: '600' as const,
     marginBottom: 4,
   },
   finishedStatValue: {
     fontSize: 22,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
   },
   finishedButtonsContainer: {
     width: '100%',
@@ -1288,7 +1290,7 @@ const styles = StyleSheet.create({
   },
   finishedButtonText: {
     fontSize: 18,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.titleMedium,
     color: '#FFFFFF',
   },
   toastContainer: {
@@ -1310,7 +1312,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontFamily: FontFamily.body,
     textAlign: 'center',
   },
   badgeOverlay: {
@@ -1338,13 +1340,13 @@ const styles = StyleSheet.create({
   },
   badgeTitle: {
     fontSize: 20,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: AppColors.primary,
     marginBottom: 16,
   },
   badgeEmoji: {
     fontSize: 32,
-    fontWeight: 'bold' as const,
+    fontFamily: FontFamily.title,
     color: AppColors.text,
     textAlign: 'center',
   },

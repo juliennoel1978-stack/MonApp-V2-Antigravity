@@ -16,6 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { speak, stop } from '@/utils/speech';
 import { AppColors, NumberColors } from '@/constants/colors';
+import { FontFamily } from '@/constants/fonts';
 import { getTableByNumber, TIPS_BY_TABLE } from '@/constants/tables';
 import { useApp } from '@/contexts/AppContext';
 import { generateQuestions } from '@/utils/questionGenerator';
@@ -966,9 +967,9 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 12,
+    fontFamily: FontFamily.body,
     color: AppColors.textSecondary,
     textAlign: 'center',
-    fontWeight: '600',
   },
   scoreContainer: {
     flexDirection: 'row',
@@ -981,7 +982,7 @@ const styles = StyleSheet.create({
   },
   scoreText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: FontFamily.title,
     color: AppColors.success,
   },
   questionCard: {
@@ -999,9 +1000,9 @@ const styles = StyleSheet.create({
   },
   questionLabel: {
     fontSize: 16,
+    fontFamily: FontFamily.body,
     color: AppColors.textSecondary,
     marginBottom: 12,
-    fontWeight: '600',
   },
   questionRow: {
     flexDirection: 'row',
@@ -1010,12 +1011,12 @@ const styles = StyleSheet.create({
   },
   questionNumber: {
     fontSize: 52,
-    fontWeight: 'bold',
+    fontFamily: FontFamily.title,
   },
   questionOperator: {
     fontSize: 40,
+    fontFamily: FontFamily.title,
     color: AppColors.text,
-    fontWeight: 'bold',
   },
   optionsContainer: {
     gap: 12,
@@ -1048,7 +1049,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontFamily: FontFamily.title,
     color: AppColors.text,
   },
   optionTextSelected: {
@@ -1080,7 +1081,7 @@ const styles = StyleSheet.create({
   },
   feedbackCenterText: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontFamily: FontFamily.title,
     color: '#FFFFFF',
     marginTop: 16,
   },
@@ -1104,12 +1105,13 @@ const styles = StyleSheet.create({
   },
   resultTitle: {
     fontSize: 40,
-    fontWeight: 'bold',
+    fontFamily: FontFamily.title,
     color: AppColors.text,
     marginBottom: 8,
   },
   resultSubtitle: {
     fontSize: 18,
+    fontFamily: FontFamily.body,
     color: AppColors.textSecondary,
     marginBottom: 40,
     textAlign: 'center',
@@ -1144,15 +1146,15 @@ const styles = StyleSheet.create({
   },
   resultScore: {
     fontSize: 56,
-    fontWeight: 'bold',
+    fontFamily: FontFamily.title,
     color: AppColors.primary,
     marginBottom: 6,
   },
   resultLabel: {
     fontSize: 16,
+    fontFamily: FontFamily.body,
     color: AppColors.textSecondary,
     marginBottom: 16,
-    fontWeight: '600',
   },
   starsContainer: {
     flexDirection: 'row',
@@ -1161,9 +1163,9 @@ const styles = StyleSheet.create({
   },
   encouragement: {
     fontSize: 16,
+    fontFamily: FontFamily.body,
     color: AppColors.text,
     textAlign: 'center',
-    fontWeight: '600',
   },
   resultButtonsColumn: {
     flexDirection: 'column',
@@ -1254,7 +1256,7 @@ const styles = StyleSheet.create({
   },
   level2QuestionText: {
     fontSize: 36,
-    fontWeight: 'bold',
+    fontFamily: FontFamily.title,
     color: AppColors.text,
     textAlign: 'center',
   },
@@ -1268,7 +1270,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 24,
     fontSize: 28,
-    fontWeight: 'bold',
+    fontFamily: FontFamily.title,
     color: AppColors.text,
     textAlign: 'center',
     borderWidth: 2,
@@ -1290,7 +1292,7 @@ const styles = StyleSheet.create({
   },
   level2SubmitButtonText: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: FontFamily.title,
     color: '#FFFFFF',
   },
   level2FeedbackContainer: {
@@ -1302,7 +1304,7 @@ const styles = StyleSheet.create({
   },
   level2FeedbackText: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: FontFamily.title,
   },
   encouragementLarge: {
     fontSize: 16,
@@ -1341,10 +1343,10 @@ const styles = StyleSheet.create({
   },
   reviewText: {
     fontSize: 15,
+    fontFamily: FontFamily.body,
     color: AppColors.text,
     textAlign: 'center',
     marginBottom: 12,
-    fontWeight: '600',
     lineHeight: 22,
   },
   reviewConfirmButton: {
@@ -1361,7 +1363,7 @@ const styles = StyleSheet.create({
   },
   reviewConfirmButtonText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: FontFamily.titleMedium,
     color: '#FFFFFF',
   },
   primaryButton: {
@@ -1379,7 +1381,7 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: FontFamily.title,
     color: '#FFFFFF',
     textAlign: 'center',
   },
@@ -1486,7 +1488,7 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: FontFamily.title,
     color: AppColors.warning,
     textAlign: 'center',
     marginBottom: 20,
@@ -1497,12 +1499,13 @@ const styles = StyleSheet.create({
   },
   correctionText: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontFamily: FontFamily.title,
     color: AppColors.text,
     marginBottom: 12,
   },
   errorTipText: {
     fontSize: 18,
+    fontFamily: FontFamily.bodyRegular,
     color: AppColors.textSecondary,
     textAlign: 'center',
     lineHeight: 26,
@@ -1526,7 +1529,7 @@ const styles = StyleSheet.create({
   },
   errorButtonText: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: FontFamily.titleMedium,
     color: AppColors.text,
   },
 });
