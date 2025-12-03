@@ -74,6 +74,7 @@ export default function ChallengeScreen() {
   const [wrongAnswers, setWrongAnswers] = useState<{ num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]>([]); 
   const [tableStats, setTableStats] = useState<Record<number, { correct: number; total: number }>>({}); 
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
+  const [reviewQuestions, setReviewQuestions] = useState<{ num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]>([]);
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
   const celebrationAnim = React.useRef(new Animated.Value(0)).current;
   const inputRef = useRef<TextInput>(null);
@@ -111,9 +112,9 @@ export default function ChallengeScreen() {
     
     let question: Question;
     
-    if (isReviewMode && wrongAnswers.length > 0) {
-      const index = totalQuestions % wrongAnswers.length;
-      question = wrongAnswers[index];
+    if (isReviewMode && reviewQuestions.length > 0) {
+      const index = totalQuestions % reviewQuestions.length;
+      question = reviewQuestions[index];
     } else {
       const num1 = Math.floor(Math.random() * 10) + 1;
       const num2 = Math.floor(Math.random() * 10) + 1;
@@ -268,6 +269,10 @@ export default function ChallengeScreen() {
           },
         };
       });
+
+      if (isReviewMode) {
+        setReviewQuestions(prev => prev.filter((_, idx) => idx !== (totalQuestions % reviewQuestions.length)));
+      }
 
       if (newTotalQuestions >= maxQuestions) {
         console.log('🎯 Challenge finished! Answered', newTotalQuestions, 'questions');
@@ -426,12 +431,13 @@ export default function ChallengeScreen() {
               </View>
               
               <View style={styles.finishedButtonsContainer}>
-                {wrongAnswers.length > 0 && (
+                {wrongAnswers.length > 0 && !isReviewMode && (
                   <TouchableOpacity
                     style={[styles.finishedButton, styles.finishedButtonSecondary]}
                     onPress={() => {
                       setIsFinished(false);
                       setIsReviewMode(true);
+                      setReviewQuestions([...wrongAnswers]);
                       setCorrectCount(0);
                       setIncorrectCount(0);
                       setTotalQuestions(0);
@@ -465,6 +471,7 @@ export default function ChallengeScreen() {
                   onPress={() => {
                     setIsFinished(false);
                     setIsReviewMode(false);
+                    setReviewQuestions([]);
                     setCorrectCount(0);
                     setIncorrectCount(0);
                     setTotalQuestions(0);
