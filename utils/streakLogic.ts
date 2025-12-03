@@ -1,4 +1,4 @@
-import type { StreakTier } from '@/types';
+import type { StreakTier, BadgeTheme } from '@/types';
 
 export const STREAK_MESSAGES = {
   '4': [
@@ -29,17 +29,40 @@ export const STREAK_MESSAGES = {
   ],
 };
 
-export const STREAK_BADGES: Record<string, string> = {
-  '4': 'Starter 🔹',
-  '8': 'Champion Bronze 🥉',
-  '12': 'Champion Argent 🥈',
-  '20': 'Expert Or 🥇',
-  '30': 'Master Diamant 💎',
-  'max': 'Perfect Day 🏅',
+export const THEMED_BADGES: Record<BadgeTheme, Record<string, string>> = {
+  space: {
+    '4': 'Décollage 🚀',
+    '8': 'Pilote Spatial 🛰',
+    '12': 'Astro-Expert ⭐️',
+    '20': 'Commandant Galactique 🪐',
+    '30': 'Maître de l\'Univers 👾',
+    'max': 'Élite Interstellaire 🌌',
+  },
+  heroes: {
+    '4': 'Super Départ ⚡️',
+    '8': 'Héros des Tables 🛡',
+    '12': 'Pro des Multiplications 💥',
+    '20': 'Super Champion ⭐️',
+    '30': 'Méga Surdoué 🔥',
+    'max': 'Invincible des Tables 🏅',
+  },
+  animals: {
+    '4': 'Tigre Rapide 🐯',
+    '8': 'Faucon Fulgurant 🦅',
+    '12': 'Guépard Turbo ⚡️',
+    '20': 'Renard Ingénieux 🦊',
+    '30': 'Dragon des Tables 🐉',
+    'max': 'Phénix Ultime 🔥',
+  },
 };
 
 const getRandomMessage = (messages: string[]): string => {
   return messages[Math.floor(Math.random() * messages.length)];
+};
+
+const getBadgeName = (tier: string, theme: BadgeTheme): string => {
+  const validTheme: BadgeTheme = ['space', 'heroes', 'animals'].includes(theme) ? theme : 'space';
+  return THEMED_BADGES[validTheme][tier] || THEMED_BADGES['space'][tier];
 };
 
 interface StreakInput {
@@ -49,6 +72,7 @@ interface StreakInput {
   challengeQuestionCount: number;
   userBadges: string[];
   lastTierShown: StreakTier;
+  badgeTheme?: BadgeTheme;
 }
 
 interface StreakOutput {
@@ -69,6 +93,7 @@ export function processStreakLogic(input: StreakInput): StreakOutput {
     challengeQuestionCount,
     userBadges,
     lastTierShown,
+    badgeTheme = 'space',
   } = input;
 
   if (!lastAnswerIsCorrect) {
@@ -98,7 +123,7 @@ export function processStreakLogic(input: StreakInput): StreakOutput {
         messageToast = getRandomMessage(messages);
         updatedLastTierShown = tier;
 
-        const badgeName = STREAK_BADGES[tier as string];
+        const badgeName = getBadgeName(tier as string, badgeTheme);
         if (badgeName && !updatedUserBadges.includes(badgeName)) {
           badgeUnlocked = badgeName;
           showBadgeAnimation = true;
@@ -113,7 +138,7 @@ export function processStreakLogic(input: StreakInput): StreakOutput {
     messageToast = getRandomMessage(messages);
     updatedLastTierShown = 'max';
 
-    const badgeName = STREAK_BADGES['max'];
+    const badgeName = getBadgeName('max', badgeTheme);
     if (!updatedUserBadges.includes(badgeName)) {
       badgeUnlocked = badgeName;
       showBadgeAnimation = true;

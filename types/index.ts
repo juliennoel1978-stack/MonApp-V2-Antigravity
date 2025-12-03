@@ -20,6 +20,7 @@ export interface UserSettings {
   soundEnabled: boolean;
   avatarId: string;
   challengeQuestions?: number;
+  badgeTheme?: BadgeTheme;
 }
 
 export interface Badge {
@@ -46,6 +47,8 @@ export interface TimerSettings {
   displayMode: 'bar' | 'chronometer';
 }
 
+export type BadgeTheme = 'space' | 'heroes' | 'animals';
+
 export interface User {
   id: string;
   firstName: string;
@@ -58,6 +61,7 @@ export interface User {
   timerSettings?: TimerSettings;
   challengeQuestions?: number;
   challengeBadges?: string[];
+  badgeTheme?: BadgeTheme;
 }
 
 export type StreakTier = '4' | '8' | '12' | '20' | '30' | 'max' | null;

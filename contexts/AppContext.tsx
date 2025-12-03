@@ -22,6 +22,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   soundEnabled: true,
   avatarId: 'avatar1',
   challengeQuestions: 15,
+  badgeTheme: 'space',
 };
 
 const INITIAL_BADGES: Badge[] = [

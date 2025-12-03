@@ -310,6 +310,7 @@ export default function ChallengeScreen() {
       setTotalQuestions(newTotalQuestions);
       setCurrentCorrectPhrase(getRandomPhrase(CORRECT_PHRASES));
       
+      const badgeTheme = currentUser?.badgeTheme || settings.badgeTheme || 'space';
       const streakResult = processStreakLogic({
         lastAnswerIsCorrect: true,
         currentStreak: consecutiveCorrect,
@@ -317,6 +318,7 @@ export default function ChallengeScreen() {
         challengeQuestionCount: maxQuestions,
         userBadges,
         lastTierShown,
+        badgeTheme,
       });
       
       setConsecutiveCorrect(streakResult.updatedCurrentStreak);
