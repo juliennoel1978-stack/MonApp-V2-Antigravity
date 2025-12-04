@@ -1,5 +1,5 @@
 import { useRouter, useFocusEffect } from 'expo-router';
-import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X } from 'lucide-react-native';
+import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X, Target, ChevronRight } from 'lucide-react-native';
 import React, { useEffect, useCallback } from 'react';
 import {
   View,
@@ -149,6 +149,28 @@ export default function HomeScreen() {
 
   const completedTables = progress.filter(p => p.completed).length;
   const totalTables = progress.length;
+
+  const missionTable = React.useMemo(() => {
+    const tablesWithAttempts = progress.filter(p => p.totalAttempts > 0 && !p.completed);
+    
+    if (tablesWithAttempts.length === 0) {
+      const notStarted = progress.filter(p => p.totalAttempts === 0 && !p.completed);
+      return notStarted.length > 0 ? notStarted[0].tableNumber : null;
+    }
+    
+    let worstTable = tablesWithAttempts[0];
+    let worstRate = worstTable.correctAnswers / worstTable.totalAttempts;
+    
+    for (const table of tablesWithAttempts) {
+      const rate = table.correctAnswers / table.totalAttempts;
+      if (rate < worstRate) {
+        worstRate = rate;
+        worstTable = table;
+      }
+    }
+    
+    return worstTable.tableNumber;
+  }, [progress]);
 
   const handleSettingsPressIn = () => {
     console.log('[HomeScreen] Settings long press started');
@@ -314,6 +336,18 @@ export default function HomeScreen() {
                 />
               </View>
             </View>
+
+            {missionTable !== null && (
+              <TouchableOpacity
+                style={styles.missionButton}
+                onPress={() => router.push(`/discovery/${missionTable}` as any)}
+                testID="mission-button"
+              >
+                <Target size={20} color={AppColors.primary} />
+                <Text style={styles.missionButtonText}>Mission : Table de {missionTable}</Text>
+                <ChevronRight size={20} color={AppColors.primary} />
+              </TouchableOpacity>
+            )}
           </View>
 
           <TouchableOpacity
@@ -620,6 +654,27 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: AppColors.primary,
     borderRadius: 6,
+  },
+  missionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: AppColors.primary + '15',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 50,
+    marginTop: 16,
+    gap: 10,
+    shadowColor: AppColors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  missionButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold' as const,
+    color: AppColors.primary,
   },
   startButton: {
     flexDirection: 'row',
