@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Volume2, VolumeX, Clock, User, Users, Trash2, Edit, RotateCcw } from 'lucide-react-native';
+import { Volume2, VolumeX, Clock, User, Users, Trash2, Edit, RotateCcw, Award } from 'lucide-react-native';
 import React from 'react';
 import {
   View,
@@ -24,6 +24,12 @@ export default function SettingsScreen() {
     { value: 'normal' as const, label: 'Normal' },
     { value: 'large' as const, label: 'Grand' },
     { value: 'xlarge' as const, label: 'Très Grand' },
+  ];
+
+  const badgeThemes = [
+    { value: 'space' as const, label: '🚀 Espace', description: 'Astronautes et étoiles' },
+    { value: 'animals' as const, label: '🦁 Animaux', description: 'Du fourmis au dragon' },
+    { value: 'heroes' as const, label: '🦸 Héros', description: 'Deviens un super-héros' },
   ];
 
   return (
@@ -408,7 +414,43 @@ export default function SettingsScreen() {
                 />
               </View>
 
-              {settings.timerEnabled && (
+              <View style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <Award size={24} color={AppColors.primary} />
+                <View style={styles.settingTextContainer}>
+                  <Text style={styles.settingTitle}>Thème des badges</Text>
+                  <Text style={styles.settingDescription}>
+                    Choisis ton univers de récompenses
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.badgeThemeButtons}>
+              {badgeThemes.map((theme) => (
+                <TouchableOpacity
+                  key={theme.value}
+                  style={[
+                    styles.badgeThemeButton,
+                    (settings.badgeTheme || 'space') === theme.value && styles.badgeThemeButtonActive,
+                  ]}
+                  onPress={() => updateSettings({ badgeTheme: theme.value })}
+                >
+                  <Text style={styles.badgeThemeEmoji}>{theme.label.split(' ')[0]}</Text>
+                  <Text
+                    style={[
+                      styles.badgeThemeLabel,
+                      (settings.badgeTheme || 'space') === theme.value && styles.badgeThemeLabelActive,
+                    ]}
+                  >
+                    {theme.label.split(' ').slice(1).join(' ')}
+                  </Text>
+                  <Text style={styles.badgeThemeDescription}>{theme.description}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {settings.timerEnabled && (
                 <View style={styles.timerConfig}>
                   <View style={styles.timerModeSection}>
                     <Text style={styles.timerSubLabel}>Mode d&apos;affichage</Text>
@@ -477,6 +519,39 @@ export default function SettingsScreen() {
                   </View>
                 </View>
               )}
+            </View>
+          )}
+
+          {currentUser && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Thème des badges</Text>
+              <Text style={styles.sectionNote}>
+                ℹ️ Sélectionnez le thème utilisé pour les récompenses Challenge.
+              </Text>
+
+              <View style={styles.badgeThemeButtons}>
+                {badgeThemes.map((theme) => (
+                  <TouchableOpacity
+                    key={theme.value}
+                    style={[
+                      styles.badgeThemeButton,
+                      (settings.badgeTheme || 'space') === theme.value && styles.badgeThemeButtonActive,
+                    ]}
+                    onPress={() => updateSettings({ badgeTheme: theme.value })}
+                  >
+                    <Text style={styles.badgeThemeEmoji}>{theme.label.split(' ')[0]}</Text>
+                    <Text
+                      style={[
+                        styles.badgeThemeLabel,
+                        (settings.badgeTheme || 'space') === theme.value && styles.badgeThemeLabelActive,
+                      ]}
+                    >
+                      {theme.label.split(' ').slice(1).join(' ')}
+                    </Text>
+                    <Text style={styles.badgeThemeDescription}>{theme.description}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
           )}
 
@@ -895,5 +970,44 @@ const styles = StyleSheet.create({
   },
   challengeQuestionButtonTextActive: {
     color: '#FFFFFF',
+  },
+  badgeThemeButtons: {
+    flexDirection: 'row',
+    gap: 10,
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    marginBottom: 12,
+  },
+  badgeThemeButton: {
+    flex: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    backgroundColor: AppColors.surface,
+    borderWidth: 2,
+    borderColor: AppColors.border,
+    alignItems: 'center',
+  },
+  badgeThemeButtonActive: {
+    backgroundColor: AppColors.primary + '15',
+    borderColor: AppColors.primary,
+  },
+  badgeThemeEmoji: {
+    fontSize: 28,
+    marginBottom: 6,
+  },
+  badgeThemeLabel: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: AppColors.text,
+    marginBottom: 2,
+  },
+  badgeThemeLabelActive: {
+    color: AppColors.primary,
+  },
+  badgeThemeDescription: {
+    fontSize: 11,
+    color: AppColors.textSecondary,
+    textAlign: 'center' as const,
   },
 });
