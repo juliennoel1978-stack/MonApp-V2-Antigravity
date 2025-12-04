@@ -1,7 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { AppColors } from '@/constants/colors';
 import type { BadgeTheme } from '@/types';
+
+const { width } = Dimensions.get('window');
+const isSmallScreen = width < 375;
 
 interface CurrentBadge {
   icon: string;
@@ -46,18 +49,12 @@ export default function ChallengeDashboardCard({
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerSection}>
-        <View style={styles.levelRow}>
-          <Text style={styles.badgeIcon}>{currentBadge?.icon || '🌟'}</Text>
-          <View style={styles.levelTextContainer}>
-            <Text style={styles.levelLabel}>Niveau Actuel</Text>
-            <Text style={styles.levelTitle} numberOfLines={1}>
-              {currentBadge?.title || 'Débutant'}
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.progressBarContainer}>
+      <View style={styles.headerRow}>
+        <Text style={styles.badgeIcon}>{currentBadge?.icon || '🌟'}</Text>
+        <View style={styles.headerContent}>
+          <Text style={styles.levelTitle} numberOfLines={1}>
+            {currentBadge?.title || 'Débutant'}
+          </Text>
           <View style={styles.progressBarBackground}>
             <View
               style={[
@@ -66,37 +63,26 @@ export default function ChallengeDashboardCard({
               ]}
             />
           </View>
+          <Text style={styles.progressText} numberOfLines={1}>
+            {nextBadgeThreshold && remaining > 0
+              ? `+${remaining} ${progressLabel}`
+              : hasStarted
+              ? '🎉 Max !'
+              : 'Prêt ?'}
+          </Text>
         </View>
-
-        {nextBadgeThreshold && remaining > 0 ? (
-          <Text style={styles.progressText}>
-            Plus que {remaining} {progressLabel} !
-          </Text>
-        ) : hasStarted ? (
-          <Text style={styles.progressText}>
-            Niveau maximum atteint ! 🎉
-          </Text>
-        ) : (
-          <Text style={styles.progressText}>
-            Prêt pour ta première mission ?
-          </Text>
-        )}
       </View>
 
-      <View style={styles.statsSection}>
-        <View style={styles.statBox}>
-          <Text style={styles.statIcon}>🏆</Text>
-          <Text style={styles.statMainText}>{totalChallengesCompleted}</Text>
-          <Text style={styles.statSubText}>challenges{"\n"}terminés</Text>
+      <View style={styles.statsRow}>
+        <View style={styles.statItem}>
+          <Text style={styles.statEmoji}>🏆</Text>
+          <Text style={styles.statValue}>{totalChallengesCompleted}</Text>
         </View>
-
-        <View style={styles.statBox}>
-          <Text style={styles.statIcon}>💪</Text>
-          <Text style={styles.statMainText} numberOfLines={1}>
-            {strongestTable !== null ? `Table ${strongestTable}` : '—'}
-          </Text>
-          <Text style={styles.statSubText}>
-            {strongestTable !== null ? 'ta force' : 'aucune'}
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={styles.statEmoji}>💪</Text>
+          <Text style={styles.statValue} numberOfLines={1}>
+            {strongestTable !== null ? `T.${strongestTable}` : '—'}
           </Text>
         </View>
       </View>
@@ -107,90 +93,78 @@ export default function ChallengeDashboardCard({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: AppColors.surface,
-    borderRadius: 20,
-    padding: 16,
-    marginTop: 16,
+    borderRadius: 16,
+    padding: isSmallScreen ? 12 : 14,
+    marginTop: 12,
+    marginBottom: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowRadius: 6,
     elevation: 2,
+    width: '100%',
   },
-  headerSection: {
-    marginBottom: 14,
-  },
-  levelRow: {
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   badgeIcon: {
-    fontSize: 48,
-    marginRight: 12,
+    fontSize: isSmallScreen ? 32 : 38,
+    marginRight: 10,
   },
-  levelTextContainer: {
+  headerContent: {
     flex: 1,
   },
-  levelLabel: {
-    fontSize: 13,
-    color: AppColors.textSecondary,
-    fontWeight: '500' as const,
-    marginBottom: 2,
-  },
   levelTitle: {
-    fontSize: 19,
+    fontSize: isSmallScreen ? 14 : 16,
     fontWeight: 'bold' as const,
     color: AppColors.primary,
-    lineHeight: 24,
-  },
-  progressBarContainer: {
-    marginBottom: 8,
+    marginBottom: 6,
   },
   progressBarBackground: {
-    height: 10,
+    height: 6,
     backgroundColor: AppColors.borderLight,
-    borderRadius: 5,
+    borderRadius: 3,
     overflow: 'hidden',
+    marginBottom: 4,
   },
   progressBarFill: {
     height: '100%',
     backgroundColor: AppColors.primary,
-    borderRadius: 5,
+    borderRadius: 3,
   },
   progressText: {
-    fontSize: 14,
+    fontSize: isSmallScreen ? 11 : 12,
     color: AppColors.textSecondary,
-    textAlign: 'center',
     fontWeight: '600' as const,
   },
-  statsSection: {
+  statsRow: {
     flexDirection: 'row',
-    gap: 12,
-  },
-  statBox: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F8F8F8',
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
   },
-  statIcon: {
-    fontSize: 28,
-    marginBottom: 6,
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
-  statMainText: {
-    fontSize: 16,
+  statEmoji: {
+    fontSize: isSmallScreen ? 18 : 20,
+  },
+  statValue: {
+    fontSize: isSmallScreen ? 14 : 15,
     fontWeight: 'bold' as const,
     color: AppColors.text,
-    marginBottom: 2,
-    textAlign: 'center',
-    lineHeight: 20,
   },
-  statSubText: {
-    fontSize: 12,
-    color: AppColors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 15,
+  statDivider: {
+    width: 1,
+    height: 20,
+    backgroundColor: AppColors.border,
+    marginHorizontal: 20,
   },
 });
