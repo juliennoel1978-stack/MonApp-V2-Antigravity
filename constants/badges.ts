@@ -122,3 +122,32 @@ export const checkForNewBadge = (
   
   return { newBadge: null, badgeConfig: null };
 };
+
+export interface NextBadgeInfo {
+  title: string;
+  icon: string;
+  threshold: number;
+  challengesRemaining: number;
+}
+
+export const getNextBadgeInfo = (
+  totalChallengesCompleted: number,
+  theme: BadgeTheme,
+  gender?: 'boy' | 'girl'
+): NextBadgeInfo | null => {
+  const badges = PERSISTENCE_BADGES[theme] || PERSISTENCE_BADGES.space;
+  
+  for (const badge of badges) {
+    if (badge.threshold > totalChallengesCompleted) {
+      const icon = getBadgeIcon(badge, gender);
+      return {
+        title: badge.title,
+        icon,
+        threshold: badge.threshold,
+        challengesRemaining: badge.threshold - totalChallengesCompleted,
+      };
+    }
+  }
+  
+  return null;
+};

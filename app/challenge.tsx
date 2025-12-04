@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
-import { checkForNewBadge } from '@/constants/badges';
+import { checkForNewBadge, getNextBadgeInfo, type NextBadgeInfo } from '@/constants/badges';
 
 import BadgeOverlay from '@/components/BadgeOverlay';
 
@@ -82,6 +82,7 @@ export default function ChallengeScreen() {
   const [unlockedBadgeIcon, setUnlockedBadgeIcon] = useState<string>('');
   const [unlockedBadgeTitle, setUnlockedBadgeTitle] = useState<string>('');
   const [unlockedBadgeMessage, setUnlockedBadgeMessage] = useState<string>('');
+  const [nextBadgeInfo, setNextBadgeInfo] = useState<NextBadgeInfo | null>(null);
   
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
   const celebrationAnim = React.useRef(new Animated.Value(0)).current;
@@ -248,9 +249,13 @@ export default function ChallengeScreen() {
     if (newBadge && badgeConfig) {
       console.log('🎉 New badge unlocked!', newBadge.title);
       
+      const nextBadge = getNextBadgeInfo(newTotal, badgeTheme, gender);
+      console.log('🔮 Next badge info:', nextBadge);
+      
       setUnlockedBadgeIcon(newBadge.icon);
       setUnlockedBadgeTitle(newBadge.title);
       setUnlockedBadgeMessage(badgeConfig.message);
+      setNextBadgeInfo(nextBadge);
       setShowBadgeOverlay(true);
       addPersistenceBadge(newBadge);
     } else {
@@ -625,6 +630,7 @@ export default function ChallengeScreen() {
           badgeIcon={unlockedBadgeIcon}
           badgeTitle={unlockedBadgeTitle}
           badgeMessage={unlockedBadgeMessage}
+          nextBadge={nextBadgeInfo}
           onDismiss={handleBadgeDismiss}
         />
 

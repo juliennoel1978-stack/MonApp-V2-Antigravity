@@ -8,6 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { AppColors } from '@/constants/colors';
+import type { NextBadgeInfo } from '@/constants/badges';
 
 const { width } = Dimensions.get('window');
 
@@ -16,6 +17,7 @@ interface BadgeOverlayProps {
   badgeIcon: string;
   badgeTitle: string;
   badgeMessage: string;
+  nextBadge: NextBadgeInfo | null;
   onDismiss: () => void;
 }
 
@@ -24,6 +26,7 @@ export default function BadgeOverlay({
   badgeIcon,
   badgeTitle,
   badgeMessage,
+  nextBadge,
   onDismiss,
 }: BadgeOverlayProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -113,6 +116,29 @@ export default function BadgeOverlay({
           <Text style={styles.badgeTitle}>{badgeTitle}</Text>
           <Text style={styles.badgeMessage}>{badgeMessage}</Text>
           
+          {nextBadge && (
+            <View style={styles.nextBadgeContainer}>
+              <View style={styles.nextBadgeDivider} />
+              <Text style={styles.nextBadgeLabel}>Prochain badge</Text>
+              <View style={styles.nextBadgeRow}>
+                <Text style={styles.nextBadgeIcon}>{nextBadge.icon}</Text>
+                <View style={styles.nextBadgeInfo}>
+                  <Text style={styles.nextBadgeTitle}>{nextBadge.title}</Text>
+                  <Text style={styles.nextBadgeProgress}>
+                    Plus que {nextBadge.challengesRemaining} challenge{nextBadge.challengesRemaining > 1 ? 's' : ''} !
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {!nextBadge && (
+            <View style={styles.maxBadgeContainer}>
+              <View style={styles.nextBadgeDivider} />
+              <Text style={styles.maxBadgeText}>🏆 Tu as tous les badges !</Text>
+            </View>
+          )}
+          
           <Text style={styles.tapHint}>Touche pour continuer</Text>
         </Animated.View>
       </Animated.View>
@@ -135,11 +161,11 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: AppColors.surface,
     borderRadius: 28,
-    paddingVertical: 36,
-    paddingHorizontal: 32,
+    paddingVertical: 32,
+    paddingHorizontal: 28,
     alignItems: 'center',
-    width: width * 0.85,
-    maxWidth: 360,
+    width: width * 0.88,
+    maxWidth: 380,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.35,
@@ -162,45 +188,100 @@ const styles = StyleSheet.create({
     transform: [{ scaleX: -1 }],
   },
   newBadgeLabel: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600' as const,
     color: AppColors.primary,
-    marginBottom: 20,
+    marginBottom: 16,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   emojiContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     backgroundColor: AppColors.surfaceLight,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
     borderWidth: 4,
     borderColor: AppColors.primary,
   },
   badgeEmoji: {
-    fontSize: 64,
+    fontSize: 52,
   },
   badgeTitle: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: 'bold' as const,
     color: AppColors.text,
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   badgeMessage: {
-    fontSize: 17,
+    fontSize: 16,
     color: AppColors.textSecondary,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 22,
     paddingHorizontal: 8,
-    marginBottom: 24,
+  },
+  nextBadgeContainer: {
+    width: '100%',
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  nextBadgeDivider: {
+    width: '80%',
+    height: 1,
+    backgroundColor: AppColors.border,
+    marginBottom: 14,
+  },
+  nextBadgeLabel: {
+    fontSize: 12,
+    fontWeight: '600' as const,
+    color: AppColors.textLight,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 10,
+  },
+  nextBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: AppColors.surfaceLight,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    gap: 12,
+  },
+  nextBadgeIcon: {
+    fontSize: 36,
+  },
+  nextBadgeInfo: {
+    flex: 1,
+  },
+  nextBadgeTitle: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: AppColors.text,
+    marginBottom: 2,
+  },
+  nextBadgeProgress: {
+    fontSize: 14,
+    color: AppColors.primary,
+    fontWeight: '500' as const,
+  },
+  maxBadgeContainer: {
+    width: '100%',
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  maxBadgeText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: AppColors.success,
   },
   tapHint: {
-    fontSize: 14,
+    fontSize: 13,
     color: AppColors.textLight,
     fontStyle: 'italic' as const,
+    marginTop: 16,
   },
 });
