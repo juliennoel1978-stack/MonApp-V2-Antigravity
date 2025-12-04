@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: AppColors.surface,
     borderRadius: 20,
-    padding: 18,
+    padding: 16,
     marginTop: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -117,33 +117,34 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   headerSection: {
-    marginBottom: 16,
+    marginBottom: 14,
   },
   levelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   badgeIcon: {
-    fontSize: 52,
-    marginRight: 14,
+    fontSize: 48,
+    marginRight: 12,
   },
   levelTextContainer: {
     flex: 1,
   },
   levelLabel: {
-    fontSize: 14,
+    fontSize: 13,
     color: AppColors.textSecondary,
     fontWeight: '500' as const,
     marginBottom: 2,
   },
   levelTitle: {
-    fontSize: 22,
+    fontSize: 19,
     fontWeight: 'bold' as const,
     color: AppColors.primary,
+    lineHeight: 24,
   },
   progressBarContainer: {
-    marginBottom: 10,
+    marginBottom: 8,
   },
   progressBarBackground: {
     height: 10,
@@ -157,7 +158,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   progressText: {
-    fontSize: 16,
+    fontSize: 14,
     color: AppColors.textSecondary,
     textAlign: 'center',
     fontWeight: '600' as const,
@@ -179,16 +180,17 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   statMainText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold' as const,
     color: AppColors.text,
     marginBottom: 2,
     textAlign: 'center',
+    lineHeight: 20,
   },
   statSubText: {
-    fontSize: 13,
+    fontSize: 12,
     color: AppColors.textSecondary,
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 15,
   },
 });

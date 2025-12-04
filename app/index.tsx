@@ -285,7 +285,7 @@ export default function HomeScreen() {
           <Text style={{ fontSize: 18, color: AppColors.text }}>Mise à jour...</Text>
         </View>
       )}
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.settingsButton}
@@ -323,16 +323,22 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        <Animated.View
-          style={[
-            styles.content,
-            {
-              opacity: fadeAnim,
-              transform: [{ scale: scaleAnim }],
-            },
-          ]}
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
         >
-          <View style={styles.titleContainer}>
+          <Animated.View
+            style={[
+              styles.animatedContent,
+              {
+                opacity: fadeAnim,
+                transform: [{ scale: scaleAnim }],
+              },
+            ]
+          }
+          >
+            <View style={styles.titleContainer}>
             <View style={styles.sparkleLeft}>
               <Sparkles size={32} color={AppColors.primary} />
             </View>
@@ -425,7 +431,8 @@ export default function HomeScreen() {
             totalChallengesCompleted={challengesCompleted}
             strongestTable={strongestTable}
           />
-        </Animated.View>
+          </Animated.View>
+        </ScrollView>
 
         {showUserModal && (
           <Modal
@@ -596,10 +603,16 @@ const styles = StyleSheet.create({
     borderTopColor: AppColors.primary,
     borderRightColor: AppColors.primary,
   },
-  content: {
+  scrollView: {
     flex: 1,
+  },
+  scrollContent: {
     paddingHorizontal: 24,
-    justifyContent: 'center',
+    paddingTop: 10,
+    paddingBottom: 30,
+  },
+  animatedContent: {
+    width: '100%',
     alignItems: 'center',
   },
   titleContainer: {
@@ -615,7 +628,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold' as const,
     color: AppColors.text,
     textAlign: 'center',
@@ -641,12 +654,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   subtitle: {
-    fontSize: 17,
+    fontSize: 15,
     color: AppColors.textSecondary,
     textAlign: 'center',
-    marginBottom: 24,
-    paddingHorizontal: 20,
-    lineHeight: 24,
+    marginBottom: 20,
+    paddingHorizontal: 16,
+    lineHeight: 21,
   },
   progressCard: {
     width: '100%',
