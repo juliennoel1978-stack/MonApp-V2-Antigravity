@@ -458,14 +458,14 @@ export default function ChallengeScreen() {
                       generateNewQuestion();
                     }}
                   >
-                    <Text style={styles.finishedButtonText}>Refaire un Challenge</Text>
+                    <Text style={styles.finishedButtonText} numberOfLines={1}>Refaire un Challenge</Text>
                   </TouchableOpacity>
                   
                   <TouchableOpacity
                     style={[styles.finishedButton, styles.finishedButtonOutline]}
                     onPress={() => router.replace('/')}
                   >
-                    <Text style={[styles.finishedButtonText, styles.finishedButtonOutlineText]}>Retour à l&apos;accueil</Text>
+                    <Text style={[styles.finishedButtonText, styles.finishedButtonOutlineText]} numberOfLines={1}>Retour à l&apos;accueil</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -577,7 +577,7 @@ export default function ChallengeScreen() {
                       }, 100);
                     }}
                   >
-                    <Text style={styles.finishedButtonText}>Revoir mes erreurs</Text>
+                    <Text style={styles.finishedButtonText} numberOfLines={1}>Revoir mes erreurs</Text>
                   </TouchableOpacity>
                 )}
                 
@@ -601,14 +601,14 @@ export default function ChallengeScreen() {
                     generateNewQuestion();
                   }}
                 >
-                  <Text style={styles.finishedButtonText}>Refaire un Challenge</Text>
+                  <Text style={styles.finishedButtonText} numberOfLines={1}>Refaire un Challenge</Text>
                 </TouchableOpacity>
                 
                 <TouchableOpacity
                   style={[styles.finishedButton, styles.finishedButtonOutline]}
                   onPress={() => router.replace('/')}
                 >
-                  <Text style={[styles.finishedButtonText, styles.finishedButtonOutlineText]}>Retour à l&apos;accueil</Text>
+                  <Text style={[styles.finishedButtonText, styles.finishedButtonOutlineText]} numberOfLines={1}>Retour à l&apos;accueil</Text>
                 </TouchableOpacity>
               </View>
             </View>
