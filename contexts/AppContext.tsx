@@ -52,7 +52,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const [isLoading, setIsLoading] = useState(true);
   const [anonymousChallengesCompleted, setAnonymousChallengesCompleted] = useState(0);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
       const [progressData, settingsData, badgesData, usersData, currentUserId, anonymousChallenges] = await Promise.all([
@@ -136,11 +136,11 @@ export const [AppProvider, useApp] = createContextHook(() => {
       setIsLoading(false);
       console.log('✅ Data loading complete');
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   useEffect(() => {
     const stars = progress.reduce((sum, p) => sum + p.starsEarned, 0);
@@ -380,7 +380,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
   const reloadData = useCallback(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   return useMemo(() => ({
     progress,
