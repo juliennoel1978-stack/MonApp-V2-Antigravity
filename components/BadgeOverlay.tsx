@@ -6,6 +6,7 @@ import {
   TouchableWithoutFeedback,
   Animated,
   Dimensions,
+  Keyboard,
 } from 'react-native';
 import { AppColors } from '@/constants/colors';
 import type { NextBadgeInfo } from '@/constants/badges';
@@ -35,6 +36,8 @@ export default function BadgeOverlay({
 
   useEffect(() => {
     if (visible) {
+      Keyboard.dismiss();
+      
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
