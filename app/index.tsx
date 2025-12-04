@@ -359,7 +359,7 @@ export default function HomeScreen() {
 
           <View style={styles.progressCard}>
             <View style={styles.progressHeader}>
-              <Trophy size={32} color={AppColors.warning} />
+              <Trophy size={20} color={AppColors.warning} />
               <Text style={styles.progressTitle}>Ta Progression</Text>
             </View>
 
@@ -664,9 +664,9 @@ const styles = StyleSheet.create({
   progressCard: {
     width: '100%',
     backgroundColor: AppColors.surface,
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 20,
+    borderRadius: 20,
+    padding: 14,
+    marginBottom: 16,
     shadowColor: AppColors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
@@ -676,82 +676,84 @@ const styles = StyleSheet.create({
   progressHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
+    justifyContent: 'center',
+    gap: 6,
+    marginBottom: 10,
   },
   progressTitle: {
-    fontSize: 22,
+    fontSize: 16,
     fontWeight: 'bold' as const,
     color: AppColors.text,
   },
   statsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 10,
+    gap: 20,
   },
   statItem: {
     alignItems: 'center',
     flex: 1,
   },
   statValue: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: 'bold' as const,
     color: AppColors.primary,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   statLabel: {
-    fontSize: 15,
+    fontSize: 12,
     color: AppColors.textSecondary,
     fontWeight: '600' as const,
   },
   statDivider: {
     width: 1,
-    height: 35,
+    height: 28,
     backgroundColor: AppColors.border,
   },
   progressBarContainer: {
     width: '100%',
   },
   progressBarBackground: {
-    height: 12,
+    height: 8,
     backgroundColor: AppColors.borderLight,
-    borderRadius: 6,
+    borderRadius: 4,
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
     backgroundColor: AppColors.primary,
-    borderRadius: 6,
+    borderRadius: 4,
   },
   missionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: AppColors.primary + '15',
-    paddingVertical: 16,
-    paddingHorizontal: 28,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     borderRadius: 50,
-    marginTop: 20,
-    gap: 12,
+    marginTop: 12,
+    gap: 8,
     shadowColor: AppColors.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 8,
-    minHeight: 56,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+    minHeight: 44,
   },
   missionIcon: {
-    fontSize: 24,
+    fontSize: 18,
   },
   missionButtonText: {
-    fontSize: 17,
+    fontSize: 13,
     fontWeight: 'bold' as const,
     color: AppColors.text,
     flexShrink: 1,
   },
   missionChevron: {
-    fontSize: 24,
+    fontSize: 18,
     color: AppColors.primary,
     fontWeight: 'bold' as const,
   },
