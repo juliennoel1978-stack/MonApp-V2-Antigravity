@@ -17,12 +17,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
+import { BADGE_THRESHOLDS, getBadgeForThreshold, getBadgeIcon, getBadgeTitle } from '@/constants/badges';
+import ChallengeDashboardCard from '@/components/ChallengeDashboardCard';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData } = useApp();
+  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData, settings, anonymousChallengesCompleted } = useApp();
   
   useFocusEffect(
     useCallback(() => {
@@ -149,6 +151,53 @@ export default function HomeScreen() {
 
   const completedTables = progress.filter(p => p.completed).length;
   const totalTables = progress.length;
+
+  const challengesCompleted = currentUser?.challengesCompleted || anonymousChallengesCompleted;
+  const badgeTheme = currentUser?.badgeTheme || settings.badgeTheme || 'space';
+  const gender = currentUser?.gender;
+
+  const currentBadgeData = React.useMemo(() => {
+    let lastEarnedBadge = null;
+    for (const threshold of BADGE_THRESHOLDS) {
+      if (challengesCompleted >= threshold) {
+        const badge = getBadgeForThreshold(badgeTheme, threshold);
+        if (badge) {
+          lastEarnedBadge = {
+            icon: getBadgeIcon(badge, gender),
+            title: getBadgeTitle(badge, gender),
+          };
+        }
+      }
+    }
+    return lastEarnedBadge;
+  }, [challengesCompleted, badgeTheme, gender]);
+
+  const nextBadgeThreshold = React.useMemo(() => {
+    for (const threshold of BADGE_THRESHOLDS) {
+      if (threshold > challengesCompleted) {
+        return threshold;
+      }
+    }
+    return null;
+  }, [challengesCompleted]);
+
+  const strongestTable = React.useMemo(() => {
+    const tablesWithAttempts = progress.filter(p => p.totalAttempts > 0);
+    if (tablesWithAttempts.length === 0) return null;
+    
+    let best = tablesWithAttempts[0];
+    let bestRate = best.correctAnswers / best.totalAttempts;
+    
+    for (const table of tablesWithAttempts) {
+      const rate = table.correctAnswers / table.totalAttempts;
+      if (rate > bestRate || (rate === bestRate && table.totalAttempts > best.totalAttempts)) {
+        bestRate = rate;
+        best = table;
+      }
+    }
+    
+    return bestRate >= 0.7 ? best.tableNumber : null;
+  }, [progress]);
 
   const missionTable = React.useMemo(() => {
     const tablesWithAttempts = progress.filter(p => p.totalAttempts > 0 && !p.completed);
@@ -369,7 +418,13 @@ export default function HomeScreen() {
             <Zap size={24} color="#FFFFFF" />
           </TouchableOpacity>
 
-
+          <ChallengeDashboardCard
+            theme={badgeTheme}
+            currentBadge={currentBadgeData}
+            nextBadgeThreshold={nextBadgeThreshold}
+            totalChallengesCompleted={challengesCompleted}
+            strongestTable={strongestTable}
+          />
         </Animated.View>
 
         {showUserModal && (
