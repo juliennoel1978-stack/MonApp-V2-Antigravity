@@ -16,8 +16,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
-import { checkForNewBadge, getNextBadgeInfo, type NextBadgeInfo } from '@/constants/badges';
-
+import type { QueuedReward, UnlockedAchievement } from '@/types';
+import { checkForRewards, checkStrategistAchievement } from '@/utils/rewardQueue';
 import BadgeOverlay from '@/components/BadgeOverlay';
 
 const { width } = Dimensions.get('window');
@@ -55,7 +55,18 @@ type Question = {
 
 export default function ChallengeScreen() {
   const router = useRouter();
-  const { settings, currentUser, incrementChallengesCompleted, anonymousChallengesCompleted, addPersistenceBadge } = useApp();
+  const { 
+    settings, 
+    currentUser, 
+    incrementChallengesCompleted, 
+    anonymousChallengesCompleted, 
+    addPersistenceBadge,
+    addAchievement,
+    addPlayDate,
+    getAchievements,
+    getPlayDates,
+    getPersistenceBadges,
+  } = useApp();
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [userAnswer, setUserAnswer] = useState<string>('');
   const [attempts, setAttempts] = useState<number>(0);
@@ -79,10 +90,12 @@ export default function ChallengeScreen() {
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
   const [reviewQuestions, setReviewQuestions] = useState<{ num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]>([]);
   const [showBadgeOverlay, setShowBadgeOverlay] = useState<boolean>(false);
-  const [unlockedBadgeIcon, setUnlockedBadgeIcon] = useState<string>('');
-  const [unlockedBadgeTitle, setUnlockedBadgeTitle] = useState<string>('');
-  const [unlockedBadgeMessage, setUnlockedBadgeMessage] = useState<string>('');
-  const [nextBadgeInfo, setNextBadgeInfo] = useState<NextBadgeInfo | null>(null);
+  const [rewardQueue, setRewardQueue] = useState<QueuedReward[]>([]);
+  const [currentReward, setCurrentReward] = useState<QueuedReward | null>(null);
+  const [pendingAchievements, setPendingAchievements] = useState<UnlockedAchievement[]>([]);
+  const [pendingBadge, setPendingBadge] = useState<{ id: string; threshold: number; title: string; icon: string; unlockedAt: string } | null>(null);
+  const [pendingReviewStart, setPendingReviewStart] = useState<boolean>(false);
+  const pendingWrongAnswersRef = useRef<{ num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]>([]);
   
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
   const celebrationAnim = React.useRef(new Animated.Value(0)).current;
@@ -231,44 +244,127 @@ export default function ChallengeScreen() {
       return;
     }
 
-    console.log('🏁 Challenge ending, checking for badge...');
+    console.log('🏁 Challenge ending, checking for rewards...');
     const newTotal = await incrementChallengesCompleted();
+    await addPlayDate();
     console.log('🏆 New total challenges completed:', newTotal);
 
     const badgeTheme = currentUser?.badgeTheme || settings.badgeTheme || 'space';
-    const existingBadges = currentUser?.persistenceBadges || [];
+    const existingBadges = getPersistenceBadges();
+    const existingAchievements = getAchievements();
+    const playDates = getPlayDates();
     const gender = currentUser?.gender;
+    
+    const timerEnabled = currentUser 
+      ? (currentUser.timerSettings?.enabled || false)
+      : settings.timerEnabled;
+    
+    const scorePercent = Math.round((correctCount / maxQuestions) * 100);
 
-    const { newBadge, badgeConfig } = checkForNewBadge(
-      newTotal,
+    const { queue, newBadge, newAchievements } = checkForRewards({
+      totalChallengesCompleted: newTotal,
       badgeTheme,
       existingBadges,
-      gender
-    );
+      existingAchievements,
+      playDates,
+      gender,
+      timerEnabled,
+      scorePercent,
+      isReviewingErrors: false,
+    });
 
-    if (newBadge && badgeConfig) {
-      console.log('🎉 New badge unlocked!', newBadge.title);
-      
-      const nextBadge = getNextBadgeInfo(newTotal, badgeTheme, gender);
-      console.log('🔮 Next badge info:', nextBadge);
-      
-      setUnlockedBadgeIcon(newBadge.icon);
-      setUnlockedBadgeTitle(newBadge.title);
-      setUnlockedBadgeMessage(badgeConfig.message);
-      setNextBadgeInfo(nextBadge);
+    if (queue.length > 0) {
+      console.log('🎉 Rewards to show:', queue.length);
+      setRewardQueue(queue);
+      setCurrentReward(queue[0]);
+      setPendingAchievements(newAchievements);
+      setPendingBadge(newBadge);
       setShowBadgeOverlay(true);
-      addPersistenceBadge(newBadge);
     } else {
-      console.log('ℹ️ No new badge at threshold', newTotal);
+      console.log('ℹ️ No rewards unlocked');
       setIsFinished(true);
     }
-  }, [isReviewMode, incrementChallengesCompleted, currentUser, settings, addPersistenceBadge]);
+  }, [isReviewMode, incrementChallengesCompleted, addPlayDate, currentUser, settings, correctCount, maxQuestions, getPersistenceBadges, getAchievements, getPlayDates]);
 
-  const handleBadgeDismiss = useCallback(() => {
-    setShowBadgeOverlay(false);
+  const handleBadgeDismiss = useCallback(async () => {
+    const currentIndex = rewardQueue.findIndex(r => r === currentReward);
+    const nextIndex = currentIndex + 1;
     
-    setIsFinished(true);
-  }, []);
+    if (currentReward) {
+      if (currentReward.type === 'level_badge' && pendingBadge) {
+        await addPersistenceBadge(pendingBadge);
+        setPendingBadge(null);
+      } else if (currentReward.type === 'achievement') {
+        const achievementToSave = pendingAchievements.find(
+          a => a.id === getAchievementIdFromTitle(currentReward.title)
+        );
+        if (achievementToSave) {
+          await addAchievement(achievementToSave);
+          setPendingAchievements(prev => prev.filter(a => a.id !== achievementToSave.id));
+        }
+      }
+    }
+    
+    if (nextIndex < rewardQueue.length) {
+      console.log('🎁 Showing next reward:', rewardQueue[nextIndex].title);
+      setCurrentReward(rewardQueue[nextIndex]);
+    } else {
+      console.log('✅ All rewards shown, closing overlay');
+      setShowBadgeOverlay(false);
+      setRewardQueue([]);
+      setCurrentReward(null);
+      
+      if (pendingReviewStart && pendingWrongAnswersRef.current.length > 0) {
+        console.log('📝 Starting review mode after badge dismissal');
+        startReviewMode(pendingWrongAnswersRef.current);
+        setPendingReviewStart(false);
+        pendingWrongAnswersRef.current = [];
+      } else {
+        setIsFinished(true);
+      }
+    }
+  }, [rewardQueue, currentReward, pendingBadge, pendingAchievements, addPersistenceBadge, addAchievement, pendingReviewStart]);
+
+  const startReviewMode = useCallback((wrongAnswersToReview: { num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]) => {
+    setIsFinished(false);
+    setIsReviewMode(true);
+    setReviewQuestions([...wrongAnswersToReview]);
+    setCorrectCount(0);
+    setIncorrectCount(0);
+    setTotalQuestions(0);
+    setConsecutiveCorrect(0);
+    setMaxQuestions(wrongAnswersToReview.length);
+    setWrongAnswers([]);
+    const firstWrongQuestion = wrongAnswersToReview[0];
+    setCurrentQuestion(firstWrongQuestion);
+    setUserAnswer('');
+    setAttempts(0);
+    setShowFeedback(false);
+    setShowCorrectAnswer(false);
+    setIsTimeout(false);
+    const duration = currentUser 
+      ? (currentUser.timerSettings?.enabled ? (currentUser.timerSettings.duration || 0) : 0)
+      : (settings.timerEnabled ? settings.timerDuration : 0);
+    setTimeRemaining(duration);
+    
+    setTimeout(() => {
+      if (isMounted.current) {
+        inputRef.current?.focus();
+      }
+    }, 100);
+  }, [currentUser, settings]);
+
+  const getAchievementIdFromTitle = (title: string): string => {
+    const mapping: Record<string, string> = {
+      'Maître du Temps': 'time_master',
+      'Grand Stratège': 'strategist',
+      'Habitué': 'regular_player',
+      'Lève-tôt': 'early_bird',
+      'Insomnie': 'night_owl',
+      'Oeil de Lynx': 'perfect_score',
+    };
+    return mapping[title] || '';
+  };
 
   const checkAnswer = () => {
     if (!currentQuestion || userAnswer.trim() === '') return;
@@ -548,33 +644,26 @@ export default function ChallengeScreen() {
                 {wrongAnswers.length > 0 && (
                   <TouchableOpacity
                     style={[styles.finishedButton, styles.finishedButtonSecondary]}
-                    onPress={() => {
-                      setIsFinished(false);
-                      setIsReviewMode(true);
-                      setReviewQuestions([...wrongAnswers]);
-                      setCorrectCount(0);
-                      setIncorrectCount(0);
-                      setTotalQuestions(0);
-                      setConsecutiveCorrect(0);
-                      setMaxQuestions(wrongAnswers.length);
-                      setWrongAnswers([]);
-                      const firstWrongQuestion = wrongAnswers[0];
-                      setCurrentQuestion(firstWrongQuestion);
-                      setUserAnswer('');
-                      setAttempts(0);
-                      setShowFeedback(false);
-                      setShowCorrectAnswer(false);
-                      setIsTimeout(false);
-                      const duration = currentUser 
-                        ? (currentUser.timerSettings?.enabled ? (currentUser.timerSettings.duration || 0) : 0)
-                        : (settings.timerEnabled ? settings.timerDuration : 0);
-                      setTimeRemaining(duration);
+                    onPress={async () => {
+                      const existingAchievements = getAchievements();
+                      const strategistReward = checkStrategistAchievement(existingAchievements);
                       
-                      setTimeout(() => {
-                        if (isMounted.current) {
-                          inputRef.current?.focus();
-                        }
-                      }, 100);
+                      if (strategistReward) {
+                        console.log('🔎 Strategist achievement unlocked!');
+                        const achievement: UnlockedAchievement = {
+                          id: 'strategist',
+                          unlockedAt: new Date().toISOString(),
+                          count: 1,
+                        };
+                        setPendingAchievements([achievement]);
+                        pendingWrongAnswersRef.current = [...wrongAnswers];
+                        setPendingReviewStart(true);
+                        setRewardQueue([strategistReward]);
+                        setCurrentReward(strategistReward);
+                        setShowBadgeOverlay(true);
+                      } else {
+                        startReviewMode(wrongAnswers);
+                      }
                     }}
                   >
                     <Text style={styles.finishedButtonText} numberOfLines={1}>Revoir mes erreurs</Text>
@@ -627,10 +716,7 @@ export default function ChallengeScreen() {
       <SafeAreaView style={styles.container} edges={['top']}>
         <BadgeOverlay
           visible={showBadgeOverlay}
-          badgeIcon={unlockedBadgeIcon}
-          badgeTitle={unlockedBadgeTitle}
-          badgeMessage={unlockedBadgeMessage}
-          nextBadge={nextBadgeInfo}
+          currentReward={currentReward}
           onDismiss={handleBadgeDismiss}
         />
 

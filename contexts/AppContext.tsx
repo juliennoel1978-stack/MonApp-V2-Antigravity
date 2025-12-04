@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { UserProgress, UserSettings, Badge, User, PersistenceBadge } from '@/types';
+import type { UserProgress, UserSettings, Badge, User, PersistenceBadge, UnlockedAchievement } from '@/types';
 import { MULTIPLICATION_TABLES } from '@/constants/tables';
 
 const STORAGE_KEYS = {
@@ -11,6 +11,9 @@ const STORAGE_KEYS = {
   USERS: '@tables_magiques_users',
   CURRENT_USER: '@tables_magiques_current_user',
   ANONYMOUS_CHALLENGES: '@tables_magiques_anonymous_challenges',
+  ANONYMOUS_ACHIEVEMENTS: '@tables_magiques_anonymous_achievements',
+  ANONYMOUS_PLAY_DATES: '@tables_magiques_anonymous_play_dates',
+  ANONYMOUS_BADGES: '@tables_magiques_anonymous_badges',
 } as const;
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -51,17 +54,23 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [anonymousChallengesCompleted, setAnonymousChallengesCompleted] = useState(0);
+  const [anonymousAchievements, setAnonymousAchievements] = useState<UnlockedAchievement[]>([]);
+  const [anonymousPlayDates, setAnonymousPlayDates] = useState<string[]>([]);
+  const [anonymousPersistenceBadges, setAnonymousPersistenceBadges] = useState<PersistenceBadge[]>([]);
 
   const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const [progressData, settingsData, badgesData, usersData, currentUserId, anonymousChallenges] = await Promise.all([
+      const [progressData, settingsData, badgesData, usersData, currentUserId, anonymousChallenges, anonymousAchievementsData, anonymousPlayDatesData, anonymousBadgesData] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEYS.PROGRESS),
         AsyncStorage.getItem(STORAGE_KEYS.SETTINGS),
         AsyncStorage.getItem(STORAGE_KEYS.BADGES),
         AsyncStorage.getItem(STORAGE_KEYS.USERS),
         AsyncStorage.getItem(STORAGE_KEYS.CURRENT_USER),
         AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_CHALLENGES),
+        AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_ACHIEVEMENTS),
+        AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_PLAY_DATES),
+        AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_BADGES),
       ]);
 
       console.log('📦 Loading data...');
@@ -129,6 +138,21 @@ export const [AppProvider, useApp] = createContextHook(() => {
       if (anonymousChallenges) {
         setAnonymousChallengesCompleted(parseInt(anonymousChallenges, 10) || 0);
         console.log('🏆 Anonymous challenges loaded:', anonymousChallenges);
+      }
+
+      if (anonymousAchievementsData) {
+        setAnonymousAchievements(JSON.parse(anonymousAchievementsData));
+        console.log('🌟 Anonymous achievements loaded');
+      }
+
+      if (anonymousPlayDatesData) {
+        setAnonymousPlayDates(JSON.parse(anonymousPlayDatesData));
+        console.log('📅 Anonymous play dates loaded');
+      }
+
+      if (anonymousBadgesData) {
+        setAnonymousPersistenceBadges(JSON.parse(anonymousBadgesData));
+        console.log('🏅 Anonymous persistence badges loaded');
       }
     } catch (error) {
       console.error('❌ Error loading data:', error);
@@ -243,11 +267,17 @@ export const [AppProvider, useApp] = createContextHook(() => {
         STORAGE_KEYS.PROGRESS,
         STORAGE_KEYS.BADGES,
         STORAGE_KEYS.ANONYMOUS_CHALLENGES,
+        STORAGE_KEYS.ANONYMOUS_ACHIEVEMENTS,
+        STORAGE_KEYS.ANONYMOUS_PLAY_DATES,
+        STORAGE_KEYS.ANONYMOUS_BADGES,
       ]);
       setProgress(INITIAL_PROGRESS);
       setBadges(INITIAL_BADGES);
       setTotalStars(0);
       setAnonymousChallengesCompleted(0);
+      setAnonymousAchievements([]);
+      setAnonymousPlayDates([]);
+      setAnonymousPersistenceBadges([]);
       console.log('🔄 Progress reset including anonymous challenges count');
     } catch (error) {
       console.error('Error resetting progress:', error);
@@ -371,16 +401,115 @@ export const [AppProvider, useApp] = createContextHook(() => {
         setCurrentUser(updatedUser);
         console.log('🏅 New persistence badge added:', badge.title, badge.icon);
       } else {
-        console.log('🏅 No user logged in, badge not saved:', badge.title);
+        const existingBadges = anonymousPersistenceBadges;
+        const alreadyExists = existingBadges.some(b => b.id === badge.id);
+        if (alreadyExists) {
+          console.log('🏅 Anonymous badge already exists:', badge.id);
+          return;
+        }
+        const updatedBadges = [...existingBadges, badge];
+        await AsyncStorage.setItem(STORAGE_KEYS.ANONYMOUS_BADGES, JSON.stringify(updatedBadges));
+        setAnonymousPersistenceBadges(updatedBadges);
+        console.log('🏅 New anonymous persistence badge added:', badge.title, badge.icon);
       }
     } catch (error) {
       console.error('Error adding persistence badge:', error);
     }
-  }, [currentUser, users]);
+  }, [currentUser, users, anonymousPersistenceBadges]);
 
   const reloadData = useCallback(() => {
     loadData();
   }, [loadData]);
+
+  const addAchievement = useCallback(async (achievement: UnlockedAchievement) => {
+    try {
+      if (currentUser) {
+        const existingAchievements = currentUser.achievements || [];
+        const existingIndex = existingAchievements.findIndex(a => a.id === achievement.id);
+        
+        let updatedAchievements: UnlockedAchievement[];
+        if (existingIndex >= 0) {
+          updatedAchievements = existingAchievements.map((a, idx) =>
+            idx === existingIndex
+              ? { ...a, count: (a.count || 1) + 1, lastUnlockedAt: achievement.unlockedAt }
+              : a
+          );
+        } else {
+          updatedAchievements = [...existingAchievements, { ...achievement, count: 1 }];
+        }
+        
+        const updatedUser = { ...currentUser, achievements: updatedAchievements };
+        const updatedUsers = users.map(u => u.id === currentUser.id ? updatedUser : u);
+        await AsyncStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updatedUsers));
+        setUsers(updatedUsers);
+        setCurrentUser(updatedUser);
+        console.log('🌟 Achievement added:', achievement.id);
+      } else {
+        const existingIndex = anonymousAchievements.findIndex(a => a.id === achievement.id);
+        
+        let updatedAchievements: UnlockedAchievement[];
+        if (existingIndex >= 0) {
+          updatedAchievements = anonymousAchievements.map((a, idx) =>
+            idx === existingIndex
+              ? { ...a, count: (a.count || 1) + 1, lastUnlockedAt: achievement.unlockedAt }
+              : a
+          );
+        } else {
+          updatedAchievements = [...anonymousAchievements, { ...achievement, count: 1 }];
+        }
+        
+        await AsyncStorage.setItem(STORAGE_KEYS.ANONYMOUS_ACHIEVEMENTS, JSON.stringify(updatedAchievements));
+        setAnonymousAchievements(updatedAchievements);
+        console.log('🌟 Anonymous achievement added:', achievement.id);
+      }
+    } catch (error) {
+      console.error('Error adding achievement:', error);
+    }
+  }, [currentUser, users, anonymousAchievements]);
+
+  const addPlayDate = useCallback(async () => {
+    try {
+      const now = new Date().toISOString();
+      if (currentUser) {
+        const existingDates = currentUser.challengePlayDates || [];
+        const updatedDates = [...existingDates, now];
+        const updatedUser = { ...currentUser, challengePlayDates: updatedDates };
+        const updatedUsers = users.map(u => u.id === currentUser.id ? updatedUser : u);
+        await AsyncStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updatedUsers));
+        setUsers(updatedUsers);
+        setCurrentUser(updatedUser);
+        console.log('📅 Play date added for user');
+      } else {
+        const updatedDates = [...anonymousPlayDates, now];
+        await AsyncStorage.setItem(STORAGE_KEYS.ANONYMOUS_PLAY_DATES, JSON.stringify(updatedDates));
+        setAnonymousPlayDates(updatedDates);
+        console.log('📅 Anonymous play date added');
+      }
+    } catch (error) {
+      console.error('Error adding play date:', error);
+    }
+  }, [currentUser, users, anonymousPlayDates]);
+
+  const getAchievements = useCallback((): UnlockedAchievement[] => {
+    if (currentUser) {
+      return currentUser.achievements || [];
+    }
+    return anonymousAchievements;
+  }, [currentUser, anonymousAchievements]);
+
+  const getPlayDates = useCallback((): string[] => {
+    if (currentUser) {
+      return currentUser.challengePlayDates || [];
+    }
+    return anonymousPlayDates;
+  }, [currentUser, anonymousPlayDates]);
+
+  const getPersistenceBadges = useCallback((): PersistenceBadge[] => {
+    if (currentUser) {
+      return currentUser.persistenceBadges || [];
+    }
+    return anonymousPersistenceBadges;
+  }, [currentUser, anonymousPersistenceBadges]);
 
   return useMemo(() => ({
     progress,
@@ -391,6 +520,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     currentUser,
     isLoading,
     anonymousChallengesCompleted,
+    anonymousPersistenceBadges,
     updateTableProgress,
     unlockBadge,
     getTableProgress,
@@ -404,5 +534,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
     incrementChallengesCompleted,
     addPersistenceBadge,
     reloadData,
-  }), [progress, settings, badges, totalStars, users, currentUser, isLoading, anonymousChallengesCompleted, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser, incrementChallengesCompleted, addPersistenceBadge, reloadData]);
+    addAchievement,
+    addPlayDate,
+    getAchievements,
+    getPlayDates,
+    getPersistenceBadges,
+  }), [progress, settings, badges, totalStars, users, currentUser, isLoading, anonymousChallengesCompleted, anonymousPersistenceBadges, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser, incrementChallengesCompleted, addPersistenceBadge, reloadData, addAchievement, addPlayDate, getAchievements, getPlayDates, getPersistenceBadges]);
 });

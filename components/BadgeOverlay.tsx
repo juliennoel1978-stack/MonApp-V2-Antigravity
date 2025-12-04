@@ -9,25 +9,19 @@ import {
   Keyboard,
 } from 'react-native';
 import { AppColors } from '@/constants/colors';
-import type { NextBadgeInfo } from '@/constants/badges';
+import type { QueuedReward } from '@/types';
 
 const { width } = Dimensions.get('window');
 
 interface BadgeOverlayProps {
   visible: boolean;
-  badgeIcon: string;
-  badgeTitle: string;
-  badgeMessage: string;
-  nextBadge: NextBadgeInfo | null;
+  currentReward: QueuedReward | null;
   onDismiss: () => void;
 }
 
 export default function BadgeOverlay({
   visible,
-  badgeIcon,
-  badgeTitle,
-  badgeMessage,
-  nextBadge,
+  currentReward,
   onDismiss,
 }: BadgeOverlayProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -35,8 +29,12 @@ export default function BadgeOverlay({
   const bounceAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (visible) {
+    if (visible && currentReward) {
       Keyboard.dismiss();
+      
+      fadeAnim.setValue(0);
+      scaleAnim.setValue(0.3);
+      bounceAnim.setValue(0);
       
       Animated.parallel([
         Animated.timing(fadeAnim, {
@@ -70,7 +68,7 @@ export default function BadgeOverlay({
       bounceAnim.stopAnimation();
       bounceAnim.setValue(0);
     }
-  }, [visible, fadeAnim, scaleAnim, bounceAnim]);
+  }, [visible, currentReward, fadeAnim, scaleAnim, bounceAnim]);
 
   const handleDismiss = () => {
     Animated.parallel([
@@ -89,7 +87,11 @@ export default function BadgeOverlay({
     });
   };
 
-  if (!visible) return null;
+  if (!visible || !currentReward) return null;
+
+  const isLevelBadge = currentReward.type === 'level_badge';
+  const headerColor = isLevelBadge ? AppColors.primary : '#FF9500';
+  const borderColor = isLevelBadge ? AppColors.primary : '#FF9500';
 
   return (
     <TouchableWithoutFeedback onPress={handleDismiss}>
@@ -110,35 +112,43 @@ export default function BadgeOverlay({
             <Text style={[styles.sparkle, styles.sparkleRight]}>✨</Text>
           </View>
           
-          <Text style={styles.newBadgeLabel}>Nouveau Badge débloqué !</Text>
+          <Text style={[styles.headerLabel, { color: headerColor }]}>
+            {currentReward.headerText}
+          </Text>
           
-          <View style={styles.emojiContainer}>
-            <Text style={styles.badgeEmoji}>{badgeIcon}</Text>
+          <View style={[styles.emojiContainer, { borderColor }]}>
+            <Text style={styles.badgeEmoji}>{currentReward.icon}</Text>
           </View>
           
-          <Text style={styles.badgeTitle}>{badgeTitle}</Text>
-          <Text style={styles.badgeMessage}>{badgeMessage}</Text>
+          <Text style={styles.badgeTitle}>{currentReward.title}</Text>
+          <Text style={styles.badgeMessage}>{currentReward.message}</Text>
           
-          {nextBadge && (
+          {isLevelBadge && currentReward.nextBadgeInfo && (
             <View style={styles.nextBadgeContainer}>
               <View style={styles.nextBadgeDivider} />
               <Text style={styles.nextBadgeLabel}>Prochain badge</Text>
               <View style={styles.nextBadgeRow}>
-                <Text style={styles.nextBadgeIcon}>{nextBadge.icon}</Text>
+                <Text style={styles.nextBadgeIcon}>{currentReward.nextBadgeInfo.icon}</Text>
                 <View style={styles.nextBadgeInfo}>
-                  <Text style={styles.nextBadgeTitle}>{nextBadge.title}</Text>
+                  <Text style={styles.nextBadgeTitle}>{currentReward.nextBadgeInfo.title}</Text>
                   <Text style={styles.nextBadgeProgress}>
-                    Plus que {nextBadge.challengesRemaining} challenge{nextBadge.challengesRemaining > 1 ? 's' : ''} !
+                    Plus que {currentReward.nextBadgeInfo.challengesRemaining} challenge{currentReward.nextBadgeInfo.challengesRemaining > 1 ? 's' : ''} !
                   </Text>
                 </View>
               </View>
             </View>
           )}
 
-          {!nextBadge && (
+          {isLevelBadge && !currentReward.nextBadgeInfo && (
             <View style={styles.maxBadgeContainer}>
               <View style={styles.nextBadgeDivider} />
               <Text style={styles.maxBadgeText}>🏆 Tu as tous les badges !</Text>
+            </View>
+          )}
+
+          {!isLevelBadge && currentReward.achievementType === 'RECURRING' && (
+            <View style={styles.recurringBadge}>
+              <Text style={styles.recurringText}>🔄 Peut être obtenu à nouveau</Text>
             </View>
           )}
           
@@ -190,10 +200,9 @@ const styles = StyleSheet.create({
   sparkleRight: {
     transform: [{ scaleX: -1 }],
   },
-  newBadgeLabel: {
+  headerLabel: {
     fontSize: 15,
     fontWeight: '600' as const,
-    color: AppColors.primary,
     marginBottom: 16,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -207,7 +216,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
     borderWidth: 4,
-    borderColor: AppColors.primary,
   },
   badgeEmoji: {
     fontSize: 52,
@@ -280,6 +288,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600' as const,
     color: AppColors.success,
+  },
+  recurringBadge: {
+    marginTop: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(255, 149, 0, 0.1)',
+    borderRadius: 12,
+  },
+  recurringText: {
+    fontSize: 13,
+    color: '#FF9500',
+    fontWeight: '500' as const,
   },
   tapHint: {
     fontSize: 13,

@@ -13,7 +13,7 @@ export interface BadgeDefinition {
 
 export interface GenderedBadgeDefinition {
   threshold: BadgeThreshold;
-  title: string;
+  title: string | { male: string; female: string; default: string };
   message: string;
   icon: {
     male: string;
@@ -60,7 +60,7 @@ export const PERSISTENCE_BADGES: Record<BadgeTheme, BadgeConfig[]> = {
     { threshold: 20, title: 'Mega-Cerveau', message: "Ton super-pouvoir ? L'intelligence.", icon: '🧠' },
     { threshold: 25, title: 'Titan', message: "Rien ne peut t'ébranler, tu es solide.", icon: '🦾' },
     { threshold: 30, title: 'Invincible', message: 'Aucune multiplication ne te résiste.', icon: '💥' },
-    { threshold: 45, title: 'Super-Héros', message: 'Les autres héros ont ton poster dans leur chambre !', icon: { male: '🦸‍♂️', female: '🦸‍♀️', default: '🦸' } },
+    { threshold: 45, title: { male: 'Super-Héros', female: 'Super-Héroïne', default: 'Super-Héros' }, message: 'Les autres héros ont ton poster dans leur chambre !', icon: { male: '🦸‍♂️', female: '🦸‍♀️', default: '🦸' } },
   ],
 };
 
@@ -82,6 +82,18 @@ export const getBadgeIcon = (
     return badge.icon.default;
   }
   return badge.icon;
+};
+
+export const getBadgeTitle = (
+  badge: BadgeConfig,
+  gender: 'boy' | 'girl' | undefined
+): string => {
+  if (isGenderedBadge(badge) && typeof badge.title === 'object') {
+    if (gender === 'girl') return badge.title.female;
+    if (gender === 'boy') return badge.title.male;
+    return badge.title.default;
+  }
+  return badge.title as string;
 };
 
 export const getBadgeForThreshold = (
@@ -108,10 +120,11 @@ export const checkForNewBadge = (
       
       if (!alreadyUnlocked) {
         const icon = getBadgeIcon(badge, gender);
+        const title = getBadgeTitle(badge, gender);
         const newBadge: UnlockedBadge = {
           id: `${theme}_${badge.threshold}`,
           threshold: badge.threshold,
-          title: badge.title,
+          title,
           icon,
           unlockedAt: new Date().toISOString(),
         };
@@ -140,8 +153,9 @@ export const getNextBadgeInfo = (
   for (const badge of badges) {
     if (badge.threshold > totalChallengesCompleted) {
       const icon = getBadgeIcon(badge, gender);
+      const title = getBadgeTitle(badge, gender);
       return {
-        title: badge.title,
+        title,
         icon,
         threshold: badge.threshold,
         challengesRemaining: badge.threshold - totalChallengesCompleted,

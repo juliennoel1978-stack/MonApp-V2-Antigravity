@@ -72,6 +72,46 @@ export interface User {
   persistenceBadges?: PersistenceBadge[];
   badgeTheme?: BadgeTheme;
   challengesCompleted?: number;
+  achievements?: UnlockedAchievement[];
+  challengePlayDates?: string[];
 }
 
 export type StreakTier = '4' | '8' | '12' | '20' | '30' | 'max' | null;
+
+export type AchievementType = 'ONE_SHOT' | 'RECURRING';
+
+export interface AchievementDefinition {
+  id: string;
+  type: AchievementType;
+  title: string;
+  emoji: string;
+  message: string;
+  trigger: string;
+}
+
+export interface UnlockedAchievement {
+  id: string;
+  unlockedAt: string;
+  count?: number;
+  lastUnlockedAt?: string;
+}
+
+export type RewardType = 'level_badge' | 'achievement';
+
+export interface QueuedReward {
+  type: RewardType;
+  priority: number;
+  icon: string;
+  title: string;
+  message: string;
+  headerText: string;
+  nextBadgeInfo?: NextBadgeInfo | null;
+  achievementType?: AchievementType;
+}
+
+export interface NextBadgeInfo {
+  title: string;
+  icon: string;
+  threshold: number;
+  challengesRemaining: number;
+}
