@@ -731,10 +731,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   missionButtonText: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: 'bold' as const,
     color: AppColors.text,
-    flexShrink: 1,
   },
   missionChevron: {
     fontSize: 20,
