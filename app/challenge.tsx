@@ -507,7 +507,7 @@ export default function ChallengeScreen() {
       );
     }
     
-    const precision = Math.round((correctCount / maxQuestions) * 100);
+    
     
     let bestTable = -1;
     let worstTable = -1;
@@ -546,7 +546,7 @@ export default function ChallengeScreen() {
                 <View style={styles.finishedStatRow}>
                   <Text style={styles.finishedStatLabel}>Précision</Text>
                   <Text style={[styles.finishedStatValue, { color: AppColors.primary }]}>
-                    {correctCount} bonnes / {maxQuestions} → {precision}% 👍
+                    {correctCount} / {maxQuestions} 👍
                   </Text>
                 </View>
                 
