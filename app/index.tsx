@@ -43,26 +43,26 @@ export default function HomeScreen() {
   const settingsProgressAnim = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const checkUserSelection = async () => {
-      console.log('[HomeScreen useEffect] isLoading:', isLoading);
-      console.log('[HomeScreen useEffect] Users loaded:', users.length, 'users');
-      console.log('[HomeScreen useEffect] Current user:', currentUser?.firstName || 'none');
+    console.log('[HomeScreen useEffect] isLoading:', isLoading);
+    
+    if (!isLoading && !isReady) {
+      setIsReady(true);
+    }
+  }, [isLoading, isReady]);
+
+  useEffect(() => {
+    console.log('[HomeScreen useEffect] Users loaded:', users.length, 'users');
+    console.log('[HomeScreen useEffect] Current user:', currentUser?.firstName || 'none');
+    
+    if (isReady && users.length > 0 && !currentUser) {
+      const timer = setTimeout(() => {
+        console.log('[HomeScreen] Opening user modal - users:', users.length);
+        setShowUserModal(true);
+      }, 500);
       
-      if (!isLoading) {
-        if (!isReady) {
-          setIsReady(true);
-        }
-        
-        if (isReady && users.length > 0 && !currentUser) {
-          setTimeout(() => {
-            console.log('[HomeScreen] Opening user modal - users:', users.length);
-            setShowUserModal(true);
-          }, 500);
-        }
-      }
-    };
-    checkUserSelection();
-  }, [users, currentUser, isReady, isLoading]);
+      return () => clearTimeout(timer);
+    }
+  }, [users, currentUser, isReady]);
 
   useEffect(() => {
     if (isReady) {
