@@ -1,5 +1,5 @@
 import { useRouter, useFocusEffect } from 'expo-router';
-import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X, Target, ChevronRight } from 'lucide-react-native';
+import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X } from 'lucide-react-native';
 import React, { useEffect, useCallback } from 'react';
 import {
   View,
@@ -342,10 +342,11 @@ export default function HomeScreen() {
                 style={styles.missionButton}
                 onPress={() => router.push(`/discovery/${missionTable}` as any)}
                 testID="mission-button"
+                activeOpacity={0.8}
               >
-                <Target size={20} color={AppColors.primary} />
+                <Text style={styles.missionIcon}>🎯</Text>
                 <Text style={styles.missionButtonText}>Mission : Table de {missionTable}</Text>
-                <ChevronRight size={20} color={AppColors.primary} />
+                <Text style={styles.missionChevron}>➔</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -659,21 +660,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: AppColors.primary + '15',
+    backgroundColor: AppColors.primary + '18',
     paddingVertical: 14,
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     borderRadius: 50,
     marginTop: 16,
     gap: 10,
-    shadowColor: AppColors.primary,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 6,
+    minHeight: 52,
+  },
+  missionIcon: {
+    fontSize: 20,
   },
   missionButtonText: {
     fontSize: 16,
     fontWeight: 'bold' as const,
+    color: AppColors.text,
+    flex: 1,
+    textAlign: 'center',
+  },
+  missionChevron: {
+    fontSize: 18,
     color: AppColors.primary,
   },
   startButton: {
