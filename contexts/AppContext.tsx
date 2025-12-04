@@ -242,10 +242,13 @@ export const [AppProvider, useApp] = createContextHook(() => {
       await AsyncStorage.multiRemove([
         STORAGE_KEYS.PROGRESS,
         STORAGE_KEYS.BADGES,
+        STORAGE_KEYS.ANONYMOUS_CHALLENGES,
       ]);
       setProgress(INITIAL_PROGRESS);
       setBadges(INITIAL_BADGES);
       setTotalStars(0);
+      setAnonymousChallengesCompleted(0);
+      console.log('🔄 Progress reset including anonymous challenges count');
     } catch (error) {
       console.error('Error resetting progress:', error);
     }

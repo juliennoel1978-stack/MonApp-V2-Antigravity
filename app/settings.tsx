@@ -146,7 +146,9 @@ export default function SettingsScreen() {
                               totalAttempts: 0,
                               level1Completed: false,
                               level2Completed: false,
-                            }))
+                            })),
+                            challengesCompleted: 0,
+                            persistenceBadges: [],
                           };
                           updateUser(user.id, resetUser);
                         }
@@ -170,7 +172,9 @@ export default function SettingsScreen() {
                                     totalAttempts: 0,
                                     level1Completed: false,
                                     level2Completed: false,
-                                  }))
+                                  })),
+                                  challengesCompleted: 0,
+                                  persistenceBadges: [],
                                 };
                                 updateUser(user.id, resetUser);
                               }
