@@ -52,7 +52,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const [isLoading, setIsLoading] = useState(true);
   const [anonymousChallengesCompleted, setAnonymousChallengesCompleted] = useState(0);
 
-  const loadData = useCallback(async () => {
+  const loadData = async () => {
     try {
       setIsLoading(true);
       const [progressData, settingsData, badgesData, usersData, currentUserId, anonymousChallenges] = await Promise.all([
@@ -136,11 +136,11 @@ export const [AppProvider, useApp] = createContextHook(() => {
       setIsLoading(false);
       console.log('✅ Data loading complete');
     }
-  }, []);
+  };
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+  }, []);
 
   useEffect(() => {
     const stars = progress.reduce((sum, p) => sum + p.starsEarned, 0);
@@ -375,6 +375,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   }, [currentUser, users]);
 
+  const reloadData = useCallback(() => {
+    loadData();
+  }, []);
+
   return useMemo(() => ({
     progress,
     settings,
@@ -396,6 +400,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
     clearCurrentUser,
     incrementChallengesCompleted,
     addPersistenceBadge,
-    reloadData: loadData,
-  }), [progress, settings, badges, totalStars, users, currentUser, isLoading, anonymousChallengesCompleted, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser, incrementChallengesCompleted, addPersistenceBadge, loadData]);
+    reloadData,
+  }), [progress, settings, badges, totalStars, users, currentUser, isLoading, anonymousChallengesCompleted, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser, incrementChallengesCompleted, addPersistenceBadge, reloadData]);
 });
