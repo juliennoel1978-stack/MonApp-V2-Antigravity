@@ -49,6 +49,14 @@ export interface TimerSettings {
 
 export type BadgeTheme = 'space' | 'heroes' | 'animals';
 
+export interface PersistenceBadge {
+  id: string;
+  threshold: number;
+  title: string;
+  icon: string;
+  unlockedAt: string;
+}
+
 export interface User {
   id: string;
   firstName: string;
@@ -61,6 +69,7 @@ export interface User {
   timerSettings?: TimerSettings;
   challengeQuestions?: number;
   challengeBadges?: string[];
+  persistenceBadges?: PersistenceBadge[];
   badgeTheme?: BadgeTheme;
   challengesCompleted?: number;
 }

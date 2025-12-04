@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { UserProgress, UserSettings, Badge, User } from '@/types';
+import type { UserProgress, UserSettings, Badge, User, PersistenceBadge } from '@/types';
 import { MULTIPLICATION_TABLES } from '@/constants/tables';
 
 const STORAGE_KEYS = {
@@ -327,7 +327,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   }, []);
 
-  const incrementChallengesCompleted = useCallback(async () => {
+  const incrementChallengesCompleted = useCallback(async (): Promise<number> => {
     try {
       if (currentUser) {
         const newCount = (currentUser.challengesCompleted || 0) + 1;
@@ -337,16 +337,43 @@ export const [AppProvider, useApp] = createContextHook(() => {
         setUsers(updatedUsers);
         setCurrentUser(updatedUser);
         console.log('🏆 User challenges completed:', newCount);
+        return newCount;
       } else {
         const newCount = anonymousChallengesCompleted + 1;
         await AsyncStorage.setItem(STORAGE_KEYS.ANONYMOUS_CHALLENGES, newCount.toString());
         setAnonymousChallengesCompleted(newCount);
         console.log('🏆 Anonymous challenges completed:', newCount);
+        return newCount;
       }
     } catch (error) {
       console.error('Error incrementing challenges completed:', error);
+      return currentUser?.challengesCompleted || anonymousChallengesCompleted;
     }
   }, [currentUser, users, anonymousChallengesCompleted]);
+
+  const addPersistenceBadge = useCallback(async (badge: PersistenceBadge) => {
+    try {
+      if (currentUser) {
+        const existingBadges = currentUser.persistenceBadges || [];
+        const alreadyExists = existingBadges.some(b => b.id === badge.id);
+        if (alreadyExists) {
+          console.log('🏅 Badge already exists:', badge.id);
+          return;
+        }
+        const updatedBadges = [...existingBadges, badge];
+        const updatedUser = { ...currentUser, persistenceBadges: updatedBadges };
+        const updatedUsers = users.map(u => u.id === currentUser.id ? updatedUser : u);
+        await AsyncStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updatedUsers));
+        setUsers(updatedUsers);
+        setCurrentUser(updatedUser);
+        console.log('🏅 New persistence badge added:', badge.title, badge.icon);
+      } else {
+        console.log('🏅 No user logged in, badge not saved:', badge.title);
+      }
+    } catch (error) {
+      console.error('Error adding persistence badge:', error);
+    }
+  }, [currentUser, users]);
 
   return useMemo(() => ({
     progress,
@@ -368,6 +395,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     updateUser,
     clearCurrentUser,
     incrementChallengesCompleted,
+    addPersistenceBadge,
     reloadData: loadData,
-  }), [progress, settings, badges, totalStars, users, currentUser, isLoading, anonymousChallengesCompleted, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser, incrementChallengesCompleted, loadData]);
+  }), [progress, settings, badges, totalStars, users, currentUser, isLoading, anonymousChallengesCompleted, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser, incrementChallengesCompleted, addPersistenceBadge, loadData]);
 });
