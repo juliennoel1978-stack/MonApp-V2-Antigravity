@@ -12,6 +12,7 @@ import {
   Modal,
   ScrollView,
   Image,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
@@ -37,6 +38,9 @@ export default function HomeScreen() {
   const modalScale = React.useRef(new Animated.Value(0.9)).current;
   const [isReady, setIsReady] = React.useState(false);
   const [showUserModal, setShowUserModal] = React.useState(false);
+  const [settingsProgress, setSettingsProgress] = React.useState(0);
+  const settingsTimerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+  const settingsProgressAnim = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const checkUserSelection = async () => {
@@ -146,6 +150,45 @@ export default function HomeScreen() {
   const completedTables = progress.filter(p => p.completed).length;
   const totalTables = progress.length;
 
+  const handleSettingsPressIn = () => {
+    console.log('[HomeScreen] Settings long press started');
+    setSettingsProgress(0);
+    settingsProgressAnim.setValue(0);
+    
+    Animated.timing(settingsProgressAnim, {
+      toValue: 1,
+      duration: 3000,
+      useNativeDriver: false,
+    }).start();
+    
+    settingsTimerRef.current = setInterval(() => {
+      setSettingsProgress(prev => {
+        const newProgress = prev + (100 / 30);
+        if (newProgress >= 100) {
+          if (settingsTimerRef.current) {
+            clearInterval(settingsTimerRef.current);
+            settingsTimerRef.current = null;
+          }
+          console.log('[HomeScreen] Settings unlocked - navigating');
+          router.push('/settings' as any);
+          return 0;
+        }
+        return newProgress;
+      });
+    }, 100);
+  };
+
+  const handleSettingsPressOut = () => {
+    console.log('[HomeScreen] Settings long press cancelled');
+    if (settingsTimerRef.current) {
+      clearInterval(settingsTimerRef.current);
+      settingsTimerRef.current = null;
+    }
+    setSettingsProgress(0);
+    settingsProgressAnim.stopAnimation();
+    settingsProgressAnim.setValue(0);
+  };
+
   if (!isReady) {
     return (
       <View style={{ flex: 1, backgroundColor: AppColors.background, justifyContent: 'center', alignItems: 'center' }}>
@@ -180,13 +223,33 @@ export default function HomeScreen() {
           >
             <Users size={28} color={AppColors.text} />
           </TouchableOpacity>
-          <TouchableOpacity
+          <Pressable
             style={styles.settingsButton}
-            onPress={() => router.push('/settings' as any)}
+            onPressIn={handleSettingsPressIn}
+            onPressOut={handleSettingsPressOut}
             testID="settings-button"
           >
-            <SettingsIcon size={28} color={AppColors.text} />
-          </TouchableOpacity>
+            <View style={styles.settingsButtonInner}>
+              <SettingsIcon size={28} color={AppColors.text} />
+              {settingsProgress > 0 && (
+                <View style={styles.settingsProgressContainer}>
+                  <Animated.View
+                    style={[
+                      styles.settingsProgressRing,
+                      {
+                        transform: [{
+                          rotate: settingsProgressAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['0deg', '360deg'],
+                          }),
+                        }],
+                      },
+                    ]}
+                  />
+                </View>
+              )}
+            </View>
+          </Pressable>
         </View>
 
         <Animated.View
@@ -420,6 +483,28 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+  },
+  settingsButtonInner: {
+    width: 48,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  settingsProgressContainer: {
+    position: 'absolute',
+    width: 48,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  settingsProgressRing: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 3,
+    borderColor: 'transparent',
+    borderTopColor: AppColors.primary,
+    borderRightColor: AppColors.primary,
   },
   content: {
     flex: 1,
