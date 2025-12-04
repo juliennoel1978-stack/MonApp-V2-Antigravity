@@ -511,7 +511,7 @@ export default function ChallengeScreen() {
               <View style={styles.finishedStats}>
                 <View style={styles.finishedStatRow}>
                   <Text style={styles.finishedStatLabel}>Précision</Text>
-                  <Text style={[styles.finishedStatValue, { color: AppColors.primary }]}>
+                  <Text style={[styles.finishedStatValue, { color: AppColors.primary }]} numberOfLines={1}>
                     {correctCount} / {maxQuestions} 👍
                   </Text>
                 </View>
@@ -519,7 +519,7 @@ export default function ChallengeScreen() {
                 {bestStreak > 0 && (
                   <View style={styles.finishedStatRow}>
                     <Text style={styles.finishedStatLabel}>Ta meilleure série</Text>
-                    <Text style={[styles.finishedStatValue, { color: AppColors.success }]}>
+                    <Text style={[styles.finishedStatValue, { color: AppColors.success }]} numberOfLines={1}>
                       {bestStreak} {bestStreak === 1 ? 'bonne' : 'bonnes'} d&apos;affilée ✨
                     </Text>
                   </View>
@@ -528,8 +528,8 @@ export default function ChallengeScreen() {
                 {bestTable > 0 && (
                   <View style={styles.finishedStatRow}>
                     <Text style={styles.finishedStatLabel}>Table la plus solide</Text>
-                    <Text style={[styles.finishedStatValue, { color: AppColors.success }]}>
-                      {bestTable}
+                    <Text style={[styles.finishedStatValue, { color: AppColors.success }]} numberOfLines={1}>
+                      {bestTable} 💪
                     </Text>
                   </View>
                 )}
@@ -537,8 +537,8 @@ export default function ChallengeScreen() {
                 {worstTable > 0 && (
                   <View style={styles.finishedStatRow}>
                     <Text style={styles.finishedStatLabel}>Table à surveiller</Text>
-                    <Text style={[styles.finishedStatValue, { color: AppColors.timerMiddle }]}>
-                      {worstTable}
+                    <Text style={[styles.finishedStatValue, { color: AppColors.timerMiddle }]} numberOfLines={1}>
+                      {worstTable} 🚸
                     </Text>
                   </View>
                 )}
@@ -1121,34 +1121,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   finishedEmoji: {
-    fontSize: 80,
-    marginBottom: 16,
+    fontSize: 64,
+    marginBottom: 8,
   },
   finishedTitle: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: 'bold' as const,
     color: AppColors.text,
-    marginBottom: 8,
+    marginBottom: 4,
     textAlign: 'center',
   },
   finishedSubtitle: {
-    fontSize: 18,
+    fontSize: 16,
     color: AppColors.textSecondary,
-    marginBottom: 24,
+    marginBottom: 16,
     textAlign: 'center',
   },
   finishedScrollContent: {
     flexGrow: 1,
     paddingHorizontal: 24,
+    paddingTop: 20,
     paddingBottom: 40,
   },
   finishedStats: {
     width: '100%',
     backgroundColor: AppColors.surface,
     borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-    gap: 12,
+    padding: 16,
+    marginBottom: 16,
+    gap: 8,
     shadowColor: AppColors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -1159,24 +1160,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   finishedStatLabel: {
-    fontSize: 13,
+    fontSize: 12,
     color: AppColors.textSecondary,
     fontWeight: '600' as const,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   finishedStatValue: {
-    fontSize: 22,
+    fontSize: 19,
     fontWeight: 'bold' as const,
   },
   finishedButtonsContainer: {
     width: '100%',
-    gap: 12,
+    gap: 10,
   },
   finishedButton: {
     backgroundColor: AppColors.primary,
-    paddingVertical: 16,
+    paddingVertical: 14,
     paddingHorizontal: 32,
-    borderRadius: 16,
+    borderRadius: 14,
     shadowColor: AppColors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -1198,7 +1199,7 @@ const styles = StyleSheet.create({
     color: AppColors.primary,
   },
   finishedButtonText: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: 'bold' as const,
     color: '#FFFFFF',
   },
