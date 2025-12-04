@@ -470,7 +470,15 @@ export default function ChallengeScreen() {
         setShowCorrectAnswer(true);
         setCurrentErrorPhrase(getRandomPhrase(ERROR_PHRASES));
         
-        setWrongAnswers(prev => [...prev, currentQuestion]);
+        const alreadyInWrongAnswers = wrongAnswers.some(
+          q => q.num1 === currentQuestion.num1 && 
+               q.num2 === currentQuestion.num2 && 
+               q.type === currentQuestion.type
+        );
+        if (!alreadyInWrongAnswers) {
+          console.log('❌ Adding wrong answer to review list:', currentQuestion.displayText);
+          setWrongAnswers(prev => [...prev, currentQuestion]);
+        }
         
         setTableStats(prev => {
           const table = currentQuestion.num1 <= 10 && currentQuestion.num2 <= 10 
