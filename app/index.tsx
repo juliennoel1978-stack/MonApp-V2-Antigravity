@@ -615,14 +615,14 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold' as const,
     color: AppColors.text,
     textAlign: 'center',
     flexShrink: 1,
   },
   userName: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '600' as const,
     color: AppColors.primary,
     textAlign: 'center',
@@ -641,11 +641,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 17,
     color: AppColors.textSecondary,
     textAlign: 'center',
     marginBottom: 24,
     paddingHorizontal: 20,
+    lineHeight: 24,
   },
   progressCard: {
     width: '100%',
@@ -666,7 +667,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   progressTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold' as const,
     color: AppColors.text,
   },
@@ -681,13 +682,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statValue: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold' as const,
     color: AppColors.primary,
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: 13,
+    fontSize: 15,
     color: AppColors.textSecondary,
     fontWeight: '600' as const,
   },
@@ -728,15 +729,16 @@ const styles = StyleSheet.create({
     minHeight: 56,
   },
   missionIcon: {
-    fontSize: 20,
+    fontSize: 24,
   },
   missionButtonText: {
-    fontSize: 15,
+    fontSize: 17,
     fontWeight: 'bold' as const,
     color: AppColors.text,
+    flexShrink: 1,
   },
   missionChevron: {
-    fontSize: 20,
+    fontSize: 24,
     color: AppColors.primary,
     fontWeight: 'bold' as const,
   },
@@ -758,7 +760,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   startButtonText: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold' as const,
     color: '#FFFFFF',
   },
@@ -780,7 +782,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   challengeButtonText: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold' as const,
     color: '#FFFFFF',
   },

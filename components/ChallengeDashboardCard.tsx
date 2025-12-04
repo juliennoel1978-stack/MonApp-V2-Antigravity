@@ -125,20 +125,20 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   badgeIcon: {
-    fontSize: 42,
+    fontSize: 52,
     marginRight: 14,
   },
   levelTextContainer: {
     flex: 1,
   },
   levelLabel: {
-    fontSize: 12,
+    fontSize: 14,
     color: AppColors.textSecondary,
     fontWeight: '500' as const,
     marginBottom: 2,
   },
   levelTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold' as const,
     color: AppColors.primary,
   },
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   progressText: {
-    fontSize: 14,
+    fontSize: 16,
     color: AppColors.textSecondary,
     textAlign: 'center',
     fontWeight: '600' as const,
@@ -175,20 +175,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statIcon: {
-    fontSize: 22,
+    fontSize: 28,
     marginBottom: 6,
   },
   statMainText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold' as const,
     color: AppColors.text,
     marginBottom: 2,
     textAlign: 'center',
   },
   statSubText: {
-    fontSize: 11,
+    fontSize: 13,
     color: AppColors.textSecondary,
     textAlign: 'center',
-    lineHeight: 14,
+    lineHeight: 16,
   },
 });
