@@ -118,11 +118,6 @@ function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlip
           ]}>
             {achievement.emoji}
           </Text>
-          {count > 1 && (
-            <View style={styles.countBadge}>
-              <Text style={styles.countText}>x{count}</Text>
-            </View>
-          )}
         </View>
         <Text style={[
           styles.achievementTitle,
@@ -130,6 +125,11 @@ function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlip
         ]} numberOfLines={2}>
           {achievement.title}
         </Text>
+        {count > 1 && (
+          <View style={styles.countBadgeBottom}>
+            <Text style={styles.countTextBottom}>x{count}</Text>
+          </View>
+        )}
       </Animated.View>
 
       {/* Back Face */}
@@ -494,11 +494,34 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   achievementDescriptionText: {
-    fontSize: 10,
+    fontSize: 12,
     color: AppColors.text,
     textAlign: 'center',
     fontWeight: '600',
-    lineHeight: 14,
-    paddingHorizontal: 4,
+    lineHeight: 18,
+    paddingHorizontal: 8,
+  },
+  countBadgeBottom: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    backgroundColor: '#FF3B30',
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    minWidth: 24,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  countTextBottom: {
+    color: '#FFF',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
 });
