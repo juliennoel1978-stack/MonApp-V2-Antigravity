@@ -273,8 +273,15 @@ export default function ChallengeScreen() {
       isReviewingErrors: false,
     });
 
+    console.log('🎁 Rewards check complete:', {
+      queueLength: queue.length,
+      newBadge: newBadge?.title || 'none',
+      newAchievements: newAchievements.length,
+    });
+
     if (queue.length > 0) {
       console.log('🎉 Rewards to show:', queue.length);
+      queue.forEach((r, i) => console.log(`  ${i + 1}. ${r.type}: ${r.title}`));
       setRewardQueue(queue);
       setCurrentReward(queue[0]);
       setPendingAchievements(newAchievements);
@@ -292,6 +299,7 @@ export default function ChallengeScreen() {
     
     if (currentReward) {
       if (currentReward.type === 'level_badge' && pendingBadge) {
+        console.log('💾 Saving pending badge:', pendingBadge.title);
         await addPersistenceBadge(pendingBadge);
         setPendingBadge(null);
       } else if (currentReward.type === 'achievement') {
@@ -299,6 +307,7 @@ export default function ChallengeScreen() {
           a => a.id === getAchievementIdFromTitle(currentReward.title)
         );
         if (achievementToSave) {
+          console.log('💾 Saving achievement:', achievementToSave.id);
           await addAchievement(achievementToSave);
           setPendingAchievements(prev => prev.filter(a => a.id !== achievementToSave.id));
         }

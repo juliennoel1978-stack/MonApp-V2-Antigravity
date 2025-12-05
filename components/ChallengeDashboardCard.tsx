@@ -36,6 +36,7 @@ export default function ChallengeDashboardCard({
   totalChallengesCompleted,
   strongestTable,
 }: ChallengeDashboardCardProps) {
+  console.log('[ChallengeDashboardCard RENDER] challenges:', totalChallengesCompleted, 'badge:', currentBadge?.title);
   const { width } = useWindowDimensions();
   const isSmallScreen = useMemo(() => width < 375, [width]);
   

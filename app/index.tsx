@@ -24,12 +24,14 @@ const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData, settings, anonymousChallengesCompleted } = useApp();
+  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData, settings, anonymousChallengesCompleted, getAchievements, getPersistenceBadges } = useApp();
+  const [dataVersion, setDataVersion] = React.useState(0);
   
   useFocusEffect(
     useCallback(() => {
       console.log('🔄 [HomeScreen] Screen focused - reloading data');
       reloadData();
+      setDataVersion(prev => prev + 1);
     }, [reloadData])
   );
 
@@ -155,8 +157,20 @@ export default function HomeScreen() {
   const challengesCompleted = currentUser?.challengesCompleted || anonymousChallengesCompleted;
   const badgeTheme = currentUser?.badgeTheme || settings.badgeTheme || 'space';
   const gender = currentUser?.gender;
+  const persistenceBadges = getPersistenceBadges();
+
+  console.log('[HomeScreen RENDER] challenges:', challengesCompleted, 'badges:', persistenceBadges.length, 'version:', dataVersion);
 
   const currentBadgeData = React.useMemo(() => {
+    const sortedBadges = [...persistenceBadges].sort((a, b) => b.threshold - a.threshold);
+    if (sortedBadges.length > 0) {
+      const latestBadge = sortedBadges[0];
+      return {
+        icon: latestBadge.icon,
+        title: latestBadge.title,
+      };
+    }
+    
     let lastEarnedBadge = null;
     for (const threshold of BADGE_THRESHOLDS) {
       if (challengesCompleted >= threshold) {
@@ -170,7 +184,7 @@ export default function HomeScreen() {
       }
     }
     return lastEarnedBadge;
-  }, [challengesCompleted, badgeTheme, gender]);
+  }, [challengesCompleted, badgeTheme, gender, persistenceBadges, dataVersion]);
 
   const nextBadgeThreshold = React.useMemo(() => {
     for (const threshold of BADGE_THRESHOLDS) {
@@ -425,6 +439,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
 
           <ChallengeDashboardCard
+            key={`challenge-card-${dataVersion}`}
             theme={badgeTheme}
             currentBadge={currentBadgeData}
             nextBadgeThreshold={nextBadgeThreshold}
