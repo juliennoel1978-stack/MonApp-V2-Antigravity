@@ -19,13 +19,15 @@ import { AppColors, NumberColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
 import { BADGE_THRESHOLDS, getBadgeForThreshold, getBadgeIcon, getBadgeTitle } from '@/constants/badges';
 import ChallengeDashboardCard from '@/components/ChallengeDashboardCard';
+import CollectionModal from '@/components/CollectionModal';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData, settings, anonymousChallengesCompleted, getAchievements, getPersistenceBadges, getBestStreak } = useApp();
+  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData, settings, anonymousChallengesCompleted, getPersistenceBadges, getBestStreak } = useApp();
   const [showTablesModal, setShowTablesModal] = React.useState(false);
+  const [showCollectionModal, setShowCollectionModal] = React.useState(false);
   const tablesModalOpacity = React.useRef(new Animated.Value(0)).current;
   const tablesModalScale = React.useRef(new Animated.Value(0.9)).current;
   const [dataVersion, setDataVersion] = React.useState(0);
@@ -555,9 +557,17 @@ export default function HomeScreen() {
             bestStreak={bestStreak}
             strongestTable={strongestTable}
             gender={gender}
+            onPressLevel={() => setShowCollectionModal(true)}
           />
           </Animated.View>
         </ScrollView>
+
+        <CollectionModal
+          visible={showCollectionModal}
+          onClose={() => setShowCollectionModal(false)}
+          theme={badgeTheme}
+          gender={gender}
+        />
 
         {showTablesModal && (
           <Modal

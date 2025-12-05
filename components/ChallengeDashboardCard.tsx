@@ -17,6 +17,7 @@ interface ChallengeDashboardCardProps {
   bestStreak: number;
   strongestTable: number | null;
   gender?: 'boy' | 'girl';
+  onPressLevel?: () => void;
 }
 
 const getProgressLabel = (theme: BadgeTheme, plural: boolean = true): string => {
@@ -171,6 +172,7 @@ export default function ChallengeDashboardCard({
   bestStreak,
   strongestTable,
   gender,
+  onPressLevel,
 }: ChallengeDashboardCardProps) {
   console.log('[ChallengeDashboardCard RENDER] challenges:', totalChallengesCompleted, 'badge:', currentBadge?.title, 'streak:', bestStreak);
   const { width } = useWindowDimensions();
@@ -216,15 +218,25 @@ export default function ChallengeDashboardCard({
   return (
     <View style={styles.container}>
       {/* HEADER SECTION */}
-      <View style={styles.headerSection}>
+      <TouchableOpacity 
+        style={styles.headerSection}
+        onPress={onPressLevel}
+        activeOpacity={0.7}
+        testID="level-card-header"
+      >
         {/* Row 1: Badge Icon + Level Title */}
         <View style={styles.levelRow}>
           <Text style={[styles.badgeIcon, isSmallScreen && styles.badgeIconSmall]}>
             {currentBadge?.icon || '🌟'}
           </Text>
-          <Text style={[styles.levelTitle, isSmallScreen && styles.levelTitleSmall]}>
-            Niveau Actuel : {currentBadge?.title || 'Débutant'}
-          </Text>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.levelTitle, isSmallScreen && styles.levelTitleSmall]}>
+              Niveau Actuel : {currentBadge?.title || 'Débutant'}
+            </Text>
+            <Text style={{ fontSize: 11, color: AppColors.textSecondary, marginTop: 2 }}>
+              Voir ma collection ›
+            </Text>
+          </View>
         </View>
 
         {/* Row 2: Progress Bar */}
@@ -243,7 +255,7 @@ export default function ChallengeDashboardCard({
         <Text style={[styles.progressText, isSmallScreen && styles.progressTextSmall]}>
           {getProgressMessage()}
         </Text>
-      </View>
+      </TouchableOpacity>
 
       {/* FOOTER SECTION - Interactive Stats Grid */}
       <View style={styles.statsGrid}>
