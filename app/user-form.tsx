@@ -23,7 +23,7 @@ import type { BadgeTheme } from '@/types';
 export default function UserFormScreen() {
   const router = useRouter();
   const { userId } = useLocalSearchParams<{ userId?: string }>();
-  const { addUser, updateUser, users } = useApp();
+  const { addUser, updateUser, users, selectUser } = useApp();
   const [firstName, setFirstName] = useState('');
   const [gender, setGender] = useState<'boy' | 'girl'>('boy');
   const [age, setAge] = useState('');
@@ -162,8 +162,9 @@ export default function UserFormScreen() {
           challengeQuestions,
           badgeTheme,
         });
+        router.back();
       } else {
-        await addUser({
+        const newUser = await addUser({
           firstName: firstName.trim(),
           gender,
           age: Number(age),
@@ -173,9 +174,11 @@ export default function UserFormScreen() {
           challengeQuestions,
           badgeTheme,
         });
+        console.log('👤 New user created:', newUser.id, newUser.firstName);
+        await selectUser(newUser.id);
+        console.log('✅ New user selected automatically');
+        router.replace('/' as any);
       }
-
-      router.back();
     } catch (error) {
       console.error('Error adding user:', error);
       if (Platform.OS === 'web') {

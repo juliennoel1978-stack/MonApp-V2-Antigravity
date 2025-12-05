@@ -1,6 +1,6 @@
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X } from 'lucide-react-native';
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -29,13 +29,22 @@ export default function HomeScreen() {
   const tablesModalOpacity = React.useRef(new Animated.Value(0)).current;
   const tablesModalScale = React.useRef(new Animated.Value(0.9)).current;
   const [dataVersion, setDataVersion] = React.useState(0);
+  const [showFirstLaunchModal, setShowFirstLaunchModal] = React.useState(false);
+  const hasCheckedFirstLaunch = useRef(false);
+  const lastFocusTime = useRef(0);
   
   useFocusEffect(
     useCallback(() => {
+      const now = Date.now();
+      if (now - lastFocusTime.current < 500) {
+        console.log('🔄 [HomeScreen] Skipping reload - too soon');
+        return;
+      }
+      lastFocusTime.current = now;
       console.log('🔄 [HomeScreen] Screen focused - reloading data');
       reloadData();
       setDataVersion(prev => prev + 1);
-    }, [])
+    }, [reloadData])
   );
 
   console.log('[HomeScreen RENDER] users.length:', users.length);
@@ -60,14 +69,24 @@ export default function HomeScreen() {
   useEffect(() => {
     console.log('[HomeScreen useEffect] Users loaded:', users.length, 'users');
     console.log('[HomeScreen useEffect] Current user:', currentUser?.firstName || 'none');
+    console.log('[HomeScreen useEffect] isReady:', isReady, 'hasCheckedFirstLaunch:', hasCheckedFirstLaunch.current);
     
-    if (isReady && users.length > 0 && !currentUser) {
-      const timer = setTimeout(() => {
-        console.log('[HomeScreen] Opening user modal - users:', users.length);
-        setShowUserModal(true);
-      }, 500);
+    if (isReady && !hasCheckedFirstLaunch.current) {
+      hasCheckedFirstLaunch.current = true;
       
-      return () => clearTimeout(timer);
+      if (users.length === 0 && !currentUser) {
+        console.log('[HomeScreen] First launch detected - showing welcome modal');
+        const timer = setTimeout(() => {
+          setShowFirstLaunchModal(true);
+        }, 600);
+        return () => clearTimeout(timer);
+      } else if (users.length > 0 && !currentUser) {
+        console.log('[HomeScreen] Users exist but none selected - showing user modal');
+        const timer = setTimeout(() => {
+          setShowUserModal(true);
+        }, 600);
+        return () => clearTimeout(timer);
+      }
     }
   }, [users, currentUser, isReady]);
 
@@ -652,9 +671,6 @@ export default function HomeScreen() {
                         <Text style={{ fontSize: 14, color: AppColors.textSecondary, marginTop: 10, textAlign: 'center' }}>
                           Crée un profil pour commencer !
                         </Text>
-                        <Text style={{ fontSize: 12, color: AppColors.error, marginTop: 10, textAlign: 'center' }}>
-                          DEBUG: users.length = {users.length}
-                        </Text>
                       </View>
                     )}
                     {users.map(user => (
@@ -684,7 +700,7 @@ export default function HomeScreen() {
                       style={[styles.modalUserCard, styles.addUserCard]}
                       onPress={() => {
                         closeModal();
-                        router.push('/select-user' as any);
+                        router.push('/user-form' as any);
                       }}
                       testID="modal-add-user"
                     >
@@ -714,6 +730,49 @@ Anonyme</Text>
                   </View>
                 </ScrollView>
               </Animated.View>
+            </View>
+          </Modal>
+        )}
+
+        {showFirstLaunchModal && (
+          <Modal
+            visible={true}
+            transparent
+            animationType="fade"
+            onRequestClose={() => {}}
+          >
+            <View style={styles.firstLaunchOverlay}>
+              <View style={styles.firstLaunchContent}>
+                <Text style={styles.firstLaunchEmoji}>👋</Text>
+                <Text style={styles.firstLaunchTitle}>Qui es-tu ?</Text>
+                <Text style={styles.firstLaunchSubtitle}>
+                  Bienvenue dans Tables Magiques !{"\n"}Crée ton profil pour sauvegarder ta progression.
+                </Text>
+
+                <TouchableOpacity
+                  style={styles.firstLaunchCreateButton}
+                  onPress={() => {
+                    setShowFirstLaunchModal(false);
+                    router.push('/user-form' as any);
+                  }}
+                  testID="first-launch-create"
+                >
+                  <Plus size={24} color="#FFFFFF" />
+                  <Text style={styles.firstLaunchCreateButtonText}>Créer un profil</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.firstLaunchAnonymousButton}
+                  onPress={() => {
+                    setShowFirstLaunchModal(false);
+                    clearCurrentUser();
+                  }}
+                  testID="first-launch-anonymous"
+                >
+                  <UserX size={20} color={AppColors.textSecondary} />
+                  <Text style={styles.firstLaunchAnonymousButtonText}>Mode Anonyme</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </Modal>
         )}
@@ -1107,6 +1166,85 @@ const styles = StyleSheet.create({
     color: AppColors.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  firstLaunchOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  firstLaunchContent: {
+    width: '100%',
+    maxWidth: 320,
+    backgroundColor: AppColors.background,
+    borderRadius: 24,
+    padding: 32,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  firstLaunchEmoji: {
+    fontSize: 64,
+    marginBottom: 16,
+  },
+  firstLaunchTitle: {
+    fontSize: 28,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  firstLaunchSubtitle: {
+    fontSize: 16,
+    color: AppColors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 32,
+  },
+  firstLaunchCreateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    backgroundColor: AppColors.primary,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 16,
+    width: '100%',
+    marginBottom: 16,
+    shadowColor: AppColors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  firstLaunchCreateButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold' as const,
+    color: '#FFFFFF',
+  },
+  firstLaunchAnonymousButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: AppColors.surface,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    width: '100%',
+    borderWidth: 2,
+    borderStyle: 'dashed' as const,
+    borderColor: AppColors.textSecondary,
+  },
+  firstLaunchAnonymousButtonText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: AppColors.textSecondary,
   },
   addUserCard: {
     borderWidth: 2,
