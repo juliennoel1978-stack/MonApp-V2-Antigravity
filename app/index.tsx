@@ -15,7 +15,7 @@ import {
   Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppColors } from '@/constants/colors';
+import { AppColors, NumberColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
 import { BADGE_THRESHOLDS, getBadgeForThreshold, getBadgeIcon, getBadgeTitle } from '@/constants/badges';
 import ChallengeDashboardCard from '@/components/ChallengeDashboardCard';
@@ -25,6 +25,9 @@ const { width } = Dimensions.get('window');
 export default function HomeScreen() {
   const router = useRouter();
   const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData, settings, anonymousChallengesCompleted, getAchievements, getPersistenceBadges, getBestStreak } = useApp();
+  const [showTablesModal, setShowTablesModal] = React.useState(false);
+  const tablesModalOpacity = React.useRef(new Animated.Value(0)).current;
+  const tablesModalScale = React.useRef(new Animated.Value(0.9)).current;
   const [dataVersion, setDataVersion] = React.useState(0);
   
   useFocusEffect(
@@ -107,6 +110,27 @@ export default function HomeScreen() {
     }
   }, [showUserModal, modalOpacity, modalScale]);
 
+  useEffect(() => {
+    if (showTablesModal) {
+      Animated.parallel([
+        Animated.timing(tablesModalOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(tablesModalScale, {
+          toValue: 1,
+          tension: 50,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      tablesModalOpacity.setValue(0);
+      tablesModalScale.setValue(0.9);
+    }
+  }, [showTablesModal, tablesModalOpacity, tablesModalScale]);
+
   const handleSelectUser = async (userId: string) => {
     console.log('[HomeScreen] Selecting user:', userId);
     await selectUser(userId);
@@ -148,6 +172,29 @@ export default function HomeScreen() {
       }),
     ]).start(() => {
       setShowUserModal(false);
+    });
+  };
+
+  const openTablesModal = () => {
+    console.log('[HomeScreen] Opening tables modal');
+    setShowTablesModal(true);
+  };
+
+  const closeTablesModal = () => {
+    Animated.parallel([
+      Animated.timing(tablesModalOpacity, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.spring(tablesModalScale, {
+        toValue: 0.9,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setShowTablesModal(false);
     });
   };
 
@@ -395,12 +442,17 @@ export default function HomeScreen() {
 
               <View style={styles.statDivider} />
 
-              <View style={styles.statItem}>
+              <TouchableOpacity 
+                style={styles.statItem}
+                onPress={openTablesModal}
+                testID="tables-progress-button"
+                activeOpacity={0.7}
+              >
                 <Text style={styles.statValue}>
                   {completedTables}/{totalTables}
                 </Text>
                 <Text style={styles.statLabel}>Tables</Text>
-              </View>
+              </TouchableOpacity>
             </View>
 
             <View style={styles.progressBarContainer}>
@@ -459,6 +511,97 @@ export default function HomeScreen() {
           />
           </Animated.View>
         </ScrollView>
+
+        {showTablesModal && (
+          <Modal
+            visible={true}
+            transparent
+            animationType="none"
+            onRequestClose={closeTablesModal}
+          >
+            <TouchableOpacity
+              style={styles.tablesModalOverlay}
+              activeOpacity={1}
+              onPress={closeTablesModal}
+            >
+              <Animated.View
+                style={[
+                  styles.tablesModalContent,
+                  {
+                    opacity: tablesModalOpacity,
+                    transform: [{ scale: tablesModalScale }],
+                  },
+                ]}
+              >
+                <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
+                  <View style={styles.tablesModalHeader}>
+                    <Text style={styles.tablesModalTitle}>Mes Tables</Text>
+                    <TouchableOpacity
+                      style={styles.tablesModalCloseButton}
+                      onPress={closeTablesModal}
+                      testID="tables-modal-close"
+                    >
+                      <X size={22} color={AppColors.text} />
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={styles.tablesGrid}>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(tableNumber => {
+                      const tableProgress = progress.find(p => p.tableNumber === tableNumber);
+                      const isCompleted = tableProgress?.completed || false;
+                      const hasAttempts = (tableProgress?.totalAttempts || 0) > 0;
+                      const tableColor = NumberColors[tableNumber as keyof typeof NumberColors];
+
+                      return (
+                        <View
+                          key={tableNumber}
+                          style={[
+                            styles.tablesGridCard,
+                            isCompleted && styles.tablesGridCardCompleted,
+                            !hasAttempts && !isCompleted && styles.tablesGridCardNotSeen,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.tablesGridNumber,
+                              {
+                                color: isCompleted
+                                  ? tableColor
+                                  : hasAttempts
+                                  ? tableColor
+                                  : AppColors.textSecondary,
+                              },
+                            ]}
+                          >
+                            {tableNumber}
+                          </Text>
+                          {isCompleted && (
+                            <View style={styles.tablesGridStar}>
+                              <Text style={styles.tablesGridStarIcon}>⭐</Text>
+                            </View>
+                          )}
+                        </View>
+                      );
+                    })}
+                  </View>
+
+                  <View style={styles.tablesModalLegend}>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendBox, styles.legendBoxNotSeen]} />
+                      <Text style={styles.legendText}>Non vue</Text>
+                    </View>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendBox, styles.legendBoxCompleted]}>
+                        <Text style={styles.legendStarSmall}>⭐</Text>
+                      </View>
+                      <Text style={styles.legendText}>Maîtrisée</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </Animated.View>
+            </TouchableOpacity>
+          </Modal>
+        )}
 
         {showUserModal && (
           <Modal
@@ -984,5 +1127,134 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
     color: AppColors.primary,
     textAlign: 'center',
+  },
+
+  tablesModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  tablesModalContent: {
+    width: width * 0.85,
+    backgroundColor: AppColors.background,
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  tablesModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    position: 'relative',
+  },
+  tablesModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+    textAlign: 'center',
+  },
+  tablesModalCloseButton: {
+    position: 'absolute',
+    right: 0,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: AppColors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  tablesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  tablesGridCard: {
+    width: (width * 0.85 - 80) / 5,
+    aspectRatio: 1,
+    backgroundColor: AppColors.surface,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: AppColors.border,
+    position: 'relative',
+  },
+  tablesGridCardCompleted: {
+    backgroundColor: '#FFF8E1',
+    borderColor: AppColors.warning,
+    borderWidth: 2,
+  },
+  tablesGridCardNotSeen: {
+    backgroundColor: AppColors.borderLight,
+    borderColor: AppColors.border,
+  },
+  tablesGridNumber: {
+    fontSize: 24,
+    fontWeight: 'bold' as const,
+  },
+  tablesGridStar: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: AppColors.warning,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tablesGridStarIcon: {
+    fontSize: 10,
+  },
+  tablesModalLegend: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 24,
+    marginTop: 20,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: AppColors.border,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  legendBox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  legendBoxNotSeen: {
+    backgroundColor: AppColors.borderLight,
+    borderColor: AppColors.border,
+  },
+  legendBoxCompleted: {
+    backgroundColor: '#FFF8E1',
+    borderColor: AppColors.warning,
+  },
+  legendStarSmall: {
+    fontSize: 10,
+  },
+  legendText: {
+    fontSize: 13,
+    color: AppColors.textSecondary,
+    fontWeight: '500' as const,
   },
 });
