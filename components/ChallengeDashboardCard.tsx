@@ -112,23 +112,49 @@ export default function ChallengeDashboardCard({
         {/* Container A: Streak */}
         <View style={styles.statBox}>
           <Text style={styles.statEmoji}>🔥</Text>
-          <Text style={[styles.statMainText, isSmallScreen && styles.statMainTextSmall]} numberOfLines={1}>
-            Série Max : {bestStreak}
-          </Text>
-          <Text style={[styles.statSubtext, isSmallScreen && styles.statSubtextSmall]}>
-            bonnes réponses consécutives
-          </Text>
+          {isZeroState ? (
+            <>
+              <Text style={[styles.statMainTextNew, isSmallScreen && styles.statMainTextSmall]} numberOfLines={1}>
+                Prêt à briller ?
+              </Text>
+              <Text style={[styles.statSubtext, isSmallScreen && styles.statSubtextSmall]}>
+                Fais ta 1ère série !
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text style={[styles.statMainTextStats, isSmallScreen && styles.statMainTextSmall]} numberOfLines={1}>
+                Série Max : {bestStreak}
+              </Text>
+              <Text style={[styles.statSubtext, isSmallScreen && styles.statSubtextSmall]}>
+                bonnes réponses d'affilée
+              </Text>
+            </>
+          )}
         </View>
 
         {/* Container B: Strength */}
         <View style={styles.statBox}>
           <Text style={styles.statEmoji}>💪</Text>
-          <Text style={[styles.statMainText, isSmallScreen && styles.statMainTextSmall]} numberOfLines={1}>
-            Force : {strongestTable !== null ? `Table de ${strongestTable}` : 'Aucune'}
-          </Text>
-          <Text style={[styles.statSubtext, isSmallScreen && styles.statSubtextSmall]}>
-            ta meilleure table
-          </Text>
+          {isZeroState ? (
+            <>
+              <Text style={[styles.statMainTextNew, isSmallScreen && styles.statMainTextSmall]} numberOfLines={1}>
+                Talent caché...
+              </Text>
+              <Text style={[styles.statSubtext, isSmallScreen && styles.statSubtextSmall]}>
+                Découvre ta force !
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text style={[styles.statMainTextStats, isSmallScreen && styles.statMainTextSmall]} numberOfLines={1}>
+                Force : {strongestTable !== null ? `Table de ${strongestTable}` : '—'}
+              </Text>
+              <Text style={[styles.statSubtext, isSmallScreen && styles.statSubtextSmall]}>
+                Ta meilleure table
+              </Text>
+            </>
+          )}
         </View>
       </View>
     </View>
@@ -203,7 +229,7 @@ const styles = StyleSheet.create({
   },
   statBox: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#F8F9FA',
     borderRadius: 12,
     padding: 12,
     alignItems: 'center',
@@ -212,10 +238,17 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginBottom: 6,
   },
-  statMainText: {
+  statMainTextNew: {
     fontSize: 14,
     fontWeight: 'bold' as const,
     color: AppColors.text,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  statMainTextStats: {
+    fontSize: 14,
+    fontWeight: 'bold' as const,
+    color: AppColors.primary,
     textAlign: 'center',
     marginBottom: 4,
   },
