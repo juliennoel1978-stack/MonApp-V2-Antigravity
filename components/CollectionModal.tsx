@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  Animated,
 } from 'react-native';
 import { AppColors } from '@/constants/colors';
 import { PERSISTENCE_BADGES, getBadgeIcon, getBadgeTitle } from '@/constants/badges';
@@ -21,6 +22,136 @@ interface CollectionModalProps {
   onClose: () => void;
   theme: BadgeTheme;
   gender?: 'boy' | 'girl';
+}
+
+interface AchievementFlipCardProps {
+  achievement: typeof ACHIEVEMENTS[0];
+  isUnlocked: boolean;
+  count: number;
+}
+
+function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlipCardProps) {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const flipAnim = useRef(new Animated.Value(0)).current;
+  const autoFlipTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const flipCard = useCallback(() => {
+    if (!isUnlocked) return;
+
+    if (autoFlipTimeout.current) {
+      clearTimeout(autoFlipTimeout.current);
+    }
+
+    const toValue = isFlipped ? 0 : 1;
+    Animated.spring(flipAnim, {
+      toValue,
+      friction: 8,
+      tension: 10,
+      useNativeDriver: true,
+    }).start();
+    setIsFlipped(!isFlipped);
+
+    if (!isFlipped) {
+      autoFlipTimeout.current = setTimeout(() => {
+        Animated.spring(flipAnim, {
+          toValue: 0,
+          friction: 8,
+          tension: 10,
+          useNativeDriver: true,
+        }).start();
+        setIsFlipped(false);
+      }, 3000);
+    }
+  }, [isFlipped, flipAnim, isUnlocked]);
+
+  useEffect(() => {
+    return () => {
+      if (autoFlipTimeout.current) {
+        clearTimeout(autoFlipTimeout.current);
+      }
+    };
+  }, []);
+
+  const frontOpacity = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 0, 0],
+  });
+
+  const backOpacity = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0, 0, 1],
+  });
+
+  const frontScale = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 0.9, 0.9],
+  });
+
+  const backScale = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.9, 0.9, 1],
+  });
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.achievementItem,
+        !isUnlocked && styles.achievementItemLocked
+      ]}
+      onPress={flipCard}
+      activeOpacity={isUnlocked ? 0.7 : 1}
+      disabled={!isUnlocked}
+    >
+      {isUnlocked && (
+        <View style={styles.flipHint}>
+          <View style={styles.flipHintDot} />
+        </View>
+      )}
+
+      {/* Front Face */}
+      <Animated.View
+        style={[
+          styles.achievementFace,
+          { opacity: frontOpacity, transform: [{ scale: frontScale }] },
+        ]}
+        pointerEvents={isFlipped ? 'none' : 'auto'}
+      >
+        <View style={styles.achievementEmojiContainer}>
+          <Text style={[
+            styles.achievementEmoji,
+            !isUnlocked && styles.achievementEmojiLocked
+          ]}>
+            {achievement.emoji}
+          </Text>
+          {count > 1 && (
+            <View style={styles.countBadge}>
+              <Text style={styles.countText}>x{count}</Text>
+            </View>
+          )}
+        </View>
+        <Text style={[
+          styles.achievementTitle,
+          !isUnlocked && styles.achievementTitleLocked
+        ]} numberOfLines={2}>
+          {achievement.title}
+        </Text>
+      </Animated.View>
+
+      {/* Back Face */}
+      <Animated.View
+        style={[
+          styles.achievementFace,
+          styles.achievementFaceBack,
+          { opacity: backOpacity, transform: [{ scale: backScale }] },
+        ]}
+        pointerEvents={isFlipped ? 'auto' : 'none'}
+      >
+        <Text style={styles.achievementDescriptionText}>
+          {achievement.message}
+        </Text>
+      </Animated.View>
+    </TouchableOpacity>
+  );
 }
 
 export default function CollectionModal({
@@ -133,33 +264,12 @@ export default function CollectionModal({
                   const count = unlocked?.count || 0;
 
                   return (
-                    <View 
-                      key={achievement.id} 
-                      style={[
-                        styles.achievementItem,
-                        !isUnlocked && styles.achievementItemLocked
-                      ]}
-                    >
-                      <View style={styles.achievementEmojiContainer}>
-                        <Text style={[
-                          styles.achievementEmoji,
-                          !isUnlocked && styles.achievementEmojiLocked
-                        ]}>
-                          {achievement.emoji}
-                        </Text>
-                        {count > 1 && (
-                          <View style={styles.countBadge}>
-                            <Text style={styles.countText}>x{count}</Text>
-                          </View>
-                        )}
-                      </View>
-                      <Text style={[
-                        styles.achievementTitle,
-                        !isUnlocked && styles.achievementTitleLocked
-                      ]} numberOfLines={2}>
-                        {achievement.title}
-                      </Text>
-                    </View>
+                    <AchievementFlipCard
+                      key={achievement.id}
+                      achievement={achievement}
+                      isUnlocked={isUnlocked}
+                      count={count}
+                    />
                   );
                 })}
               </View>
@@ -297,7 +407,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   achievementItem: {
-    width: '31%', // 3 items per row approx
+    width: '31%',
     aspectRatio: 0.8,
     backgroundColor: AppColors.surface,
     borderRadius: 12,
@@ -311,6 +421,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+    position: 'relative',
+    overflow: 'hidden',
   },
   achievementItemLocked: {
     backgroundColor: '#F5F5F5',
@@ -357,5 +469,40 @@ const styles = StyleSheet.create({
   },
   achievementTitleLocked: {
     color: '#999',
+  },
+  achievementFace: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: '100%',
+  },
+  achievementFaceBack: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    padding: 8,
+    backgroundColor: '#EEF2FF',
+  },
+  flipHint: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    zIndex: 10,
+  },
+  flipHintDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: AppColors.primary,
+    opacity: 0.4,
+  },
+  achievementDescriptionText: {
+    fontSize: 11,
+    color: AppColors.text,
+    textAlign: 'center',
+    fontWeight: '500',
+    lineHeight: 15,
   },
 });
