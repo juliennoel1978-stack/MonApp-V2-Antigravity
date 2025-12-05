@@ -402,11 +402,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   achievementItem: {
-    width: '31%',
-    aspectRatio: 0.75,
+    width: '48%',
+    aspectRatio: 0.85,
     backgroundColor: AppColors.surface,
     borderRadius: 12,
-    padding: 8,
+    padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   achievementEmoji: {
-    fontSize: 32,
+    fontSize: 40,
   },
   achievementEmojiLocked: {
     opacity: 0.3,
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   achievementTitle: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: AppColors.text,
     textAlign: 'center',
@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    padding: 8,
+    padding: 12,
     backgroundColor: '#6C63FF',
     justifyContent: 'center',
     alignItems: 'center',
@@ -496,12 +496,12 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   achievementDescriptionText: {
-    fontSize: 10.5,
+    fontSize: 12,
     color: '#FFFFFF',
     textAlign: 'center',
     fontWeight: '600',
-    lineHeight: 15,
-    paddingHorizontal: 2,
+    lineHeight: 17,
+    paddingHorizontal: 4,
   },
   countBadgeBottom: {
     position: 'absolute',
