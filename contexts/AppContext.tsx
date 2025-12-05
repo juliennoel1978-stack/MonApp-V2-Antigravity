@@ -65,20 +65,26 @@ export const [AppProvider, useApp] = createContextHook(() => {
       console.log('📦 Starting data load...');
       setIsLoading(true);
       
-      let progressData, settingsData, badgesData, usersData, currentUserId, anonymousChallenges, anonymousAchievementsData, anonymousPlayDatesData, anonymousBadgesData;
+      let progressData: string | null = null;
+      let settingsData: string | null = null;
+      let badgesData: string | null = null;
+      let usersData: string | null = null;
+      let currentUserId: string | null = null;
+      let anonymousChallenges: string | null = null;
+      let anonymousAchievementsData: string | null = null;
+      let anonymousPlayDatesData: string | null = null;
+      let anonymousBadgesData: string | null = null;
       
       try {
-        [progressData, settingsData, badgesData, usersData, currentUserId, anonymousChallenges, anonymousAchievementsData, anonymousPlayDatesData, anonymousBadgesData] = await Promise.all([
-        AsyncStorage.getItem(STORAGE_KEYS.PROGRESS),
-        AsyncStorage.getItem(STORAGE_KEYS.SETTINGS),
-        AsyncStorage.getItem(STORAGE_KEYS.BADGES),
-        AsyncStorage.getItem(STORAGE_KEYS.USERS),
-        AsyncStorage.getItem(STORAGE_KEYS.CURRENT_USER),
-        AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_CHALLENGES),
-        AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_ACHIEVEMENTS),
-        AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_PLAY_DATES),
-        AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_BADGES),
-      ]);
+        progressData = await AsyncStorage.getItem(STORAGE_KEYS.PROGRESS);
+        settingsData = await AsyncStorage.getItem(STORAGE_KEYS.SETTINGS);
+        badgesData = await AsyncStorage.getItem(STORAGE_KEYS.BADGES);
+        usersData = await AsyncStorage.getItem(STORAGE_KEYS.USERS);
+        currentUserId = await AsyncStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+        anonymousChallenges = await AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_CHALLENGES);
+        anonymousAchievementsData = await AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_ACHIEVEMENTS);
+        anonymousPlayDatesData = await AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_PLAY_DATES);
+        anonymousBadgesData = await AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_BADGES);
       } catch (storageError) {
         console.error('❌ Error reading from AsyncStorage:', storageError);
         setIsLoading(false);
