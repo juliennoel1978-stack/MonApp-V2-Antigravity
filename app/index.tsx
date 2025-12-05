@@ -253,20 +253,22 @@ export default function HomeScreen() {
       useNativeDriver: false,
     }).start();
     
+    let currentProgress = 0;
     settingsTimerRef.current = setInterval(() => {
-      setSettingsProgress(prev => {
-        const newProgress = prev + (100 / 30);
-        if (newProgress >= 100) {
-          if (settingsTimerRef.current) {
-            clearInterval(settingsTimerRef.current);
-            settingsTimerRef.current = null;
-          }
-          console.log('[HomeScreen] Settings unlocked - navigating');
-          router.push('/settings' as any);
-          return 0;
+      currentProgress += (100 / 30);
+      if (currentProgress >= 100) {
+        if (settingsTimerRef.current) {
+          clearInterval(settingsTimerRef.current);
+          settingsTimerRef.current = null;
         }
-        return newProgress;
-      });
+        setSettingsProgress(0);
+        console.log('[HomeScreen] Settings unlocked - navigating');
+        setTimeout(() => {
+          router.push('/settings' as any);
+        }, 0);
+      } else {
+        setSettingsProgress(currentProgress);
+      }
     }, 100);
   };
 
