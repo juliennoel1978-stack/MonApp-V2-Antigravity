@@ -374,9 +374,10 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <Text style={styles.subtitle}>
-            Apprends les multiplications en jouant : chasse les étoiles, décroche tes badges !
-          </Text>
+          <View style={styles.subtitleContainer}>
+            <Text style={styles.subtitleMain}>Deviens un as du calcul ✨</Text>
+            <Text style={styles.subtitleSecondary}>Apprends en t'amusant !</Text>
+          </View>
 
           <View style={styles.progressCard}>
             <View style={styles.progressHeader}>
@@ -676,13 +677,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  subtitle: {
-    fontSize: 15,
-    color: AppColors.textSecondary,
-    textAlign: 'center',
+  subtitleContainer: {
+    alignItems: 'center',
     marginBottom: 20,
     paddingHorizontal: 16,
-    lineHeight: 21,
+  },
+  subtitleMain: {
+    fontSize: 22,
+    fontWeight: 'bold' as const,
+    color: AppColors.text,
+    textAlign: 'center',
+    lineHeight: 30,
+    letterSpacing: 0.3,
+  },
+  subtitleSecondary: {
+    fontSize: 16,
+    fontWeight: '500' as const,
+    color: '#555555',
+    textAlign: 'center',
+    marginTop: 6,
+    lineHeight: 22,
+    letterSpacing: 0.2,
   },
   progressCard: {
     width: '100%',
