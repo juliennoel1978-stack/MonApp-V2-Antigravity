@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react';
+import { View, Text, StyleSheet, useWindowDimensions, TouchableOpacity, Animated } from 'react-native';
 import { AppColors } from '@/constants/colors';
 import type { BadgeTheme } from '@/types';
 
@@ -42,6 +42,124 @@ const getZeroStateMessage = (theme: BadgeTheme): string => {
       return 'Lance ton premier challenge !';
   }
 };
+
+interface FlipCardProps {
+  icon: string;
+  frontText: string;
+  backText: string;
+  isZeroState: boolean;
+  isSmallScreen: boolean;
+}
+
+function FlipCard({ icon, frontText, backText, isZeroState, isSmallScreen }: FlipCardProps) {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const flipAnim = useRef(new Animated.Value(0)).current;
+  const autoFlipTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const flipCard = useCallback(() => {
+    if (autoFlipTimeout.current) {
+      clearTimeout(autoFlipTimeout.current);
+    }
+
+    const toValue = isFlipped ? 0 : 1;
+    Animated.spring(flipAnim, {
+      toValue,
+      friction: 8,
+      tension: 10,
+      useNativeDriver: true,
+    }).start();
+    setIsFlipped(!isFlipped);
+
+    if (!isFlipped) {
+      autoFlipTimeout.current = setTimeout(() => {
+        Animated.spring(flipAnim, {
+          toValue: 0,
+          friction: 8,
+          tension: 10,
+          useNativeDriver: true,
+        }).start();
+        setIsFlipped(false);
+      }, 3000);
+    }
+  }, [isFlipped, flipAnim]);
+
+  useEffect(() => {
+    return () => {
+      if (autoFlipTimeout.current) {
+        clearTimeout(autoFlipTimeout.current);
+      }
+    };
+  }, []);
+
+  const frontOpacity = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 0, 0],
+  });
+
+  const backOpacity = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0, 0, 1],
+  });
+
+  const frontScale = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 0.9, 0.9],
+  });
+
+  const backScale = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.9, 0.9, 1],
+  });
+
+  return (
+    <TouchableOpacity
+      style={styles.flipCardContainer}
+      onPress={flipCard}
+      activeOpacity={0.8}
+    >
+      <View style={[styles.statBox, isFlipped && styles.statBoxFlipped]}>
+        {/* Clickable hint */}
+        <View style={styles.clickHint}>
+          <View style={styles.clickHintDot} />
+        </View>
+
+        {/* Front Face */}
+        <Animated.View
+          style={[
+            styles.cardFace,
+            { opacity: frontOpacity, transform: [{ scale: frontScale }] },
+          ]}
+          pointerEvents={isFlipped ? 'none' : 'auto'}
+        >
+          <Text style={styles.statEmoji}>{icon}</Text>
+          <Text
+            style={[
+              isZeroState ? styles.statMainTextNew : styles.statMainTextStats,
+              isSmallScreen && styles.statMainTextSmall,
+            ]}
+            numberOfLines={1}
+          >
+            {frontText}
+          </Text>
+        </Animated.View>
+
+        {/* Back Face */}
+        <Animated.View
+          style={[
+            styles.cardFace,
+            styles.cardFaceBack,
+            { opacity: backOpacity, transform: [{ scale: backScale }] },
+          ]}
+          pointerEvents={isFlipped ? 'auto' : 'none'}
+        >
+          <Text style={[styles.backText, isSmallScreen && styles.backTextSmall]}>
+            {backText}
+          </Text>
+        </Animated.View>
+      </View>
+    </TouchableOpacity>
+  );
+}
 
 export default function ChallengeDashboardCard({
   theme,
@@ -107,55 +225,25 @@ export default function ChallengeDashboardCard({
         </Text>
       </View>
 
-      {/* FOOTER SECTION - Stats Grid */}
+      {/* FOOTER SECTION - Interactive Stats Grid */}
       <View style={styles.statsGrid}>
-        {/* Container A: Streak */}
-        <View style={styles.statBox}>
-          <Text style={styles.statEmoji}>🔥</Text>
-          {isZeroState ? (
-            <>
-              <Text style={[styles.statMainTextNew, isSmallScreen && styles.statMainTextSmall]} numberOfLines={1}>
-                Prêt à briller ?
-              </Text>
-              <Text style={[styles.statSubtext, isSmallScreen && styles.statSubtextSmall]}>
-                Fais ta 1ère série !
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text style={[styles.statMainTextStats, isSmallScreen && styles.statMainTextSmall]} numberOfLines={1}>
-                Série Max : {bestStreak}
-              </Text>
-              <Text style={[styles.statSubtext, isSmallScreen && styles.statSubtextSmall]}>
-                bonnes réponses d'affilée
-              </Text>
-            </>
-          )}
-        </View>
+        {/* Flip Card A: Streak */}
+        <FlipCard
+          icon="🔥"
+          frontText={isZeroState ? 'Prêt ?' : `Série Max : ${bestStreak}`}
+          backText="Ton record de réponses justes à la suite !"
+          isZeroState={isZeroState}
+          isSmallScreen={isSmallScreen}
+        />
 
-        {/* Container B: Strength */}
-        <View style={styles.statBox}>
-          <Text style={styles.statEmoji}>💪</Text>
-          {isZeroState ? (
-            <>
-              <Text style={[styles.statMainTextNew, isSmallScreen && styles.statMainTextSmall]} numberOfLines={1}>
-                Talent caché...
-              </Text>
-              <Text style={[styles.statSubtext, isSmallScreen && styles.statSubtextSmall]}>
-                Découvre ta force !
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text style={[styles.statMainTextStats, isSmallScreen && styles.statMainTextSmall]} numberOfLines={1}>
-                Force : {strongestTable !== null ? `Table de ${strongestTable}` : '—'}
-              </Text>
-              <Text style={[styles.statSubtext, isSmallScreen && styles.statSubtextSmall]}>
-                Ta meilleure table
-              </Text>
-            </>
-          )}
-        </View>
+        {/* Flip Card B: Strength */}
+        <FlipCard
+          icon="💪"
+          frontText={isZeroState ? 'Mystère...' : `Force : ${strongestTable !== null ? `Table de ${strongestTable}` : '—'}`}
+          backText="C'est la table que tu connais le mieux !"
+          isZeroState={isZeroState}
+          isSmallScreen={isSmallScreen}
+        />
       </View>
     </View>
   );
@@ -227,12 +315,59 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
   },
+  flipCardContainer: {
+    flex: 1,
+  },
   statBox: {
     flex: 1,
     backgroundColor: '#F8F9FA',
     borderRadius: 12,
     padding: 12,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 85,
+    position: 'relative' as const,
+    overflow: 'hidden',
+  },
+  statBoxFlipped: {
+    backgroundColor: '#EEF2FF',
+  },
+  cardFace: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardFaceBack: {
+    position: 'absolute' as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+  },
+  clickHint: {
+    position: 'absolute' as const,
+    top: 6,
+    right: 6,
+  },
+  clickHintDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: AppColors.primary,
+    opacity: 0.4,
+  },
+  backText: {
+    fontSize: 12,
+    color: AppColors.text,
+    textAlign: 'center' as const,
+    fontWeight: '500' as const,
+    lineHeight: 18,
+  },
+  backTextSmall: {
+    fontSize: 11,
+    lineHeight: 16,
   },
   statEmoji: {
     fontSize: 24,
@@ -255,12 +390,5 @@ const styles = StyleSheet.create({
   statMainTextSmall: {
     fontSize: 12,
   },
-  statSubtext: {
-    fontSize: 11,
-    color: AppColors.textSecondary,
-    textAlign: 'center',
-  },
-  statSubtextSmall: {
-    fontSize: 10,
-  },
+
 });
