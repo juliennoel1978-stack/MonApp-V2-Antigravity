@@ -685,7 +685,7 @@ const styles = StyleSheet.create({
   subtitleMain: {
     fontSize: 22,
     fontWeight: 'bold' as const,
-    color: AppColors.text,
+    color: '#1A365D',
     textAlign: 'center',
     lineHeight: 30,
     letterSpacing: 0.3,
@@ -693,9 +693,9 @@ const styles = StyleSheet.create({
   subtitleSecondary: {
     fontSize: 16,
     fontWeight: '500' as const,
-    color: '#555555',
+    color: '#4A5568',
     textAlign: 'center',
-    marginTop: 6,
+    marginTop: 8,
     lineHeight: 22,
     letterSpacing: 0.2,
   },
