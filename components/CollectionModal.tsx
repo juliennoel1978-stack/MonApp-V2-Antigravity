@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
-  Platform,
 } from 'react-native';
 import { AppColors } from '@/constants/colors';
 import { PERSISTENCE_BADGES, getBadgeIcon, getBadgeTitle } from '@/constants/badges';
@@ -65,15 +64,12 @@ export default function CollectionModal({
         activeOpacity={1}
         onPress={onClose}
       >
-        <TouchableOpacity
-          activeOpacity={1}
-          style={styles.modalContent}
-          onPress={(e) => e.stopPropagation()}
-        >
+        <View style={styles.modalContent}>
           <ScrollView
             style={styles.scrollView}
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
+            bounces={true}
           >
             {/* ZONE 1: MON AVENTURE */}
             <View style={styles.section}>
@@ -168,7 +164,7 @@ export default function CollectionModal({
             </View>
 
           </ScrollView>
-        </TouchableOpacity>
+        </View>
       </TouchableOpacity>
     </Modal>
   );
@@ -198,6 +194,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 24,
+    paddingBottom: 40,
   },
   section: {
     marginBottom: 20,
