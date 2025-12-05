@@ -8,8 +8,11 @@ import { TouchableOpacity } from "react-native";
 import { X } from "lucide-react-native";
 import { AppProvider } from "@/contexts/AppContext";
 
-
-SplashScreen.preventAutoHideAsync();
+try {
+  SplashScreen.preventAutoHideAsync();
+} catch (e) {
+  console.log('SplashScreen warning:', e);
+}
 
 const queryClient = new QueryClient();
 
