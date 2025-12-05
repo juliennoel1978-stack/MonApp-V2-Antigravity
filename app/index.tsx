@@ -220,12 +220,27 @@ export default function HomeScreen() {
   const completedTables = progress.filter(p => p.completed).length;
   const totalTables = progress.length;
 
-  const challengesCompleted = currentUser?.challengesCompleted || anonymousChallengesCompleted;
-  const badgeTheme = currentUser?.badgeTheme || settings.badgeTheme || 'space';
-  const gender = currentUser?.gender;
-  const persistenceBadges = getPersistenceBadges();
+  const challengesCompleted = React.useMemo(() => {
+    return currentUser?.challengesCompleted || anonymousChallengesCompleted;
+  }, [currentUser, anonymousChallengesCompleted, dataVersion]);
 
-  console.log('[HomeScreen RENDER] challenges:', challengesCompleted, 'badges:', persistenceBadges.length, 'version:', dataVersion);
+  const badgeTheme = React.useMemo(() => {
+    return currentUser?.badgeTheme || settings.badgeTheme || 'space';
+  }, [currentUser, settings.badgeTheme, dataVersion]);
+
+  const gender = React.useMemo(() => {
+    return currentUser?.gender;
+  }, [currentUser, dataVersion]);
+
+  const persistenceBadges = React.useMemo(() => {
+    return getPersistenceBadges();
+  }, [getPersistenceBadges, dataVersion]);
+
+  const bestStreak = React.useMemo(() => {
+    return getBestStreak();
+  }, [getBestStreak, dataVersion]);
+
+  console.log('[HomeScreen RENDER] challenges:', challengesCompleted, 'badges:', persistenceBadges.length, 'bestStreak:', bestStreak, 'version:', dataVersion);
 
   const currentBadgeData = React.useMemo(() => {
     const sortedBadges = [...persistenceBadges].sort((a, b) => b.threshold - a.threshold);
@@ -525,7 +540,7 @@ export default function HomeScreen() {
             currentBadge={currentBadgeData}
             nextBadgeThreshold={nextBadgeThreshold}
             totalChallengesCompleted={challengesCompleted}
-            bestStreak={getBestStreak()}
+            bestStreak={bestStreak}
             strongestTable={strongestTable}
           />
           </Animated.View>
