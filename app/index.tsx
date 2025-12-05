@@ -165,6 +165,13 @@ export default function HomeScreen() {
     const sortedBadges = [...persistenceBadges].sort((a, b) => b.threshold - a.threshold);
     if (sortedBadges.length > 0) {
       const latestBadge = sortedBadges[0];
+      const badgeFromTheme = getBadgeForThreshold(badgeTheme, latestBadge.threshold as 1 | 4 | 7 | 10 | 15 | 20 | 25 | 30 | 45);
+      if (badgeFromTheme) {
+        return {
+          icon: getBadgeIcon(badgeFromTheme, gender),
+          title: getBadgeTitle(badgeFromTheme, gender),
+        };
+      }
       return {
         icon: latestBadge.icon,
         title: latestBadge.title,
