@@ -86,17 +86,7 @@ export default function TablesScreen() {
                   }
                   testID={`table-${table.number}`}
                 >
-                  <View
-                    style={[
-                      styles.cardHeader,
-                      {
-                        backgroundColor:
-                          NumberColors[
-                            table.number as keyof typeof NumberColors
-                          ] + '20',
-                      },
-                    ]}
-                  >
+                  <View style={styles.cardContent}>
                     <Text
                       style={[
                         styles.tableNumber,
@@ -110,10 +100,6 @@ export default function TablesScreen() {
                     >
                       {table.number}
                     </Text>
-                  </View>
-
-                  <View style={styles.cardContent}>
-                    <Text style={styles.tableTitle}>Table de {table.number}</Text>
 
                     <View
                       style={[
@@ -229,24 +215,17 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  cardHeader: {
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   tableNumber: {
-    fontSize: 24,
+    fontSize: 36,
     fontWeight: 'bold' as const,
+    textAlign: 'center',
+    marginBottom: 4,
   },
   cardContent: {
-    padding: 6,
-    gap: 3,
-  },
-  tableTitle: {
-    fontSize: 12,
-    fontWeight: 'bold' as const,
-    color: AppColors.text,
-    textAlign: 'center',
+    padding: 10,
+    paddingTop: 12,
+    alignItems: 'center',
+    gap: 6,
   },
   difficultyBadge: {
     paddingVertical: 2,
