@@ -17,16 +17,29 @@ interface ChallengeDashboardCardProps {
   strongestTable: number | null;
 }
 
-const getProgressLabel = (theme: BadgeTheme): string => {
+const getProgressLabel = (theme: BadgeTheme, plural: boolean = true): string => {
   switch (theme) {
     case 'space':
-      return 'missions';
+      return plural ? 'missions' : 'mission';
     case 'heroes':
-      return 'exploits';
+      return plural ? 'exploits' : 'exploit';
     case 'animals':
-      return 'défis';
+      return plural ? 'défis' : 'défi';
     default:
-      return 'challenges';
+      return plural ? 'challenges' : 'challenge';
+  }
+};
+
+const getZeroStateMessage = (theme: BadgeTheme): string => {
+  switch (theme) {
+    case 'space':
+      return 'Lance ta première mission !';
+    case 'heroes':
+      return 'Accomplis ton 1er exploit !';
+    case 'animals':
+      return 'Relève ton premier défi !';
+    default:
+      return 'Lance ton premier challenge !';
   }
 };
 
@@ -42,13 +55,25 @@ export default function ChallengeDashboardCard({
   const { width } = useWindowDimensions();
   const isSmallScreen = useMemo(() => width < 375, [width]);
   
-  const progressLabel = getProgressLabel(theme);
   const remaining = nextBadgeThreshold ? nextBadgeThreshold - totalChallengesCompleted : 0;
+  const isPlural = remaining > 1;
+  const progressLabel = getProgressLabel(theme, isPlural);
   const progressPercent = nextBadgeThreshold
     ? Math.min((totalChallengesCompleted / nextBadgeThreshold) * 100, 100)
     : 100;
 
   const hasMaxBadge = !nextBadgeThreshold || remaining <= 0;
+  const isZeroState = totalChallengesCompleted === 0;
+
+  const getProgressMessage = (): string => {
+    if (hasMaxBadge) {
+      return '🎉 Niveau maximum atteint !';
+    }
+    if (isZeroState) {
+      return getZeroStateMessage(theme);
+    }
+    return `Plus que ${remaining} ${progressLabel} !`;
+  };
 
   return (
     <View style={styles.container}>
@@ -78,9 +103,7 @@ export default function ChallengeDashboardCard({
 
         {/* Row 3: Dynamic Text */}
         <Text style={[styles.progressText, isSmallScreen && styles.progressTextSmall]}>
-          {hasMaxBadge
-            ? '🎉 Niveau maximum atteint !'
-            : `Plus que ${remaining} ${progressLabel} !`}
+          {getProgressMessage()}
         </Text>
       </View>
 
