@@ -239,6 +239,8 @@ export default function ChallengeScreen() {
     }
   }, [currentQuestion, showFeedback, showCelebration, settings.timerEnabled, settings.timerDuration, currentUser, handleTimeOut, generateNewQuestion]);
 
+  const [completedChallengeCount, setCompletedChallengeCount] = useState<number>(0);
+
   const handleChallengeEnd = useCallback(async () => {
     if (isReviewMode) {
       setIsFinished(true);
@@ -248,6 +250,7 @@ export default function ChallengeScreen() {
     console.log('🏁 Challenge ending, checking for rewards...');
     const newTotal = await incrementChallengesCompleted();
     await addPlayDate();
+    setCompletedChallengeCount(newTotal);
     console.log('🏆 New total challenges completed:', newTotal);
 
     const badgeTheme = currentUser?.badgeTheme || settings.badgeTheme || 'space';
@@ -620,7 +623,7 @@ export default function ChallengeScreen() {
                 {currentUser ? `Bravo ${currentUser.firstName} !` : 'Félicitations !'}
               </Text>
               <Text style={styles.finishedSubtitle}>
-                Challenge terminé ! (n°{currentUser ? ((currentUser.challengesCompleted || 0) + 1) : (anonymousChallengesCompleted + 1)})
+                Challenge terminé ! (n°{completedChallengeCount > 0 ? completedChallengeCount : (currentUser ? (currentUser.challengesCompleted || 0) : anonymousChallengesCompleted)})
               </Text>
               
               <View style={styles.finishedStats}>

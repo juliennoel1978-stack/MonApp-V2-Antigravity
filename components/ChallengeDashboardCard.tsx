@@ -173,15 +173,28 @@ export default function ChallengeDashboardCard({
   const { width } = useWindowDimensions();
   const isSmallScreen = useMemo(() => width < 375, [width]);
   
-  const remaining = nextBadgeThreshold ? nextBadgeThreshold - totalChallengesCompleted : 0;
+  const remaining = useMemo(() => {
+    return nextBadgeThreshold ? nextBadgeThreshold - totalChallengesCompleted : 0;
+  }, [nextBadgeThreshold, totalChallengesCompleted]);
+  
   const isPlural = remaining > 1;
   const progressLabel = getProgressLabel(theme, isPlural);
-  const progressPercent = nextBadgeThreshold
-    ? Math.min((totalChallengesCompleted / nextBadgeThreshold) * 100, 100)
-    : 100;
+  
+  const progressPercent = useMemo(() => {
+    if (!nextBadgeThreshold) return 100;
+    return Math.min((totalChallengesCompleted / nextBadgeThreshold) * 100, 100);
+  }, [totalChallengesCompleted, nextBadgeThreshold]);
 
   const hasMaxBadge = !nextBadgeThreshold || remaining <= 0;
   const isZeroState = totalChallengesCompleted === 0;
+  
+  console.log('[ChallengeDashboardCard] Progress calculation:', {
+    totalChallengesCompleted,
+    nextBadgeThreshold,
+    remaining,
+    progressPercent: progressPercent.toFixed(1) + '%',
+    isZeroState,
+  });
 
   const getProgressMessage = (): string => {
     if (hasMaxBadge) {
