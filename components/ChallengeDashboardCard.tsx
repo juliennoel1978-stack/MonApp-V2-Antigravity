@@ -59,7 +59,7 @@ export default function ChallengeDashboardCard({
           <Text style={[styles.badgeIcon, isSmallScreen && styles.badgeIconSmall]}>
             {currentBadge?.icon || '🌟'}
           </Text>
-          <Text style={[styles.levelTitle, isSmallScreen && styles.levelTitleSmall]} numberOfLines={1}>
+          <Text style={[styles.levelTitle, isSmallScreen && styles.levelTitleSmall]}>
             Niveau Actuel : {currentBadge?.title || 'Débutant'}
           </Text>
         </View>
@@ -142,13 +142,14 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   levelTitle: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: 'bold' as const,
     color: AppColors.primary,
     flex: 1,
+    flexWrap: 'wrap' as const,
   },
   levelTitleSmall: {
-    fontSize: 14,
+    fontSize: 13,
   },
   progressBarContainer: {
     marginBottom: 10,
