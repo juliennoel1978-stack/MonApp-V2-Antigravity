@@ -376,7 +376,7 @@ export default function HomeScreen() {
 
           <View style={styles.subtitleContainer}>
             <Text style={styles.subtitleMain}>Deviens un as du calcul ✨</Text>
-            <Text style={styles.subtitleSecondary}>Apprends en t'amusant !</Text>
+            <Text style={styles.subtitleSecondary}>Apprends en t{"'"}amusant !</Text>
           </View>
 
           <View style={styles.progressCard}>
