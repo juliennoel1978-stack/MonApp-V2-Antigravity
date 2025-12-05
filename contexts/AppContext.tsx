@@ -268,6 +268,34 @@ export const [AppProvider, useApp] = createContextHook(() => {
     });
   }, [saveProgress]);
 
+  const batchUpdateTableProgress = useCallback(async (
+    updates: { tableNumber: number; correct: number; total: number }[]
+  ) => {
+    setProgress(prevProgress => {
+      const newProgress = [...prevProgress];
+      let hasChanges = false;
+
+      updates.forEach(({ tableNumber, correct, total }) => {
+        const index = newProgress.findIndex(p => p.tableNumber === tableNumber);
+        if (index !== -1) {
+          const p = newProgress[index];
+          newProgress[index] = {
+            ...p,
+            correctAnswers: p.correctAnswers + correct,
+            totalAttempts: p.totalAttempts + total,
+            lastPracticed: new Date().toISOString(),
+          };
+          hasChanges = true;
+        }
+      });
+
+      if (hasChanges) {
+        saveProgress(newProgress);
+      }
+      return newProgress;
+    });
+  }, [saveProgress]);
+
   const unlockBadge = useCallback((badgeId: string) => {
     const newBadges = badges.map(b => {
       if (b.id === badgeId && !b.earned) {
@@ -580,6 +608,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     anonymousChallengesCompleted,
     anonymousPersistenceBadges,
     updateTableProgress,
+    batchUpdateTableProgress,
     unlockBadge,
     getTableProgress,
     updateSettings,

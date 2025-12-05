@@ -67,6 +67,7 @@ export default function ChallengeScreen() {
     getPlayDates,
     getPersistenceBadges,
     updateBestStreak,
+    batchUpdateTableProgress,
   } = useApp();
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [userAnswer, setUserAnswer] = useState<string>('');
@@ -252,6 +253,20 @@ export default function ChallengeScreen() {
     await addPlayDate();
     setCompletedChallengeCount(newTotal);
     console.log('🏆 New total challenges completed:', newTotal);
+
+    // Save table stats from this challenge
+    const tableUpdates = Object.entries(tableStats).map(([tableStr, stats]) => ({
+      tableNumber: parseInt(tableStr, 10),
+      correct: stats.correct,
+      total: stats.total
+    }));
+    
+    if (tableUpdates.length > 0) {
+      console.log('📊 Saving table stats:', tableUpdates.length, 'tables');
+      await batchUpdateTableProgress(tableUpdates);
+    } else {
+      console.log('⚠️ No table stats to save');
+    }
 
     const badgeTheme = currentUser?.badgeTheme || settings.badgeTheme || 'space';
     const existingBadges = getPersistenceBadges();
