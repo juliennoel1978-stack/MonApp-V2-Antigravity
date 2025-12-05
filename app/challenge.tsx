@@ -620,7 +620,7 @@ export default function ChallengeScreen() {
                 {currentUser ? `Bravo ${currentUser.firstName} !` : 'Félicitations !'}
               </Text>
               <Text style={styles.finishedSubtitle}>
-                Challenge terminé ! (n°{currentUser ? (currentUser.challengesCompleted || 0) : anonymousChallengesCompleted})
+                Challenge terminé ! (n°{currentUser ? ((currentUser.challengesCompleted || 0) + 1) : (anonymousChallengesCompleted + 1)})
               </Text>
               
               <View style={styles.finishedStats}>
