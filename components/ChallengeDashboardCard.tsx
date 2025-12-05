@@ -252,7 +252,7 @@ export default function ChallengeDashboardCard({
         {/* Flip Card B: Strength */}
         <FlipCard
           icon="💪"
-          frontText={isZeroState ? 'Mystère...' : `Force : ${strongestTable !== null ? `Table de ${strongestTable}` : '—'}`}
+          frontText={isZeroState ? 'Mystère...' : (strongestTable !== null ? `Table de ${strongestTable}` : '—')}
           backText="C'est la table que tu connais le mieux !"
           isZeroState={isZeroState}
           isSmallScreen={isSmallScreen}
