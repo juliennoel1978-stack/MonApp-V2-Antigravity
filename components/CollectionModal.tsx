@@ -36,8 +36,6 @@ function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlip
   const autoFlipTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const flipCard = useCallback(() => {
-    if (!isUnlocked) return;
-
     if (autoFlipTimeout.current) {
       clearTimeout(autoFlipTimeout.current);
     }
@@ -62,7 +60,7 @@ function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlip
         setIsFlipped(false);
       }, 3000);
     }
-  }, [isFlipped, flipAnim, isUnlocked]);
+  }, [isFlipped, flipAnim]);
 
   useEffect(() => {
     return () => {
@@ -99,14 +97,11 @@ function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlip
         !isUnlocked && styles.achievementItemLocked
       ]}
       onPress={flipCard}
-      activeOpacity={isUnlocked ? 0.7 : 1}
-      disabled={!isUnlocked}
+      activeOpacity={0.7}
     >
-      {isUnlocked && (
-        <View style={styles.flipHint}>
-          <View style={styles.flipHintDot} />
-        </View>
-      )}
+      <View style={styles.flipHint}>
+        <View style={styles.flipHintDot} />
+      </View>
 
       {/* Front Face */}
       <Animated.View
@@ -499,10 +494,11 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   achievementDescriptionText: {
-    fontSize: 11,
+    fontSize: 10,
     color: AppColors.text,
     textAlign: 'center',
-    fontWeight: '500',
-    lineHeight: 15,
+    fontWeight: '600',
+    lineHeight: 14,
+    paddingHorizontal: 4,
   },
 });
