@@ -681,12 +681,13 @@ export default function ChallengeScreen() {
                 {wrongAnswers.length > 0 && (
                   <TouchableOpacity
                     style={[styles.finishedButton, styles.finishedButtonSecondary]}
-                    onPress={async () => {
+                    onPress={() => {
+                      console.log('🔄 Starting review mode with', wrongAnswers.length, 'questions');
                       const existingAchievements = getAchievements();
                       const strategistReward = checkStrategistAchievement(existingAchievements);
                       
                       if (strategistReward) {
-                        console.log('🔎 Strategist achievement unlocked!');
+                        console.log('🔎 Strategist achievement will be unlocked!');
                         const achievement: UnlockedAchievement = {
                           id: 'strategist',
                           unlockedAt: new Date().toISOString(),
@@ -699,6 +700,7 @@ export default function ChallengeScreen() {
                         setCurrentReward(strategistReward);
                         setShowBadgeOverlay(true);
                       } else {
+                        console.log('🔄 Starting review directly (no strategist achievement)');
                         startReviewMode(wrongAnswers);
                       }
                     }}
