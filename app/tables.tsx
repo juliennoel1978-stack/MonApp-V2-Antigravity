@@ -33,6 +33,19 @@ export default function TablesScreen() {
     }
   };
 
+  const getDifficultyTextColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'easy':
+        return '#2D7A4F';
+      case 'medium':
+        return '#B8860B';
+      case 'hard':
+        return '#C53030';
+      default:
+        return AppColors.primary;
+    }
+  };
+
   const getDifficultyLabel = (difficulty: string) => {
     switch (difficulty) {
       case 'easy':
@@ -114,7 +127,7 @@ export default function TablesScreen() {
                       <Text
                         style={[
                           styles.difficultyText,
-                          { color: getDifficultyColor(table.difficulty) },
+                          { color: getDifficultyTextColor(table.difficulty) },
                         ]}
                       >
                         {getDifficultyLabel(table.difficulty)}
