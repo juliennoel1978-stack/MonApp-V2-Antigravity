@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { UserProgress, UserSettings, Badge, User, PersistenceBadge, UnlockedAchievement } from '@/types';
 import { MULTIPLICATION_TABLES } from '@/constants/tables';
 
@@ -552,7 +552,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   }, [currentUser, users, anonymousBestStreak]);
 
-  return useMemo(() => ({
+  return {
     progress,
     settings,
     badges,
@@ -582,5 +582,5 @@ export const [AppProvider, useApp] = createContextHook(() => {
     getPersistenceBadges,
     getBestStreak,
     updateBestStreak,
-  }), [progress, settings, badges, totalStars, users, currentUser, isLoading, anonymousChallengesCompleted, anonymousPersistenceBadges, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser, incrementChallengesCompleted, addPersistenceBadge, reloadData, addAchievement, addPlayDate, getAchievements, getPlayDates, getPersistenceBadges, getBestStreak, updateBestStreak]);
+  };
 });
