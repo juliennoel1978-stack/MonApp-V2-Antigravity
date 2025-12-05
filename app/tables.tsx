@@ -36,11 +36,11 @@ export default function TablesScreen() {
   const getDifficultyTextColor = (difficulty: string) => {
     switch (difficulty) {
       case 'easy':
-        return '#1B5E20';
+        return '#14532d'; // darker green
       case 'medium':
-        return '#B45309';
+        return '#78350f'; // darker amber
       case 'hard':
-        return '#7F1D1D';
+        return '#7f1d1d'; // darker red
       default:
         return AppColors.primary;
     }
