@@ -62,8 +62,13 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
   const loadData = useCallback(async () => {
     try {
+      console.log('📦 Starting data load...');
       setIsLoading(true);
-      const [progressData, settingsData, badgesData, usersData, currentUserId, anonymousChallenges, anonymousAchievementsData, anonymousPlayDatesData, anonymousBadgesData] = await Promise.all([
+      
+      let progressData, settingsData, badgesData, usersData, currentUserId, anonymousChallenges, anonymousAchievementsData, anonymousPlayDatesData, anonymousBadgesData;
+      
+      try {
+        [progressData, settingsData, badgesData, usersData, currentUserId, anonymousChallenges, anonymousAchievementsData, anonymousPlayDatesData, anonymousBadgesData] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEYS.PROGRESS),
         AsyncStorage.getItem(STORAGE_KEYS.SETTINGS),
         AsyncStorage.getItem(STORAGE_KEYS.BADGES),
@@ -74,6 +79,11 @@ export const [AppProvider, useApp] = createContextHook(() => {
         AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_PLAY_DATES),
         AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_BADGES),
       ]);
+      } catch (storageError) {
+        console.error('❌ Error reading from AsyncStorage:', storageError);
+        setIsLoading(false);
+        return;
+      }
 
       console.log('📦 Loading data...');
       console.log('🔍 Raw users data from storage:', usersData);

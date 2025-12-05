@@ -32,7 +32,7 @@ export default function HomeScreen() {
       console.log('🔄 [HomeScreen] Screen focused - reloading data');
       reloadData();
       setDataVersion(prev => prev + 1);
-    }, [reloadData])
+    }, [])
   );
 
   console.log('[HomeScreen RENDER] users.length:', users.length);
