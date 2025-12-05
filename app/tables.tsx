@@ -20,16 +20,28 @@ export default function TablesScreen() {
   const router = useRouter();
   const { progress } = useApp();
 
-  const getDifficultyColor = (difficulty: string) => {
+  const getDifficultyBadgeStyles = (difficulty: string) => {
     switch (difficulty) {
       case 'easy':
-        return AppColors.easy;
+        return {
+          backgroundColor: '#22C55E',
+          textColor: '#FFFFFF',
+        };
       case 'medium':
-        return AppColors.medium;
+        return {
+          backgroundColor: '#F59E0B',
+          textColor: '#FFFFFF',
+        };
       case 'hard':
-        return AppColors.hard;
+        return {
+          backgroundColor: '#EF4444',
+          textColor: '#FFFFFF',
+        };
       default:
-        return AppColors.primary;
+        return {
+          backgroundColor: AppColors.primary,
+          textColor: '#FFFFFF',
+        };
     }
   };
 
@@ -107,14 +119,14 @@ export default function TablesScreen() {
                         styles.difficultyBadge,
                         {
                           backgroundColor:
-                            getDifficultyColor(table.difficulty) + '20',
+                            getDifficultyBadgeStyles(table.difficulty).backgroundColor,
                         },
                       ]}
                     >
                       <Text
                         style={[
                           styles.difficultyText,
-                          { color: getDifficultyColor(table.difficulty) },
+                          { color: getDifficultyBadgeStyles(table.difficulty).textColor },
                         ]}
                       >
                         {getDifficultyLabel(table.difficulty)}
@@ -238,14 +250,15 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   difficultyBadge: {
-    paddingVertical: 2,
-    paddingHorizontal: 6,
-    borderRadius: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 12,
     alignSelf: 'center',
   },
   difficultyText: {
-    fontSize: 9,
-    fontWeight: '600' as const,
+    fontSize: 10,
+    fontWeight: '700' as const,
+    letterSpacing: 0.3,
   },
   starsContainer: {
     flexDirection: 'row',
