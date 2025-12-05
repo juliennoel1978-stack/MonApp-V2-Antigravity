@@ -24,7 +24,7 @@ const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData, settings, anonymousChallengesCompleted, getAchievements, getPersistenceBadges } = useApp();
+  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData, settings, anonymousChallengesCompleted, getAchievements, getPersistenceBadges, getBestStreak } = useApp();
   const [dataVersion, setDataVersion] = React.useState(0);
   
   useFocusEffect(
@@ -444,6 +444,7 @@ export default function HomeScreen() {
             currentBadge={currentBadgeData}
             nextBadgeThreshold={nextBadgeThreshold}
             totalChallengesCompleted={challengesCompleted}
+            bestStreak={getBestStreak()}
             strongestTable={strongestTable}
           />
           </Animated.View>

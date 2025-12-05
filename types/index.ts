@@ -74,6 +74,7 @@ export interface User {
   challengesCompleted?: number;
   achievements?: UnlockedAchievement[];
   challengePlayDates?: string[];
+  bestStreak?: number;
 }
 
 export type StreakTier = '4' | '8' | '12' | '20' | '30' | 'max' | null;

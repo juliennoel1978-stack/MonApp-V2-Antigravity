@@ -14,6 +14,7 @@ const STORAGE_KEYS = {
   ANONYMOUS_ACHIEVEMENTS: '@tables_magiques_anonymous_achievements',
   ANONYMOUS_PLAY_DATES: '@tables_magiques_anonymous_play_dates',
   ANONYMOUS_BADGES: '@tables_magiques_anonymous_badges',
+  ANONYMOUS_BEST_STREAK: '@tables_magiques_anonymous_best_streak',
 } as const;
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -57,6 +58,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const [anonymousAchievements, setAnonymousAchievements] = useState<UnlockedAchievement[]>([]);
   const [anonymousPlayDates, setAnonymousPlayDates] = useState<string[]>([]);
   const [anonymousPersistenceBadges, setAnonymousPersistenceBadges] = useState<PersistenceBadge[]>([]);
+  const [anonymousBestStreak, setAnonymousBestStreak] = useState(0);
 
   const loadData = useCallback(async () => {
     try {
@@ -153,6 +155,12 @@ export const [AppProvider, useApp] = createContextHook(() => {
       if (anonymousBadgesData) {
         setAnonymousPersistenceBadges(JSON.parse(anonymousBadgesData));
         console.log('🏅 Anonymous persistence badges loaded');
+      }
+
+      const anonymousBestStreakData = await AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_BEST_STREAK);
+      if (anonymousBestStreakData) {
+        setAnonymousBestStreak(parseInt(anonymousBestStreakData, 10) || 0);
+        console.log('🔥 Anonymous best streak loaded:', anonymousBestStreakData);
       }
     } catch (error) {
       console.error('❌ Error loading data:', error);
@@ -270,6 +278,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         STORAGE_KEYS.ANONYMOUS_ACHIEVEMENTS,
         STORAGE_KEYS.ANONYMOUS_PLAY_DATES,
         STORAGE_KEYS.ANONYMOUS_BADGES,
+        STORAGE_KEYS.ANONYMOUS_BEST_STREAK,
       ]);
       setProgress(INITIAL_PROGRESS);
       setBadges(INITIAL_BADGES);
@@ -278,6 +287,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       setAnonymousAchievements([]);
       setAnonymousPlayDates([]);
       setAnonymousPersistenceBadges([]);
+      setAnonymousBestStreak(0);
       console.log('🔄 Progress reset including anonymous challenges count');
     } catch (error) {
       console.error('Error resetting progress:', error);
@@ -511,6 +521,37 @@ export const [AppProvider, useApp] = createContextHook(() => {
     return anonymousPersistenceBadges;
   }, [currentUser, anonymousPersistenceBadges]);
 
+  const getBestStreak = useCallback((): number => {
+    if (currentUser) {
+      return currentUser.bestStreak || 0;
+    }
+    return anonymousBestStreak;
+  }, [currentUser, anonymousBestStreak]);
+
+  const updateBestStreak = useCallback(async (newStreak: number) => {
+    try {
+      if (currentUser) {
+        const currentBest = currentUser.bestStreak || 0;
+        if (newStreak > currentBest) {
+          const updatedUser = { ...currentUser, bestStreak: newStreak };
+          const updatedUsers = users.map(u => u.id === currentUser.id ? updatedUser : u);
+          await AsyncStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updatedUsers));
+          setUsers(updatedUsers);
+          setCurrentUser(updatedUser);
+          console.log('🔥 Best streak updated for user:', newStreak);
+        }
+      } else {
+        if (newStreak > anonymousBestStreak) {
+          await AsyncStorage.setItem(STORAGE_KEYS.ANONYMOUS_BEST_STREAK, newStreak.toString());
+          setAnonymousBestStreak(newStreak);
+          console.log('🔥 Anonymous best streak updated:', newStreak);
+        }
+      }
+    } catch (error) {
+      console.error('Error updating best streak:', error);
+    }
+  }, [currentUser, users, anonymousBestStreak]);
+
   return useMemo(() => ({
     progress,
     settings,
@@ -539,5 +580,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     getAchievements,
     getPlayDates,
     getPersistenceBadges,
-  }), [progress, settings, badges, totalStars, users, currentUser, isLoading, anonymousChallengesCompleted, anonymousPersistenceBadges, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser, incrementChallengesCompleted, addPersistenceBadge, reloadData, addAchievement, addPlayDate, getAchievements, getPlayDates, getPersistenceBadges]);
+    getBestStreak,
+    updateBestStreak,
+  }), [progress, settings, badges, totalStars, users, currentUser, isLoading, anonymousChallengesCompleted, anonymousPersistenceBadges, updateTableProgress, unlockBadge, getTableProgress, updateSettings, resetProgress, addUser, deleteUser, selectUser, updateUser, clearCurrentUser, incrementChallengesCompleted, addPersistenceBadge, reloadData, addAchievement, addPlayDate, getAchievements, getPlayDates, getPersistenceBadges, getBestStreak, updateBestStreak]);
 });

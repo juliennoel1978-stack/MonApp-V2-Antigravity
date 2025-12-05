@@ -66,6 +66,7 @@ export default function ChallengeScreen() {
     getAchievements,
     getPlayDates,
     getPersistenceBadges,
+    updateBestStreak,
   } = useApp();
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [userAnswer, setUserAnswer] = useState<string>('');
@@ -415,6 +416,7 @@ export default function ChallengeScreen() {
       setConsecutiveCorrect(newStreak);
       if (newStreak > bestStreak) {
         setBestStreak(newStreak);
+        updateBestStreak(newStreak);
       }
       
       setTableStats(prev => {
