@@ -683,11 +683,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   subtitleMain: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold' as const,
     color: '#1A365D',
     textAlign: 'center',
-    lineHeight: 30,
+    lineHeight: 24,
     letterSpacing: 0.3,
   },
   subtitleSecondary: {
