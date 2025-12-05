@@ -2,6 +2,7 @@ import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react'
 import { View, Text, StyleSheet, useWindowDimensions, TouchableOpacity, Animated } from 'react-native';
 import { AppColors } from '@/constants/colors';
 import type { BadgeTheme } from '@/types';
+import { getNextBadgeInfo } from '@/constants/badges';
 
 interface CurrentBadge {
   icon: string;
@@ -15,6 +16,7 @@ interface ChallengeDashboardCardProps {
   totalChallengesCompleted: number;
   bestStreak: number;
   strongestTable: number | null;
+  gender?: 'boy' | 'girl';
 }
 
 const getProgressLabel = (theme: BadgeTheme, plural: boolean = true): string => {
@@ -168,6 +170,7 @@ export default function ChallengeDashboardCard({
   totalChallengesCompleted,
   bestStreak,
   strongestTable,
+  gender,
 }: ChallengeDashboardCardProps) {
   console.log('[ChallengeDashboardCard RENDER] challenges:', totalChallengesCompleted, 'badge:', currentBadge?.title, 'streak:', bestStreak);
   const { width } = useWindowDimensions();
@@ -202,6 +205,10 @@ export default function ChallengeDashboardCard({
     }
     if (isZeroState) {
       return getZeroStateMessage(theme);
+    }
+    const nextBadge = getNextBadgeInfo(totalChallengesCompleted, theme, gender);
+    if (nextBadge) {
+      return `Plus que ${remaining} ${progressLabel} pour\n${nextBadge.icon} ${nextBadge.title}`;
     }
     return `Plus que ${remaining} ${progressLabel} !`;
   };

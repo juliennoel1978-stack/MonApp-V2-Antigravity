@@ -554,6 +554,7 @@ export default function HomeScreen() {
             totalChallengesCompleted={challengesCompleted}
             bestStreak={bestStreak}
             strongestTable={strongestTable}
+            gender={gender}
           />
           </Animated.View>
         </ScrollView>
