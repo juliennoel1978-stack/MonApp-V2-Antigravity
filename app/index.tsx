@@ -43,7 +43,13 @@ export default function HomeScreen() {
       lastFocusTime.current = now;
       console.log('🔄 [HomeScreen] Screen focused - reloading data');
       reloadData();
-      setDataVersion(prev => prev + 1);
+      setTimeout(() => {
+        setDataVersion(prev => {
+          const newVersion = prev + 1;
+          console.log('🔄 [HomeScreen] DataVersion updated to:', newVersion);
+          return newVersion;
+        });
+      }, 100);
     }, [reloadData])
   );
 
@@ -221,8 +227,10 @@ export default function HomeScreen() {
   const totalTables = progress.length;
 
   const challengesCompleted = React.useMemo(() => {
-    return currentUser?.challengesCompleted || anonymousChallengesCompleted;
-  }, [currentUser, anonymousChallengesCompleted, dataVersion]);
+    const value = currentUser?.challengesCompleted || anonymousChallengesCompleted;
+    console.log('[HomeScreen useMemo challengesCompleted]', value, 'dataVersion:', dataVersion);
+    return value;
+  }, [currentUser?.challengesCompleted, anonymousChallengesCompleted, dataVersion]);
 
   const badgeTheme = React.useMemo(() => {
     return currentUser?.badgeTheme || settings.badgeTheme || 'space';
@@ -237,8 +245,10 @@ export default function HomeScreen() {
   }, [getPersistenceBadges, dataVersion]);
 
   const bestStreak = React.useMemo(() => {
-    return getBestStreak();
-  }, [getBestStreak, dataVersion]);
+    const value = getBestStreak();
+    console.log('[HomeScreen useMemo bestStreak]', value, 'dataVersion:', dataVersion);
+    return value;
+  }, [getBestStreak, dataVersion, currentUser?.bestStreak, anonymousChallengesCompleted]);
 
   console.log('[HomeScreen RENDER] challenges:', challengesCompleted, 'badges:', persistenceBadges.length, 'bestStreak:', bestStreak, 'version:', dataVersion);
 
@@ -298,8 +308,10 @@ export default function HomeScreen() {
       }
     }
     
-    return bestRate >= 0.7 ? best.tableNumber : null;
-  }, [progress]);
+    const result = bestRate >= 0.7 ? best.tableNumber : null;
+    console.log('[HomeScreen useMemo strongestTable]', result, 'dataVersion:', dataVersion);
+    return result;
+  }, [progress, dataVersion]);
 
   const missionTable = React.useMemo(() => {
     const tablesWithAttempts = progress.filter(p => p.totalAttempts > 0 && !p.completed);
