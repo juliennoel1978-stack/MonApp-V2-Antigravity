@@ -76,10 +76,11 @@ export default function TablesScreen() {
                   style={[
                     styles.card,
                     {
-                      borderColor: NumberColors[
+                      borderColor: isCompleted ? AppColors.success : NumberColors[
                         table.number as keyof typeof NumberColors
                       ],
                     },
+                    isCompleted && styles.cardCompleted,
                   ]}
                   onPress={() =>
                     router.push(`/discovery/${table.number}` as any)
@@ -208,12 +209,21 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.surface,
     borderRadius: 10,
     borderWidth: 2,
-    overflow: 'hidden',
+    overflow: 'visible',
     shadowColor: AppColors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  cardCompleted: {
+    borderWidth: 3,
+    borderColor: AppColors.success,
+    shadowColor: AppColors.success,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   tableNumber: {
     fontSize: 32,
@@ -244,16 +254,26 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   completedBadge: {
-    backgroundColor: AppColors.success + '20',
-    paddingVertical: 2,
-    paddingHorizontal: 6,
-    borderRadius: 4,
-    marginTop: 1,
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: AppColors.success,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: AppColors.surface,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
   completedText: {
-    fontSize: 10,
-    fontWeight: '600' as const,
-    color: AppColors.success,
-    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: 'bold' as const,
+    color: '#FFFFFF',
   },
 });
