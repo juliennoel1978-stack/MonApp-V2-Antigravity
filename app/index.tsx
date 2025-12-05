@@ -1,5 +1,5 @@
 import { useRouter, useFocusEffect } from 'expo-router';
-import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X, Star } from 'lucide-react-native';
+import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X } from 'lucide-react-native';
 import React, { useEffect, useCallback } from 'react';
 import {
   View,
@@ -15,7 +15,7 @@ import {
   Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppColors, NumberColors } from '@/constants/colors';
+import { AppColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
 import { BADGE_THRESHOLDS, getBadgeForThreshold, getBadgeIcon, getBadgeTitle } from '@/constants/badges';
 import ChallengeDashboardCard from '@/components/ChallengeDashboardCard';
@@ -42,9 +42,6 @@ export default function HomeScreen() {
   const modalScale = React.useRef(new Animated.Value(0.9)).current;
   const [isReady, setIsReady] = React.useState(false);
   const [showUserModal, setShowUserModal] = React.useState(false);
-  const [showTablesModal, setShowTablesModal] = React.useState(false);
-  const tablesModalOpacity = React.useRef(new Animated.Value(0)).current;
-  const tablesModalScale = React.useRef(new Animated.Value(0.9)).current;
   const [settingsProgress, setSettingsProgress] = React.useState(0);
   const settingsTimerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
   const settingsProgressAnim = React.useRef(new Animated.Value(0)).current;
@@ -110,27 +107,6 @@ export default function HomeScreen() {
     }
   }, [showUserModal, modalOpacity, modalScale]);
 
-  useEffect(() => {
-    if (showTablesModal) {
-      Animated.parallel([
-        Animated.timing(tablesModalOpacity, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.spring(tablesModalScale, {
-          toValue: 1,
-          tension: 50,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      tablesModalOpacity.setValue(0);
-      tablesModalScale.setValue(0.9);
-    }
-  }, [showTablesModal, tablesModalOpacity, tablesModalScale]);
-
   const handleSelectUser = async (userId: string) => {
     console.log('[HomeScreen] Selecting user:', userId);
     await selectUser(userId);
@@ -173,38 +149,6 @@ export default function HomeScreen() {
     ]).start(() => {
       setShowUserModal(false);
     });
-  };
-
-  const openTablesModal = () => {
-    setShowTablesModal(true);
-  };
-
-  const closeTablesModal = () => {
-    Animated.parallel([
-      Animated.timing(tablesModalOpacity, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.spring(tablesModalScale, {
-        toValue: 0.9,
-        tension: 50,
-        friction: 7,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setShowTablesModal(false);
-    });
-  };
-
-  const isTableMastered = (tableNumber: number): boolean => {
-    const tableProgress = progress.find(p => p.tableNumber === tableNumber);
-    return tableProgress?.completed || false;
-  };
-
-  const isTableStarted = (tableNumber: number): boolean => {
-    const tableProgress = progress.find(p => p.tableNumber === tableNumber);
-    return (tableProgress?.totalAttempts || 0) > 0;
   };
 
   const completedTables = progress.filter(p => p.completed).length;
@@ -432,7 +376,7 @@ export default function HomeScreen() {
 
           <View style={styles.subtitleContainer}>
             <Text style={styles.subtitleMain}>Deviens un as du calcul ✨</Text>
-            <Text style={styles.subtitleSecondary}>Apprends en t&apos;amusant !</Text>
+            <Text style={styles.subtitleSecondary}>Apprends en t'amusant !</Text>
           </View>
 
           <View style={styles.progressCard}>
@@ -449,17 +393,12 @@ export default function HomeScreen() {
 
               <View style={styles.statDivider} />
 
-              <TouchableOpacity 
-                style={styles.statItem}
-                onPress={openTablesModal}
-                testID="tables-stat-button"
-                activeOpacity={0.7}
-              >
+              <View style={styles.statItem}>
                 <Text style={styles.statValue}>
                   {completedTables}/{totalTables}
                 </Text>
-                <Text style={[styles.statLabel, styles.statLabelClickable]}>Tables 📊</Text>
-              </TouchableOpacity>
+                <Text style={styles.statLabel}>Tables</Text>
+              </View>
             </View>
 
             <View style={styles.progressBarContainer}>
@@ -518,96 +457,6 @@ export default function HomeScreen() {
           />
           </Animated.View>
         </ScrollView>
-
-        {showTablesModal && (
-          <Modal
-            visible={true}
-            transparent
-            animationType="none"
-            onRequestClose={closeTablesModal}
-          >
-            <Pressable 
-              style={styles.tablesModalOverlay}
-              onPress={closeTablesModal}
-            >
-              <Animated.View
-                style={[
-                  styles.tablesModalContent,
-                  {
-                    opacity: tablesModalOpacity,
-                    transform: [{ scale: tablesModalScale }],
-                  },
-                ]}
-              >
-                <Pressable onPress={(e) => e.stopPropagation()}>
-                  <View style={styles.tablesModalHeader}>
-                    <Text style={styles.tablesModalTitle}>Mes Tables</Text>
-                    <TouchableOpacity
-                      style={styles.tablesModalCloseButton}
-                      onPress={closeTablesModal}
-                      testID="tables-modal-close"
-                    >
-                      <X size={24} color={AppColors.text} />
-                    </TouchableOpacity>
-                  </View>
-
-                  <View style={styles.tablesGrid}>
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(tableNum => {
-                      const mastered = isTableMastered(tableNum);
-                      const started = isTableStarted(tableNum);
-                      
-                      return (
-                        <View
-                          key={tableNum}
-                          style={[
-                            styles.tableGridItem,
-                            mastered && styles.tableGridItemMastered,
-                            !started && !mastered && styles.tableGridItemNotStarted,
-                          ]}
-                        >
-                          <Text
-                            style={[
-                              styles.tableGridNumber,
-                              {
-                                color: mastered 
-                                  ? '#B8860B'
-                                  : started 
-                                    ? NumberColors[tableNum as keyof typeof NumberColors]
-                                    : AppColors.textSecondary,
-                              },
-                            ]}
-                          >
-                            {tableNum}
-                          </Text>
-                          {mastered && (
-                            <View style={styles.tableGridStar}>
-                              <Star size={16} color="#FFD700" fill="#FFD700" />
-                            </View>
-                          )}
-                        </View>
-                      );
-                    })}
-                  </View>
-
-                  <View style={styles.tablesLegend}>
-                    <View style={styles.legendItem}>
-                      <View style={[styles.legendDot, { backgroundColor: '#E5E7EB' }]} />
-                      <Text style={styles.legendText}>Non vue</Text>
-                    </View>
-                    <View style={styles.legendItem}>
-                      <View style={[styles.legendDot, { backgroundColor: AppColors.primary }]} />
-                      <Text style={styles.legendText}>En cours</Text>
-                    </View>
-                    <View style={styles.legendItem}>
-                      <Star size={14} color="#FFD700" fill="#FFD700" />
-                      <Text style={styles.legendText}>Maîtrisée</Text>
-                    </View>
-                  </View>
-                </Pressable>
-              </Animated.View>
-            </Pressable>
-          </Modal>
-        )}
 
         {showUserModal && (
           <Modal
@@ -1133,102 +982,5 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
     color: AppColors.primary,
     textAlign: 'center',
-  },
-  statLabelClickable: {
-    textDecorationLine: 'underline',
-  },
-  tablesModalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  tablesModalContent: {
-    width: width * 0.75,
-    backgroundColor: AppColors.surface,
-    borderRadius: 24,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 12,
-  },
-  tablesModalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  tablesModalTitle: {
-    fontSize: 22,
-    fontWeight: 'bold' as const,
-    color: AppColors.text,
-  },
-  tablesModalCloseButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: AppColors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  tablesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 10,
-    marginBottom: 20,
-  },
-  tableGridItem: {
-    width: (width * 0.75 - 80) / 5,
-    aspectRatio: 1,
-    borderRadius: 12,
-    backgroundColor: AppColors.surfaceLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: AppColors.border,
-  },
-  tableGridItemMastered: {
-    backgroundColor: '#FEF3C7',
-    borderColor: '#F59E0B',
-    borderWidth: 2,
-  },
-  tableGridItemNotStarted: {
-    backgroundColor: '#F3F4F6',
-    borderColor: '#E5E7EB',
-  },
-  tableGridNumber: {
-    fontSize: 20,
-    fontWeight: 'bold' as const,
-  },
-  tableGridStar: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-  },
-  tablesLegend: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: AppColors.border,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  legendDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  legendText: {
-    fontSize: 11,
-    color: AppColors.textSecondary,
   },
 });
