@@ -6,7 +6,8 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     type: 'ONE_SHOT',
     title: 'Maître du Temps',
     emoji: '⏱️',
-    message: 'Même pas peur du chrono ! Quel courage.',
+    message: 'Le chrono ne te résiste pas.',
+    backTitle: 'Vitesse Éclair ! ⚡️',
     trigger: 'First time finishing with Timer ON',
   },
   {
@@ -14,7 +15,8 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     type: 'ONE_SHOT',
     title: 'Grand Stratège',
     emoji: '🔎',
-    message: 'Un vrai détective ! Tu traques tes erreurs.',
+    message: 'Tu apprends de tes erreurs.',
+    backTitle: 'Génie en action 🧠',
     trigger: 'Clicking "Revoir mes erreurs" (Review Errors)',
   },
   {
@@ -22,7 +24,8 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     type: 'RECURRING',
     title: 'Habitué',
     emoji: '📅',
-    message: 'Jamais 2 sans 3 ! Ta régularité paie.',
+    message: 'Tu reviens nous voir chaque jour.',
+    backTitle: 'Toujours fidèle ! 🫡',
     trigger: 'Played on 3 distinct days in current week',
   },
   {
@@ -30,7 +33,8 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     type: 'RECURRING',
     title: 'Lève-tôt',
     emoji: '🌅',
-    message: 'Le monde appartient à ceux qui calculent tôt !',
+    message: 'Déjà prêt à gagner des étoiles.',
+    backTitle: 'Debout champion ! ☀️',
     trigger: 'Finish challenge before 10:00 AM',
   },
   {
@@ -38,7 +42,8 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     type: 'RECURRING',
     title: 'Insomnie',
     emoji: '🦉',
-    message: 'Un petit entraînement du soir ? Bien joué.',
+    message: 'Tu travailles même le soir !',
+    backTitle: 'Oiseau de nuit 🦉',
     trigger: 'Finish challenge after 07:00 PM (19:00)',
   },
   {
@@ -46,8 +51,18 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     type: 'RECURRING',
     title: 'Oeil de Lynx',
     emoji: '🎯',
-    message: 'Aucune erreur. Précision parfaite !',
+    message: 'Aucune erreur ne te résiste.',
+    backTitle: 'Regard perçant 😼',
     trigger: 'Score === 100%',
+  },
+  {
+    id: 'streak_max',
+    type: 'RECURRING',
+    title: 'Série Max',
+    emoji: '🔥',
+    message: 'Quelle superbe série de victoires.',
+    backTitle: 'Inarrêtable ! 🔥',
+    trigger: 'Achieve a high streak',
   },
 ];
 

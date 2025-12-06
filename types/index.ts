@@ -88,6 +88,7 @@ export interface AchievementDefinition {
   emoji: string;
   message: string;
   trigger: string;
+  backTitle?: string;
 }
 
 export interface UnlockedAchievement {

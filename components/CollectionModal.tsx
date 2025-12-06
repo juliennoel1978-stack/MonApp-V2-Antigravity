@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react';
+import React, { useMemo, useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -33,13 +33,8 @@ interface AchievementFlipCardProps {
 function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlipCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const flipAnim = useRef(new Animated.Value(0)).current;
-  const autoFlipTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const flipCard = useCallback(() => {
-    if (autoFlipTimeout.current) {
-      clearTimeout(autoFlipTimeout.current);
-    }
-
     const toValue = isFlipped ? 0 : 1;
     Animated.spring(flipAnim, {
       toValue,
@@ -48,27 +43,7 @@ function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlip
       useNativeDriver: true,
     }).start();
     setIsFlipped(!isFlipped);
-
-    if (!isFlipped) {
-      autoFlipTimeout.current = setTimeout(() => {
-        Animated.spring(flipAnim, {
-          toValue: 0,
-          friction: 8,
-          tension: 10,
-          useNativeDriver: true,
-        }).start();
-        setIsFlipped(false);
-      }, 3000);
-    }
   }, [isFlipped, flipAnim]);
-
-  useEffect(() => {
-    return () => {
-      if (autoFlipTimeout.current) {
-        clearTimeout(autoFlipTimeout.current);
-      }
-    };
-  }, []);
 
   const frontOpacity = flipAnim.interpolate({
     inputRange: [0, 0.5, 1],
@@ -141,6 +116,9 @@ function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlip
         ]}
         pointerEvents={isFlipped ? 'auto' : 'none'}
       >
+        <Text style={styles.achievementBackTitle}>
+          {achievement.backTitle || achievement.title}
+        </Text>
         <Text style={styles.achievementDescriptionText}>
           {achievement.message}
         </Text>
@@ -403,7 +381,7 @@ const styles = StyleSheet.create({
   },
   achievementItem: {
     width: '48%',
-    aspectRatio: 0.85,
+    aspectRatio: 1,
     backgroundColor: AppColors.surface,
     borderRadius: 16,
     padding: 12,
@@ -477,7 +455,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    padding: 16,
+    padding: 12,
     backgroundColor: '#6C63FF',
     borderRadius: 16,
     justifyContent: 'center',
@@ -496,13 +474,19 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.primary,
     opacity: 0.4,
   },
-  achievementDescriptionText: {
-    fontSize: 13,
+  achievementBackTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
     color: '#FFFFFF',
     textAlign: 'center',
-    fontWeight: '600',
-    lineHeight: 18,
-    paddingHorizontal: 2,
+    marginBottom: 8,
+  },
+  achievementDescriptionText: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    fontWeight: '500',
+    lineHeight: 20,
   },
   countBadgeBottom: {
     position: 'absolute',
