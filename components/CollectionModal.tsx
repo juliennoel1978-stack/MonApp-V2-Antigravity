@@ -119,7 +119,9 @@ function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlip
         <View style={styles.achievementBackContent}>
           <Text
             style={styles.achievementDescriptionText}
-            numberOfLines={5}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
+            numberOfLines={4}
           >
             {achievement.message}
           </Text>
@@ -456,7 +458,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    margin: 0,
+    padding: 10,
     backgroundColor: '#6C63FF',
     borderRadius: 16,
     display: 'flex',
@@ -473,7 +475,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     display: 'flex',
-    padding: 10,
   },
   flipHint: {
     position: 'absolute',
@@ -489,14 +490,14 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   achievementDescriptionText: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#FFFFFF',
     textAlign: 'center',
     fontWeight: '600',
+    flexShrink: 1,
     margin: 0,
     width: '100%',
-    lineHeight: 17,
-    flexWrap: 'wrap',
+    lineHeight: 18,
   },
   countBadgeBottom: {
     position: 'absolute',
