@@ -475,7 +475,7 @@ export default function PracticeScreen() {
           <View style={styles.backgroundContainer}>
             <SafeAreaView style={styles.container}>
               <View style={styles.resultContainer}>
-                <Text style={styles.resultTitle}>Bravo {userName} ! 🎉</Text>
+                <Text style={styles.resultTitle}>Bravo {userName ? `${userName} ` : ''}! 🎉</Text>
                 <Text style={styles.resultSubtitle}>
                   Tu as réussi toutes les questions de révision !
                 </Text>
@@ -582,7 +582,7 @@ export default function PracticeScreen() {
         <View style={styles.backgroundContainer}>
           <SafeAreaView style={styles.container}>
             <View style={styles.resultContainer}>
-              <Text style={styles.resultTitle}>Bravo {userName} ! 🎉</Text>
+              <Text style={styles.resultTitle}>Bravo {userName ? `${userName} ` : ''}! 🎉</Text>
               <Text style={styles.resultSubtitle}>
                 Tu as réussi toutes les questions de révision !
               </Text>
@@ -622,7 +622,11 @@ export default function PracticeScreen() {
       <View style={styles.backgroundContainer}>
         <SafeAreaView style={styles.container}>
           <View style={styles.resultContainer}>
-            <Text style={styles.resultTitle}>{passed ? 'Bravo !' : 'Presque !'}</Text>
+            <Text style={styles.resultTitle}>
+              {passed 
+                ? `Bravo ${userName ? `${userName} ` : ''}! 🎉` 
+                : `Presque ${userName ? `${userName} ` : ''}! 😕`}
+            </Text>
             <Text style={styles.resultSubtitle}>
               {passed ? 'Tu as terminé l\'entraînement' : 'Entraîne-toi encore un peu'}
             </Text>
@@ -1164,12 +1168,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   encouragement: {
-    fontSize: 15,
+    fontSize: 14,
     color: AppColors.text,
     textAlign: 'center',
     fontWeight: '600',
     lineHeight: 20,
-    paddingHorizontal: 4,
+    paddingHorizontal: 0,
     maxWidth: '100%',
   },
   resultButtonsColumn: {
@@ -1218,7 +1222,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   transitionDescriptionFirst: {
-    fontSize: 16,
+    fontSize: 15,
     color: AppColors.text,
     textAlign: 'center',
     lineHeight: 22,
@@ -1226,7 +1230,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   transitionDescriptionSecond: {
-    fontSize: 14,
+    fontSize: 13,
     color: AppColors.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
@@ -1406,7 +1410,7 @@ const styles = StyleSheet.create({
     borderColor: AppColors.warning + '30',
   },
   reviewSectionTitle: {
-    fontSize: 15,
+    fontSize: 14,
     color: AppColors.text,
     textAlign: 'center',
     marginBottom: 14,
