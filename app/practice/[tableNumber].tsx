@@ -405,7 +405,7 @@ export default function PracticeScreen() {
       <View style={styles.backgroundContainer}>
         <SafeAreaView style={styles.container}>
           <View style={styles.resultContainer}>
-            <Text style={styles.resultTitle}>Bravo {userName} ! 🎉</Text>
+            <Text style={styles.resultTitle}>Bravo {userName ? `${userName} ` : ''}! 🎉</Text>
             <Text style={styles.resultSubtitle}>
               {correctCount === 10 
                 ? 'Tu maîtrises cette table !' 
@@ -1170,6 +1170,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 20,
     paddingHorizontal: 4,
+    maxWidth: '100%',
   },
   resultButtonsColumn: {
     flexDirection: 'column',
