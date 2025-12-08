@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Volume2, VolumeX, Clock, User, Users, Trash2, Edit, RotateCcw, Award } from 'lucide-react-native';
+import { Volume2, VolumeX, Clock, User, Users, Trash2, Edit, RotateCcw, Award, Type } from 'lucide-react-native';
 import React from 'react';
 import {
   View,
@@ -273,7 +273,7 @@ export default function SettingsScreen() {
                     style={[
                       styles.voiceButton,
                       settings.voiceGender === 'female' &&
-                        styles.voiceButtonActive,
+                      styles.voiceButtonActive,
                     ]}
                     onPress={() => updateSettings({ voiceGender: 'female' })}
                   >
@@ -281,7 +281,7 @@ export default function SettingsScreen() {
                       style={[
                         styles.voiceButtonText,
                         settings.voiceGender === 'female' &&
-                          styles.voiceButtonTextActive,
+                        styles.voiceButtonTextActive,
                       ]}
                     >
                       Féminine
@@ -291,7 +291,7 @@ export default function SettingsScreen() {
                     style={[
                       styles.voiceButton,
                       settings.voiceGender === 'male' &&
-                        styles.voiceButtonActive,
+                      styles.voiceButtonActive,
                     ]}
                     onPress={() => updateSettings({ voiceGender: 'male' })}
                   >
@@ -299,7 +299,7 @@ export default function SettingsScreen() {
                       style={[
                         styles.voiceButtonText,
                         settings.voiceGender === 'male' &&
-                          styles.voiceButtonTextActive,
+                        styles.voiceButtonTextActive,
                       ]}
                     >
                       Masculine
@@ -332,7 +332,7 @@ export default function SettingsScreen() {
                   style={[
                     styles.fontSizeButton,
                     settings.fontSize === size.value &&
-                      styles.fontSizeButtonActive,
+                    styles.fontSizeButtonActive,
                   ]}
                   onPress={() => updateSettings({ fontSize: size.value })}
                 >
@@ -340,7 +340,7 @@ export default function SettingsScreen() {
                     style={[
                       styles.fontSizeButtonText,
                       settings.fontSize === size.value &&
-                        styles.fontSizeButtonTextActive,
+                      styles.fontSizeButtonTextActive,
                     ]}
                   >
                     {size.label}
@@ -415,42 +415,42 @@ export default function SettingsScreen() {
               </View>
 
               <View style={styles.settingItem}>
-              <View style={styles.settingLeft}>
-                <Award size={24} color={AppColors.primary} />
-                <View style={styles.settingTextContainer}>
-                  <Text style={styles.settingTitle}>Thème des badges</Text>
-                  <Text style={styles.settingDescription}>
-                    Choisis ton univers de récompenses
-                  </Text>
+                <View style={styles.settingLeft}>
+                  <Award size={24} color={AppColors.primary} />
+                  <View style={styles.settingTextContainer}>
+                    <Text style={styles.settingTitle}>Thème des badges</Text>
+                    <Text style={styles.settingDescription}>
+                      Choisis ton univers de récompenses
+                    </Text>
+                  </View>
                 </View>
               </View>
-            </View>
 
-            <View style={styles.badgeThemeButtons}>
-              {badgeThemes.map((theme) => (
-                <TouchableOpacity
-                  key={theme.value}
-                  style={[
-                    styles.badgeThemeButton,
-                    (settings.badgeTheme || 'space') === theme.value && styles.badgeThemeButtonActive,
-                  ]}
-                  onPress={() => updateSettings({ badgeTheme: theme.value })}
-                >
-                  <Text style={styles.badgeThemeEmoji}>{theme.label.split(' ')[0]}</Text>
-                  <Text
+              <View style={styles.badgeThemeButtons}>
+                {badgeThemes.map((theme) => (
+                  <TouchableOpacity
+                    key={theme.value}
                     style={[
-                      styles.badgeThemeLabel,
-                      (settings.badgeTheme || 'space') === theme.value && styles.badgeThemeLabelActive,
+                      styles.badgeThemeButton,
+                      (settings.badgeTheme || 'space') === theme.value && styles.badgeThemeButtonActive,
                     ]}
+                    onPress={() => updateSettings({ badgeTheme: theme.value })}
                   >
-                    {theme.label.split(' ').slice(1).join(' ')}
-                  </Text>
-                  <Text style={styles.badgeThemeDescription}>{theme.description}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+                    <Text style={styles.badgeThemeEmoji}>{theme.label.split(' ')[0]}</Text>
+                    <Text
+                      style={[
+                        styles.badgeThemeLabel,
+                        (settings.badgeTheme || 'space') === theme.value && styles.badgeThemeLabelActive,
+                      ]}
+                    >
+                      {theme.label.split(' ').slice(1).join(' ')}
+                    </Text>
+                    <Text style={styles.badgeThemeDescription}>{theme.description}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
 
-            {settings.timerEnabled && (
+              {settings.timerEnabled && (
                 <View style={styles.timerConfig}>
                   <View style={styles.timerModeSection}>
                     <Text style={styles.timerSubLabel}>Mode d&apos;affichage</Text>
@@ -586,7 +586,7 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
-    </View>
+    </View >
   );
 }
 

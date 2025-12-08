@@ -1,13 +1,15 @@
+
 import React, { useMemo, useState, useRef, useCallback } from 'react';
+
 import {
   View,
-  Text,
   StyleSheet,
   Modal,
   TouchableOpacity,
   ScrollView,
   Dimensions,
   Animated,
+  Text,
 } from 'react-native';
 import { AppColors } from '@/constants/colors';
 import { PERSISTENCE_BADGES, getBadgeIcon, getBadgeTitle } from '@/constants/badges';
@@ -187,10 +189,10 @@ export default function CollectionModal({
               <View style={styles.adventureList}>
                 {badges.map((badge, index) => {
                   const isUnlocked = challengesCompleted >= badge.threshold;
-                  
+
                   return (
-                    <View 
-                      key={badge.threshold} 
+                    <View
+                      key={badge.threshold}
                       style={[
                         styles.adventureItem,
                         !isUnlocked && styles.adventureItemLocked
@@ -207,7 +209,7 @@ export default function CollectionModal({
                           {getBadgeIcon(badge, gender)}
                         </Text>
                       </View>
-                      
+
                       <View style={styles.badgeInfo}>
                         <Text style={[
                           styles.badgeTitle,
@@ -216,7 +218,7 @@ export default function CollectionModal({
                           {getBadgeTitle(badge, gender)}
                         </Text>
                         <Text style={styles.badgeThreshold}>
-                          {isUnlocked ? 'Acquis !' : `Niveau ${badge.threshold}`}
+                          {isUnlocked ? 'Acquis !' : `Niveau ${badge.threshold} `}
                         </Text>
                       </View>
 

@@ -1,6 +1,7 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Home, Check, X, Star, RefreshCw, ArrowRight } from 'lucide-react-native';
 import React, { useState, useEffect, useRef } from 'react';
+
 import {
   View,
   Text,
@@ -42,12 +43,12 @@ export default function PracticeScreen() {
   const [showResult, setShowResult] = useState(false);
   const [homeClickCount, setHomeClickCount] = useState(0);
   const [showLevelTransition, setShowLevelTransition] = useState(false);
-  
+
   const [questionsToReview, setQuestionsToReview] = useState<Question[]>([]);
   const [showErrorFeedback, setShowErrorFeedback] = useState(false);
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [reviewErrors, setReviewErrors] = useState<Question[]>([]);
-  
+
 
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -92,7 +93,7 @@ export default function PracticeScreen() {
     if (settings?.voiceEnabled) {
       const tip = TIPS_BY_TABLE[table.number];
       let errorText = tip?.erreur || '';
-      
+
       // Improve speech for the error tip to be more natural
       // Replaces "5 × X =" with "5 fois quelque chose égale"
       errorText = errorText
@@ -114,7 +115,7 @@ export default function PracticeScreen() {
     setIsCorrect(correct);
 
     const newCorrectCount = correct ? correctCount + 1 : correctCount;
-    
+
     if (correct) {
       setCorrectCount(newCorrectCount);
       animateSuccess();
@@ -154,7 +155,7 @@ export default function PracticeScreen() {
     setIsCorrect(correct);
 
     const newCorrectCount = correct ? correctCount + 1 : correctCount;
-    
+
     if (correct) {
       setCorrectCount(newCorrectCount);
       animateSuccess();
@@ -265,7 +266,7 @@ export default function PracticeScreen() {
   const finishLevel = (finalCorrectCount: number) => {
     if (isReviewMode) {
       setIsReviewMode(false);
-      
+
       if (reviewErrors.length > 0) {
         setQuestionsToReview([...reviewErrors]);
         setReviewErrors([]);
@@ -277,7 +278,7 @@ export default function PracticeScreen() {
         setCorrectCount(0);
         setShowResult(false);
         setIsReviewMode(true);
-        
+
         if (level === 2) {
           setTimeout(() => {
             if (isMounted.current) {
@@ -306,7 +307,7 @@ export default function PracticeScreen() {
       if (totalCorrectLevel2 === 10) stars = 4;
       else if (totalCorrectLevel2 >= 8) stars = 3;
       else if (totalCorrectLevel2 >= 5) stars = 2;
-      
+
       updateTableProgress(table.number, totalCorrectLevel2, questions.length, stars, 2);
 
       if (stars >= 4) {
@@ -332,7 +333,7 @@ export default function PracticeScreen() {
     setShowLevelTransition(false);
     setQuestionsToReview([]);
     setReviewErrors([]);
-    
+
     setTimeout(() => {
       if (isMounted.current) {
         inputRef.current?.focus();
@@ -351,7 +352,7 @@ export default function PracticeScreen() {
     setShowLevelTransition(false);
     setQuestionsToReview([]);
     setReviewErrors([]);
-    
+
     if (level === 2) {
       setTimeout(() => {
         if (isMounted.current) {
@@ -373,7 +374,7 @@ export default function PracticeScreen() {
     setCorrectCount(0);
     setShowResult(false);
     setShowLevelTransition(false);
-    
+
     if (level === 2) {
       setTimeout(() => {
         if (isMounted.current) {
@@ -407,8 +408,8 @@ export default function PracticeScreen() {
           <View style={styles.resultContainer}>
             <Text style={styles.resultTitle}>Bravo {userName ? `${userName} ` : ''}! 🎉</Text>
             <Text style={styles.resultSubtitle}>
-              {correctCount === 10 
-                ? 'Tu maîtrises cette table !' 
+              {correctCount === 10
+                ? 'Tu maîtrises cette table !'
                 : 'Tu as débloqué le niveau 2 !'}
             </Text>
 
@@ -429,27 +430,27 @@ export default function PracticeScreen() {
                 Tape les réponses pour obtenir{'\n'}les {4 - starsEarnedLevel1} étoile{4 - starsEarnedLevel1 > 1 ? 's' : ''} restante{4 - starsEarnedLevel1 > 1 ? 's' : ''}.
               </Text>
             </View>
-            
+
             <View style={styles.resultButtonsColumn}>
-               <TouchableOpacity
+              <TouchableOpacity
                 style={[styles.primaryButton, { backgroundColor: tableColor }]}
                 onPress={startLevel2}
               >
                 <Text style={styles.primaryButtonText}>Passer au niveau 2 🚀</Text>
               </TouchableOpacity>
-              
+
               {questionsToReview.length > 0 && (
-                 <View style={styles.reviewSectionContainer}>
-                    <Text style={styles.reviewSectionTitle}>Tu veux d&apos;abord revoir tes erreurs ?</Text>
-                    <TouchableOpacity
-                      style={styles.reviewButtonSecondary}
-                      onPress={startReview}
-                    >
-                      <Text style={styles.reviewButtonSecondaryText}>Oui, réviser {questionsToReview.length === 1 ? 'mon' : `mes ${questionsToReview.length}`} erreur{questionsToReview.length > 1 ? 's' : ''}</Text>
-                    </TouchableOpacity>
-                 </View>
+                <View style={styles.reviewSectionContainer}>
+                  <Text style={styles.reviewSectionTitle}>Tu veux d&apos;abord revoir tes erreurs ?</Text>
+                  <TouchableOpacity
+                    style={styles.reviewButtonSecondary}
+                    onPress={startReview}
+                  >
+                    <Text style={styles.reviewButtonSecondaryText}>Oui, réviser {questionsToReview.length === 1 ? 'mon' : `mes ${questionsToReview.length}`} erreur{questionsToReview.length > 1 ? 's' : ''}</Text>
+                  </TouchableOpacity>
+                </View>
               )}
-              
+
               <TouchableOpacity
                 style={styles.backToMenuButton}
                 onPress={() => router.push('/tables' as any)}
@@ -469,7 +470,7 @@ export default function PracticeScreen() {
       // Check if we just finished a review session successfully
       const justFinishedReview = questions.length < 10 && correctCount === questions.length && !isReviewMode;
       const userName = currentUser?.firstName || '';
-      
+
       if (justFinishedReview) {
         return (
           <View style={styles.backgroundContainer}>
@@ -502,7 +503,7 @@ export default function PracticeScreen() {
           </View>
         );
       }
-      
+
       // Level 1 Failed (Score <= 6)
       return (
         <View style={styles.backgroundContainer}>
@@ -526,17 +527,17 @@ export default function PracticeScreen() {
 
               <View style={styles.resultButtonsColumn}>
                 {questionsToReview.length > 0 && (
-                   <View style={styles.reviewContainer}>
-                      <Text style={styles.reviewText}>
-                         Tu veux revoir uniquement les questions qui t&apos;ont posé problème ?
-                      </Text>
-                      <TouchableOpacity
-                        style={styles.reviewConfirmButton}
-                        onPress={startReview}
-                      >
-                        <Text style={styles.reviewConfirmButtonText}>Oui</Text>
-                      </TouchableOpacity>
-                   </View>
+                  <View style={styles.reviewContainer}>
+                    <Text style={styles.reviewText}>
+                      Tu veux revoir uniquement les questions qui t&apos;ont posé problème ?
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.reviewConfirmButton}
+                      onPress={startReview}
+                    >
+                      <Text style={styles.reviewConfirmButtonText}>Oui</Text>
+                    </TouchableOpacity>
+                  </View>
                 )}
 
                 <View style={styles.resultButtonsRow}>
@@ -576,7 +577,7 @@ export default function PracticeScreen() {
     // Check if we just finished a review session successfully for Level 2
     const justFinishedReviewL2 = questions.length < 10 && correctCount === questions.length && !isReviewMode;
     const userName = currentUser?.firstName || '';
-    
+
     if (justFinishedReviewL2) {
       return (
         <View style={styles.backgroundContainer}>
@@ -609,7 +610,7 @@ export default function PracticeScreen() {
         </View>
       );
     }
-    
+
     // Level 2 Finished
     const totalCorrectLevel2 = correctCount;
     let stars = 4;
@@ -623,8 +624,8 @@ export default function PracticeScreen() {
         <SafeAreaView style={styles.container}>
           <View style={styles.resultContainer}>
             <Text style={styles.resultTitle}>
-              {passed 
-                ? `Bravo ${userName ? `${userName} ` : ''}! 🎉` 
+              {passed
+                ? `Bravo ${userName ? `${userName} ` : ''}! 🎉`
                 : `Presque ${userName ? `${userName} ` : ''}! 😕`}
             </Text>
             <Text style={styles.resultSubtitle}>
@@ -650,59 +651,59 @@ export default function PracticeScreen() {
 
               <Text style={styles.encouragement}>
                 {stars === 4 ? `Super ! Tu maîtrises parfaitement la table de ${table.number} !` :
-                stars === 3 ? 'Très bien ! Continue comme ça !' :
-                stars === 2 ? 'Bon début ! Entraîne-toi encore !' :
-                'Continue à t\'entraîner, tu vas y arriver !'}
+                  stars === 3 ? 'Très bien ! Continue comme ça !' :
+                    stars === 2 ? 'Bon début ! Entraîne-toi encore !' :
+                      'Continue à t\'entraîner, tu vas y arriver !'}
               </Text>
             </View>
 
-             <View style={styles.resultButtonsColumn}>
-                {questionsToReview.length > 0 && (
-                   <View style={styles.reviewSectionContainer}>
-                      <Text style={styles.reviewSectionTitle}>
-                         Tu veux revoir tes erreurs avant de continuer ?
-                      </Text>
-                      <TouchableOpacity
-                        style={styles.reviewButtonSecondary}
-                        onPress={startReview}
-                      >
-                        <Text style={styles.reviewButtonSecondaryText}>Oui, réviser {questionsToReview.length === 1 ? 'mon' : `mes ${questionsToReview.length}`} erreur{questionsToReview.length > 1 ? 's' : ''}</Text>
-                      </TouchableOpacity>
-                   </View>
-                )}
-            
-                <View style={styles.resultButtonsRow}>
+            <View style={styles.resultButtonsColumn}>
+              {questionsToReview.length > 0 && (
+                <View style={styles.reviewSectionContainer}>
+                  <Text style={styles.reviewSectionTitle}>
+                    Tu veux revoir tes erreurs avant de continuer ?
+                  </Text>
                   <TouchableOpacity
-                    style={[
-                      styles.actionButton, 
-                      passed ? styles.retryButtonStyle : { backgroundColor: tableColor }
-                    ]}
-                    onPress={retry}
+                    style={styles.reviewButtonSecondary}
+                    onPress={startReview}
                   >
-                    <Text style={[
-                      styles.actionButtonText, 
-                      passed && { color: AppColors.text }
-                    ]}>
-                      {passed ? 'Refaire le niveau' : 'Refaire le niveau'}
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[
-                      styles.actionButton, 
-                      passed ? { backgroundColor: tableColor } : styles.actionButtonOutline, 
-                      !passed && { borderColor: tableColor }
-                    ]}
-                    onPress={() => router.push('/tables')}
-                  >
-                    <Text style={[
-                      styles.actionButtonText, 
-                      !passed && { color: tableColor }
-                    ]}>
-                      {passed ? 'Non, autre table' : 'Non, autre table'}
-                    </Text>
+                    <Text style={styles.reviewButtonSecondaryText}>Oui, réviser {questionsToReview.length === 1 ? 'mon' : `mes ${questionsToReview.length}`} erreur{questionsToReview.length > 1 ? 's' : ''}</Text>
                   </TouchableOpacity>
                 </View>
+              )}
+
+              <View style={styles.resultButtonsRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.actionButton,
+                    passed ? styles.retryButtonStyle : { backgroundColor: tableColor }
+                  ]}
+                  onPress={retry}
+                >
+                  <Text style={[
+                    styles.actionButtonText,
+                    passed && { color: AppColors.text }
+                  ]}>
+                    {passed ? 'Refaire le niveau' : 'Refaire le niveau'}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.actionButton,
+                    passed ? { backgroundColor: tableColor } : styles.actionButtonOutline,
+                    !passed && { borderColor: tableColor }
+                  ]}
+                  onPress={() => router.push('/tables')}
+                >
+                  <Text style={[
+                    styles.actionButtonText,
+                    !passed && { color: tableColor }
+                  ]}>
+                    {passed ? 'Non, autre table' : 'Non, autre table'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </SafeAreaView>
@@ -764,66 +765,66 @@ export default function PracticeScreen() {
               ]}
             >
               <View style={[
-                  level === 2 ? styles.level2QuestionCard : styles.questionCard, 
-                  { borderColor: tableColor }
-                ]}
+                level === 2 ? styles.level2QuestionCard : styles.questionCard,
+                { borderColor: tableColor }
+              ]}
               >
                 {level === 1 ? (
-                   <>
-                      <Text style={styles.questionLabel}>Combien font :</Text>
-                      <View style={styles.questionRow}>
-                        <Text style={[styles.questionNumber, { color: tableColor }]}>
-                          {currentQuestion.multiplicand}
-                        </Text>
-                        <Text style={styles.questionOperator}>×</Text>
-                        <Text style={[styles.questionNumber, { color: tableColor }]}>
-                          {currentQuestion.multiplier}
-                        </Text>
-                      </View>
-                   </>
+                  <>
+                    <Text style={styles.questionLabel}>Combien font :</Text>
+                    <View style={styles.questionRow}>
+                      <Text style={[styles.questionNumber, { color: tableColor }]}>
+                        {currentQuestion.multiplicand}
+                      </Text>
+                      <Text style={styles.questionOperator}>×</Text>
+                      <Text style={[styles.questionNumber, { color: tableColor }]}>
+                        {currentQuestion.multiplier}
+                      </Text>
+                    </View>
+                  </>
                 ) : (
-                    <Text style={styles.level2QuestionText}>
-                      {currentQuestion.multiplicand} × {currentQuestion.multiplier} = ?
-                    </Text>
+                  <Text style={styles.level2QuestionText}>
+                    {currentQuestion.multiplicand} × {currentQuestion.multiplier} = ?
+                  </Text>
                 )}
               </View>
 
               {level === 1 ? (
                 <View style={styles.optionsContainer}>
-                {currentQuestion.options.map((option, index) => {
-                  const isSelected = selectedAnswer === option;
-                  const isCorrectAnswer = option === currentQuestion.correctAnswer;
-                  // Only show correct/wrong indication if we are NOT in error feedback mode (or show it differently?)
-                  // Actually logic is: if error, we show error feedback modal, but here we can keep selection style
-                  const showCorrect = selectedAnswer !== null && isCorrectAnswer;
-                  const showWrong = isSelected && !isCorrect;
+                  {currentQuestion.options.map((option, index) => {
+                    const isSelected = selectedAnswer === option;
+                    const isCorrectAnswer = option === currentQuestion.correctAnswer;
+                    // Only show correct/wrong indication if we are NOT in error feedback mode (or show it differently?)
+                    // Actually logic is: if error, we show error feedback modal, but here we can keep selection style
+                    const showCorrect = selectedAnswer !== null && isCorrectAnswer;
+                    const showWrong = isSelected && !isCorrect;
 
-                  return (
-                    <TouchableOpacity
-                      key={index}
-                      style={[
-                        styles.optionButton,
-                        showCorrect && styles.optionCorrect,
-                        showWrong && styles.optionWrong,
-                      ]}
-                      onPress={() => handleAnswerSelect(option)}
-                      disabled={selectedAnswer !== null}
-                      testID={`option-${index}`}
-                    >
-                      <Text
+                    return (
+                      <TouchableOpacity
+                        key={index}
                         style={[
-                          styles.optionText,
-                          (showCorrect || showWrong) && styles.optionTextSelected,
+                          styles.optionButton,
+                          showCorrect && styles.optionCorrect,
+                          showWrong && styles.optionWrong,
                         ]}
+                        onPress={() => handleAnswerSelect(option)}
+                        disabled={selectedAnswer !== null}
+                        testID={`option-${index}`}
                       >
-                        {option}
-                      </Text>
-                      {showCorrect && <Check size={24} color="#FFFFFF" />}
-                      {showWrong && <X size={24} color="#FFFFFF" />}
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+                        <Text
+                          style={[
+                            styles.optionText,
+                            (showCorrect || showWrong) && styles.optionTextSelected,
+                          ]}
+                        >
+                          {option}
+                        </Text>
+                        {showCorrect && <Check size={24} color="#FFFFFF" />}
+                        {showWrong && <X size={24} color="#FFFFFF" />}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
               ) : (
                 <>
                   <View style={styles.level2InputContainer}>
@@ -840,7 +841,7 @@ export default function PracticeScreen() {
                       testID="answer-input"
                     />
                   </View>
-                   
+
                   {!showErrorFeedback && selectedAnswer === null && (
                     <TouchableOpacity
                       style={[styles.level2SubmitButton, { backgroundColor: tableColor }]}
@@ -850,20 +851,20 @@ export default function PracticeScreen() {
                       <Text style={styles.level2SubmitButtonText}>Valider</Text>
                     </TouchableOpacity>
                   )}
-                  
+
                   {isCorrect && (
-                     <View style={styles.level2FeedbackContainer}>
-                        <View style={styles.level2FeedbackBox}>
-                          <Check size={48} color={AppColors.success} />
-                          <Text style={[styles.level2FeedbackText, { color: AppColors.success }]}>
-                            Correct !
-                          </Text>
-                        </View>
+                    <View style={styles.level2FeedbackContainer}>
+                      <View style={styles.level2FeedbackBox}>
+                        <Check size={48} color={AppColors.success} />
+                        <Text style={[styles.level2FeedbackText, { color: AppColors.success }]}>
+                          Correct !
+                        </Text>
+                      </View>
                     </View>
                   )}
                 </>
               )}
-              
+
               <View style={{ height: 100 }} />
             </Animated.View>
           </ScrollView>
@@ -872,49 +873,49 @@ export default function PracticeScreen() {
         {/* Success Feedback Overlay */}
         {isCorrect && !showErrorFeedback && (
           <View style={styles.feedbackCenterOverlay}>
-             <View style={styles.feedbackCenterContent}>
-               <Check size={80} color="#FFFFFF" strokeWidth={4} />
-               <Text style={styles.feedbackCenterText}>Excellent !</Text>
-             </View>
+            <View style={styles.feedbackCenterContent}>
+              <Check size={80} color="#FFFFFF" strokeWidth={4} />
+              <Text style={styles.feedbackCenterText}>Excellent !</Text>
+            </View>
           </View>
         )}
-        
+
         {/* Error Feedback Overlay / Card */}
         {showErrorFeedback && (
-           <View style={styles.fullScreenOverlay}>
-              <View style={[styles.errorCard, { borderColor: AppColors.warning }]}>
-                 <Text style={styles.errorTitle}>On corrige ensemble ✨</Text>
-                 
-                 <View style={styles.correctionContainer}>
-                    <Text style={styles.correctionText}>
-                       {currentQuestion.multiplicand} × {currentQuestion.multiplier} = {currentQuestion.correctAnswer}
-                    </Text>
-                    <Text style={styles.errorTipText}>
-                       {TIPS_BY_TABLE[table.number]?.erreur || ''}
-                    </Text>
-                 </View>
-                 
-                 <View style={styles.errorButtons}>
-                   {level === 2 && (
-                      <TouchableOpacity 
-                        style={[styles.errorButton, styles.retryQuestionButton]}
-                        onPress={handleRetryQuestion}
-                      >
-                         <RefreshCw size={20} color={AppColors.text} />
-                         <Text style={styles.errorButtonText}>Réessayer cette question</Text>
-                      </TouchableOpacity>
-                   )}
-                   
-                   <TouchableOpacity 
-                      style={[styles.errorButton, styles.continueButton]}
-                      onPress={handleContinueAfterError}
-                   >
-                      <Text style={[styles.errorButtonText, { color: '#FFF' }]}>Continuer</Text>
-                      <ArrowRight size={20} color="#FFF" />
-                   </TouchableOpacity>
-                 </View>
+          <View style={styles.fullScreenOverlay}>
+            <View style={[styles.errorCard, { borderColor: AppColors.warning }]}>
+              <Text style={styles.errorTitle}>On corrige ensemble ✨</Text>
+
+              <View style={styles.correctionContainer}>
+                <Text style={styles.correctionText}>
+                  {currentQuestion.multiplicand} × {currentQuestion.multiplier} = {currentQuestion.correctAnswer}
+                </Text>
+                <Text style={styles.errorTipText}>
+                  {TIPS_BY_TABLE[table.number]?.erreur || ''}
+                </Text>
               </View>
-           </View>
+
+              <View style={styles.errorButtons}>
+                {level === 2 && (
+                  <TouchableOpacity
+                    style={[styles.errorButton, styles.retryQuestionButton]}
+                    onPress={handleRetryQuestion}
+                  >
+                    <RefreshCw size={20} color={AppColors.text} />
+                    <Text style={styles.errorButtonText}>Réessayer cette question</Text>
+                  </TouchableOpacity>
+                )}
+
+                <TouchableOpacity
+                  style={[styles.errorButton, styles.continueButton]}
+                  onPress={handleContinueAfterError}
+                >
+                  <Text style={[styles.errorButtonText, { color: '#FFF' }]}>Continuer</Text>
+                  <ArrowRight size={20} color="#FFF" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
         )}
       </SafeAreaView>
     </View>

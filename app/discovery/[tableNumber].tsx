@@ -1,6 +1,7 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Home, ArrowRight, ArrowLeft, Volume2, X, Check } from 'lucide-react-native';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+
 import {
   View,
   Text,
@@ -223,7 +224,7 @@ export default function DiscoveryScreen() {
   const handleMultiplicationPress = useCallback((multiplier: number, result: number) => {
     setSelectedMultiplication({ multiplier, result });
     setClickedMultiplications(prev => new Set(prev).add(multiplier));
-    
+
     modalScaleAnim.setValue(0);
     Animated.spring(modalScaleAnim, {
       toValue: 1,
@@ -348,7 +349,7 @@ export default function DiscoveryScreen() {
       title: `Découvre la table de ${table.number}`,
       content: table.story,
       visual: (
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.visualContainer, { backgroundColor: tableColor + '20', padding: 28, marginTop: 12 }]}
           onPress={() => setCurrentStep(1)}
           activeOpacity={0.8}
@@ -370,7 +371,7 @@ export default function DiscoveryScreen() {
           <View style={styles.tipExamplesContainer}>
             {getTipExamples(table.number).map((example, idx) => (
               <View key={idx} style={[styles.tipExampleCard, { borderColor: tableColor }]}>
-                <Text 
+                <Text
                   style={[styles.tipExampleText, { color: tableColor }]}
                   numberOfLines={1}
                   adjustsFontSizeToFit
@@ -396,7 +397,7 @@ export default function DiscoveryScreen() {
                 key={i}
                 style={[
                   styles.countingItem,
-                  { 
+                  {
                     backgroundColor: isClicked ? tableColor : tableColor + '20',
                     borderColor: isClicked ? tableColor : 'transparent',
                   },
@@ -404,12 +405,12 @@ export default function DiscoveryScreen() {
                 onPress={() => handleMultiplicationPress(i, result)}
                 activeOpacity={0.7}
               >
-                <Text 
+                <Text
                   style={[styles.countingNumber, { color: isClicked ? '#FFFFFF' : tableColor }]}
                 >
                   {result}
                 </Text>
-                <Text 
+                <Text
                   style={[styles.countingLabel, { color: isClicked ? '#FFFFFF' : AppColors.textSecondary }]}
                 >
                   {table.number} × {i}
@@ -469,9 +470,9 @@ export default function DiscoveryScreen() {
         onRequestClose={closeModal}
       >
         <View style={styles.modalOverlay}>
-          <TouchableOpacity 
-            style={styles.modalBackground} 
-            activeOpacity={1} 
+          <TouchableOpacity
+            style={styles.modalBackground}
+            activeOpacity={1}
             onPress={closeModal}
           />
           <Animated.View
@@ -489,7 +490,7 @@ export default function DiscoveryScreen() {
             >
               <X size={28} color={AppColors.text} />
             </TouchableOpacity>
-            
+
             {selectedMultiplication && table && (
               <View style={styles.modalInner}>
                 <Text style={[styles.modalNumber, { color: tableColor }]}>

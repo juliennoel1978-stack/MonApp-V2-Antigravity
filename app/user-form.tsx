@@ -13,6 +13,7 @@ import {
   Image,
   KeyboardAvoidingView,
   Keyboard,
+  Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
@@ -215,316 +216,318 @@ export default function UserFormScreen() {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-          <View style={styles.photoSection}>
-            <TouchableOpacity
-              style={styles.photoContainer}
-              onPress={pickImage}
-            >
-              {photoUri ? (
-                <Image source={{ uri: photoUri }} style={styles.photo} />
-              ) : (
-                <View style={styles.photoPlaceholder}>
-                  <Text style={styles.photoEmoji}>
-                    {gender === 'boy' ? '👦' : '👧'}
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-
-            <View style={styles.photoButtons}>
+            <View style={styles.photoSection}>
               <TouchableOpacity
-                style={styles.photoButton}
+                style={styles.photoContainer}
                 onPress={pickImage}
               >
-                <ImageIcon size={20} color={AppColors.primary} />
-                <Text style={styles.photoButtonText}>Galerie</Text>
+                {photoUri ? (
+                  <Image source={{ uri: photoUri }} style={styles.photo} />
+                ) : (
+                  <View style={styles.photoPlaceholder}>
+                    <Text style={styles.photoEmoji}>
+                      {gender === 'boy' ? '👦' : '👧'}
+                    </Text>
+                  </View>
+                )}
               </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.photoButton}
-                onPress={takePhoto}
-              >
-                <Camera size={20} color={AppColors.primary} />
-                <Text style={styles.photoButtonText}>Photo</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.label}>Prénom *</Text>
-            <TextInput
-              ref={firstNameRef}
-              style={styles.input}
-              value={firstName}
-              onChangeText={setFirstName}
-              placeholder="Ex: Marie"
-              placeholderTextColor={AppColors.textSecondary}
-              returnKeyType="next"
-              onSubmitEditing={() => ageRef.current?.focus()}
-            />
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.label}>Genre *</Text>
-            <View style={styles.genderButtons}>
-              <TouchableOpacity
-                style={[
-                  styles.genderButton,
-                  gender === 'boy' && styles.genderButtonActive,
-                ]}
-                onPress={() => setGender('boy')}
-              >
-                <Text
-                  style={[
-                    styles.genderButtonText,
-                    gender === 'boy' && styles.genderButtonTextActive,
-                  ]}
-                >
-                  👦 Garçon
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.genderButton,
-                  gender === 'girl' && styles.genderButtonActive,
-                ]}
-                onPress={() => setGender('girl')}
-              >
-                <Text
-                  style={[
-                    styles.genderButtonText,
-                    gender === 'girl' && styles.genderButtonTextActive,
-                  ]}
-                >
-                  👧 Fille
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.label}>Âge *</Text>
-            <TextInput
-              ref={ageRef}
-              style={styles.input}
-              value={age}
-              onChangeText={setAge}
-              placeholder="Ex: 8"
-              placeholderTextColor={AppColors.textSecondary}
-              keyboardType="number-pad"
-              returnKeyType="next"
-              onSubmitEditing={() => gradeRef.current?.focus()}
-            />
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.label}>Classe *</Text>
-            <TextInput
-              ref={gradeRef}
-              style={styles.input}
-              value={grade}
-              onChangeText={setGrade}
-              placeholder="Ex: CE2"
-              placeholderTextColor={AppColors.textSecondary}
-              returnKeyType="done"
-              onSubmitEditing={() => {
-                Keyboard.dismiss();
-                handleSave();
-              }}
-            />
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.label}>Challenge - Nombre de questions</Text>
-            <Text style={styles.challengeSubLabel}>
-              Définir combien de questions seront posées dans le challenge (12-50 questions)
-            </Text>
-            <Text style={styles.challengeCurrentValue}>
-              Questions : {challengeQuestions}
-            </Text>
-            <View style={styles.challengeQuestionsButtons}>
-              {[12, 15, 20, 25, 30, 40, 50].map((num) => (
+              <View style={styles.photoButtons}>
                 <TouchableOpacity
-                  key={num}
+                  style={styles.photoButton}
+                  onPress={pickImage}
+                >
+                  <ImageIcon size={20} color={AppColors.primary} />
+                  <Text style={styles.photoButtonText}>Galerie</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.photoButton}
+                  onPress={takePhoto}
+                >
+                  <Camera size={20} color={AppColors.primary} />
+                  <Text style={styles.photoButtonText}>Photo</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.label}>Prénom *</Text>
+              <TextInput
+                ref={firstNameRef}
+                style={styles.input}
+                value={firstName}
+                onChangeText={setFirstName}
+                placeholder="Ex: Marie"
+                placeholderTextColor={AppColors.textSecondary}
+                returnKeyType="next"
+                onSubmitEditing={() => ageRef.current?.focus()}
+              />
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.label}>Genre *</Text>
+              <View style={styles.genderButtons}>
+                <TouchableOpacity
                   style={[
-                    styles.challengeQuestionButton,
-                    challengeQuestions === num && styles.challengeQuestionButtonActive,
+                    styles.genderButton,
+                    gender === 'boy' && styles.genderButtonActive,
                   ]}
-                  onPress={() => setChallengeQuestions(num)}
+                  onPress={() => setGender('boy')}
                 >
                   <Text
                     style={[
-                      styles.challengeQuestionButtonText,
-                      challengeQuestions === num && styles.challengeQuestionButtonTextActive,
+                      styles.genderButtonText,
+                      gender === 'boy' && styles.genderButtonTextActive,
                     ]}
                   >
-                    {num}
+                    👦 Garçon
                   </Text>
                 </TouchableOpacity>
-              ))}
-            </View>
-          </View>
 
-          <View style={styles.section}>
-            <Text style={styles.label}>Thème des badges</Text>
-            <Text style={styles.badgeThemeSubLabel}>
-              Choisis le style des badges gagnés pendant les challenges
-            </Text>
-            <View style={styles.badgeThemeButtons}>
-              <TouchableOpacity
-                style={[
-                  styles.badgeThemeButton,
-                  badgeTheme === 'space' && styles.badgeThemeButtonActive,
-                ]}
-                onPress={() => setBadgeTheme('space')}
-              >
-                <Text style={styles.badgeThemeEmoji}>🚀</Text>
-                <Text
+                <TouchableOpacity
                   style={[
-                    styles.badgeThemeButtonText,
-                    badgeTheme === 'space' && styles.badgeThemeButtonTextActive,
+                    styles.genderButton,
+                    gender === 'girl' && styles.genderButtonActive,
                   ]}
+                  onPress={() => setGender('girl')}
                 >
-                  Espace
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.badgeThemeButton,
-                  badgeTheme === 'heroes' && styles.badgeThemeButtonActive,
-                ]}
-                onPress={() => setBadgeTheme('heroes')}
-              >
-                <Text style={styles.badgeThemeEmoji}>⚡️</Text>
-                <Text
-                  style={[
-                    styles.badgeThemeButtonText,
-                    badgeTheme === 'heroes' && styles.badgeThemeButtonTextActive,
-                  ]}
-                >
-                  Héros
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.badgeThemeButton,
-                  badgeTheme === 'animals' && styles.badgeThemeButtonActive,
-                ]}
-                onPress={() => setBadgeTheme('animals')}
-              >
-                <Text style={styles.badgeThemeEmoji}>🐯</Text>
-                <Text
-                  style={[
-                    styles.badgeThemeButtonText,
-                    badgeTheme === 'animals' && styles.badgeThemeButtonTextActive,
-                  ]}
-                >
-                  Animaux
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.label}>Chronomètre</Text>
-            <TouchableOpacity
-              style={[
-                styles.timerToggle,
-                timerEnabled && styles.timerToggleActive,
-              ]}
-              onPress={() => setTimerEnabled(!timerEnabled)}
-            >
-              <Clock size={24} color={timerEnabled ? AppColors.primary : AppColors.textSecondary} />
-              <Text
-                style={[
-                  styles.timerToggleText,
-                  timerEnabled && styles.timerToggleTextActive,
-                ]}
-              >
-                {timerEnabled ? 'Activé' : 'Désactivé'}
-              </Text>
-            </TouchableOpacity>
-
-            {timerEnabled && (
-              <View style={styles.timerConfig}>
-                <View style={styles.timerModeSection}>
-                  <Text style={styles.timerSubLabel}>Mode d&apos;affichage</Text>
-                  <View style={styles.timerModeButtons}>
-                    <TouchableOpacity
-                      style={[
-                        styles.timerModeButton,
-                        timerDisplayMode === 'bar' && styles.timerModeButtonActive,
-                      ]}
-                      onPress={() => setTimerDisplayMode('bar')}
-                    >
-                      <Text
-                        style={[
-                          styles.timerModeButtonText,
-                          timerDisplayMode === 'bar' && styles.timerModeButtonTextActive,
-                        ]}
-                      >
-                        📊 Barre
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[
-                        styles.timerModeButton,
-                        timerDisplayMode === 'chronometer' && styles.timerModeButtonActive,
-                      ]}
-                      onPress={() => setTimerDisplayMode('chronometer')}
-                    >
-                      <Text
-                        style={[
-                          styles.timerModeButtonText,
-                          timerDisplayMode === 'chronometer' && styles.timerModeButtonTextActive,
-                        ]}
-                      >
-                        ⏱️ Chrono
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                <View style={styles.timerDurationSection}>
-                  <Text style={styles.timerSubLabel}>
-                    Durée : {timerDuration} sec
+                  <Text
+                    style={[
+                      styles.genderButtonText,
+                      gender === 'girl' && styles.genderButtonTextActive,
+                    ]}
+                  >
+                    👧 Fille
                   </Text>
-                  <View style={styles.timerDurationButtons}>
-                    {[5, 10, 15, 20, 30].map((duration) => (
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.label}>Âge *</Text>
+              <TextInput
+                ref={ageRef}
+                style={styles.input}
+                value={age}
+                onChangeText={setAge}
+                placeholder="Ex: 8"
+                placeholderTextColor={AppColors.textSecondary}
+                keyboardType="number-pad"
+                returnKeyType="next"
+                onSubmitEditing={() => gradeRef.current?.focus()}
+              />
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.label}>Classe *</Text>
+              <TextInput
+                ref={gradeRef}
+                style={styles.input}
+                value={grade}
+                onChangeText={setGrade}
+                placeholder="Ex: CE2"
+                placeholderTextColor={AppColors.textSecondary}
+                returnKeyType="done"
+                onSubmitEditing={() => {
+                  Keyboard.dismiss();
+                  handleSave();
+                }}
+              />
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.label}>Challenge - Nombre de questions</Text>
+              <Text style={styles.challengeSubLabel}>
+                Définir combien de questions seront posées dans le challenge (12-50 questions)
+              </Text>
+              <Text style={styles.challengeCurrentValue}>
+                Questions : {challengeQuestions}
+              </Text>
+              <View style={styles.challengeQuestionsButtons}>
+                {[12, 15, 20, 25, 30, 40, 50].map((num) => (
+                  <TouchableOpacity
+                    key={num}
+                    style={[
+                      styles.challengeQuestionButton,
+                      challengeQuestions === num && styles.challengeQuestionButtonActive,
+                    ]}
+                    onPress={() => setChallengeQuestions(num)}
+                  >
+                    <Text
+                      style={[
+                        styles.challengeQuestionButtonText,
+                        challengeQuestions === num && styles.challengeQuestionButtonTextActive,
+                      ]}
+                    >
+                      {num}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.label}>Thème des badges</Text>
+              <Text style={styles.badgeThemeSubLabel}>
+                Choisis le style des badges gagnés pendant les challenges
+              </Text>
+              <View style={styles.badgeThemeButtons}>
+                <TouchableOpacity
+                  style={[
+                    styles.badgeThemeButton,
+                    badgeTheme === 'space' && styles.badgeThemeButtonActive,
+                  ]}
+                  onPress={() => setBadgeTheme('space')}
+                >
+                  <Text style={styles.badgeThemeEmoji}>🚀</Text>
+                  <Text
+                    style={[
+                      styles.badgeThemeButtonText,
+                      badgeTheme === 'space' && styles.badgeThemeButtonTextActive,
+                    ]}
+                  >
+                    Espace
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.badgeThemeButton,
+                    badgeTheme === 'heroes' && styles.badgeThemeButtonActive,
+                  ]}
+                  onPress={() => setBadgeTheme('heroes')}
+                >
+                  <Text style={styles.badgeThemeEmoji}>⚡️</Text>
+                  <Text
+                    style={[
+                      styles.badgeThemeButtonText,
+                      badgeTheme === 'heroes' && styles.badgeThemeButtonTextActive,
+                    ]}
+                  >
+                    Héros
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.badgeThemeButton,
+                    badgeTheme === 'animals' && styles.badgeThemeButtonActive,
+                  ]}
+                  onPress={() => setBadgeTheme('animals')}
+                >
+                  <Text style={styles.badgeThemeEmoji}>🐯</Text>
+                  <Text
+                    style={[
+                      styles.badgeThemeButtonText,
+                      badgeTheme === 'animals' && styles.badgeThemeButtonTextActive,
+                    ]}
+                  >
+                    Animaux
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+
+
+            <View style={styles.section}>
+              <Text style={styles.label}>Chronomètre</Text>
+              <TouchableOpacity
+                style={[
+                  styles.timerToggle,
+                  timerEnabled && styles.timerToggleActive,
+                ]}
+                onPress={() => setTimerEnabled(!timerEnabled)}
+              >
+                <Clock size={24} color={timerEnabled ? AppColors.primary : AppColors.textSecondary} />
+                <Text
+                  style={[
+                    styles.timerToggleText,
+                    timerEnabled && styles.timerToggleTextActive,
+                  ]}
+                >
+                  {timerEnabled ? 'Activé' : 'Désactivé'}
+                </Text>
+              </TouchableOpacity>
+
+              {timerEnabled && (
+                <View style={styles.timerConfig}>
+                  <View style={styles.timerModeSection}>
+                    <Text style={styles.timerSubLabel}>Mode d&apos;affichage</Text>
+                    <View style={styles.timerModeButtons}>
                       <TouchableOpacity
-                        key={duration}
                         style={[
-                          styles.timerDurationButton,
-                          timerDuration === duration && styles.timerDurationButtonActive,
+                          styles.timerModeButton,
+                          timerDisplayMode === 'bar' && styles.timerModeButtonActive,
                         ]}
-                        onPress={() => setTimerDuration(duration)}
+                        onPress={() => setTimerDisplayMode('bar')}
                       >
                         <Text
                           style={[
-                            styles.timerDurationButtonText,
-                            timerDuration === duration && styles.timerDurationButtonTextActive,
+                            styles.timerModeButtonText,
+                            timerDisplayMode === 'bar' && styles.timerModeButtonTextActive,
                           ]}
                         >
-                          {duration}s
+                          📊 Barre
                         </Text>
                       </TouchableOpacity>
-                    ))}
+                      <TouchableOpacity
+                        style={[
+                          styles.timerModeButton,
+                          timerDisplayMode === 'chronometer' && styles.timerModeButtonActive,
+                        ]}
+                        onPress={() => setTimerDisplayMode('chronometer')}
+                      >
+                        <Text
+                          style={[
+                            styles.timerModeButtonText,
+                            timerDisplayMode === 'chronometer' && styles.timerModeButtonTextActive,
+                          ]}
+                        >
+                          ⏱️ Chrono
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  <View style={styles.timerDurationSection}>
+                    <Text style={styles.timerSubLabel}>
+                      Durée : {timerDuration} sec
+                    </Text>
+                    <View style={styles.timerDurationButtons}>
+                      {[5, 10, 15, 20, 30].map((duration) => (
+                        <TouchableOpacity
+                          key={duration}
+                          style={[
+                            styles.timerDurationButton,
+                            timerDuration === duration && styles.timerDurationButtonActive,
+                          ]}
+                          onPress={() => setTimerDuration(duration)}
+                        >
+                          <Text
+                            style={[
+                              styles.timerDurationButtonText,
+                              timerDuration === duration && styles.timerDurationButtonTextActive,
+                            ]}
+                          >
+                            {duration}s
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
                   </View>
                 </View>
-              </View>
-            )}
-          </View>
+              )}
+            </View>
 
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleSave}
-          >
-            <Save size={24} color="#FFFFFF" />
-            <Text style={styles.saveButtonText}>Enregistrer</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleSave}
+            >
+              <Save size={24} color="#FFFFFF" />
+              <Text style={styles.saveButtonText}>Enregistrer</Text>
+            </TouchableOpacity>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>

@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, useWindowDimensions, TouchableOpacity, Animated } from 'react-native';
+
+import { View, StyleSheet, useWindowDimensions, TouchableOpacity, Animated, Text } from 'react-native';
 import { AppColors } from '@/constants/colors';
 import type { BadgeTheme } from '@/types';
 import { getNextBadgeInfo } from '@/constants/badges';
@@ -177,14 +178,14 @@ export default function ChallengeDashboardCard({
   console.log('[ChallengeDashboardCard RENDER] challenges:', totalChallengesCompleted, 'badge:', currentBadge?.title, 'streak:', bestStreak);
   const { width } = useWindowDimensions();
   const isSmallScreen = useMemo(() => width < 375, [width]);
-  
+
   const remaining = useMemo(() => {
     return nextBadgeThreshold ? nextBadgeThreshold - totalChallengesCompleted : 0;
   }, [nextBadgeThreshold, totalChallengesCompleted]);
-  
+
   const isPlural = remaining > 1;
   const progressLabel = getProgressLabel(theme, isPlural);
-  
+
   const progressPercent = useMemo(() => {
     if (!nextBadgeThreshold) return 100;
     return Math.min((totalChallengesCompleted / nextBadgeThreshold) * 100, 100);
@@ -192,7 +193,7 @@ export default function ChallengeDashboardCard({
 
   const hasMaxBadge = !nextBadgeThreshold || remaining <= 0;
   const isZeroState = totalChallengesCompleted === 0;
-  
+
   console.log('[ChallengeDashboardCard] Progress calculation:', {
     totalChallengesCompleted,
     nextBadgeThreshold,
@@ -218,7 +219,7 @@ export default function ChallengeDashboardCard({
   return (
     <View style={styles.container}>
       {/* HEADER SECTION */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.headerSection}
         onPress={onPressLevel}
         activeOpacity={0.7}

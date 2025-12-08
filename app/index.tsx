@@ -1,6 +1,8 @@
+
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X } from 'lucide-react-native';
 import React, { useEffect, useCallback, useRef } from 'react';
+
 import {
   View,
   Text,
@@ -34,7 +36,7 @@ export default function HomeScreen() {
   const [showFirstLaunchModal, setShowFirstLaunchModal] = React.useState(false);
   const hasCheckedFirstLaunch = useRef(false);
   const lastFocusTime = useRef(0);
-  
+
   useFocusEffect(
     useCallback(() => {
       const now = Date.now();
@@ -68,7 +70,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     console.log('[HomeScreen useEffect] isLoading:', isLoading);
-    
+
     if (!isLoading && !isReady) {
       setIsReady(true);
     }
@@ -78,10 +80,10 @@ export default function HomeScreen() {
     console.log('[HomeScreen useEffect] Users loaded:', users.length, 'users');
     console.log('[HomeScreen useEffect] Current user:', currentUser?.firstName || 'none');
     console.log('[HomeScreen useEffect] isReady:', isReady, 'hasCheckedFirstLaunch:', hasCheckedFirstLaunch.current);
-    
+
     if (isReady && !hasCheckedFirstLaunch.current) {
       hasCheckedFirstLaunch.current = true;
-      
+
       if (users.length === 0 && !currentUser) {
         console.log('[HomeScreen] First launch detected - showing welcome modal');
         const timer = setTimeout(() => {
@@ -175,11 +177,11 @@ export default function HomeScreen() {
     console.log('[HomeScreen] Is loading:', isLoading);
     console.log('[HomeScreen] Current user:', currentUser?.firstName || 'none');
     console.log('[HomeScreen] Users array:', JSON.stringify(users, null, 2));
-    
+
     users.forEach((u, idx) => {
-      console.log(`[HomeScreen]   User ${idx + 1}:`, u.firstName, 'ID:', u.id, 'Age:', u.age);
+      console.log(`[HomeScreen]   User ${idx + 1}: `, u.firstName, 'ID:', u.id, 'Age:', u.age);
     });
-    
+
     console.log('[HomeScreen] ================================================');
     setShowUserModal(true);
   };
@@ -270,7 +272,7 @@ export default function HomeScreen() {
         title: latestBadge.title,
       };
     }
-    
+
     let lastEarnedBadge = null;
     for (const threshold of BADGE_THRESHOLDS) {
       if (challengesCompleted >= threshold) {
@@ -298,10 +300,10 @@ export default function HomeScreen() {
   const strongestTable = React.useMemo(() => {
     const tablesWithAttempts = progress.filter(p => p.totalAttempts > 0);
     if (tablesWithAttempts.length === 0) return null;
-    
+
     let best = tablesWithAttempts[0];
     let bestRate = best.correctAnswers / best.totalAttempts;
-    
+
     for (const table of tablesWithAttempts) {
       const rate = table.correctAnswers / table.totalAttempts;
       if (rate > bestRate || (rate === bestRate && table.totalAttempts > best.totalAttempts)) {
@@ -309,45 +311,64 @@ export default function HomeScreen() {
         best = table;
       }
     }
-    
+
     const result = bestRate >= 0.7 ? best.tableNumber : null;
     console.log('[HomeScreen useMemo strongestTable]', result, 'dataVersion:', dataVersion);
     return result;
   }, [progress, dataVersion]);
 
   const missionTable = React.useMemo(() => {
-    const tablesWithAttempts = progress.filter(p => p.totalAttempts > 0 && !p.completed);
-    
+    // 1. Check for any activity
+    const tablesWithAttempts = progress.filter(p => p.totalAttempts > 0);
+
+    // If no activity at all (Fresh Launch), start with Table 1
     if (tablesWithAttempts.length === 0) {
-      const notStarted = progress.filter(p => p.totalAttempts === 0 && !p.completed);
-      return notStarted.length > 0 ? notStarted[0].tableNumber : null;
+      return 1;
     }
-    
-    let worstTable = tablesWithAttempts[0];
-    let worstRate = worstTable.correctAnswers / worstTable.totalAttempts;
-    
-    for (const table of tablesWithAttempts) {
-      const rate = table.correctAnswers / table.totalAttempts;
-      if (rate < worstRate) {
-        worstRate = rate;
-        worstTable = table;
+
+    // 2. Scenario A: Challenges played -> Prioritize weakness (most errors)
+    if (challengesCompleted > 0) {
+      let worstTable = tablesWithAttempts[0];
+      let worstRate = worstTable.correctAnswers / worstTable.totalAttempts;
+
+      for (const table of tablesWithAttempts) {
+        const rate = table.correctAnswers / table.totalAttempts;
+        // Find the lowest success rate
+        if (rate < worstRate) {
+          worstRate = rate;
+          worstTable = table;
+        }
       }
+      return worstTable.tableNumber;
     }
-    
-    return worstTable.tableNumber;
-  }, [progress]);
+
+    // 3. Scenario B: Practice only ("Commencer") -> Sequential progression
+    // Find the first (lowest number) table that is NOT completed
+    // This covers "not seen yet" (next in line) or "current being learned"
+    const nextTable = progress.find(p => !p.completed);
+
+    if (nextTable) {
+      return nextTable.tableNumber;
+    }
+
+    // If all tables are completed and no challenges played? 
+    // Maybe show the one with worst stats anyway, or hide button.
+    // Let's fallback to worst stats among completed if user really wants to practice.
+    // Or just return null to hide.
+    return null;
+  }, [progress, challengesCompleted]);
 
   const handleSettingsPressIn = () => {
     console.log('[HomeScreen] Settings long press started');
     setSettingsProgress(0);
     settingsProgressAnim.setValue(0);
-    
+
     Animated.timing(settingsProgressAnim, {
       toValue: 1,
       duration: 3000,
       useNativeDriver: false,
     }).start();
-    
+
     let currentProgress = 0;
     settingsTimerRef.current = setInterval(() => {
       currentProgress += (100 / 30);
@@ -441,7 +462,7 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -454,111 +475,111 @@ export default function HomeScreen() {
                 transform: [{ scale: scaleAnim }],
               },
             ]
-          }
+            }
           >
             <View style={styles.titleContainer}>
-            <View style={styles.sparkleLeft}>
-              <Sparkles size={32} color={AppColors.primary} />
+              <View style={styles.sparkleLeft}>
+                <Sparkles size={32} color={AppColors.primary} />
+              </View>
+              <View style={styles.titleContent}>
+                <Text style={styles.title}>Tables Magiques</Text>
+                {currentUser && (
+                  <Text style={styles.userName}>Bonjour {currentUser.firstName} !</Text>
+                )}
+              </View>
+              <View style={styles.sparkleRight}>
+                <Sparkles size={32} color={AppColors.secondary} />
+              </View>
             </View>
-            <View style={styles.titleContent}>
-              <Text style={styles.title}>Tables Magiques</Text>
-              {currentUser && (
-                <Text style={styles.userName}>Bonjour {currentUser.firstName} !</Text>
+
+            <View style={styles.subtitleContainer}>
+              <Text style={styles.subtitleMain}>Deviens un as du calcul ✨</Text>
+              <Text style={styles.subtitleSecondary}>Apprends en t{"'"}amusant !</Text>
+            </View>
+
+            <View style={styles.progressCard}>
+              <View style={styles.progressHeader}>
+                <Trophy size={20} color={AppColors.warning} />
+                <Text style={styles.progressTitle}>Ta Progression</Text>
+              </View>
+
+              <View style={styles.statsContainer}>
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>{totalStars}</Text>
+                  <Text style={styles.statLabel}>⭐ Étoiles</Text>
+                </View>
+
+                <View style={styles.statDivider} />
+
+                <TouchableOpacity
+                  style={styles.statItem}
+                  onPress={openTablesModal}
+                  testID="tables-progress-button"
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.statValue}>
+                    {completedTables}/{totalTables}
+                  </Text>
+                  <Text style={styles.statLabel}>Tables</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.progressBarContainer}>
+                <View style={styles.progressBarBackground}>
+                  <View
+                    style={[
+                      styles.progressBarFill,
+                      {
+                        width: `${(completedTables / totalTables) * 100}%`,
+                      },
+                    ]}
+                  />
+                </View>
+              </View>
+
+              {missionTable !== null && (
+                <TouchableOpacity
+                  style={styles.missionButton}
+                  onPress={() => router.push(`/discovery/${missionTable}` as any)}
+                  testID="mission-button"
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.missionIcon}>🎯</Text>
+                  <Text style={styles.missionButtonText}>Mission : Table de {missionTable}</Text>
+                  <Text style={styles.missionChevron}>➔</Text>
+                </TouchableOpacity>
               )}
             </View>
-            <View style={styles.sparkleRight}>
-              <Sparkles size={32} color={AppColors.secondary} />
-            </View>
-          </View>
 
-          <View style={styles.subtitleContainer}>
-            <Text style={styles.subtitleMain}>Deviens un as du calcul ✨</Text>
-            <Text style={styles.subtitleSecondary}>Apprends en t{"'"}amusant !</Text>
-          </View>
+            <TouchableOpacity
+              style={styles.startButton}
+              onPress={() => router.push('/tables' as any)}
+              testID="start-button"
+            >
+              <Text style={styles.startButtonText}>Commencer</Text>
+              <Sparkles size={24} color="#FFFFFF" />
+            </TouchableOpacity>
 
-          <View style={styles.progressCard}>
-            <View style={styles.progressHeader}>
-              <Trophy size={20} color={AppColors.warning} />
-              <Text style={styles.progressTitle}>Ta Progression</Text>
-            </View>
+            <TouchableOpacity
+              style={styles.challengeButton}
+              onPress={() => router.push('/challenge' as any)}
+              testID="challenge-button"
+            >
+              <Text style={styles.challengeButtonText}>Challenge</Text>
+              <Zap size={24} color="#FFFFFF" />
+            </TouchableOpacity>
 
-            <View style={styles.statsContainer}>
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{totalStars}</Text>
-                <Text style={styles.statLabel}>⭐ Étoiles</Text>
-              </View>
-
-              <View style={styles.statDivider} />
-
-              <TouchableOpacity 
-                style={styles.statItem}
-                onPress={openTablesModal}
-                testID="tables-progress-button"
-                activeOpacity={0.7}
-              >
-                <Text style={styles.statValue}>
-                  {completedTables}/{totalTables}
-                </Text>
-                <Text style={styles.statLabel}>Tables</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.progressBarContainer}>
-              <View style={styles.progressBarBackground}>
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    {
-                      width: `${(completedTables / totalTables) * 100}%`,
-                    },
-                  ]}
-                />
-              </View>
-            </View>
-
-            {missionTable !== null && (
-              <TouchableOpacity
-                style={styles.missionButton}
-                onPress={() => router.push(`/discovery/${missionTable}` as any)}
-                testID="mission-button"
-                activeOpacity={0.8}
-              >
-                <Text style={styles.missionIcon}>🎯</Text>
-                <Text style={styles.missionButtonText}>Mission : Table de {missionTable}</Text>
-                <Text style={styles.missionChevron}>➔</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          <TouchableOpacity
-            style={styles.startButton}
-            onPress={() => router.push('/tables' as any)}
-            testID="start-button"
-          >
-            <Text style={styles.startButtonText}>Commencer</Text>
-            <Sparkles size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.challengeButton}
-            onPress={() => router.push('/challenge' as any)}
-            testID="challenge-button"
-          >
-            <Text style={styles.challengeButtonText}>Challenge</Text>
-            <Zap size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-
-          <ChallengeDashboardCard
-            key={`challenge-card-${dataVersion}`}
-            theme={badgeTheme}
-            currentBadge={currentBadgeData}
-            nextBadgeThreshold={nextBadgeThreshold}
-            totalChallengesCompleted={challengesCompleted}
-            bestStreak={bestStreak}
-            strongestTable={strongestTable}
-            gender={gender}
-            onPressLevel={() => setShowCollectionModal(true)}
-          />
+            <ChallengeDashboardCard
+              key={`challenge - card - ${dataVersion} `}
+              theme={badgeTheme}
+              currentBadge={currentBadgeData}
+              nextBadgeThreshold={nextBadgeThreshold}
+              totalChallengesCompleted={challengesCompleted}
+              bestStreak={bestStreak}
+              strongestTable={strongestTable}
+              gender={gender}
+              onPressLevel={() => setShowCollectionModal(true)}
+            />
           </Animated.View>
         </ScrollView>
 
@@ -625,8 +646,8 @@ export default function HomeScreen() {
                                 color: isCompleted
                                   ? tableColor
                                   : hasAttempts
-                                  ? tableColor
-                                  : AppColors.textSecondary,
+                                    ? tableColor
+                                    : AppColors.textSecondary,
                               },
                             ]}
                           >
@@ -716,7 +737,7 @@ export default function HomeScreen() {
                         key={user.id}
                         style={styles.modalUserCard}
                         onPress={() => handleSelectUser(user.id)}
-                        testID={`modal-user-${user.id}`}
+                        testID={`modal - user - ${user.id} `}
                       >
                         <View style={styles.modalAvatarContainer}>
                           {user.photoUri ? (
@@ -762,7 +783,7 @@ export default function HomeScreen() {
                           </View>
                         </View>
                         <Text style={styles.anonymousUserName}>Mode
-Anonyme</Text>
+                          Anonyme</Text>
                       </TouchableOpacity>
                     )}
                   </View>
@@ -777,7 +798,7 @@ Anonyme</Text>
             visible={true}
             transparent
             animationType="fade"
-            onRequestClose={() => {}}
+            onRequestClose={() => { }}
           >
             <View style={styles.firstLaunchOverlay}>
               <View style={styles.firstLaunchContent}>

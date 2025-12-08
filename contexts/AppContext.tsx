@@ -92,7 +92,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   }, [anonymousAchievements]);
 
   const updateStateAndStorage = useCallback(async (
-    newCurrentUser: User | null, 
+    newCurrentUser: User | null,
     newUsers: User[],
     skipStorage: boolean = false
   ) => {
@@ -117,7 +117,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const loadData = useCallback(async () => {
     console.log('📦 Starting data load...');
     setIsLoading(true);
-    
+
     let progressData: string | null = null;
     let settingsData: string | null = null;
     let badgesData: string | null = null;
@@ -127,7 +127,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     let anonymousAchievementsData: string | null = null;
     let anonymousPlayDatesData: string | null = null;
     let anonymousBadgesData: string | null = null;
-    
+
     try {
       progressData = await AsyncStorage.getItem(STORAGE_KEYS.PROGRESS);
       settingsData = await AsyncStorage.getItem(STORAGE_KEYS.SETTINGS);
@@ -156,7 +156,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         parsedUsers.forEach((u: User, idx: number) => {
           console.log(`  User ${idx + 1}: ${u.firstName} (ID: ${u.id})`);
         });
-        
+
         const validUsers = parsedUsers.filter((u: User) => {
           const isValid = u && u.id && u.firstName && u.gender && u.age && u.grade && u.createdAt && u.progress;
           if (!isValid) {
@@ -164,12 +164,12 @@ export const [AppProvider, useApp] = createContextHook(() => {
           }
           return isValid;
         });
-        
+
         if (validUsers.length !== parsedUsers.length) {
           console.log(`🧹 Cleaned ${parsedUsers.length - validUsers.length} invalid user(s)`);
           await AsyncStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(validUsers));
         }
-        
+
         setUsers(validUsers);
 
         if (currentUserId) {
@@ -256,14 +256,14 @@ export const [AppProvider, useApp] = createContextHook(() => {
     try {
       setProgress(newProgress);
       progressRef.current = newProgress;
-      
+
       const currentU = currentUserRef.current;
       const currentUsrs = usersRef.current;
 
       if (currentU) {
         const updatedUser = { ...currentU, progress: newProgress };
         const updatedUsers = currentUsrs.map(u => u.id === currentU.id ? updatedUser : u);
-        
+
         await updateStateAndStorage(updatedUser, updatedUsers);
       } else {
         await AsyncStorage.setItem(STORAGE_KEYS.PROGRESS, JSON.stringify(newProgress));
@@ -301,31 +301,31 @@ export const [AppProvider, useApp] = createContextHook(() => {
     // Use callback form to access latest state if we were using setProgress directly,
     // but here we need to read from ref to ensure we have latest base
     const currentProg = progressRef.current;
-    
+
     const newProgress = currentProg.map(p => {
-        if (p.tableNumber === tableNumber) {
-          const updates: Partial<UserProgress> = {
-            correctAnswers: p.correctAnswers + correct,
-            totalAttempts: p.totalAttempts + total,
-            starsEarned: Math.max(p.starsEarned, stars),
-            completed: stars >= 3,
-            lastPracticed: new Date().toISOString(),
-          };
+      if (p.tableNumber === tableNumber) {
+        const updates: Partial<UserProgress> = {
+          correctAnswers: p.correctAnswers + correct,
+          totalAttempts: p.totalAttempts + total,
+          starsEarned: Math.max(p.starsEarned, stars),
+          completed: stars >= 3,
+          lastPracticed: new Date().toISOString(),
+        };
 
-          if (level === 1 && correct === 10) {
-            updates.level1Completed = true;
-          }
-          if (level === 2) {
-            updates.level2Completed = true;
-          }
-
-          return { ...p, ...updates };
+        if (level === 1 && correct === 10) {
+          updates.level1Completed = true;
         }
-        return p;
-      });
-      
-      await saveProgress(newProgress);
-      return newProgress;
+        if (level === 2) {
+          updates.level2Completed = true;
+        }
+
+        return { ...p, ...updates };
+      }
+      return p;
+    });
+
+    await saveProgress(newProgress);
+    return newProgress;
   }, [saveProgress]);
 
   const batchUpdateTableProgress = useCallback(async (
@@ -333,26 +333,26 @@ export const [AppProvider, useApp] = createContextHook(() => {
   ) => {
     const currentProg = progressRef.current;
     const newProgress = [...currentProg];
-      let hasChanges = false;
+    let hasChanges = false;
 
-      updates.forEach(({ tableNumber, correct, total }) => {
-        const index = newProgress.findIndex(p => p.tableNumber === tableNumber);
-        if (index !== -1) {
-          const p = newProgress[index];
-          newProgress[index] = {
-            ...p,
-            correctAnswers: p.correctAnswers + correct,
-            totalAttempts: p.totalAttempts + total,
-            lastPracticed: new Date().toISOString(),
-          };
-          hasChanges = true;
-        }
-      });
-
-      if (hasChanges) {
-        await saveProgress(newProgress);
+    updates.forEach(({ tableNumber, correct, total }) => {
+      const index = newProgress.findIndex(p => p.tableNumber === tableNumber);
+      if (index !== -1) {
+        const p = newProgress[index];
+        newProgress[index] = {
+          ...p,
+          correctAnswers: p.correctAnswers + correct,
+          totalAttempts: p.totalAttempts + total,
+          lastPracticed: new Date().toISOString(),
+        };
+        hasChanges = true;
       }
-      return newProgress;
+    });
+
+    if (hasChanges) {
+      await saveProgress(newProgress);
+    }
+    return newProgress;
   }, [saveProgress]);
 
   const unlockBadge = useCallback((badgeId: string) => {
@@ -403,7 +403,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       console.log('💾 Saving users:', newUsers.length, 'users');
       // Update ref immediately
       usersRef.current = newUsers;
-      
+
       await AsyncStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(newUsers));
       console.log('📝 Setting users state with', newUsers.length, 'users');
       setUsers(newUsers);
@@ -428,7 +428,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const deleteUser = useCallback(async (userId: string) => {
     const updatedUsers = users.filter(u => u.id !== userId);
     await saveUsers(updatedUsers);
-    
+
     if (currentUser?.id === userId) {
       await AsyncStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
       setCurrentUser(null);
@@ -451,12 +451,12 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const updateUser = useCallback(async (userId: string, updates: Partial<User>) => {
     const currentUsrs = usersRef.current;
     const currentU = currentUserRef.current;
-    
-    const updatedUsers = currentUsrs.map(u => 
+
+    const updatedUsers = currentUsrs.map(u =>
       u.id === userId ? { ...u, ...updates } : u
     );
     await saveUsers(updatedUsers);
-    
+
     if (currentU?.id === userId) {
       const updated = { ...currentU, ...updates };
       setCurrentUser(updated);
@@ -469,7 +469,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       await AsyncStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
       setCurrentUser(null);
       currentUserRef.current = null;
-      
+
       const progressData = await AsyncStorage.getItem(STORAGE_KEYS.PROGRESS);
       if (progressData) {
         const prog = JSON.parse(progressData);
@@ -490,14 +490,14 @@ export const [AppProvider, useApp] = createContextHook(() => {
     try {
       const currentU = currentUserRef.current;
       const currentUsrs = usersRef.current;
-      
+
       if (currentU) {
         const newCount = (currentU.challengesCompleted || 0) + 1;
         const updatedUser = { ...currentU, challengesCompleted: newCount };
         const updatedUsers = currentUsrs.map(u => u.id === currentU.id ? updatedUser : u);
-        
+
         await updateStateAndStorage(updatedUser, updatedUsers);
-        
+
         console.log('🏆 User challenges completed:', newCount);
         return newCount;
       } else {
@@ -519,7 +519,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     try {
       const currentU = currentUserRef.current;
       const currentUsrs = usersRef.current;
-      
+
       if (currentU) {
         const existingBadges = currentU.persistenceBadges || [];
         const alreadyExists = existingBadges.some(b => b.id === badge.id);
@@ -530,7 +530,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         const updatedBadges = [...existingBadges, badge];
         const updatedUser = { ...currentU, persistenceBadges: updatedBadges };
         const updatedUsers = currentUsrs.map(u => u.id === currentU.id ? updatedUser : u);
-        
+
         await updateStateAndStorage(updatedUser, updatedUsers);
         console.log('🏅 New persistence badge added:', badge.title, badge.icon);
       } else {
@@ -538,7 +538,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         const existingBadges = anonymousPersistenceBadges;
         const alreadyExists = existingBadges.some(b => b.id === badge.id);
         if (alreadyExists) return;
-        
+
         const updatedBadges = [...existingBadges, badge];
         await AsyncStorage.setItem(STORAGE_KEYS.ANONYMOUS_BADGES, JSON.stringify(updatedBadges));
         setAnonymousPersistenceBadges(updatedBadges);
@@ -561,7 +561,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       if (currentU) {
         const existingAchievements = currentU.achievements || [];
         const existingIndex = existingAchievements.findIndex(a => a.id === achievement.id);
-        
+
         let updatedAchievements: UnlockedAchievement[];
         if (existingIndex >= 0) {
           updatedAchievements = existingAchievements.map((a, idx) =>
@@ -572,15 +572,15 @@ export const [AppProvider, useApp] = createContextHook(() => {
         } else {
           updatedAchievements = [...existingAchievements, { ...achievement, count: 1 }];
         }
-        
+
         const updatedUser = { ...currentU, achievements: updatedAchievements };
         const updatedUsers = currentUsrs.map(u => u.id === currentU.id ? updatedUser : u);
-        
+
         await updateStateAndStorage(updatedUser, updatedUsers);
         console.log('🌟 Achievement added:', achievement.id);
       } else {
         const existingIndex = anonymousAchievementsRef.current.findIndex(a => a.id === achievement.id);
-        
+
         let updatedAchievements: UnlockedAchievement[];
         if (existingIndex >= 0) {
           updatedAchievements = anonymousAchievementsRef.current.map((a, idx) =>
@@ -591,7 +591,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         } else {
           updatedAchievements = [...anonymousAchievementsRef.current, { ...achievement, count: 1 }];
         }
-        
+
         await AsyncStorage.setItem(STORAGE_KEYS.ANONYMOUS_ACHIEVEMENTS, JSON.stringify(updatedAchievements));
         setAnonymousAchievements(updatedAchievements);
         anonymousAchievementsRef.current = updatedAchievements;
@@ -613,7 +613,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         const updatedDates = [...existingDates, now];
         const updatedUser = { ...currentU, challengePlayDates: updatedDates };
         const updatedUsers = currentUsrs.map(u => u.id === currentU.id ? updatedUser : u);
-        
+
         await updateStateAndStorage(updatedUser, updatedUsers);
         console.log('📅 Play date added for user');
       } else {
@@ -666,7 +666,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         if (newStreak > currentBest) {
           const updatedUser = { ...currentU, bestStreak: newStreak };
           const updatedUsers = currentUsrs.map(u => u.id === currentU.id ? updatedUser : u);
-          
+
           await updateStateAndStorage(updatedUser, updatedUsers);
           console.log('🔥 Best streak updated for user:', newStreak);
         }
