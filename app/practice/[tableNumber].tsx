@@ -1104,7 +1104,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   resultTitle: {
-    fontSize: 32,
+    fontSize: 26,
     fontWeight: 'bold',
     color: AppColors.text,
     marginBottom: 8,
