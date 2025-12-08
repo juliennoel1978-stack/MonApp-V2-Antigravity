@@ -116,20 +116,12 @@ function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlip
         ]}
         pointerEvents={isFlipped ? 'auto' : 'none'}
       >
-        <View style={{ width: '100%', justifyContent: 'center', alignItems: 'center' }}>
-          <Text
-            style={styles.achievementBackTitle}
-            adjustsFontSizeToFit
-            minimumFontScale={0.6}
-            numberOfLines={2}
-          >
-            {achievement.backTitle || achievement.title}
-          </Text>
+        <View style={styles.achievementBackContent}>
           <Text
             style={styles.achievementDescriptionText}
             adjustsFontSizeToFit
-            minimumFontScale={0.5}
-            numberOfLines={3}
+            minimumFontScale={0.7}
+            numberOfLines={4}
           >
             {achievement.message}
           </Text>
@@ -477,6 +469,13 @@ const styles = StyleSheet.create({
     height: '100%',
     zIndex: 10,
   },
+  achievementBackContent: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    display: 'flex',
+  },
   flipHint: {
     position: 'absolute',
     top: 4,
@@ -490,24 +489,15 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.primary,
     opacity: 0.4,
   },
-  achievementBackTitle: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    marginBottom: 4,
-    margin: 0,
-    width: '100%',
-  },
   achievementDescriptionText: {
-    fontSize: 9,
+    fontSize: 14,
     color: '#FFFFFF',
     textAlign: 'center',
-    fontWeight: '500',
+    fontWeight: '600',
     flexShrink: 1,
     margin: 0,
     width: '100%',
-    lineHeight: 12,
+    lineHeight: 18,
   },
   countBadgeBottom: {
     position: 'absolute',
