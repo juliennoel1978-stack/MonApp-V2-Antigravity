@@ -1108,6 +1108,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: AppColors.text,
     marginBottom: 8,
+    textAlign: 'center',
   },
   resultSubtitle: {
     fontSize: 18,
@@ -1163,10 +1164,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   encouragement: {
-    fontSize: 16,
+    fontSize: 15,
     color: AppColors.text,
     textAlign: 'center',
     fontWeight: '600',
+    lineHeight: 20,
+    paddingHorizontal: 4,
   },
   resultButtonsColumn: {
     flexDirection: 'column',
@@ -1427,6 +1430,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: AppColors.warning,
+    textAlign: 'center',
+    lineHeight: 20,
   },
   backToMenuButton: {
     backgroundColor: 'transparent',
