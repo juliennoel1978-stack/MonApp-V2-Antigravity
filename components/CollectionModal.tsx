@@ -116,21 +116,24 @@ function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlip
         ]}
         pointerEvents={isFlipped ? 'auto' : 'none'}
       >
-        <Text
-          style={styles.achievementBackTitle}
-          adjustsFontSizeToFit
-          minimumFontScale={0.8}
-          numberOfLines={2}
-        >
-          {achievement.backTitle || achievement.title}
-        </Text>
-        <Text
-          style={styles.achievementDescriptionText}
-          adjustsFontSizeToFit
-          minimumFontScale={0.7}
-        >
-          {achievement.message}
-        </Text>
+        <View style={{ width: '100%', justifyContent: 'center', alignItems: 'center' }}>
+          <Text
+            style={styles.achievementBackTitle}
+            adjustsFontSizeToFit
+            minimumFontScale={0.6}
+            numberOfLines={2}
+          >
+            {achievement.backTitle || achievement.title}
+          </Text>
+          <Text
+            style={styles.achievementDescriptionText}
+            adjustsFontSizeToFit
+            minimumFontScale={0.5}
+            numberOfLines={3}
+          >
+            {achievement.message}
+          </Text>
+        </View>
       </Animated.View>
     </TouchableOpacity>
   );
@@ -463,9 +466,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    padding: 12,
+    padding: 10,
     backgroundColor: '#6C63FF',
     borderRadius: 16,
+    display: 'flex',
+    flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
@@ -486,20 +491,23 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   achievementBackTitle: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: 'bold',
     color: '#FFFFFF',
     textAlign: 'center',
-    marginBottom: 2,
+    marginBottom: 4,
     margin: 0,
+    width: '100%',
   },
   achievementDescriptionText: {
-    fontSize: 11,
+    fontSize: 9,
     color: '#FFFFFF',
     textAlign: 'center',
     fontWeight: '500',
     flexShrink: 1,
     margin: 0,
+    width: '100%',
+    lineHeight: 12,
   },
   countBadgeBottom: {
     position: 'absolute',
