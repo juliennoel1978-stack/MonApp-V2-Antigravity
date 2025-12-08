@@ -400,12 +400,13 @@ export default function PracticeScreen() {
 
   if (showLevelTransition) {
     const starsEarnedLevel1 = correctCount === 10 ? 2 : 1;
+    const userName = currentUser?.firstName || '';
     return (
       <View style={styles.backgroundContainer}>
         <SafeAreaView style={styles.container}>
           <View style={styles.resultContainer}>
             <Text style={styles.resultTitle}>
-              {correctCount === 10 ? '10/10 ! 🌟' : 'Bravo ! 🎉'}
+              {correctCount === 10 ? `10/10 ${userName} ! 🌟` : `Bravo ${userName} ! 🎉`}
             </Text>
             <Text style={styles.resultSubtitle}>
               {correctCount === 10 
@@ -470,13 +471,14 @@ export default function PracticeScreen() {
     if (level === 1) {
       // Check if we just finished a review session successfully
       const justFinishedReview = questions.length < 10 && correctCount === questions.length && !isReviewMode;
+      const userName = currentUser?.firstName || '';
       
       if (justFinishedReview) {
         return (
           <View style={styles.backgroundContainer}>
             <SafeAreaView style={styles.container}>
               <View style={styles.resultContainer}>
-                <Text style={styles.resultTitle}>Bravo ! 🎉</Text>
+                <Text style={styles.resultTitle}>Bravo {userName} ! 🎉</Text>
                 <Text style={styles.resultSubtitle}>
                   Tu as réussi toutes les questions de révision !
                 </Text>
@@ -576,13 +578,14 @@ export default function PracticeScreen() {
 
     // Check if we just finished a review session successfully for Level 2
     const justFinishedReviewL2 = questions.length < 10 && correctCount === questions.length && !isReviewMode;
+    const userName = currentUser?.firstName || '';
     
     if (justFinishedReviewL2) {
       return (
         <View style={styles.backgroundContainer}>
           <SafeAreaView style={styles.container}>
             <View style={styles.resultContainer}>
-              <Text style={styles.resultTitle}>Bravo ! 🎉</Text>
+              <Text style={styles.resultTitle}>Bravo {userName} ! 🎉</Text>
               <Text style={styles.resultSubtitle}>
                 Tu as réussi toutes les questions de révision !
               </Text>
@@ -1099,6 +1102,7 @@ const styles = StyleSheet.create({
   resultContainer: {
     flex: 1,
     padding: 24,
+    paddingTop: 40,
     justifyContent: 'center',
     alignItems: 'center',
   },
