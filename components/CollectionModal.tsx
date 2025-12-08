@@ -463,11 +463,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    padding: 10,
+    padding: 12,
     backgroundColor: '#6C63FF',
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
+    width: '100%',
+    height: '100%',
+    zIndex: 10,
   },
   flipHint: {
     position: 'absolute',
@@ -487,7 +490,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 2,
+    margin: 0,
   },
   achievementDescriptionText: {
     fontSize: 11,
@@ -495,6 +499,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '500',
     flexShrink: 1,
+    margin: 0,
   },
   countBadgeBottom: {
     position: 'absolute',
