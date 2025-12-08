@@ -116,10 +116,19 @@ function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlip
         ]}
         pointerEvents={isFlipped ? 'auto' : 'none'}
       >
-        <Text style={styles.achievementBackTitle}>
+        <Text
+          style={styles.achievementBackTitle}
+          adjustsFontSizeToFit
+          minimumFontScale={0.8}
+          numberOfLines={2}
+        >
           {achievement.backTitle || achievement.title}
         </Text>
-        <Text style={styles.achievementDescriptionText}>
+        <Text
+          style={styles.achievementDescriptionText}
+          adjustsFontSizeToFit
+          minimumFontScale={0.7}
+        >
           {achievement.message}
         </Text>
       </Animated.View>
@@ -454,7 +463,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    padding: 16,
+    padding: 10,
     backgroundColor: '#6C63FF',
     borderRadius: 16,
     justifyContent: 'center',
@@ -474,19 +483,17 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   achievementBackTitle: {
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: 'bold',
     color: '#FFFFFF',
     textAlign: 'center',
-    marginBottom: 8,
-    lineHeight: 20,
+    marginBottom: 4,
   },
   achievementDescriptionText: {
-    fontSize: 13,
+    fontSize: 11,
     color: '#FFFFFF',
     textAlign: 'center',
     fontWeight: '500',
-    lineHeight: 18,
     flexShrink: 1,
   },
   countBadgeBottom: {
