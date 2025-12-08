@@ -426,8 +426,11 @@ export default function PracticeScreen() {
                 ))}
               </View>
               <Text style={styles.intermediateStarsText}>{starsEarnedLevel1} étoile{starsEarnedLevel1 > 1 ? 's' : ''} sur 4</Text>
-              <Text style={styles.transitionDescription}>
-                Maintenant, allons plus loin ! Tape les réponses pour obtenir les {4 - starsEarnedLevel1} étoile{4 - starsEarnedLevel1 > 1 ? 's' : ''} restante{4 - starsEarnedLevel1 > 1 ? 's' : ''}.
+              <Text style={styles.transitionDescriptionFirst}>
+                Maintenant, allons plus loin !
+              </Text>
+              <Text style={styles.transitionDescriptionSecond}>
+                Tape les réponses pour obtenir les {4 - starsEarnedLevel1} étoile{4 - starsEarnedLevel1 > 1 ? 's' : ''} restante{4 - starsEarnedLevel1 > 1 ? 's' : ''}.
               </Text>
             </View>
             
@@ -1214,13 +1217,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
-  transitionDescription: {
-    fontSize: 16,
+  transitionDescriptionFirst: {
+    fontSize: 17,
     color: AppColors.text,
     textAlign: 'center',
     lineHeight: 24,
-    paddingHorizontal: 20,
     fontWeight: '600',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  transitionDescriptionSecond: {
+    fontSize: 16,
+    color: AppColors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    fontWeight: '500',
   },
   intermediateStarsText: {
     fontSize: 22,
