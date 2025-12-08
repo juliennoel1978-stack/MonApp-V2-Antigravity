@@ -405,9 +405,7 @@ export default function PracticeScreen() {
       <View style={styles.backgroundContainer}>
         <SafeAreaView style={styles.container}>
           <View style={styles.resultContainer}>
-            <Text style={styles.resultTitle}>
-              {correctCount === 10 ? `10/10 ${userName} ! 🌟` : `Bravo ${userName} ! 🎉`}
-            </Text>
+            <Text style={styles.resultTitle}>Bravo {userName} ! 🎉</Text>
             <Text style={styles.resultSubtitle}>
               {correctCount === 10 
                 ? 'Tu maîtrises cette table !' 
@@ -426,11 +424,9 @@ export default function PracticeScreen() {
                 ))}
               </View>
               <Text style={styles.intermediateStarsText}>{starsEarnedLevel1} étoile{starsEarnedLevel1 > 1 ? 's' : ''} sur 4</Text>
-              <Text style={styles.transitionDescriptionFirst}>
-                Maintenant, allons plus loin !
-              </Text>
+              <Text style={styles.transitionDescriptionFirst}>Maintenant, allons plus loin !</Text>
               <Text style={styles.transitionDescriptionSecond}>
-                Tape les réponses pour obtenir les {4 - starsEarnedLevel1} étoile{4 - starsEarnedLevel1 > 1 ? 's' : ''} restante{4 - starsEarnedLevel1 > 1 ? 's' : ''}.
+                Tape les réponses pour obtenir{'\n'}les {4 - starsEarnedLevel1} étoile{4 - starsEarnedLevel1 > 1 ? 's' : ''} restante{4 - starsEarnedLevel1 > 1 ? 's' : ''}.
               </Text>
             </View>
             
@@ -444,14 +440,12 @@ export default function PracticeScreen() {
               
               {questionsToReview.length > 0 && (
                  <View style={styles.reviewSectionContainer}>
-                    <Text style={styles.reviewSectionTitle}>
-                       Tu veux d&apos;abord revoir tes erreurs ?
-                    </Text>
+                    <Text style={styles.reviewSectionTitle}>Tu veux d&apos;abord revoir tes erreurs ?</Text>
                     <TouchableOpacity
                       style={styles.reviewButtonSecondary}
                       onPress={startReview}
                     >
-                      <Text style={styles.reviewButtonSecondaryText}>Oui, réviser mes {questionsToReview.length} erreur{questionsToReview.length > 1 ? 's' : ''}</Text>
+                      <Text style={styles.reviewButtonSecondaryText}>Oui, réviser {questionsToReview.length === 1 ? 'mon' : `mes ${questionsToReview.length}`} erreur{questionsToReview.length > 1 ? 's' : ''}</Text>
                     </TouchableOpacity>
                  </View>
               )}
@@ -668,7 +662,7 @@ export default function PracticeScreen() {
                         style={styles.reviewButtonSecondary}
                         onPress={startReview}
                       >
-                        <Text style={styles.reviewButtonSecondaryText}>Oui, réviser mes {questionsToReview.length} erreur{questionsToReview.length > 1 ? 's' : ''}</Text>
+                        <Text style={styles.reviewButtonSecondaryText}>Oui, réviser {questionsToReview.length === 1 ? 'mon' : `mes ${questionsToReview.length}`} erreur{questionsToReview.length > 1 ? 's' : ''}</Text>
                       </TouchableOpacity>
                    </View>
                 )}
@@ -1123,7 +1117,9 @@ const styles = StyleSheet.create({
   },
   resultCard: {
     backgroundColor: AppColors.surface,
-    padding: 40,
+    padding: 32,
+    paddingTop: 28,
+    paddingBottom: 28,
     borderRadius: 24,
     alignItems: 'center',
     width: width - 48,
@@ -1164,7 +1160,7 @@ const styles = StyleSheet.create({
   starsContainer: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 24,
+    marginBottom: 12,
   },
   encouragement: {
     fontSize: 16,
@@ -1223,22 +1219,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     fontWeight: '600',
-    marginTop: 8,
-    marginBottom: 4,
+    marginBottom: 8,
   },
   transitionDescriptionSecond: {
-    fontSize: 16,
+    fontSize: 15,
     color: AppColors.textSecondary,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 21,
     fontWeight: '500',
   },
   intermediateStarsText: {
     fontSize: 22,
     fontWeight: 'bold',
     color: AppColors.text,
-    marginTop: 16,
-    marginBottom: 12,
+    marginTop: 8,
+    marginBottom: 16,
   },
   keyboardAvoid: {
     flex: 1,
@@ -1407,11 +1402,12 @@ const styles = StyleSheet.create({
     borderColor: AppColors.warning + '30',
   },
   reviewSectionTitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: AppColors.text,
     textAlign: 'center',
     marginBottom: 14,
     fontWeight: '600',
+    lineHeight: 20,
   },
   reviewButtonSecondary: {
     backgroundColor: AppColors.surface,
