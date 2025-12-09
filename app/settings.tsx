@@ -414,42 +414,6 @@ export default function SettingsScreen() {
                 />
               </View>
 
-              <View style={styles.settingItem}>
-                <View style={styles.settingLeft}>
-                  <Award size={24} color={AppColors.primary} />
-                  <View style={styles.settingTextContainer}>
-                    <Text style={styles.settingTitle}>Thème des badges</Text>
-                    <Text style={styles.settingDescription}>
-                      Choisis ton univers de récompenses
-                    </Text>
-                  </View>
-                </View>
-              </View>
-
-              <View style={styles.badgeThemeButtons}>
-                {badgeThemes.map((theme) => (
-                  <TouchableOpacity
-                    key={theme.value}
-                    style={[
-                      styles.badgeThemeButton,
-                      (settings.badgeTheme || 'space') === theme.value && styles.badgeThemeButtonActive,
-                    ]}
-                    onPress={() => updateSettings({ badgeTheme: theme.value })}
-                  >
-                    <Text style={styles.badgeThemeEmoji}>{theme.label.split(' ')[0]}</Text>
-                    <Text
-                      style={[
-                        styles.badgeThemeLabel,
-                        (settings.badgeTheme || 'space') === theme.value && styles.badgeThemeLabelActive,
-                      ]}
-                    >
-                      {theme.label.split(' ').slice(1).join(' ')}
-                    </Text>
-                    <Text style={styles.badgeThemeDescription}>{theme.description}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
               {settings.timerEnabled && (
                 <View style={styles.timerConfig}>
                   <View style={styles.timerModeSection}>
@@ -519,6 +483,44 @@ export default function SettingsScreen() {
                   </View>
                 </View>
               )}
+
+              <View style={styles.settingItem}>
+                <View style={styles.settingLeft}>
+                  <Award size={24} color={AppColors.primary} />
+                  <View style={styles.settingTextContainer}>
+                    <Text style={styles.settingTitle}>Thème des badges</Text>
+                    <Text style={styles.settingDescription}>
+                      Choisis ton univers de récompenses
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.badgeThemeButtons}>
+                {badgeThemes.map((theme) => (
+                  <TouchableOpacity
+                    key={theme.value}
+                    style={[
+                      styles.badgeThemeButton,
+                      (settings.badgeTheme || 'space') === theme.value && styles.badgeThemeButtonActive,
+                    ]}
+                    onPress={() => updateSettings({ badgeTheme: theme.value })}
+                  >
+                    <Text style={styles.badgeThemeEmoji}>{theme.label.split(' ')[0]}</Text>
+                    <Text
+                      style={[
+                        styles.badgeThemeLabel,
+                        (settings.badgeTheme || 'space') === theme.value && styles.badgeThemeLabelActive,
+                      ]}
+                    >
+                      {theme.label.split(' ').slice(1).join(' ')}
+                    </Text>
+                    <Text style={styles.badgeThemeDescription}>{theme.description}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+
             </View>
           )}
 
