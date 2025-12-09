@@ -41,23 +41,23 @@ export default function HomeScreen() {
     useCallback(() => {
       const now = Date.now();
       if (now - lastFocusTime.current < 500) {
-        console.log('🔄 [HomeScreen] Skipping reload - too soon');
+
         return;
       }
       lastFocusTime.current = now;
-      console.log('🔄 [HomeScreen] Screen focused - reloading data');
+
       reloadData();
       setTimeout(() => {
         setDataVersion(prev => {
           const newVersion = prev + 1;
-          console.log('🔄 [HomeScreen] DataVersion updated to:', newVersion);
+
           return newVersion;
         });
       }, 100);
     }, [reloadData])
   );
 
-  console.log('[HomeScreen RENDER] users.length:', users.length);
+
   const scaleAnim = React.useRef(new Animated.Value(0)).current;
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const modalOpacity = React.useRef(new Animated.Value(0)).current;
@@ -69,7 +69,7 @@ export default function HomeScreen() {
   const settingsProgressAnim = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    console.log('[HomeScreen useEffect] isLoading:', isLoading);
+
 
     if (!isLoading && !isReady) {
       setIsReady(true);
@@ -77,21 +77,19 @@ export default function HomeScreen() {
   }, [isLoading, isReady]);
 
   useEffect(() => {
-    console.log('[HomeScreen useEffect] Users loaded:', users.length, 'users');
-    console.log('[HomeScreen useEffect] Current user:', currentUser?.firstName || 'none');
-    console.log('[HomeScreen useEffect] isReady:', isReady, 'hasCheckedFirstLaunch:', hasCheckedFirstLaunch.current);
+
 
     if (isReady && !hasCheckedFirstLaunch.current) {
       hasCheckedFirstLaunch.current = true;
 
       if (users.length === 0 && !currentUser) {
-        console.log('[HomeScreen] First launch detected - showing welcome modal');
+
         const timer = setTimeout(() => {
           setShowFirstLaunchModal(true);
         }, 600);
         return () => clearTimeout(timer);
       } else if (users.length > 0 && !currentUser) {
-        console.log('[HomeScreen] Users exist but none selected - showing user modal');
+
         const timer = setTimeout(() => {
           setShowUserModal(true);
         }, 600);
@@ -161,7 +159,7 @@ export default function HomeScreen() {
   }, [showTablesModal, tablesModalOpacity, tablesModalScale]);
 
   const handleSelectUser = async (userId: string) => {
-    console.log('[HomeScreen] Selecting user:', userId);
+
     await selectUser(userId);
     closeModal();
   };
@@ -172,17 +170,7 @@ export default function HomeScreen() {
   };
 
   const handleOpenModal = () => {
-    console.log('[HomeScreen] ========== OPENING USER MODAL ==========');
-    console.log('[HomeScreen] Users state length:', users.length);
-    console.log('[HomeScreen] Is loading:', isLoading);
-    console.log('[HomeScreen] Current user:', currentUser?.firstName || 'none');
-    console.log('[HomeScreen] Users array:', JSON.stringify(users, null, 2));
 
-    users.forEach((u, idx) => {
-      console.log(`[HomeScreen]   User ${idx + 1}: `, u.firstName, 'ID:', u.id, 'Age:', u.age);
-    });
-
-    console.log('[HomeScreen] ================================================');
     setShowUserModal(true);
   };
 
@@ -205,7 +193,7 @@ export default function HomeScreen() {
   };
 
   const openTablesModal = () => {
-    console.log('[HomeScreen] Opening tables modal');
+
     setShowTablesModal(true);
   };
 
@@ -232,7 +220,7 @@ export default function HomeScreen() {
 
   const challengesCompleted = React.useMemo(() => {
     const value = currentUser?.challengesCompleted || anonymousChallengesCompleted;
-    console.log('[HomeScreen useMemo challengesCompleted]', value, 'dataVersion:', dataVersion);
+
     return value;
   }, [currentUser?.challengesCompleted, anonymousChallengesCompleted, dataVersion]);
 
@@ -250,11 +238,11 @@ export default function HomeScreen() {
 
   const bestStreak = React.useMemo(() => {
     const value = getBestStreak();
-    console.log('[HomeScreen useMemo bestStreak]', value, 'dataVersion:', dataVersion);
+
     return value;
   }, [getBestStreak, dataVersion, currentUser?.bestStreak, anonymousChallengesCompleted]);
 
-  console.log('[HomeScreen RENDER] challenges:', challengesCompleted, 'badges:', persistenceBadges.length, 'bestStreak:', bestStreak, 'version:', dataVersion);
+
 
   const currentBadgeData = React.useMemo(() => {
     const sortedBadges = [...persistenceBadges].sort((a, b) => b.threshold - a.threshold);
@@ -313,7 +301,7 @@ export default function HomeScreen() {
     }
 
     const result = bestRate >= 0.7 ? best.tableNumber : null;
-    console.log('[HomeScreen useMemo strongestTable]', result, 'dataVersion:', dataVersion);
+
     return result;
   }, [progress, dataVersion]);
 
@@ -359,7 +347,7 @@ export default function HomeScreen() {
   }, [progress, challengesCompleted]);
 
   const handleSettingsPressIn = () => {
-    console.log('[HomeScreen] Settings long press started');
+
     setSettingsProgress(0);
     settingsProgressAnim.setValue(0);
 
@@ -378,7 +366,7 @@ export default function HomeScreen() {
           settingsTimerRef.current = null;
         }
         setSettingsProgress(0);
-        console.log('[HomeScreen] Settings unlocked - navigating');
+
         setTimeout(() => {
           router.push('/settings' as any);
         }, 0);
@@ -389,7 +377,7 @@ export default function HomeScreen() {
   };
 
   const handleSettingsPressOut = () => {
-    console.log('[HomeScreen] Settings long press cancelled');
+
     if (settingsTimerRef.current) {
       clearInterval(settingsTimerRef.current);
       settingsTimerRef.current = null;
@@ -473,6 +461,9 @@ export default function HomeScreen() {
               {
                 opacity: fadeAnim,
                 transform: [{ scale: scaleAnim }],
+                maxWidth: 500, // Tablet constraint
+                width: '100%',
+                alignSelf: 'center',
               },
             ]
             }
@@ -608,6 +599,8 @@ export default function HomeScreen() {
                   {
                     opacity: tablesModalOpacity,
                     transform: [{ scale: tablesModalScale }],
+                    maxWidth: 500, // Tablet constraint
+                    alignSelf: 'center',
                   },
                 ]}
               >

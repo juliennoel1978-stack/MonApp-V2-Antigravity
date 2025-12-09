@@ -6,19 +6,30 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Dimensions,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors, NumberColors } from '@/constants/colors';
 import { MULTIPLICATION_TABLES } from '@/constants/tables';
 import { useApp } from '@/contexts/AppContext';
 
-const { width } = Dimensions.get('window');
-const CARD_WIDTH = (width - 48) / 2;
-
 export default function TablesScreen() {
   const router = useRouter();
   const { progress } = useApp();
+  const { width } = useWindowDimensions();
+
+  // Tablet Optimization: Dynamic columns
+  const getNumColumns = () => {
+    if (width > 768) return 4; // iPad/Tablet
+    if (width >= 600) return 3; // Large phones/Small tablets
+    return 2; // Standard phones
+  };
+
+  const numColumns = getNumColumns();
+  const gap = 12; // Increased gap for better spacing
+  const padding = 16;
+  const availableWidth = width - (padding * 2) - (gap * (numColumns - 1));
+  const cardWidth = availableWidth / numColumns;
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -89,6 +100,7 @@ export default function TablesScreen() {
                   style={[
                     styles.card,
                     {
+                      width: cardWidth,
                       borderColor: isCompleted ? AppColors.success : NumberColors[
                         table.number as keyof typeof NumberColors
                       ],
@@ -107,7 +119,7 @@ export default function TablesScreen() {
                         {
                           color:
                             NumberColors[
-                              table.number as keyof typeof NumberColors
+                            table.number as keyof typeof NumberColors
                             ],
                         },
                       ]}
@@ -213,12 +225,12 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
-    justifyContent: 'space-between',
+    gap: 12,
+    justifyContent: 'flex-start',
     alignContent: 'flex-start',
   },
   card: {
-    width: CARD_WIDTH,
+    // width set dynamically
     backgroundColor: AppColors.surface,
     borderRadius: 10,
     borderWidth: 2,

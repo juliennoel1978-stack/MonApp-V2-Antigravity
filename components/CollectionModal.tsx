@@ -277,7 +277,9 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: width * 0.85,
+    maxWidth: 600, // Tablet constraint
     height: height * 0.8,
+    maxHeight: 700, // Prevent it from being too tall on huge screens
     backgroundColor: AppColors.background,
     borderRadius: 24,
     overflow: 'hidden',
@@ -286,6 +288,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 20,
     elevation: 10,
+    alignSelf: 'center', // Center in overlay
   },
   scrollView: {
     flex: 1,

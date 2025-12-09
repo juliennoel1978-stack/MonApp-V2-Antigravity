@@ -55,11 +55,11 @@ type Question = {
 
 export default function ChallengeScreen() {
   const router = useRouter();
-  const { 
-    settings, 
-    currentUser, 
-    incrementChallengesCompleted, 
-    anonymousChallengesCompleted, 
+  const {
+    settings,
+    currentUser,
+    incrementChallengesCompleted,
+    anonymousChallengesCompleted,
     addPersistenceBadge,
     addAchievement,
     addPlayDate,
@@ -87,8 +87,8 @@ export default function ChallengeScreen() {
   const [maxQuestions, setMaxQuestions] = useState<number>(15);
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [bestStreak, setBestStreak] = useState<number>(0);
-  const [wrongAnswers, setWrongAnswers] = useState<{ num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]>([]); 
-  const [tableStats, setTableStats] = useState<Record<number, { correct: number; total: number }>>({}); 
+  const [wrongAnswers, setWrongAnswers] = useState<{ num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]>([]);
+  const [tableStats, setTableStats] = useState<Record<number, { correct: number; total: number }>>({});
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
   const [reviewQuestions, setReviewQuestions] = useState<{ num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]>([]);
   const [showBadgeOverlay, setShowBadgeOverlay] = useState<boolean>(false);
@@ -98,22 +98,22 @@ export default function ChallengeScreen() {
   const [pendingBadge, setPendingBadge] = useState<{ id: string; threshold: number; title: string; icon: string; unlockedAt: string } | null>(null);
   const [pendingReviewStart, setPendingReviewStart] = useState<boolean>(false);
   const pendingWrongAnswersRef = useRef<{ num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]>([]);
-  
+
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
   const celebrationAnim = React.useRef(new Animated.Value(0)).current;
-  
+
   const inputRef = useRef<TextInput>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isMounted = useRef(true);
 
   useEffect(() => {
     isMounted.current = true;
-    const questions = currentUser 
+    const questions = currentUser
       ? (currentUser.challengeQuestions || 15)
       : (settings.challengeQuestions || 15);
     setMaxQuestions(questions);
-    console.log('🎯 Challenge initialized with', questions, 'questions');
-    console.log('🏅 User persistence badges:', currentUser?.persistenceBadges?.length || 0);
+
+
     return () => {
       isMounted.current = false;
     };
@@ -121,7 +121,7 @@ export default function ChallengeScreen() {
 
   const handleTimeOut = useCallback(() => {
     if (!isMounted.current) return;
-    
+
     setTotalQuestions(prev => prev + 1);
     setConsecutiveCorrect(0);
     setShowCorrectAnswer(true);
@@ -134,9 +134,9 @@ export default function ChallengeScreen() {
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
-    
+
     let question: Question;
-    
+
     if (isReviewMode && reviewQuestions.length > 0) {
       const index = totalQuestions % reviewQuestions.length;
       question = reviewQuestions[index];
@@ -144,13 +144,13 @@ export default function ChallengeScreen() {
       const num1 = Math.floor(Math.random() * 10) + 1;
       const num2 = Math.floor(Math.random() * 10) + 1;
       const result = num1 * num2;
-      
+
       const questionTypes: QuestionType[] = ['result', 'multiplier', 'multiplicand'];
       const randomType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
-      
+
       let answer: number;
       let displayText: string;
-      
+
       switch (randomType) {
         case 'result':
           answer = result;
@@ -165,7 +165,7 @@ export default function ChallengeScreen() {
           displayText = `? × ${num2} = ${result}`;
           break;
       }
-      
+
       question = {
         num1,
         num2,
@@ -174,19 +174,19 @@ export default function ChallengeScreen() {
         displayText,
       };
     }
-    
-    console.log('🔄 Generating new question:', question.displayText);
+
+
     setCurrentQuestion(question);
     setUserAnswer('');
     setAttempts(0);
     setShowFeedback(false);
     setShowCorrectAnswer(false);
     setIsTimeout(false);
-    const duration = currentUser 
+    const duration = currentUser
       ? (currentUser.timerSettings?.enabled ? (currentUser.timerSettings.duration || 0) : 0)
       : (settings.timerEnabled ? settings.timerDuration : 0);
     setTimeRemaining(duration);
-    
+
     setTimeout(() => {
       if (isMounted.current) {
         inputRef.current?.focus();
@@ -196,23 +196,23 @@ export default function ChallengeScreen() {
 
   useEffect(() => {
     if (totalQuestions === 0 && !currentQuestion) {
-      console.log('🎬 Initial question generation');
+
       generateNewQuestion();
     }
   }, []);
 
   useEffect(() => {
-    const timerEnabled = currentUser 
+    const timerEnabled = currentUser
       ? (currentUser.timerSettings?.enabled || false)
       : settings.timerEnabled;
     const timerDuration = currentUser
       ? (currentUser.timerSettings?.duration || 0)
       : settings.timerDuration;
-    
+
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
-    
+
     if (timerEnabled && timerDuration > 0 && !showFeedback && !showCelebration && currentQuestion) {
       timerRef.current = setInterval(() => {
         setTimeRemaining(prev => {
@@ -231,7 +231,7 @@ export default function ChallengeScreen() {
           return prev - 1;
         });
       }, 1000);
-      
+
       return () => {
         if (timerRef.current) {
           clearInterval(timerRef.current);
@@ -248,11 +248,11 @@ export default function ChallengeScreen() {
       return;
     }
 
-    console.log('🏁 Challenge ending, checking for rewards...');
+
     const newTotal = await incrementChallengesCompleted();
     await addPlayDate();
     setCompletedChallengeCount(newTotal);
-    console.log('🏆 New total challenges completed:', newTotal);
+
 
     // Save table stats from this challenge
     const tableUpdates = Object.entries(tableStats).map(([tableStr, stats]) => ({
@@ -260,12 +260,12 @@ export default function ChallengeScreen() {
       correct: stats.correct,
       total: stats.total
     }));
-    
+
     if (tableUpdates.length > 0) {
-      console.log('📊 Saving table stats:', tableUpdates.length, 'tables');
+
       await batchUpdateTableProgress(tableUpdates);
     } else {
-      console.log('⚠️ No table stats to save');
+
     }
 
     const badgeTheme = currentUser?.badgeTheme || settings.badgeTheme || 'space';
@@ -273,11 +273,11 @@ export default function ChallengeScreen() {
     const existingAchievements = getAchievements();
     const playDates = getPlayDates();
     const gender = currentUser?.gender;
-    
-    const timerEnabled = currentUser 
+
+    const timerEnabled = currentUser
       ? (currentUser.timerSettings?.enabled || false)
       : settings.timerEnabled;
-    
+
     const scorePercent = Math.round((correctCount / maxQuestions) * 100);
 
     const { queue, newBadge, newAchievements } = checkForRewards({
@@ -292,22 +292,18 @@ export default function ChallengeScreen() {
       isReviewingErrors: false,
     });
 
-    console.log('🎁 Rewards check complete:', {
-      queueLength: queue.length,
-      newBadge: newBadge?.title || 'none',
-      newAchievements: newAchievements.length,
-    });
+
 
     if (queue.length > 0) {
-      console.log('🎉 Rewards to show:', queue.length);
-      queue.forEach((r, i) => console.log(`  ${i + 1}. ${r.type}: ${r.title}`));
+
+
       setRewardQueue(queue);
       setCurrentReward(queue[0]);
       setPendingAchievements(newAchievements);
       setPendingBadge(newBadge);
       setShowBadgeOverlay(true);
     } else {
-      console.log('ℹ️ No rewards unlocked');
+
       setIsFinished(true);
     }
   }, [isReviewMode, incrementChallengesCompleted, addPlayDate, currentUser, settings, correctCount, maxQuestions, getPersistenceBadges, getAchievements, getPlayDates]);
@@ -315,10 +311,10 @@ export default function ChallengeScreen() {
   const handleBadgeDismiss = useCallback(async () => {
     const currentIndex = rewardQueue.findIndex(r => r === currentReward);
     const nextIndex = currentIndex + 1;
-    
+
     if (currentReward) {
       if (currentReward.type === 'level_badge' && pendingBadge) {
-        console.log('💾 Saving pending badge:', pendingBadge.title);
+
         await addPersistenceBadge(pendingBadge);
         setPendingBadge(null);
       } else if (currentReward.type === 'achievement') {
@@ -326,24 +322,24 @@ export default function ChallengeScreen() {
           a => a.id === getAchievementIdFromTitle(currentReward.title)
         );
         if (achievementToSave) {
-          console.log('💾 Saving achievement:', achievementToSave.id);
+
           await addAchievement(achievementToSave);
           setPendingAchievements(prev => prev.filter(a => a.id !== achievementToSave.id));
         }
       }
     }
-    
+
     if (nextIndex < rewardQueue.length) {
-      console.log('🎁 Showing next reward:', rewardQueue[nextIndex].title);
+
       setCurrentReward(rewardQueue[nextIndex]);
     } else {
-      console.log('✅ All rewards shown, closing overlay');
+
       setShowBadgeOverlay(false);
       setRewardQueue([]);
       setCurrentReward(null);
-      
+
       if (pendingReviewStart && pendingWrongAnswersRef.current.length > 0) {
-        console.log('📝 Starting review mode after badge dismissal');
+
         startReviewMode(pendingWrongAnswersRef.current);
         setPendingReviewStart(false);
         pendingWrongAnswersRef.current = [];
@@ -370,11 +366,11 @@ export default function ChallengeScreen() {
     setShowFeedback(false);
     setShowCorrectAnswer(false);
     setIsTimeout(false);
-    const duration = currentUser 
+    const duration = currentUser
       ? (currentUser.timerSettings?.enabled ? (currentUser.timerSettings.duration || 0) : 0)
       : (settings.timerEnabled ? settings.timerDuration : 0);
     setTimeRemaining(duration);
-    
+
     setTimeout(() => {
       if (isMounted.current) {
         inputRef.current?.focus();
@@ -429,17 +425,17 @@ export default function ChallengeScreen() {
       setCorrectCount(newCorrectCount);
       setTotalQuestions(newTotalQuestions);
       setCurrentCorrectPhrase(getRandomPhrase(CORRECT_PHRASES));
-      
+
       const newStreak = consecutiveCorrect + 1;
       setConsecutiveCorrect(newStreak);
       if (newStreak > bestStreak) {
         setBestStreak(newStreak);
         updateBestStreak(newStreak);
       }
-      
+
       setTableStats(prev => {
-        const table = currentQuestion.num1 <= 10 && currentQuestion.num2 <= 10 
-          ? Math.max(currentQuestion.num1, currentQuestion.num2) 
+        const table = currentQuestion.num1 <= 10 && currentQuestion.num2 <= 10
+          ? Math.max(currentQuestion.num1, currentQuestion.num2)
           : currentQuestion.num1;
         return {
           ...prev,
@@ -454,9 +450,9 @@ export default function ChallengeScreen() {
         const currentIndex = (totalQuestions) % reviewQuestions.length;
         const updatedReviewQuestions = reviewQuestions.filter((_, idx) => idx !== currentIndex);
         setReviewQuestions(updatedReviewQuestions);
-        
+
         if (updatedReviewQuestions.length === 0) {
-          console.log('✅ All review questions corrected!');
+
           setTimeout(() => {
             if (isMounted.current) {
               setIsFinished(true);
@@ -467,7 +463,7 @@ export default function ChallengeScreen() {
       }
 
       if (newTotalQuestions >= maxQuestions) {
-        console.log('🎯 Challenge finished! Answered', newTotalQuestions, 'questions');
+
         setTimeout(() => {
           if (isMounted.current) {
             handleChallengeEnd();
@@ -498,20 +494,20 @@ export default function ChallengeScreen() {
         setTotalQuestions(newTotalQuestions);
         setShowCorrectAnswer(true);
         setCurrentErrorPhrase(getRandomPhrase(ERROR_PHRASES));
-        
+
         const alreadyInWrongAnswers = wrongAnswers.some(
-          q => q.num1 === currentQuestion.num1 && 
-               q.num2 === currentQuestion.num2 && 
-               q.type === currentQuestion.type
+          q => q.num1 === currentQuestion.num1 &&
+            q.num2 === currentQuestion.num2 &&
+            q.type === currentQuestion.type
         );
         if (!alreadyInWrongAnswers) {
-          console.log('❌ Adding wrong answer to review list:', currentQuestion.displayText);
+
           setWrongAnswers(prev => [...prev, currentQuestion]);
         }
-        
+
         setTableStats(prev => {
-          const table = currentQuestion.num1 <= 10 && currentQuestion.num2 <= 10 
-            ? Math.max(currentQuestion.num1, currentQuestion.num2) 
+          const table = currentQuestion.num1 <= 10 && currentQuestion.num2 <= 10
+            ? Math.max(currentQuestion.num1, currentQuestion.num2)
             : currentQuestion.num1;
           return {
             ...prev,
@@ -523,7 +519,7 @@ export default function ChallengeScreen() {
         });
 
         if (newTotalQuestions >= maxQuestions) {
-          console.log('🎯 Challenge finished! Answered', newTotalQuestions, 'questions');
+
           setTimeout(() => {
             if (isMounted.current) {
               handleChallengeEnd();
@@ -549,11 +545,11 @@ export default function ChallengeScreen() {
         "Super ! C'est comme ça qu'on progresse 💪",
       ];
       const randomMessage = correctionMessages[Math.floor(Math.random() * correctionMessages.length)];
-      
+
       return (
         <View style={styles.backgroundContainer}>
           <SafeAreaView style={styles.container} edges={['top']}>
-            <ScrollView 
+            <ScrollView
               contentContainerStyle={styles.finishedScrollContent}
               showsVerticalScrollIndicator={false}
             >
@@ -563,13 +559,13 @@ export default function ChallengeScreen() {
                   Bien joué{currentUser ? ` ${currentUser.firstName}` : ''} !
                 </Text>
                 <Text style={styles.finishedSubtitle}>Tu as corrigé tes erreurs</Text>
-                
+
                 <View style={styles.finishedStats}>
                   <Text style={styles.correctionMessage}>
                     {randomMessage}
                   </Text>
                 </View>
-                
+
                 <View style={styles.finishedButtonsContainer}>
                   <TouchableOpacity
                     style={styles.finishedButton}
@@ -584,7 +580,7 @@ export default function ChallengeScreen() {
                       setBestStreak(0);
                       setWrongAnswers([]);
                       setTableStats({});
-                      const questions = currentUser 
+                      const questions = currentUser
                         ? (currentUser.challengeQuestions || 15)
                         : (settings.challengeQuestions || 15);
                       setMaxQuestions(questions);
@@ -593,7 +589,7 @@ export default function ChallengeScreen() {
                   >
                     <Text style={styles.finishedButtonText} numberOfLines={1}>Refaire un Challenge</Text>
                   </TouchableOpacity>
-                  
+
                   <TouchableOpacity
                     style={[styles.finishedButton, styles.finishedButtonOutline]}
                     onPress={() => router.replace('/')}
@@ -607,12 +603,12 @@ export default function ChallengeScreen() {
         </View>
       );
     }
-    
+
     let bestTable = -1;
     let worstTable = -1;
     let bestTableRate = -1;
     let worstTableRate = 2;
-    
+
     Object.entries(tableStats).forEach(([table, stats]) => {
       const rate = stats.correct / stats.total;
       if (rate > bestTableRate) {
@@ -624,11 +620,11 @@ export default function ChallengeScreen() {
         worstTable = parseInt(table);
       }
     });
-    
+
     return (
       <View style={styles.backgroundContainer}>
         <SafeAreaView style={styles.container} edges={['top']}>
-          <ScrollView 
+          <ScrollView
             contentContainerStyle={styles.finishedScrollContent}
             showsVerticalScrollIndicator={false}
           >
@@ -640,7 +636,7 @@ export default function ChallengeScreen() {
               <Text style={styles.finishedSubtitle}>
                 Challenge terminé ! (n°{completedChallengeCount > 0 ? completedChallengeCount : (currentUser ? (currentUser.challengesCompleted || 0) : anonymousChallengesCompleted)})
               </Text>
-              
+
               <View style={styles.finishedStats}>
                 <View style={styles.finishedStatRow}>
                   <Text style={styles.finishedStatLabel}>Précision</Text>
@@ -648,7 +644,7 @@ export default function ChallengeScreen() {
                     {correctCount} / {maxQuestions} 👍
                   </Text>
                 </View>
-                
+
                 {bestStreak > 0 && (
                   <View style={styles.finishedStatRow}>
                     <Text style={styles.finishedStatLabel}>Ta meilleure série</Text>
@@ -657,7 +653,7 @@ export default function ChallengeScreen() {
                     </Text>
                   </View>
                 )}
-                
+
                 {bestTable > 0 && (
                   <View style={styles.finishedStatRow}>
                     <Text style={styles.finishedStatLabel}>Table la plus solide</Text>
@@ -666,7 +662,7 @@ export default function ChallengeScreen() {
                     </Text>
                   </View>
                 )}
-                
+
                 {worstTable > 0 && (
                   <View style={styles.finishedStatRow}>
                     <Text style={styles.finishedStatLabel}>Table à surveiller</Text>
@@ -676,18 +672,18 @@ export default function ChallengeScreen() {
                   </View>
                 )}
               </View>
-              
+
               <View style={styles.finishedButtonsContainer}>
                 {wrongAnswers.length > 0 && (
                   <TouchableOpacity
                     style={[styles.finishedButton, styles.finishedButtonSecondary]}
                     onPress={() => {
-                      console.log('🔄 Starting review mode with', wrongAnswers.length, 'questions');
+
                       const existingAchievements = getAchievements();
                       const strategistReward = checkStrategistAchievement(existingAchievements);
-                      
+
                       if (strategistReward) {
-                        console.log('🔎 Strategist achievement will be unlocked!');
+
                         const achievement: UnlockedAchievement = {
                           id: 'strategist',
                           unlockedAt: new Date().toISOString(),
@@ -700,7 +696,7 @@ export default function ChallengeScreen() {
                         setCurrentReward(strategistReward);
                         setShowBadgeOverlay(true);
                       } else {
-                        console.log('🔄 Starting review directly (no strategist achievement)');
+
                         startReviewMode(wrongAnswers);
                       }
                     }}
@@ -708,7 +704,7 @@ export default function ChallengeScreen() {
                     <Text style={styles.finishedButtonText} numberOfLines={1}>Revoir mes erreurs</Text>
                   </TouchableOpacity>
                 )}
-                
+
                 <TouchableOpacity
                   style={styles.finishedButton}
                   onPress={() => {
@@ -722,7 +718,7 @@ export default function ChallengeScreen() {
                     setBestStreak(0);
                     setWrongAnswers([]);
                     setTableStats({});
-                    const questions = currentUser 
+                    const questions = currentUser
                       ? (currentUser.challengeQuestions || 15)
                       : (settings.challengeQuestions || 15);
                     setMaxQuestions(questions);
@@ -731,7 +727,7 @@ export default function ChallengeScreen() {
                 >
                   <Text style={styles.finishedButtonText} numberOfLines={1}>Refaire un Challenge</Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                   style={[styles.finishedButton, styles.finishedButtonOutline]}
                   onPress={() => router.replace('/')}
@@ -793,7 +789,7 @@ export default function ChallengeScreen() {
         </View>
 
         {(() => {
-          const timerEnabled = currentUser 
+          const timerEnabled = currentUser
             ? (currentUser.timerSettings?.enabled || false)
             : settings.timerEnabled;
           const timerDuration = currentUser
@@ -802,24 +798,24 @@ export default function ChallengeScreen() {
           const displayMode = currentUser
             ? (currentUser.timerSettings?.displayMode || 'chronometer')
             : settings.timerDisplayMode;
-          
-          const timerColor = timeRemaining > timerDuration * 0.66 
-            ? AppColors.timerStart 
-            : timeRemaining > timerDuration * 0.33 
-            ? AppColors.timerMiddle 
-            : AppColors.timerEnd;
+
+          const timerColor = timeRemaining > timerDuration * 0.66
+            ? AppColors.timerStart
+            : timeRemaining > timerDuration * 0.33
+              ? AppColors.timerMiddle
+              : AppColors.timerEnd;
 
           if (!timerEnabled || timerDuration === 0 || showCelebration) return null;
-          
+
           return (
             <View style={styles.timerContainer}>
               {displayMode === 'chronometer' ? (
                 <>
-                  <Timer 
-                    size={20} 
-                    color={timerColor} 
+                  <Timer
+                    size={20}
+                    color={timerColor}
                   />
-                  <Text 
+                  <Text
                     style={[
                       styles.timerText,
                       { color: timerColor }
@@ -830,14 +826,14 @@ export default function ChallengeScreen() {
                 </>
               ) : (
                 <View style={styles.progressBarContainer}>
-                  <View 
+                  <View
                     style={[
                       styles.progressBar,
-                      { 
+                      {
                         width: `${(timeRemaining / timerDuration) * 100}%`,
                         backgroundColor: timerColor
                       }
-                    ]} 
+                    ]}
                   />
                 </View>
               )}
@@ -855,153 +851,153 @@ export default function ChallengeScreen() {
             showsVerticalScrollIndicator={false}
             bounces={false}
           >
-          {showCelebration ? (
-            <Animated.View
-              style={[
-                styles.celebrationContainer,
-                {
-                  opacity: celebrationAnim,
-                  transform: [
-                    {
-                      scale: celebrationAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0.5, 1],
-                      }),
-                    },
-                  ],
-                },
-              ]}
-            >
-              <Text style={styles.celebrationEmoji}>🎉</Text>
-              <Text style={styles.celebrationText}>Bravo !</Text>
-              <Text style={styles.celebrationSubtext}>
-                4 bonnes réponses d&apos;affilée !
-              </Text>
-            </Animated.View>
-          ) : (
-            <>
-              <View style={styles.questionCard}>
-                <Text style={styles.questionText}>
-                  {currentQuestion.displayText}
+            {showCelebration ? (
+              <Animated.View
+                style={[
+                  styles.celebrationContainer,
+                  {
+                    opacity: celebrationAnim,
+                    transform: [
+                      {
+                        scale: celebrationAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0.5, 1],
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              >
+                <Text style={styles.celebrationEmoji}>🎉</Text>
+                <Text style={styles.celebrationText}>Bravo !</Text>
+                <Text style={styles.celebrationSubtext}>
+                  4 bonnes réponses d&apos;affilée !
                 </Text>
-              </View>
+              </Animated.View>
+            ) : (
+              <>
+                <View style={styles.questionCard}>
+                  <Text style={styles.questionText}>
+                    {currentQuestion.displayText}
+                  </Text>
+                </View>
 
-              <View style={styles.inputContainer}>
-                <TextInput
-                  ref={inputRef}
-                  style={styles.input}
-                  value={userAnswer}
-                  onChangeText={setUserAnswer}
-                  keyboardType="number-pad"
-                  placeholder="Ta réponse"
-                  placeholderTextColor={AppColors.textLight}
-                  autoFocus
-                  editable={!showCorrectAnswer}
-                  testID="answer-input"
-                />
-              </View>
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    ref={inputRef}
+                    style={styles.input}
+                    value={userAnswer}
+                    onChangeText={setUserAnswer}
+                    keyboardType="number-pad"
+                    placeholder="Ta réponse"
+                    placeholderTextColor={AppColors.textLight}
+                    autoFocus
+                    editable={!showCorrectAnswer}
+                    testID="answer-input"
+                  />
+                </View>
 
-              {showFeedback && (
-                <Animated.View
-                  style={[
-                    styles.feedbackContainer,
-                    { transform: [{ scale: scaleAnim }] },
-                  ]}
-                >
-                  {isCorrect && !showCelebration ? (
-                    <View style={styles.feedbackBox}>
-                      <Check size={48} color={AppColors.success} />
-                      <Text style={[styles.feedbackText, { color: AppColors.success }]}>
-                        Correct !
-                      </Text>
-                      <Text style={styles.encouragementText}>
-                        {currentCorrectPhrase}
-                      </Text>
-                    </View>
-                  ) : isTimeout ? (
-                    <View style={styles.feedbackBox}>
-                      <Clock size={48} color={AppColors.timerMiddle} />
-                      <Text style={[styles.feedbackText, { color: AppColors.timerMiddle, textAlign: 'center' }]}>
-                        {(currentUser?.timerSettings?.displayMode || settings.timerDisplayMode) === 'bar' 
-                          ? "Prends ton temps,\non regarde la réponse ensemble."
-                          : "Temps écoulé !"}
-                      </Text>
-                      {showCorrectAnswer && (
-                        <View style={styles.answerContainer}>
-                          <Text style={styles.correctAnswerLabel}>
-                            La bonne réponse est : <Text style={styles.correctAnswerValue}>{currentQuestion.answer}</Text>
-                          </Text>
-                          <View style={styles.equationContainer}>
-                            <Text style={styles.equationText}>
-                              {currentQuestion.type === 'multiplicand' && (
-                                <Text style={styles.underlined}>{currentQuestion.num1}</Text>
-                              )}
-                              {currentQuestion.type !== 'multiplicand' && currentQuestion.num1}
-                              {' × '}
-                              {currentQuestion.type === 'multiplier' && (
-                                <Text style={styles.underlined}>{currentQuestion.num2}</Text>
-                              )}
-                              {currentQuestion.type !== 'multiplier' && currentQuestion.num2}
-                              {' = '}
-                              {currentQuestion.type === 'result' && (
-                                <Text style={styles.underlined}>{currentQuestion.answer}</Text>
-                              )}
-                              {currentQuestion.type !== 'result' && currentQuestion.num1 * currentQuestion.num2}
+                {showFeedback && (
+                  <Animated.View
+                    style={[
+                      styles.feedbackContainer,
+                      { transform: [{ scale: scaleAnim }] },
+                    ]}
+                  >
+                    {isCorrect && !showCelebration ? (
+                      <View style={styles.feedbackBox}>
+                        <Check size={48} color={AppColors.success} />
+                        <Text style={[styles.feedbackText, { color: AppColors.success }]}>
+                          Correct !
+                        </Text>
+                        <Text style={styles.encouragementText}>
+                          {currentCorrectPhrase}
+                        </Text>
+                      </View>
+                    ) : isTimeout ? (
+                      <View style={styles.feedbackBox}>
+                        <Clock size={48} color={AppColors.timerMiddle} />
+                        <Text style={[styles.feedbackText, { color: AppColors.timerMiddle, textAlign: 'center' }]}>
+                          {(currentUser?.timerSettings?.displayMode || settings.timerDisplayMode) === 'bar'
+                            ? "Prends ton temps,\non regarde la réponse ensemble."
+                            : "Temps écoulé !"}
+                        </Text>
+                        {showCorrectAnswer && (
+                          <View style={styles.answerContainer}>
+                            <Text style={styles.correctAnswerLabel}>
+                              La bonne réponse est : <Text style={styles.correctAnswerValue}>{currentQuestion.answer}</Text>
+                            </Text>
+                            <View style={styles.equationContainer}>
+                              <Text style={styles.equationText}>
+                                {currentQuestion.type === 'multiplicand' && (
+                                  <Text style={styles.underlined}>{currentQuestion.num1}</Text>
+                                )}
+                                {currentQuestion.type !== 'multiplicand' && currentQuestion.num1}
+                                {' × '}
+                                {currentQuestion.type === 'multiplier' && (
+                                  <Text style={styles.underlined}>{currentQuestion.num2}</Text>
+                                )}
+                                {currentQuestion.type !== 'multiplier' && currentQuestion.num2}
+                                {' = '}
+                                {currentQuestion.type === 'result' && (
+                                  <Text style={styles.underlined}>{currentQuestion.answer}</Text>
+                                )}
+                                {currentQuestion.type !== 'result' && currentQuestion.num1 * currentQuestion.num2}
+                              </Text>
+                            </View>
+                          </View>
+                        )}
+                      </View>
+                    ) : (
+                      <View style={styles.feedbackBox}>
+                        <X size={48} color={attempts === 1 ? AppColors.timerMiddle : AppColors.timerEnd} />
+                        <Text style={[styles.feedbackText, { color: attempts === 1 ? AppColors.timerMiddle : AppColors.timerEnd }]}>
+                          {attempts === 1 ? 'On réessaie 😌' : 'Pas tout à fait...'}
+                        </Text>
+                        {showCorrectAnswer && (
+                          <View style={styles.answerContainer}>
+                            <Text style={styles.correctAnswerLabel}>
+                              La bonne réponse est : <Text style={styles.correctAnswerValue}>{currentQuestion.answer}</Text>
+                            </Text>
+                            <View style={styles.equationContainer}>
+                              <Text style={styles.equationText}>
+                                {currentQuestion.type === 'multiplicand' && (
+                                  <Text style={styles.underlined}>{currentQuestion.num1}</Text>
+                                )}
+                                {currentQuestion.type !== 'multiplicand' && currentQuestion.num1}
+                                {' × '}
+                                {currentQuestion.type === 'multiplier' && (
+                                  <Text style={styles.underlined}>{currentQuestion.num2}</Text>
+                                )}
+                                {currentQuestion.type !== 'multiplier' && currentQuestion.num2}
+                                {' = '}
+                                {currentQuestion.type === 'result' && (
+                                  <Text style={styles.underlined}>{currentQuestion.answer}</Text>
+                                )}
+                                {currentQuestion.type !== 'result' && currentQuestion.num1 * currentQuestion.num2}
+                              </Text>
+                            </View>
+                            <Text style={styles.kindPhraseText}>
+                              {currentErrorPhrase}
                             </Text>
                           </View>
-                        </View>
-                      )}
-                    </View>
-                  ) : (
-                    <View style={styles.feedbackBox}>
-                      <X size={48} color={attempts === 1 ? AppColors.timerMiddle : AppColors.timerEnd} />
-                      <Text style={[styles.feedbackText, { color: attempts === 1 ? AppColors.timerMiddle : AppColors.timerEnd }]}>
-                        {attempts === 1 ? 'On réessaie 😌' : 'Pas tout à fait...'}
-                      </Text>
-                      {showCorrectAnswer && (
-                        <View style={styles.answerContainer}>
-                          <Text style={styles.correctAnswerLabel}>
-                            La bonne réponse est : <Text style={styles.correctAnswerValue}>{currentQuestion.answer}</Text>
-                          </Text>
-                          <View style={styles.equationContainer}>
-                            <Text style={styles.equationText}>
-                              {currentQuestion.type === 'multiplicand' && (
-                                <Text style={styles.underlined}>{currentQuestion.num1}</Text>
-                              )}
-                              {currentQuestion.type !== 'multiplicand' && currentQuestion.num1}
-                              {' × '}
-                              {currentQuestion.type === 'multiplier' && (
-                                <Text style={styles.underlined}>{currentQuestion.num2}</Text>
-                              )}
-                              {currentQuestion.type !== 'multiplier' && currentQuestion.num2}
-                              {' = '}
-                              {currentQuestion.type === 'result' && (
-                                <Text style={styles.underlined}>{currentQuestion.answer}</Text>
-                              )}
-                              {currentQuestion.type !== 'result' && currentQuestion.num1 * currentQuestion.num2}
-                            </Text>
-                          </View>
-                          <Text style={styles.kindPhraseText}>
-                            {currentErrorPhrase}
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  )}
-                </Animated.View>
-              )}
+                        )}
+                      </View>
+                    )}
+                  </Animated.View>
+                )}
 
-              {!showFeedback && (
-                <TouchableOpacity
-                  style={styles.submitButton}
-                  onPress={checkAnswer}
-                  testID="submit-button"
-                >
-                  <Text style={styles.submitButtonText}>Valider</Text>
-                </TouchableOpacity>
-              )}
-            </>
-          )}
+                {!showFeedback && (
+                  <TouchableOpacity
+                    style={styles.submitButton}
+                    onPress={checkAnswer}
+                    testID="submit-button"
+                  >
+                    <Text style={styles.submitButtonText}>Valider</Text>
+                  </TouchableOpacity>
+                )}
+              </>
+            )}
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -1016,6 +1012,9 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    maxWidth: 500, // Tablet constraint
+    width: '100%',
+    alignSelf: 'center', // Center on tablet
   },
   header: {
     flexDirection: 'row',

@@ -115,7 +115,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   }, []);
 
   const loadData = useCallback(async () => {
-    console.log('📦 Starting data load...');
+
     setIsLoading(true);
 
     let progressData: string | null = null;
@@ -146,27 +146,26 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
     try {
 
-      console.log('📦 Loading data...');
-      console.log('🔍 Raw users data from storage:', usersData);
-      console.log('🔍 Current user ID from storage:', currentUserId);
+
+
 
       if (usersData) {
         const parsedUsers = JSON.parse(usersData);
-        console.log('✅ Parsed users:', parsedUsers.length, 'users');
+
         parsedUsers.forEach((u: User, idx: number) => {
-          console.log(`  User ${idx + 1}: ${u.firstName} (ID: ${u.id})`);
+
         });
 
         const validUsers = parsedUsers.filter((u: User) => {
           const isValid = u && u.id && u.firstName && u.gender && u.age && u.grade && u.createdAt && u.progress;
           if (!isValid) {
-            console.log('⚠️ Filtering out invalid user:', u);
+
           }
           return isValid;
         });
 
         if (validUsers.length !== parsedUsers.length) {
-          console.log(`🧹 Cleaned ${parsedUsers.length - validUsers.length} invalid user(s)`);
+
           await AsyncStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(validUsers));
         }
 
@@ -175,27 +174,27 @@ export const [AppProvider, useApp] = createContextHook(() => {
         if (currentUserId) {
           const user = parsedUsers.find((u: User) => u.id === currentUserId);
           if (user) {
-            console.log('👤 Current user found:', user.firstName);
+
             setCurrentUser(user);
             setProgress(user.progress || INITIAL_PROGRESS);
           } else {
-            console.log('⚠️ Current user ID not found in users list');
+
             if (progressData) {
               setProgress(JSON.parse(progressData));
             }
           }
         } else {
-          console.log('ℹ️ No current user ID set');
+
           if (progressData) {
-            console.log('📊 Loading global progress data');
+
             setProgress(JSON.parse(progressData));
           }
         }
       } else {
-        console.log('⚠️ No users data found in storage');
+
         setUsers([]);
         if (progressData) {
-          console.log('📊 Loading global progress data (no users)');
+
           setProgress(JSON.parse(progressData));
         }
       }
@@ -210,34 +209,34 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
       if (anonymousChallenges) {
         setAnonymousChallengesCompleted(parseInt(anonymousChallenges, 10) || 0);
-        console.log('🏆 Anonymous challenges loaded:', anonymousChallenges);
+
       }
 
       if (anonymousAchievementsData) {
         setAnonymousAchievements(JSON.parse(anonymousAchievementsData));
-        console.log('🌟 Anonymous achievements loaded');
+
       }
 
       if (anonymousPlayDatesData) {
         setAnonymousPlayDates(JSON.parse(anonymousPlayDatesData));
-        console.log('📅 Anonymous play dates loaded');
+
       }
 
       if (anonymousBadgesData) {
         setAnonymousPersistenceBadges(JSON.parse(anonymousBadgesData));
-        console.log('🏅 Anonymous persistence badges loaded');
+
       }
 
       const anonymousBestStreakData = await AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_BEST_STREAK);
       if (anonymousBestStreakData) {
         setAnonymousBestStreak(parseInt(anonymousBestStreakData, 10) || 0);
-        console.log('🔥 Anonymous best streak loaded:', anonymousBestStreakData);
+
       }
     } catch (error) {
       console.error('❌ Error loading data:', error);
     } finally {
       setIsLoading(false);
-      console.log('✅ Data loading complete');
+
     }
   }, []);
 
@@ -392,7 +391,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       setAnonymousPlayDates([]);
       setAnonymousPersistenceBadges([]);
       setAnonymousBestStreak(0);
-      console.log('🔄 Progress reset including anonymous challenges count');
+
     } catch (error) {
       console.error('Error resetting progress:', error);
     }
@@ -400,14 +399,14 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
   const saveUsers = useCallback(async (newUsers: User[]) => {
     try {
-      console.log('💾 Saving users:', newUsers.length, 'users');
+
       // Update ref immediately
       usersRef.current = newUsers;
 
       await AsyncStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(newUsers));
-      console.log('📝 Setting users state with', newUsers.length, 'users');
+
       setUsers(newUsers);
-      console.log('✅ Users saved and state updated successfully');
+
     } catch (error) {
       console.error('❌ Error saving users:', error);
     }
@@ -498,7 +497,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
         await updateStateAndStorage(updatedUser, updatedUsers);
 
-        console.log('🏆 User challenges completed:', newCount);
+
         return newCount;
       } else {
         const currentAnon = anonymousChallengesRef.current;
@@ -506,7 +505,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         await AsyncStorage.setItem(STORAGE_KEYS.ANONYMOUS_CHALLENGES, newCount.toString());
         setAnonymousChallengesCompleted(newCount);
         anonymousChallengesRef.current = newCount;
-        console.log('🏆 Anonymous challenges completed:', newCount);
+
         return newCount;
       }
     } catch (error) {
@@ -524,7 +523,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         const existingBadges = currentU.persistenceBadges || [];
         const alreadyExists = existingBadges.some(b => b.id === badge.id);
         if (alreadyExists) {
-          console.log('🏅 Badge already exists:', badge.id);
+
           return;
         }
         const updatedBadges = [...existingBadges, badge];
@@ -532,7 +531,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         const updatedUsers = currentUsrs.map(u => u.id === currentU.id ? updatedUser : u);
 
         await updateStateAndStorage(updatedUser, updatedUsers);
-        console.log('🏅 New persistence badge added:', badge.title, badge.icon);
+
       } else {
         // ... (anonymous handling is fine as it uses different state)
         const existingBadges = anonymousPersistenceBadges;
@@ -542,7 +541,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         const updatedBadges = [...existingBadges, badge];
         await AsyncStorage.setItem(STORAGE_KEYS.ANONYMOUS_BADGES, JSON.stringify(updatedBadges));
         setAnonymousPersistenceBadges(updatedBadges);
-        console.log('🏅 New anonymous persistence badge added:', badge.title, badge.icon);
+
       }
     } catch (error) {
       console.error('Error adding persistence badge:', error);
@@ -577,7 +576,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         const updatedUsers = currentUsrs.map(u => u.id === currentU.id ? updatedUser : u);
 
         await updateStateAndStorage(updatedUser, updatedUsers);
-        console.log('🌟 Achievement added:', achievement.id);
+
       } else {
         const existingIndex = anonymousAchievementsRef.current.findIndex(a => a.id === achievement.id);
 
@@ -595,7 +594,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         await AsyncStorage.setItem(STORAGE_KEYS.ANONYMOUS_ACHIEVEMENTS, JSON.stringify(updatedAchievements));
         setAnonymousAchievements(updatedAchievements);
         anonymousAchievementsRef.current = updatedAchievements;
-        console.log('🌟 Anonymous achievement added:', achievement.id);
+
       }
     } catch (error) {
       console.error('Error adding achievement:', error);
@@ -615,13 +614,13 @@ export const [AppProvider, useApp] = createContextHook(() => {
         const updatedUsers = currentUsrs.map(u => u.id === currentU.id ? updatedUser : u);
 
         await updateStateAndStorage(updatedUser, updatedUsers);
-        console.log('📅 Play date added for user');
+
       } else {
         const updatedDates = [...anonymousPlayDatesRef.current, now];
         await AsyncStorage.setItem(STORAGE_KEYS.ANONYMOUS_PLAY_DATES, JSON.stringify(updatedDates));
         setAnonymousPlayDates(updatedDates);
         anonymousPlayDatesRef.current = updatedDates;
-        console.log('📅 Anonymous play date added');
+
       }
     } catch (error) {
       console.error('Error adding play date:', error);
@@ -668,13 +667,13 @@ export const [AppProvider, useApp] = createContextHook(() => {
           const updatedUsers = currentUsrs.map(u => u.id === currentU.id ? updatedUser : u);
 
           await updateStateAndStorage(updatedUser, updatedUsers);
-          console.log('🔥 Best streak updated for user:', newStreak);
+
         }
       } else {
         if (newStreak > anonymousBestStreak) {
           await AsyncStorage.setItem(STORAGE_KEYS.ANONYMOUS_BEST_STREAK, newStreak.toString());
           setAnonymousBestStreak(newStreak);
-          console.log('🔥 Anonymous best streak updated:', newStreak);
+
         }
       }
     } catch (error) {

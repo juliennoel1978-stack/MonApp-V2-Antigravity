@@ -8,16 +8,18 @@ import {
   StyleSheet,
   TouchableOpacity,
   Animated,
-  Dimensions,
-  Platform,
-  Modal,
-  PanResponder,
+  Dimensions, // Restored for StyleSheet use
+  Platform, // Restored
+  Modal, // Restored
+  PanResponder, // Restored
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import { AppColors, NumberColors } from '@/constants/colors';
 import { getTableByNumber } from '@/constants/tables';
 
+// Keep this for static styles usage, while component uses hook for dynamic updates
 const { width } = Dimensions.get('window');
 
 function getTipExamples(tableNumber: number): string[] {
@@ -96,6 +98,18 @@ export default function DiscoveryScreen() {
   const soundRef = useRef<Audio.Sound | null>(null);
   const modalSoundRef = useRef<Audio.Sound | null>(null);
   const isMounted = useRef(true);
+
+  const { width } = useWindowDimensions();
+  const isTablet = width > 600;
+
+  // Dynamic columns calculation
+  const numColumns = isTablet ? 5 : 3;
+  const gap = 8;
+  const containerPadding = 8; // matched with styles.countingContainer padding
+  // Calculate width: (Total Width - Container Padding - Total Gap) / Number of Columns
+  // We also cap the total width used for calculation to 800px to avoid huge items
+  const effectiveWidth = Math.min(width, 800);
+  const itemWidth = (effectiveWidth - (containerPadding * 2) - (gap * (numColumns - 1))) / numColumns;
 
   const panResponder = useRef(
     PanResponder.create({
@@ -398,6 +412,7 @@ export default function DiscoveryScreen() {
                 style={[
                   styles.countingItem,
                   {
+                    width: itemWidth,
                     backgroundColor: isClicked ? tableColor : tableColor + '20',
                     borderColor: isClicked ? tableColor : 'transparent',
                   },
@@ -564,6 +579,9 @@ export default function DiscoveryScreen() {
               {
                 opacity: fadeAnim,
                 transform: [{ scale: scaleAnim }],
+                maxWidth: 800, // Constraint for large screens
+                alignSelf: 'center', // Center content
+                width: '100%',
               },
             ]}
           >
@@ -765,7 +783,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   countingItem: {
-    width: (width - 80) / 3,
+    // Width is set dynamically in the component based on screen size
     aspectRatio: 1,
     padding: 8,
     borderRadius: 12,
