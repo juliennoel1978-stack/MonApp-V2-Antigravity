@@ -5,6 +5,11 @@ import { useApp } from '@/contexts/AppContext';
 import { checkForRewards, checkStrategistAchievement } from '@/utils/rewardQueue';
 import type { QueuedReward, UnlockedAchievement } from '@/types';
 import { AppColors } from '@/constants/colors';
+import { Audio } from 'expo-av';
+import * as Haptics from 'expo-haptics';
+import { Platform } from 'react-native';
+
+const POWERUP_AUDIO_B64 = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//oeMAAAAAAAAAAAAAAAAAAAAAAAAAAAAABYaW5nAAAABQAAAA4AAA0wAA8PDxMTExcXFxsbGx8fH2BgYGRkZGlpaW9vb3Nzc3t7e4CAgISEhImJiaGhoaSkpK2trbGxsbq6usPDw8jIyM3NzdTU1N3d3eHh4evr6/Hx8fb29v///wAAAABMYXZjNTguNTQuMTAwAAAAAAAAAAAAAAAAIjwAAAAAANIAAAAAAA0w8l/O2gAAAAAAAAAAAAAAAAAAAAAA//oeMMAAAADSAAAAABAAAAAAAAAAABInfoAAAAqMAAAAKgAAAAQAAQIEBAQO2e5V323/577777///////77///5wAAAAAD/8AAAAAAAAAAABiLm1wM//oeMMQAACqgAAACqAAABAAABAAABAAAP/yAA//IAA//IA/8gAAAAA3/8wAAAAA5//MAAAAAOkAANf/6HjDEAAmqAAAAKqAAAAQAAAQAAAQAA//IAAAABAA//ID/8gAAAAAN//MAAAAAOf/zAAAAADpAABAAAAA//oeMMQAACqgAAACqAAABAAABAAABAAAP/yAA//IAA//IA/8gAAAAA3/8wAAAAA5//MAAAAAOkAAEAAP/yAA//oeMMQAACqgAAACqAAABAAABAAABAAAP/yAA//IAA//IA/8gAAAAA3/8wAAAAA5//MAAAAAOkAAEAAP/yAA//oeMMQAACqgAAACqAAABAAABAAABAAAP/yAA//IAA//IA/8gAAAAA3/8wAAAAA5//MAAAAAOkAAEAAP/yAA';
 
 const CORRECT_PHRASES = [
     "Bravo, c'est exactement ça !",
@@ -52,6 +57,8 @@ export const useChallengeGame = () => {
         getPersistenceBadges,
         updateBestStreak,
         batchUpdateTableProgress,
+        updateStrongestTable,
+        updateUser,
     } = useApp();
 
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
@@ -70,12 +77,14 @@ export const useChallengeGame = () => {
     const [currentCorrectPhrase, setCurrentCorrectPhrase] = useState<string>('');
     const [currentErrorPhrase, setCurrentErrorPhrase] = useState<string>('');
     const [maxQuestions, setMaxQuestions] = useState<number>(15);
+    const [isEnduranceUnlock, setIsEnduranceUnlock] = useState<boolean>(false); // New State to track if an endurance badge was just unlocked (optional, for effects)
     const [isFinished, setIsFinished] = useState<boolean>(false);
     const [bestStreak, setBestStreak] = useState<number>(0);
     const [wrongAnswers, setWrongAnswers] = useState<{ num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]>([]);
     const [tableStats, setTableStats] = useState<Record<number, { correct: number; total: number }>>({});
     const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
     const [reviewQuestions, setReviewQuestions] = useState<{ num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]>([]);
+    const [showMidBoost, setShowMidBoost] = useState<boolean>(false);
 
     // Rewards state
     const [showBadgeOverlay, setShowBadgeOverlay] = useState<boolean>(false);
@@ -87,6 +96,7 @@ export const useChallengeGame = () => {
 
     const pendingWrongAnswersRef = useRef<{ num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]>([]);
     const inputRef = useRef<TextInput>(null);
+    const tableStatsRef = useRef<Record<number, { correct: number; total: number }>>({}); // Ref for fresh access
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const isMounted = useRef(true);
 
@@ -203,7 +213,7 @@ export const useChallengeGame = () => {
             clearInterval(timerRef.current);
         }
 
-        if (timerEnabled && timerDuration > 0 && !showFeedback && !showCelebration && currentQuestion) {
+        if (timerEnabled && timerDuration > 0 && !showFeedback && !showCelebration && !showMidBoost && currentQuestion) {
             timerRef.current = setInterval(() => {
                 setTimeRemaining(prev => {
                     if (prev <= 1) {
@@ -228,7 +238,7 @@ export const useChallengeGame = () => {
                 }
             };
         }
-    }, [currentQuestion, showFeedback, showCelebration, settings.timerEnabled, settings.timerDuration, currentUser, handleTimeOut, generateNewQuestion]);
+    }, [currentQuestion, showFeedback, showCelebration, showMidBoost, settings.timerEnabled, settings.timerDuration, currentUser, handleTimeOut, generateNewQuestion]);
 
     const [completedChallengeCount, setCompletedChallengeCount] = useState<number>(0);
 
@@ -243,14 +253,30 @@ export const useChallengeGame = () => {
         setCompletedChallengeCount(newTotal);
 
         // Save table stats logic...
-        const tableUpdates = Object.entries(tableStats).map(([tableStr, stats]) => ({
+        // Use REF to get latest stats avoiding closure staleness
+        const currentStats = tableStatsRef.current;
+        const tableUpdates = Object.entries(currentStats).map(([tableStr, stats]) => ({
             tableNumber: parseInt(tableStr, 10),
             correct: stats.correct,
             total: stats.total
         }));
 
+        // Calculate Strongest Table for this session/overall
+        let bestTableReq = -1;
+        let bestTableRate = -1; // Scores (number of correct answers) are stored here for ranking
+
+
+        console.log('🏁 handleChallengeEnd: Analyzing stats:', JSON.stringify(currentStats));
+
+        // NOTE: Strongest Table calculation and saving is now handled by the ChallengeResults component
+        // to ensure that the value displayed to the user is exactly the one that is persisted.
+        // This prevents logic mismatch bugs.
+
         if (tableUpdates.length > 0) {
+            console.log('💾 Saving table stats:', tableUpdates);
             await batchUpdateTableProgress(tableUpdates);
+        } else {
+            console.log('⚠️ No table stats to save this run.');
         }
 
         const badgeTheme = currentUser?.badgeTheme || settings.badgeTheme || 'space';
@@ -264,6 +290,40 @@ export const useChallengeGame = () => {
             : settings.timerEnabled;
 
         const scorePercent = Math.round((correctCount / maxQuestions) * 100);
+
+        // --- ENDURANCE BADGES LOGIC ---
+        // New logic to unlock 20, 30, 50 question badges with > 70% success.
+        // Retroactive unlock: 50 unlocks 30 and 20 if needed.
+        if (currentUser && scorePercent > 70) {
+            const currentEndurance = currentUser.enduranceBadges || {};
+            const updates: Partial<{ 20: boolean; 30: boolean; 50: boolean }> = {};
+            let hasChanges = false;
+
+            // Check for 50 (The Boss)
+            if (maxQuestions >= 50) {
+                if (!currentEndurance[50]) { updates[50] = true; hasChanges = true; }
+                if (!currentEndurance[30]) { updates[30] = true; hasChanges = true; }
+                if (!currentEndurance[20]) { updates[20] = true; hasChanges = true; }
+            }
+            // Check for 30
+            else if (maxQuestions >= 30) {
+                if (!currentEndurance[30]) { updates[30] = true; hasChanges = true; }
+                if (!currentEndurance[20]) { updates[20] = true; hasChanges = true; }
+            }
+            // Check for 20
+            else if (maxQuestions >= 20) {
+                if (!currentEndurance[20]) { updates[20] = true; hasChanges = true; }
+            }
+
+            if (hasChanges) {
+                const newEndurance = { ...currentEndurance, ...updates };
+                await updateUser(currentUser.id, { enduranceBadges: newEndurance });
+                // We could add a specific notification/reward here if desired, 
+                // but the requirements focus on the "Mes Exploits" appearance.
+                // For now, we just silently unlock or rely on typical persistence checks.
+            }
+        }
+        // ------------------------------
 
         const { queue, newBadge, newAchievements } = checkForRewards({
             totalChallengesCompleted: newTotal,
@@ -286,7 +346,7 @@ export const useChallengeGame = () => {
         } else {
             setIsFinished(true);
         }
-    }, [isReviewMode, incrementChallengesCompleted, addPlayDate, currentUser, settings, correctCount, maxQuestions, getPersistenceBadges, getAchievements, getPlayDates, tableStats]);
+    }, [isReviewMode, incrementChallengesCompleted, addPlayDate, currentUser, settings, correctCount, maxQuestions, getPersistenceBadges, getAchievements, getPlayDates, tableStats, batchUpdateTableProgress, updateStrongestTable]);
 
     const startReviewMode = useCallback((wrongAnswersToReview: { num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]) => {
         setIsFinished(false);
@@ -367,28 +427,17 @@ export const useChallengeGame = () => {
     }, [rewardQueue, currentReward, pendingBadge, pendingAchievements, addPersistenceBadge, addAchievement, pendingReviewStart, startReviewMode]);
 
     const handleReviewErrors = useCallback(() => {
-        console.log('🔄 Starting review mode with', wrongAnswers.length, 'questions');
-        const existingAchievements = getAchievements();
-        const strategistReward = checkStrategistAchievement(existingAchievements);
+        console.log('🔄 handleReviewErrors called. Wrong answers count:', wrongAnswers.length);
 
-        if (strategistReward) {
-            console.log('🔎 Strategist achievement will be unlocked!');
-            const achievement: UnlockedAchievement = {
-                id: 'strategist',
-                unlockedAt: new Date().toISOString(),
-                count: 1,
-            };
-            setPendingAchievements([achievement]);
-            pendingWrongAnswersRef.current = [...wrongAnswers];
-            setPendingReviewStart(true);
-            setRewardQueue([strategistReward]);
-            setCurrentReward(strategistReward);
-            setShowBadgeOverlay(true);
-        } else {
-            console.log('🔄 Starting review directly (no strategist achievement)');
-            startReviewMode(wrongAnswers);
+        if (!wrongAnswers || wrongAnswers.length === 0) {
+            console.warn('⚠️ No wrong answers to review (or array is empty).');
+            return;
         }
-    }, [wrongAnswers, getAchievements, startReviewMode]);
+
+        // Unconditionally start review mode as requested
+        console.log('🔄 Starting review directly. Questions:', wrongAnswers);
+        startReviewMode([...wrongAnswers]);
+    }, [wrongAnswers, startReviewMode]);
 
     const checkAnswer = useCallback(() => {
         if (!currentQuestion || userAnswer.trim() === '') return;
@@ -437,13 +486,15 @@ export const useChallengeGame = () => {
                 const table = currentQuestion.num1 <= 10 && currentQuestion.num2 <= 10
                     ? Math.max(currentQuestion.num1, currentQuestion.num2)
                     : currentQuestion.num1;
-                return {
+                const newStats = {
                     ...prev,
                     [table]: {
                         correct: (prev[table]?.correct || 0) + 1,
                         total: (prev[table]?.total || 0) + 1,
                     },
                 };
+                tableStatsRef.current = newStats; // Sync ref
+                return newStats;
             });
 
             if (isReviewMode) {
@@ -470,6 +521,22 @@ export const useChallengeGame = () => {
                     }
                 }, 2000);
                 return;
+            }
+
+            // MID-COURSE BOOST TRIGGER
+            // Check if we hit exactly 50%
+            if (totalQuestions + 1 === Math.floor(maxQuestions / 2)) {
+                playBoostSound();
+                setShowMidBoost(true);
+
+                // Wait 2.5s then resume
+                setTimeout(() => {
+                    if (isMounted.current) {
+                        setShowMidBoost(false);
+                        generateNewQuestion();
+                    }
+                }, 2500);
+                return; // SKIP standard generation
             }
 
             setTimeout(() => {
@@ -506,13 +573,15 @@ export const useChallengeGame = () => {
                     const table = currentQuestion.num1 <= 10 && currentQuestion.num2 <= 10
                         ? Math.max(currentQuestion.num1, currentQuestion.num2)
                         : currentQuestion.num1;
-                    return {
+                    const newStats = {
                         ...prev,
                         [table]: {
                             correct: prev[table]?.correct || 0,
                             total: (prev[table]?.total || 0) + 1,
                         },
                     };
+                    tableStatsRef.current = newStats; // Sync ref
+                    return newStats;
                 });
 
                 if (totalQuestions + 1 >= maxQuestions) {
@@ -543,6 +612,7 @@ export const useChallengeGame = () => {
         setBestStreak(0);
         setWrongAnswers([]);
         setTableStats({});
+        tableStatsRef.current = {}; // Fix: Clear ref to prevent ghost stats from previous games
         const questions = currentUser
             ? (currentUser.challengeQuestions || 15)
             : (settings.challengeQuestions || 15);
@@ -550,8 +620,46 @@ export const useChallengeGame = () => {
         generateNewQuestion();
     }, [currentUser, settings, generateNewQuestion]);
 
+    const playBoostSound = async () => {
+        if (Platform.OS === 'web') {
+            try {
+                const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+
+                // Rising Tone (Power Up)
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.5); // A3 to A5
+
+                gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.5);
+
+                osc.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            } catch (e) {
+                console.error(e);
+            }
+        } else {
+            try {
+                await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                const { sound } = await Audio.Sound.createAsync(
+                    { uri: POWERUP_AUDIO_B64 },
+                    { shouldPlay: true }
+                );
+                // Pitch up for effect
+                await sound.setRateAsync(1.5, true);
+            } catch (e) { }
+        }
+    };
+
     return {
         // State
+        showMidBoost,
         currentQuestion,
         userAnswer,
         setUserAnswer,

@@ -6,8 +6,8 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     type: 'ONE_SHOT',
     title: 'Maître du Temps',
     emoji: '⏱️',
-    message: 'Le chrono ne te résiste pas.',
-    backTitle: 'Vitesse Éclair ! ⚡️',
+    message: 'Le temps est maîtrisé.',
+    backTitle: 'Flash !',
     trigger: 'First time finishing with Timer ON',
   },
   {
@@ -15,8 +15,8 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     type: 'ONE_SHOT',
     title: 'Grand Stratège',
     emoji: '🔎',
-    message: 'Tu apprends de tes erreurs.',
-    backTitle: 'Génie en action 🧠',
+    message: 'Tu apprends vite !',
+    backTitle: 'Génie !',
     trigger: 'Clicking "Revoir mes erreurs" (Review Errors)',
   },
   {
@@ -24,8 +24,8 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     type: 'RECURRING',
     title: 'Habitué',
     emoji: '📅',
-    message: 'Tu reviens nous voir chaque jour.',
-    backTitle: 'Toujours fidèle ! 🫡',
+    message: 'Tu es très régulier.',
+    backTitle: 'Fidèle !',
     trigger: 'Played on 3 distinct days in current week',
   },
   {
@@ -33,8 +33,8 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     type: 'RECURRING',
     title: 'Lève-tôt',
     emoji: '🌅',
-    message: 'Déjà prêt à gagner des étoiles.',
-    backTitle: 'Debout champion ! ☀️',
+    message: 'Déjà au travail !',
+    backTitle: 'Debout !',
     trigger: 'Finish challenge before 10:00 AM',
   },
   {
@@ -43,7 +43,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     title: 'Insomnie',
     emoji: '🦉',
     message: 'Tu travailles même le soir !',
-    backTitle: 'Oiseau de nuit 🦉',
+    backTitle: 'Oiseau de nuit',
     trigger: 'Finish challenge after 07:00 PM (19:00)',
   },
   {
@@ -51,8 +51,8 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     type: 'RECURRING',
     title: 'Oeil de Lynx',
     emoji: '🎯',
-    message: 'Aucune erreur ne te résiste.',
-    backTitle: 'Regard perçant 😼',
+    message: 'Un sans faute.',
+    backTitle: 'Quel talent !',
     trigger: 'Score === 100%',
   },
   {
@@ -60,8 +60,8 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     type: 'RECURRING',
     title: 'Série Max',
     emoji: '🔥',
-    message: 'Quelle superbe série de victoires.',
-    backTitle: 'Inarrêtable ! 🔥',
+    message: 'Quelle belle série !',
+    backTitle: 'Invincible !',
     trigger: 'Achieve a high streak',
   },
 ];
@@ -94,7 +94,7 @@ export const canUnlockRecurringAchievement = (
   const lastUnlocked = existing.lastUnlockedAt || existing.unlockedAt;
   const lastDate = new Date(lastUnlocked);
   const today = new Date();
-  
+
   return (
     lastDate.getFullYear() !== today.getFullYear() ||
     lastDate.getMonth() !== today.getMonth() ||
@@ -118,7 +118,7 @@ export const getDistinctPlayDaysThisWeek = (playDates: string[]): number => {
   weekEnd.setDate(weekEnd.getDate() + 7);
 
   const uniqueDays = new Set<string>();
-  
+
   playDates.forEach(dateStr => {
     const date = new Date(dateStr);
     if (date >= weekStart && date < weekEnd) {

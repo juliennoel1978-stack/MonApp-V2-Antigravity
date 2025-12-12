@@ -142,11 +142,12 @@ function FlipCard({ icon, frontText, backText, isZeroState, isSmallScreen }: Fli
               isSmallScreen && styles.statMainTextSmall,
             ]}
             numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.5}
           >
             {frontText}
           </Text>
         </Animated.View>
-
         {/* Back Face */}
         <Animated.View
           style={[
@@ -161,7 +162,7 @@ function FlipCard({ icon, frontText, backText, isZeroState, isSmallScreen }: Fli
           </Text>
         </Animated.View>
       </View>
-    </TouchableOpacity>
+    </TouchableOpacity >
   );
 }
 

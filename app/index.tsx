@@ -46,7 +46,10 @@ export default function HomeScreen() {
       }
       lastFocusTime.current = now;
 
-      reloadData();
+      // RELOAD DATA REMOVED: Rely on Context State which is fresh. 
+      // reloadData() causes race conditions if storage write is lagging behind memory update.
+      // reloadData(); 
+
       setTimeout(() => {
         setDataVersion(prev => {
           const newVersion = prev + 1;
@@ -54,7 +57,7 @@ export default function HomeScreen() {
           return newVersion;
         });
       }, 100);
-    }, [reloadData])
+    }, []) // Removed reloadData from deps to be safe, or just leave empty deps as it is a callback.
   );
 
 
@@ -286,64 +289,46 @@ export default function HomeScreen() {
   }, [challengesCompleted]);
 
   const strongestTable = React.useMemo(() => {
-    const tablesWithAttempts = progress.filter(p => p.totalAttempts > 0);
-    if (tablesWithAttempts.length === 0) return null;
+    // 1. STRICT: Only use Snapshot "Last Session"
+    // The user explicitly wants to purge "Table 9" (history) if it's not the current best.
+    // We REMOVE the fallback to currentUser.strongestTable.
 
-    let best = tablesWithAttempts[0];
-    let bestRate = best.correctAnswers / best.totalAttempts;
-
-    for (const table of tablesWithAttempts) {
-      const rate = table.correctAnswers / table.totalAttempts;
-      if (rate > bestRate || (rate === bestRate && table.totalAttempts > best.totalAttempts)) {
-        bestRate = rate;
-        best = table;
-      }
+    if (currentUser?.lastSessionBestTable && currentUser.lastSessionBestTable > 0) {
+      return currentUser.lastSessionBestTable;
     }
 
-    const result = bestRate >= 0.7 ? best.tableNumber : null;
-
-    return result;
-  }, [progress, dataVersion]);
+    // 2. Default to 1. (Do NOT show history)
+    return 1;
+  }, [currentUser?.lastSessionBestTable]);
 
   const missionTable = React.useMemo(() => {
-    // 1. Check for any activity
+    // 1. Default: If no challenges completed, start with Table 1.
+    // Use challengesCompleted as the primary driver for "Mission" progress.
+    if (challengesCompleted === 0) {
+      return 1;
+    }
+
+    // 2. Scenario: Challenges played -> Prioritize weakness (most errors / lowest score)
+    // We look at all tables that have been attempted to find the weak spot.
     const tablesWithAttempts = progress.filter(p => p.totalAttempts > 0);
 
-    // If no activity at all (Fresh Launch), start with Table 1
+    // If somehow we have challenges but no attempts recorded (edge case), default to 1.
     if (tablesWithAttempts.length === 0) {
       return 1;
     }
 
-    // 2. Scenario A: Challenges played -> Prioritize weakness (most errors)
-    if (challengesCompleted > 0) {
-      let worstTable = tablesWithAttempts[0];
-      let worstRate = worstTable.correctAnswers / worstTable.totalAttempts;
+    let worstTable = tablesWithAttempts[0];
+    let worstRate = worstTable.correctAnswers / worstTable.totalAttempts;
 
-      for (const table of tablesWithAttempts) {
-        const rate = table.correctAnswers / table.totalAttempts;
-        // Find the lowest success rate
-        if (rate < worstRate) {
-          worstRate = rate;
-          worstTable = table;
-        }
+    for (const table of tablesWithAttempts) {
+      const rate = table.correctAnswers / table.totalAttempts;
+      // Find the lowest success rate
+      if (rate < worstRate || (rate === worstRate && table.totalAttempts < worstTable.totalAttempts)) {
+        worstRate = rate;
+        worstTable = table;
       }
-      return worstTable.tableNumber;
     }
-
-    // 3. Scenario B: Practice only ("Commencer") -> Sequential progression
-    // Find the first (lowest number) table that is NOT completed
-    // This covers "not seen yet" (next in line) or "current being learned"
-    const nextTable = progress.find(p => !p.completed);
-
-    if (nextTable) {
-      return nextTable.tableNumber;
-    }
-
-    // If all tables are completed and no challenges played? 
-    // Maybe show the one with worst stats anyway, or hide button.
-    // Let's fallback to worst stats among completed if user really wants to practice.
-    // Or just return null to hide.
-    return null;
+    return worstTable.tableNumber;
   }, [progress, challengesCompleted]);
 
   const handleSettingsPressIn = () => {

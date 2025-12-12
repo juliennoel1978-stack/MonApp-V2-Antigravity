@@ -13,6 +13,7 @@ import {
   Modal, // Restored
   PanResponder, // Restored
   useWindowDimensions,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
@@ -402,43 +403,50 @@ export default function DiscoveryScreen() {
       title: 'Compte avec moi !',
       content: 'Clique sur les multiplications pour entendre comment elles se lisent !',
       visual: (
-        <View style={styles.countingContainer}>
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => {
-            const result = table.number * i;
-            const isClicked = clickedMultiplications.has(i);
-            return (
-              <TouchableOpacity
-                key={i}
-                style={[
-                  styles.countingItem,
-                  {
-                    width: itemWidth,
-                    backgroundColor: isClicked ? tableColor : tableColor + '20',
-                    borderColor: isClicked ? tableColor : 'transparent',
-                  },
-                ]}
-                onPress={() => handleMultiplicationPress(i, result)}
-                activeOpacity={0.7}
-              >
-                <Text
-                  style={[styles.countingNumber, { color: isClicked ? '#FFFFFF' : tableColor }]}
+        <ScrollView
+          style={{ width: '100%', maxHeight: 400 }}
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingBottom: 20 }}
+          showsVerticalScrollIndicator={true}
+          nestedScrollEnabled={true}
+        >
+          <View style={styles.countingContainer}>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => {
+              const result = table.number * i;
+              const isClicked = clickedMultiplications.has(i);
+              return (
+                <TouchableOpacity
+                  key={i}
+                  style={[
+                    styles.countingItem,
+                    {
+                      width: itemWidth,
+                      backgroundColor: isClicked ? tableColor : tableColor + '20',
+                      borderColor: isClicked ? tableColor : 'transparent',
+                    },
+                  ]}
+                  onPress={() => handleMultiplicationPress(i, result)}
+                  activeOpacity={0.7}
                 >
-                  {result}
-                </Text>
-                <Text
-                  style={[styles.countingLabel, { color: isClicked ? '#FFFFFF' : AppColors.textSecondary }]}
-                >
-                  {table.number} × {i}
-                </Text>
-                {isClicked && (
-                  <View style={styles.checkmarkBadge}>
-                    <Check size={10} color="#FFFFFF" />
-                  </View>
-                )}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+                  <Text
+                    style={[styles.countingNumber, { color: isClicked ? '#FFFFFF' : tableColor }]}
+                  >
+                    {result}
+                  </Text>
+                  <Text
+                    style={[styles.countingLabel, { color: isClicked ? '#FFFFFF' : AppColors.textSecondary }]}
+                  >
+                    {table.number} × {i}
+                  </Text>
+                  {isClicked && (
+                    <View style={styles.checkmarkBadge}>
+                      <Check size={10} color="#FFFFFF" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </ScrollView>
       ),
     },
     {
@@ -684,28 +692,28 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 100,
+    paddingTop: 4, // drastically reduced
+    paddingBottom: 4,
   },
   content: {
     alignItems: 'center',
     width: '100%',
   },
   stepTitle: {
-    fontSize: 24,
+    fontSize: 20, // Reduced from 24
     fontWeight: 'bold' as const,
     color: AppColors.text,
     textAlign: 'center',
-    marginBottom: 12,
-    paddingTop: 8,
+    marginBottom: 4, // Reduced
+    paddingTop: 4,
   },
   stepContent: {
-    fontSize: 16,
+    fontSize: 14, // Reduced from 16
     color: AppColors.textSecondary,
     textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 20,
-    paddingHorizontal: 20,
+    lineHeight: 18,
+    marginBottom: 8,
+    paddingHorizontal: 16,
   },
   visualContainer: {
     width: width - 40,
@@ -770,10 +778,10 @@ const styles = StyleSheet.create({
   countingContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    justifyContent: 'center',
+    justifyContent: 'space-between', // Changed to space-between
     width: '100%',
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
+    flex: 1, // Added flex: 1
   },
   readyTitle: {
     fontSize: 24,
@@ -784,9 +792,12 @@ const styles = StyleSheet.create({
   },
   countingItem: {
     // Width is set dynamically in the component based on screen size
-    aspectRatio: 1,
-    padding: 8,
-    borderRadius: 12,
+    // width set dynamically
+    flexGrow: 1, // Added flexGrow
+    margin: 2, // Added margin instead of gap handling
+    minHeight: 60, // Minimum height but flexible
+    padding: 2,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,

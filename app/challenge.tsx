@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
@@ -22,6 +23,52 @@ import { ChallengeFeedback } from '@/components/challenge/ChallengeFeedback';
 import { useChallengeGame } from '@/hooks/useChallengeGame';
 
 const { width } = Dimensions.get('window');
+
+const BOOST_THEMES = {
+  animals: { image: '🐒', item: '🧃', title: 'Pause Vitaminée !', subtitle: 'La moitié est faite ! Bois un coup !' },
+  space: { image: '👽', item: '🛸', title: 'Hyper-Vitesse !', subtitle: 'On finit à la vitesse de la lumière !' },
+  heroes: { image: '🤖', item: '💾', title: 'Mise à jour système...', subtitle: 'Tu deviens plus rapide !' },
+};
+
+const MidChallengeBoostModal = ({
+  visible,
+  theme,
+}: {
+  visible: boolean;
+  theme: string;
+}) => {
+  const [scaleAnim] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    if (visible) {
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 50,
+        friction: 5,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      scaleAnim.setValue(0);
+    }
+  }, [visible]);
+
+  if (!visible) return null;
+
+  const data = BOOST_THEMES[theme as keyof typeof BOOST_THEMES] || BOOST_THEMES.animals;
+
+  return (
+    <View style={styles.boostOverlay}>
+      <Animated.View style={[styles.boostCard, { transform: [{ scale: scaleAnim }] }]}>
+        <Text style={styles.boostTitle}>{data.title}</Text>
+        <View style={styles.boostImageContainer}>
+          <Text style={styles.boostEmojiMain}>{data.image}</Text>
+          <Text style={styles.boostEmojiItem}>{data.item}</Text>
+        </View>
+        <Text style={styles.boostSubtitle}>{data.subtitle}</Text>
+      </Animated.View>
+    </View>
+  );
+};
 
 export default function ChallengeScreen() {
   const router = useRouter();
@@ -55,6 +102,7 @@ export default function ChallengeScreen() {
     currentReward,
     completedChallengeCount,
     anonymousChallengesCompleted,
+    showMidBoost,
 
     // Refs & Anims
     inputRef,
@@ -102,6 +150,11 @@ export default function ChallengeScreen() {
           visible={showBadgeOverlay}
           currentReward={currentReward}
           onDismiss={handleBadgeDismiss}
+        />
+
+        <MidChallengeBoostModal
+          visible={showMidBoost}
+          theme={currentUser?.badgeTheme || settings?.badgeTheme || 'space'}
         />
 
         <ChallengeHeader
@@ -233,6 +286,63 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold' as const,
     color: '#FFFFFF',
+  },
+
+  // Boost Modal Styles
+  boostOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999, // High z-index to overlay everything
+  },
+  boostCard: {
+    backgroundColor: 'white',
+    borderRadius: 30,
+    padding: 30,
+    alignItems: 'center',
+    width: width * 0.85,
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 4,
+    borderColor: '#FFD700', // Gold border for special feel
+  },
+  boostTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: AppColors.primary,
+    marginBottom: 10,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+  },
+  boostImageContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 20,
+  },
+  boostEmojiMain: {
+    fontSize: 80,
+  },
+  boostEmojiItem: {
+    fontSize: 60,
+    marginLeft: -20,
+    marginTop: 30,
+  },
+  boostSubtitle: {
+    fontSize: 20,
+    color: AppColors.text,
+    textAlign: 'center',
+    fontWeight: '600',
+    fontStyle: 'italic',
   },
 
 

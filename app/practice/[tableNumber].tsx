@@ -22,6 +22,136 @@ import { useApp } from '@/contexts/AppContext';
 import { generateQuestions } from '@/utils/questionGenerator';
 import type { Question } from '@/types';
 
+import { Audio } from 'expo-av';
+import * as Haptics from 'expo-haptics';
+
+// Short "Ding" sound (Base64 MP3)
+const SUCCESS_AUDIO_B64 = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//oeMAAAAAAAAAAAAAAAAAAAAAAAAAAAAABYaW5nAAAABQAAAA4AAA0wAA8PDxMTExcXFxsbGx8fH2BgYGRkZGlpaW9vb3Nzc3t7e4CAgISEhImJiaGhoaSkpK2trbGxsbq6usPDw8jIyM3NzdTU1N3d3eHh4evr6/Hx8fb29v///wAAAABMYXZjNTguNTQuMTAwAAAAAAAAAAAAAAAAIjwAAAAAANIAAAAAAA0w8l/O2gAAAAAAAAAAAAAAAAAAAAAA//oeMMAAAADSAAAAABAAAAAAAAAAABInfoAAAAqMAAAAKgAAAAQAAQIEBAQO2e5V323/577777///////77///5wAAAAAD/8AAAAAAAAAAABiLm1wM//oeMMQAACqgAAACqAAABAAABAAABAAAP/yAA//IAA//IA/8gAAAAA3/8wAAAAA5//MAAAAAOkAANf/6HjDEAAmqAAAAKqAAAAQAAAQAAAQAA//IAAAABAA//ID/8gAAAAAN//MAAAAAOf/zAAAAADpAABAAAAA//oeMMQAACqgAAACqAAABAAABAAABAAAP/yAA//IAA//IA/8gAAAAA3/8wAAAAA5//MAAAAAOkAAEAAP/yAA//oeMMQAACqgAAACqAAABAAABAAABAAAP/yAA//IAA//IA/8gAAAAA3/8wAAAAA5//MAAAAAOkAAEAAP/yAA//oeMMQAACqgAAACqAAABAAABAAABAAAP/yAA//IAA//IA/8gAAAAA3/8wAAAAA5//MAAAAAOkAAEAAP/yAA';
+
+const COACH_THEMES = {
+  animals: '🐒',
+  space: '👽',
+  heroes: '🤖',
+};
+
+const COACH_MESSAGES = {
+  neutral: ["Bravo !", "Super !", "Génial !", "Top !", "Bien joué !", "Excellent !", "C'est ça !"],
+  boy: ["Tu es un Champion !", "T'es le meilleur !", "Quel talent !", "Fort !"],
+  girl: ["Tu es une Championne !", "T'es la meilleure !", "Quel talent !", "Forte !"],
+};
+
+const CHECKPOINT_THEMES = {
+  animals: { image: '🐒', item: '🍌', title: 'Miam !', subtitle: 'Déjà la moitié de la table !' },
+  space: { image: '👽', item: '💎', title: 'Énergie 50% !', subtitle: 'Tu as fait la moitié du voyage.' },
+  heroes: { image: '🤖', item: '🔋', title: 'Recharge OK !', subtitle: 'Puissance à 50%.' },
+};
+
+const CheckpointModal = ({
+  visible,
+  theme,
+  onClose,
+}: {
+  visible: boolean;
+  theme: string;
+  onClose: () => void;
+}) => {
+  const [scaleAnim] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    if (visible) {
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 50,
+        friction: 5,
+        useNativeDriver: true,
+      }).start();
+
+      // Auto close after 2.5 seconds
+      const timer = setTimeout(() => {
+        onClose();
+      }, 2500);
+      return () => clearTimeout(timer);
+    } else {
+      scaleAnim.setValue(0);
+    }
+  }, [visible]);
+
+  if (!visible) return null;
+
+  const data = CHECKPOINT_THEMES[theme as keyof typeof CHECKPOINT_THEMES] || CHECKPOINT_THEMES.animals;
+
+  return (
+    <View style={styles.checkpointOverlay}>
+      <Animated.View style={[styles.checkpointCard, { transform: [{ scale: scaleAnim }] }]}>
+        <Text style={styles.checkpointTitle}>{data.title}</Text>
+        <View style={styles.checkpointImageContainer}>
+          <Text style={styles.checkpointEmojiMain}>{data.image}</Text>
+          <Text style={styles.checkpointEmojiItem}>{data.item}</Text>
+        </View>
+        <Text style={styles.checkpointSubtitle}>{data.subtitle}</Text>
+      </Animated.View>
+    </View>
+  );
+};
+
+const CoachFeedback = ({
+  visible,
+  theme,
+  gender,
+  message,
+}: {
+  visible: boolean;
+  theme: string;
+  gender?: 'boy' | 'girl';
+  message: string;
+}) => {
+  const [scaleAnim] = useState(new Animated.Value(0));
+  const [opacityAnim] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 50,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      scaleAnim.setValue(0);
+      opacityAnim.setValue(0);
+    }
+  }, [visible]);
+
+  if (!visible) return null;
+
+  const coachEmoji = COACH_THEMES[theme as keyof typeof COACH_THEMES] || '🐒';
+
+  return (
+    <View style={styles.coachContainer} pointerEvents="none">
+      <Animated.View
+        style={[
+          styles.coachBubble,
+          {
+            opacity: opacityAnim,
+            transform: [{ scale: scaleAnim }, { translateY: -20 }],
+          },
+        ]}
+      >
+        <Text style={styles.coachMessage}>{message} {['🎉', '🌟', '🔥', '🚀', '👏', '💪'][Math.floor(Math.random() * 6)]}</Text>
+        <View style={styles.coachBubbleArrow} />
+      </Animated.View>
+      <Text style={styles.coachEmoji}>{coachEmoji}</Text>
+    </View>
+  );
+};
+
 const { width } = Dimensions.get('window');
 
 export default function PracticeScreen() {
@@ -49,6 +179,16 @@ export default function PracticeScreen() {
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [reviewErrors, setReviewErrors] = useState<Question[]>([]);
 
+  // Coach Feedback State
+  const [showCoachFeedback, setShowCoachFeedback] = useState(false);
+  const [coachMessage, setCoachMessage] = useState('');
+
+  // Checkpoint State
+  const [showCheckpoint, setShowCheckpoint] = useState(false);
+  const [streak, setStreak] = useState(0);
+
+  const soundRef = useRef<Audio.Sound | null>(null);
+
 
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -58,8 +198,19 @@ export default function PracticeScreen() {
 
   useEffect(() => {
     isMounted.current = true;
+
+    // Configure Audio for iOS Silent Mode
+    Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      shouldDuckAndroid: true,
+      playThroughEarpieceAndroid: false,
+    });
+
     return () => {
       isMounted.current = false;
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+      }
     };
   }, []);
 
@@ -118,13 +269,16 @@ export default function PracticeScreen() {
 
     if (correct) {
       setCorrectCount(newCorrectCount);
-      animateSuccess();
+      // Level 1: Just regular loop, no streak/checkpoint logic needed as per request
+      triggerCoachSuccess();
       setTimeout(() => {
         if (isMounted.current) {
           nextQuestion(newCorrectCount);
+          setShowCoachFeedback(false);
         }
-      }, 1000);
+      }, 1200);
     } else {
+      setStreak(0); // Reset streak on error even in Level 1 for consistency
       animateError();
       if (isReviewMode) {
         const alreadyInReviewErrors = reviewErrors.some(
@@ -158,13 +312,33 @@ export default function PracticeScreen() {
 
     if (correct) {
       setCorrectCount(newCorrectCount);
-      animateSuccess();
-      setTimeout(() => {
-        if (isMounted.current) {
-          nextQuestion(newCorrectCount);
-        }
-      }, 1000);
+
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+
+      // Checkpoint Trigger (Level 2 ONLY, 5 Consecutive)
+      if (level === 2 && newStreak === 5) {
+        triggerCheckpoint();
+        // Wait 2.5s for checkpoint, then proceed
+        setTimeout(() => {
+          if (isMounted.current) {
+            setShowCheckpoint(false);
+            nextQuestion(newCorrectCount);
+          }
+        }, 2500);
+      } else {
+        // Standard Success
+        triggerCoachSuccess();
+        setTimeout(() => {
+          if (isMounted.current) {
+            nextQuestion(newCorrectCount);
+            setShowCoachFeedback(false);
+          }
+        }, 1200);
+      }
+
     } else {
+      setStreak(0); // Reset streak on error
       animateError();
       if (isReviewMode) {
         const alreadyInReviewErrors = reviewErrors.some(
@@ -205,6 +379,90 @@ export default function PracticeScreen() {
         }
       }, 350);
     }
+  };
+
+  const playSuccessSound = async (isCheckpoint = false) => {
+    if (Platform.OS === 'web') {
+      try {
+        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+        if (!AudioContext) return;
+
+        const ctx = new AudioContext();
+
+        // Create oscillator
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+
+        osc.type = 'sine';
+        if (isCheckpoint) {
+          // Checkpoint Tune: C5 - E5 - G5 (Arpeggio)
+          osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+          osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
+        } else {
+          osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+          osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.1);
+        }
+
+        // Envelope
+        gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (isCheckpoint ? 0.6 : 0.3));
+
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + (isCheckpoint ? 0.6 : 0.3));
+      } catch (e) {
+        console.error("Audio error", e);
+      }
+    } else {
+      // NATIVE (iOS/Android)
+      try {
+        // 1. Haptic Feedback (Physical feel)
+        await Haptics.notificationAsync(
+          isCheckpoint ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Success
+        );
+
+        // 2. Play Sound from Base64
+        // Use same sound for now, or could define a different B64 for checkpoint
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: SUCCESS_AUDIO_B64 },
+          { shouldPlay: true }
+        );
+
+        // Auto-unload after playing
+        sound.setOnPlaybackStatusUpdate(async (status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            await sound.unloadAsync();
+          }
+        });
+      } catch (error) {
+        console.log("Native Sound Error", error);
+      }
+    }
+  };
+
+  const triggerCheckpoint = () => {
+    playSuccessSound(true); // Play special tune (Web) or Standard (Native)
+    setShowCheckpoint(true);
+  };
+
+  const triggerCoachSuccess = async () => {
+    // 1. Play Sound (Web Audio API)
+    playSuccessSound();
+
+    // 2. Select Message
+    const isGendered = Math.random() > 0.5;
+    let msg = "";
+    if (isGendered && currentUser?.gender) {
+      const list = currentUser.gender === 'boy' ? COACH_MESSAGES.boy : COACH_MESSAGES.girl;
+      msg = list[Math.floor(Math.random() * list.length)];
+    } else {
+      msg = COACH_MESSAGES.neutral[Math.floor(Math.random() * COACH_MESSAGES.neutral.length)];
+    }
+    setCoachMessage(msg);
+    setShowCoachFeedback(true);
   };
 
   const animateSuccess = () => {
@@ -333,6 +591,7 @@ export default function PracticeScreen() {
     setShowLevelTransition(false);
     setQuestionsToReview([]);
     setReviewErrors([]);
+    setStreak(0); // Reset streak when starting a new level
 
     setTimeout(() => {
       if (isMounted.current) {
@@ -352,6 +611,7 @@ export default function PracticeScreen() {
     setShowLevelTransition(false);
     setQuestionsToReview([]);
     setReviewErrors([]);
+    setStreak(0); // Reset streak on retry
 
     if (level === 2) {
       setTimeout(() => {
@@ -374,6 +634,7 @@ export default function PracticeScreen() {
     setCorrectCount(0);
     setShowResult(false);
     setShowLevelTransition(false);
+    setStreak(0); // Reset streak on starting review
 
     if (level === 2) {
       setTimeout(() => {
@@ -870,15 +1131,25 @@ export default function PracticeScreen() {
           </ScrollView>
         </KeyboardAvoidingView>
 
-        {/* Success Feedback Overlay */}
-        {isCorrect && !showErrorFeedback && (
-          <View style={styles.feedbackCenterOverlay}>
-            <View style={styles.feedbackCenterContent}>
-              <Check size={80} color="#FFFFFF" strokeWidth={4} />
-              <Text style={styles.feedbackCenterText}>Excellent !</Text>
-            </View>
-          </View>
-        )}
+        {/* Success Feedback Overlay REMOVED - Replaced by Coach */}
+
+        <CoachFeedback
+          visible={showCoachFeedback}
+          theme={currentUser?.badgeTheme || settings?.badgeTheme || 'animals'}
+          gender={currentUser?.gender}
+          message={coachMessage}
+        />
+
+        <CheckpointModal
+          visible={showCheckpoint}
+          theme={currentUser?.badgeTheme || settings?.badgeTheme || 'animals'}
+          onClose={() => {
+            // Focus is handled by the timeout logic in triggerCheckpoint/nextQuestion
+            if (isMounted.current) {
+              inputRef.current?.focus();
+            }
+          }}
+        />
 
         {/* Error Feedback Overlay / Card */}
         {showErrorFeedback && (
@@ -1553,5 +1824,102 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: AppColors.text,
+  },
+  coachContainer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 100,
+  },
+  coachEmoji: {
+    fontSize: 80,
+  },
+  coachBubble: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 20,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+    maxWidth: '80%',
+  },
+  coachMessage: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: AppColors.text,
+    textAlign: 'center',
+  },
+  coachBubbleArrow: {
+    position: 'absolute',
+    bottom: -10,
+    left: '50%',
+    marginLeft: -10,
+    width: 0,
+    height: 0,
+    borderLeftWidth: 10,
+    borderRightWidth: 10,
+    borderTopWidth: 10,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: '#FFFFFF',
+  },
+
+  // Checkpoint Styles
+  checkpointOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 900,
+  },
+  checkpointCard: {
+    backgroundColor: 'white',
+    borderRadius: 30,
+    padding: 30,
+    alignItems: 'center',
+    width: width * 0.85,
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  checkpointTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: AppColors.primary,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  checkpointImageContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 20,
+  },
+  checkpointEmojiMain: {
+    fontSize: 80,
+  },
+  checkpointEmojiItem: {
+    fontSize: 60,
+    marginLeft: -20,
+    marginTop: 30,
+  },
+  checkpointSubtitle: {
+    fontSize: 18,
+    color: AppColors.textLight,
+    textAlign: 'center',
+    fontWeight: '600',
   },
 });

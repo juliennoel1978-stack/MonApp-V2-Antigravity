@@ -12,7 +12,7 @@ import {
   Text,
 } from 'react-native';
 import { AppColors } from '@/constants/colors';
-import { PERSISTENCE_BADGES, getBadgeIcon, getBadgeTitle } from '@/constants/badges';
+import { PERSISTENCE_BADGES, getBadgeIcon, getBadgeTitle, ENDURANCE_BADGES } from '@/constants/badges';
 import { ACHIEVEMENTS } from '@/constants/achievements';
 import { useApp } from '@/contexts/AppContext';
 import { BadgeTheme } from '@/types';
@@ -119,19 +119,228 @@ function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlip
         pointerEvents={isFlipped ? 'auto' : 'none'}
       >
         <View style={styles.achievementBackContent}>
-          <Text
-            style={styles.achievementDescriptionText}
-            adjustsFontSizeToFit
-            minimumFontScale={0.7}
-            numberOfLines={4}
-          >
+          <Text style={styles.achievementBackTitle}>
+            {achievement.backTitle}
+          </Text>
+          <Text style={styles.achievementDescriptionText}>
             {achievement.message}
           </Text>
         </View>
       </Animated.View>
+    </TouchableOpacity >
+  );
+}
+
+interface EnduranceFlipCardProps {
+  threshold: 20 | 30 | 50;
+  isUnlocked: boolean;
+  title: string;
+  icon: string;
+  backTitle: string;
+  backMessage: string;
+}
+
+function EnduranceFlipCard({ threshold, isUnlocked, title, icon, backTitle, backMessage }: EnduranceFlipCardProps) {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const flipAnim = useRef(new Animated.Value(0)).current;
+
+  const flipCard = useCallback(() => {
+    const toValue = isFlipped ? 0 : 1;
+    Animated.spring(flipAnim, {
+      toValue,
+      friction: 8,
+      tension: 10,
+      useNativeDriver: true,
+    }).start();
+    setIsFlipped(!isFlipped);
+  }, [isFlipped, flipAnim]);
+
+  const frontOpacity = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 0, 0],
+  });
+
+  const backOpacity = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0, 0, 1],
+  });
+
+  const frontScale = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 0.9, 0.9],
+  });
+
+  const backScale = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.9, 0.9, 1],
+  });
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.achievementItem,
+        !isUnlocked && styles.achievementItemLocked
+      ]}
+      onPress={flipCard}
+      activeOpacity={0.7}
+    >
+      <View style={styles.flipHint}>
+        <View style={styles.flipHintDot} />
+      </View>
+
+      {/* Front Face */}
+      <Animated.View
+        style={[
+          styles.achievementFace,
+          { opacity: frontOpacity, transform: [{ scale: frontScale }] },
+        ]}
+        pointerEvents={isFlipped ? 'none' : 'auto'}
+      >
+        <View style={styles.achievementEmojiContainer}>
+          <Text style={[
+            styles.achievementEmoji,
+            !isUnlocked && styles.achievementEmojiLocked
+          ]}>
+            {icon}
+          </Text>
+        </View>
+        <Text style={[
+          styles.achievementTitle,
+          !isUnlocked && styles.achievementTitleLocked
+        ]} numberOfLines={2}>
+          {title}
+        </Text>
+      </Animated.View>
+
+      {/* Back Face */}
+      <Animated.View
+        style={[
+          styles.achievementFace,
+          styles.achievementFaceBack,
+          { opacity: backOpacity, transform: [{ scale: backScale }] },
+        ]}
+        pointerEvents={isFlipped ? 'auto' : 'none'}
+      >
+        <View style={styles.achievementBackContent}>
+          <Text style={styles.enduranceBackTitle}>
+            {backTitle}
+          </Text>
+          <Text style={styles.enduranceBackMessage}>
+            {backMessage}
+          </Text>
+        </View>
+      </Animated.View>
+    </TouchableOpacity>
+
+  );
+}
+
+interface AdventureFlipCardProps {
+  badge: import('@/constants/badges').BadgeConfig;
+  isUnlocked: boolean;
+  gender?: 'boy' | 'girl';
+}
+
+function AdventureFlipCard({ badge, isUnlocked, gender }: AdventureFlipCardProps) {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const flipAnim = useRef(new Animated.Value(0)).current;
+
+  const flipCard = useCallback(() => {
+    const toValue = isFlipped ? 0 : 1;
+    Animated.spring(flipAnim, {
+      toValue,
+      friction: 8,
+      tension: 10,
+      useNativeDriver: true,
+    }).start();
+    setIsFlipped(!isFlipped);
+  }, [isFlipped, flipAnim]);
+
+  const frontOpacity = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 0, 0],
+  });
+
+  const backOpacity = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0, 0, 1],
+  });
+
+  const frontScale = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 0.9, 0.9],
+  });
+
+  const backScale = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.9, 0.9, 1],
+  });
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.adventureItem,
+        !isUnlocked && styles.adventureItemLocked
+      ]}
+      onPress={flipCard}
+      activeOpacity={0.9}
+    >
+      <View style={styles.flipHint}>
+        <View style={styles.flipHintDot} />
+      </View>
+
+      {/* Front Face */}
+      <Animated.View
+        style={[
+          styles.adventureFace,
+          !isUnlocked && styles.adventureFaceLocked,
+          { opacity: frontOpacity, transform: [{ scale: frontScale }] }
+        ]}
+        pointerEvents={isFlipped ? 'none' : 'auto'}
+      >
+        <View style={[
+          styles.badgeIconContainer,
+          !isUnlocked && styles.badgeIconContainerLocked
+        ]}>
+          <Text style={[
+            styles.badgeIcon,
+            !isUnlocked && styles.badgeIconLocked
+          ]}>
+            {getBadgeIcon(badge, gender)}
+          </Text>
+        </View>
+
+        <View style={styles.badgeInfo}>
+          <Text style={[
+            styles.badgeTitle,
+            !isUnlocked && styles.badgeTitleLocked
+          ]}>
+            {getBadgeTitle(badge, gender)}
+          </Text>
+          <Text style={styles.badgeThreshold}>
+            {isUnlocked ? `${badge.threshold} Challenges` : `${badge.threshold} Challenges`}
+          </Text>
+        </View>
+
+        {/* Visual Indicator for Acquired/Locked (Optional, but color shift handles it) */}
+      </Animated.View>
+
+      {/* Back Face */}
+      <Animated.View
+        style={[
+          styles.adventureFaceBack,
+          { opacity: backOpacity, transform: [{ scale: backScale }] }
+        ]}
+        pointerEvents={isFlipped ? 'auto' : 'none'}
+      >
+        <Text style={styles.adventureBackText}>
+          {isUnlocked ? badge.message : "Mystère... Encore un peu d'entraînement ! 🔒"}
+        </Text>
+      </Animated.View>
     </TouchableOpacity>
   );
 }
+
 
 export default function CollectionModal({
   visible,
@@ -191,41 +400,12 @@ export default function CollectionModal({
                   const isUnlocked = challengesCompleted >= badge.threshold;
 
                   return (
-                    <View
+                    <AdventureFlipCard
                       key={badge.threshold}
-                      style={[
-                        styles.adventureItem,
-                        !isUnlocked && styles.adventureItemLocked
-                      ]}
-                    >
-                      <View style={[
-                        styles.badgeIconContainer,
-                        !isUnlocked && styles.badgeIconContainerLocked
-                      ]}>
-                        <Text style={[
-                          styles.badgeIcon,
-                          !isUnlocked && styles.badgeIconLocked
-                        ]}>
-                          {getBadgeIcon(badge, gender)}
-                        </Text>
-                      </View>
-
-                      <View style={styles.badgeInfo}>
-                        <Text style={[
-                          styles.badgeTitle,
-                          !isUnlocked && styles.badgeTitleLocked
-                        ]}>
-                          {getBadgeTitle(badge, gender)}
-                        </Text>
-                        <Text style={styles.badgeThreshold}>
-                          {isUnlocked ? 'Acquis !' : `Niveau ${badge.threshold} `}
-                        </Text>
-                      </View>
-
-                      {!isUnlocked && (
-                        <View style={styles.lockOverlay} />
-                      )}
-                    </View>
+                      badge={badge}
+                      isUnlocked={isUnlocked}
+                      gender={gender}
+                    />
                   );
                 })}
               </View>
@@ -248,6 +428,30 @@ export default function CollectionModal({
                       achievement={achievement}
                       isUnlocked={isUnlocked}
                       count={count}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+
+            <View style={styles.divider} />
+
+            {/* ZONE 3: ENDURANCE */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>ENDURANCE</Text>
+              <View style={styles.achievementsGrid}>
+                {ENDURANCE_BADGES.map((badge) => {
+                  const isUnlocked = currentUser?.enduranceBadges?.[badge.threshold] || false;
+
+                  return (
+                    <EnduranceFlipCard
+                      key={badge.threshold}
+                      threshold={badge.threshold}
+                      isUnlocked={isUnlocked}
+                      title={badge.title}
+                      icon={badge.icon}
+                      backTitle={badge.backTitle}
+                      backMessage={badge.backMessage}
                     />
                   );
                 })}
@@ -313,6 +517,14 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   adventureItem: {
+    marginBottom: 0,
+    position: 'relative',
+    // Background and visuals moved to adventureFace for flip effect
+  },
+  adventureItemLocked: {
+    // handled in face
+  },
+  adventureFace: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: AppColors.surface,
@@ -325,13 +537,34 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+    width: '100%',
+    backfaceVisibility: 'hidden',
   },
-  adventureItemLocked: {
-    backgroundColor: '#F5F5F5',
+  adventureFaceLocked: {
+    backgroundColor: '#F0F0F0',
     borderColor: 'transparent',
     shadowOpacity: 0,
     elevation: 0,
-    opacity: 0.7,
+    borderWidth: 0,
+  },
+  adventureFaceBack: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#6C63FF',
+    borderRadius: 16, // Match parent radius
+    justifyContent: 'center',
+    alignItems: 'center',
+    backfaceVisibility: 'hidden',
+    padding: 12,
+  },
+  adventureBackText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 14,
+    textAlign: 'center',
   },
   badgeIconContainer: {
     width: 60,
@@ -392,7 +625,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     backgroundColor: AppColors.surface,
     borderRadius: 16,
-    padding: 12,
+    padding: 0,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -456,6 +689,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
     height: '100%',
+    padding: 12,
   },
   achievementFaceBack: {
     position: 'absolute',
@@ -463,7 +697,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    padding: 10,
+    padding: 0,
     backgroundColor: '#6C63FF',
     borderRadius: 16,
     display: 'flex',
@@ -473,13 +707,15 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     zIndex: 10,
+    overflow: 'hidden',
+    margin: 0,
   },
   achievementBackContent: {
     width: '100%',
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    display: 'flex',
+    paddingHorizontal: 6, // Minimal padding to prevent edge touching
   },
   flipHint: {
     position: 'absolute',
@@ -494,15 +730,21 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.primary,
     opacity: 0.4,
   },
-  achievementDescriptionText: {
-    fontSize: 14,
+  achievementBackTitle: {
+    fontSize: 13,
+    fontWeight: 'bold',
     color: '#FFFFFF',
     textAlign: 'center',
-    fontWeight: '600',
-    flexShrink: 1,
-    margin: 0,
+    marginBottom: 6,
+    lineHeight: 16,
+  },
+  achievementDescriptionText: {
+    fontSize: 12,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    fontWeight: '500',
+    lineHeight: 14.4, // 1.2 * 12
     width: '100%',
-    lineHeight: 18,
   },
   countBadgeBottom: {
     position: 'absolute',
@@ -526,5 +768,20 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 10,
     fontWeight: 'bold',
+  },
+  enduranceBackTitle: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 6,
+    lineHeight: 16,
+  },
+  enduranceBackMessage: {
+    fontSize: 12,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    fontWeight: '500',
+    lineHeight: 14.4, // 1.2 * 12
   },
 });

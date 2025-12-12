@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
 import { User } from '@/types';
+import { useApp } from '@/contexts/AppContext';
 
 type ChallengeResultsProps = {
     isReviewMode: boolean;
@@ -85,22 +86,41 @@ export const ChallengeResults = ({
         );
     }
 
-    let bestTable = -1;
-    let worstTable = -1;
-    let bestTableRate = -1;
-    let worstTableRate = 2;
+    // INTEGRATION FIX: We use the context directly here to save what we DISPLAY.
+    // This ensures "What You See Is What You Get".
+    const { updateStrongestTable } = useApp();
 
-    Object.entries(tableStats).forEach(([table, stats]) => {
-        const rate = stats.correct / stats.total;
-        if (rate > bestTableRate) {
-            bestTableRate = rate;
-            bestTable = parseInt(table);
+    const { bestTable, worstTable, bestStreakValue } = React.useMemo(() => {
+        let best = -1;
+        let worst = -1;
+        let bestRate = -1;
+        let worstRate = 2;
+
+        Object.entries(tableStats).forEach(([table, stats]) => {
+            const rate = stats.total > 0 ? stats.correct / stats.total : 0;
+
+            // Logic matches the display exactly
+            if (rate > bestRate) {
+                bestRate = rate;
+                best = parseInt(table);
+            }
+            if (rate < worstRate && stats.total > 0 && stats.correct < stats.total) {
+                worstRate = rate;
+                worst = parseInt(table);
+            }
+        });
+
+        return { bestTable: best, worstTable: worst, bestStreakValue: bestStreak };
+    }, [tableStats, bestStreak]);
+
+    // Side Effect: Save the Best Table to Context immediately when calculated.
+    // This runs once when the component mounts (Results screen appears).
+    React.useEffect(() => {
+        if (bestTable > 0) {
+            console.log('🏆 UI-Driven Save: Updating Strongest Table to', bestTable);
+            updateStrongestTable(bestTable);
         }
-        if (rate < worstTableRate && stats.total > 0 && stats.correct < stats.total) {
-            worstTableRate = rate;
-            worstTable = parseInt(table);
-        }
-    });
+    }, [bestTable, updateStrongestTable]);
 
     return (
         <View style={styles.backgroundContainer}>

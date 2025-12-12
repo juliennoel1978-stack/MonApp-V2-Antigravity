@@ -348,8 +348,13 @@ export const [AppProvider, useApp] = createContextHook(() => {
       }
     });
 
+
+
     if (hasChanges) {
+      console.log('💾 batchUpdateTableProgress: Saving progress to storage', newProgress.filter(p => p.totalAttempts > 0));
       await saveProgress(newProgress);
+    } else {
+      console.log('⚠️ batchUpdateTableProgress: No changes detected');
     }
     return newProgress;
   }, [saveProgress]);
@@ -418,6 +423,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
       progress: INITIAL_PROGRESS,
+      lastSessionBestTable: 0,
     };
     const updatedUsers = [...users, newUser];
     await saveUsers(updatedUsers);
@@ -681,6 +687,34 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   }, [anonymousBestStreak, updateStateAndStorage]);
 
+  const updateStrongestTable = useCallback(async (tableNumber: number) => {
+    try {
+      if (tableNumber > 0) {
+        const currentU = currentUserRef.current;
+        const currentUsrs = usersRef.current;
+
+        if (currentU) {
+          console.log(`Force update lastSessionBestTable from ${currentU.lastSessionBestTable} to ${tableNumber}`);
+          // Update BOTH strongestTable (legacy/backup) and lastSessionBestTable (snapshot display)
+          // The user specifically requested lastSessionBestTable for the Home display.
+          const updatedUser = {
+            ...currentU,
+            strongestTable: tableNumber,
+            lastSessionBestTable: tableNumber
+          };
+
+          // Determine if we need to update the user in the list
+          const updatedUsers = currentUsrs.map(u => u.id === currentU.id ? updatedUser : u);
+          await updateStateAndStorage(updatedUser, updatedUsers);
+        } else {
+          // Anonymous fallback
+        }
+      }
+    } catch (error) {
+      console.error('Error updating strongest table:', error);
+    }
+  }, [updateStateAndStorage]);
+
   return {
     progress,
     settings,
@@ -712,5 +746,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
     getPersistenceBadges,
     getBestStreak,
     updateBestStreak,
+    updateStrongestTable,
   };
 });

@@ -75,6 +75,13 @@ export interface User {
   achievements?: UnlockedAchievement[];
   challengePlayDates?: string[];
   bestStreak?: number;
+  strongestTable?: number;
+  lastSessionBestTable?: number; // Snapshot of the best table from the last session
+  enduranceBadges?: {
+    20?: boolean;
+    30?: boolean;
+    50?: boolean;
+  };
 }
 
 export type StreakTier = '4' | '8' | '12' | '20' | '30' | 'max' | null;
