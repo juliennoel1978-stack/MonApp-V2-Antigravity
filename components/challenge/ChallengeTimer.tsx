@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Timer } from 'lucide-react-native';
+import { ThemedText } from '../ThemedText';
 import { AppColors } from '@/constants/colors';
 
 type ChallengeTimerProps = {
@@ -24,14 +25,14 @@ export const ChallengeTimer = ({ timeRemaining, duration, displayMode = 'chronom
                         size={20}
                         color={timerColor}
                     />
-                    <Text
+                    <ThemedText
                         style={[
                             styles.timerText,
                             { color: timerColor }
                         ]}
                     >
                         {timeRemaining}s
-                    </Text>
+                    </ThemedText>
                 </>
             ) : (
                 <View style={styles.progressBarContainer}>

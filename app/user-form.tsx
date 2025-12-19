@@ -1,5 +1,5 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Camera, Image as ImageIcon, Save, X, Clock } from 'lucide-react-native';
+import { Camera, Image as ImageIcon, Save, X, Clock, Volume2, VolumeX, Mic, Zap, Type, Leaf } from 'lucide-react-native';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -36,6 +36,11 @@ export default function UserFormScreen() {
   const [timerDisplayMode, setTimerDisplayMode] = useState<'bar' | 'chronometer'>('bar');
   const [challengeQuestions, setChallengeQuestions] = useState(15);
   const [badgeTheme, setBadgeTheme] = useState<BadgeTheme>('space');
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [hapticsEnabled, setHapticsEnabled] = useState(true);
+  const [dyslexiaFontEnabled, setDyslexiaFontEnabled] = useState(false);
+  const [zenMode, setZenMode] = useState(false);
   const firstNameRef = React.useRef<TextInput>(null);
   const ageRef = React.useRef<TextInput>(null);
   const gradeRef = React.useRef<TextInput>(null);
@@ -61,6 +66,11 @@ export default function UserFormScreen() {
         if (user.badgeTheme) {
           setBadgeTheme(user.badgeTheme);
         }
+        setVoiceEnabled(user.voiceEnabled ?? true);
+        setSoundEnabled(user.soundEnabled ?? true);
+        setHapticsEnabled(user.hapticsEnabled ?? true);
+        setDyslexiaFontEnabled(user.dyslexiaFontEnabled ?? false);
+        setZenMode(user.zenMode ?? false);
       }
     }
   }, [userId, users]);
@@ -162,6 +172,11 @@ export default function UserFormScreen() {
           timerSettings,
           challengeQuestions,
           badgeTheme,
+          voiceEnabled,
+          soundEnabled,
+          hapticsEnabled,
+          dyslexiaFontEnabled,
+          zenMode,
         });
         router.back();
       } else {
@@ -174,6 +189,11 @@ export default function UserFormScreen() {
           timerSettings,
           challengeQuestions,
           badgeTheme,
+          voiceEnabled,
+          soundEnabled,
+          hapticsEnabled,
+          dyslexiaFontEnabled,
+          zenMode,
         });
         console.log('👤 New user created:', newUser.id, newUser.firstName);
         await selectUser(newUser.id);
@@ -431,6 +451,125 @@ export default function UserFormScreen() {
 
 
 
+
+
+            <View style={styles.section}>
+              <Text style={styles.label}>Audio</Text>
+              <Text style={styles.challengeSubLabel}>
+                Personnaliser l&apos;expérience sonore pour cet utilisateur
+              </Text>
+
+              <TouchableOpacity
+                style={[
+                  styles.timerToggle,
+                  voiceEnabled && styles.timerToggleActive,
+                  { marginBottom: 12 }
+                ]}
+                onPress={() => setVoiceEnabled(!voiceEnabled)}
+              >
+                {voiceEnabled ? (
+                  <Mic size={24} color={AppColors.primary} />
+                ) : (
+                  <Mic size={24} color={AppColors.textSecondary} />
+                )}
+                <Text
+                  style={[
+                    styles.timerToggleText,
+                    voiceEnabled && styles.timerToggleTextActive,
+                  ]}
+                >
+                  {voiceEnabled ? 'Voix activée' : 'Voix désactivée'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.timerToggle,
+                  soundEnabled && styles.timerToggleActive,
+                ]}
+                onPress={() => setSoundEnabled(!soundEnabled)}
+              >
+                {soundEnabled ? (
+                  <Volume2 size={24} color={AppColors.primary} />
+                ) : (
+                  <VolumeX size={24} color={AppColors.textSecondary} />
+                )}
+                <Text
+                  style={[
+                    styles.timerToggleText,
+                    soundEnabled && styles.timerToggleTextActive,
+                  ]}
+                >
+                  {soundEnabled ? 'Bruitages activés' : 'Bruitages désactivés'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.timerToggle,
+                  hapticsEnabled && styles.timerToggleActive,
+                  { marginTop: 12 }
+                ]}
+                onPress={() => setHapticsEnabled(!hapticsEnabled)}
+              >
+                {hapticsEnabled ? (
+                  <Zap size={24} color={AppColors.primary} />
+                ) : (
+                  <Zap size={24} color={AppColors.textSecondary} />
+                )}
+                <Text
+                  style={[
+                    styles.timerToggleText,
+                    hapticsEnabled && styles.timerToggleTextActive,
+                  ]}
+                >
+                  {hapticsEnabled ? 'Vibrations activées' : 'Vibrations désactivées'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.label}>Accessibilité</Text>
+              <TouchableOpacity
+                style={[
+                  styles.timerToggle,
+                  dyslexiaFontEnabled && styles.timerToggleActive,
+                ]}
+                onPress={() => setDyslexiaFontEnabled(!dyslexiaFontEnabled)}
+              >
+                <Type size={24} color={dyslexiaFontEnabled ? AppColors.primary : AppColors.textSecondary} />
+                <Text
+                  style={[
+                    styles.timerToggleText,
+                    dyslexiaFontEnabled && styles.timerToggleTextActive,
+                  ]}
+                >
+                  {dyslexiaFontEnabled ? 'Police dyslexie activée' : 'Police standard'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.timerToggle,
+                  zenMode && styles.timerToggleActive,
+                  { marginTop: 12 }
+                ]}
+                onPress={() => setZenMode(!zenMode)}
+              >
+                <Leaf size={24} color={zenMode ? AppColors.primary : AppColors.textSecondary} />
+                <Text
+                  style={[
+                    styles.timerToggleText,
+                    zenMode && styles.timerToggleTextActive,
+                  ]}
+                >
+                  {zenMode ? 'Mode Zen activé' : 'Mode Zen désactivé'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+
+
             <View style={styles.section}>
               <Text style={styles.label}>Chronomètre</Text>
               <TouchableOpacity
@@ -531,7 +670,7 @@ export default function UserFormScreen() {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </View>
+    </View >
   );
 }
 

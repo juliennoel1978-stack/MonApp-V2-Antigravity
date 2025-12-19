@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { ThemedText } from '../ThemedText';
 import { AppColors } from '@/constants/colors';
 
 type ChallengeStatsProps = {
@@ -13,22 +14,22 @@ export const ChallengeStats = ({ correct, incorrect, total, max }: ChallengeStat
     return (
         <View style={styles.statsBar}>
             <View style={styles.statBox}>
-                <Text style={styles.statLabel}>Bonnes</Text>
-                <Text style={[styles.statValue, { color: AppColors.success }]}>
+                <ThemedText style={styles.statLabel}>Bonnes</ThemedText>
+                <ThemedText style={[styles.statValue, { color: AppColors.success }]}>
                     {correct}
-                </Text>
+                </ThemedText>
             </View>
             <View style={styles.statBox}>
-                <Text style={styles.statLabel}>Mauvaises</Text>
-                <Text style={[styles.statValue, { color: AppColors.error }]}>
+                <ThemedText style={styles.statLabel}>Mauvaises</ThemedText>
+                <ThemedText style={[styles.statValue, { color: AppColors.error }]}>
                     {incorrect}
-                </Text>
+                </ThemedText>
             </View>
             <View style={styles.statBox}>
-                <Text style={styles.statLabel}>Total</Text>
-                <Text style={[styles.statValue, { color: AppColors.primary }]}>
+                <ThemedText style={styles.statLabel}>Total</ThemedText>
+                <ThemedText style={[styles.statValue, { color: AppColors.primary }]}>
                     {total}/{max}
-                </Text>
+                </ThemedText>
             </View>
         </View>
     );

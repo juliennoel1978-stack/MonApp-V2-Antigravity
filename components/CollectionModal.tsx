@@ -9,9 +9,9 @@ import {
   ScrollView,
   Dimensions,
   Animated,
-  Text,
 } from 'react-native';
 import { AppColors } from '@/constants/colors';
+import { ThemedText } from './ThemedText';
 import { PERSISTENCE_BADGES, getBadgeIcon, getBadgeTitle, ENDURANCE_BADGES } from '@/constants/badges';
 import { ACHIEVEMENTS } from '@/constants/achievements';
 import { useApp } from '@/contexts/AppContext';
@@ -24,6 +24,7 @@ interface CollectionModalProps {
   onClose: () => void;
   theme: BadgeTheme;
   gender?: 'boy' | 'girl';
+  targetUser?: any; // Allow passing a specific user to view
 }
 
 interface AchievementFlipCardProps {
@@ -89,22 +90,22 @@ function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlip
         pointerEvents={isFlipped ? 'none' : 'auto'}
       >
         <View style={styles.achievementEmojiContainer}>
-          <Text style={[
+          <ThemedText style={[
             styles.achievementEmoji,
             !isUnlocked && styles.achievementEmojiLocked
           ]}>
             {achievement.emoji}
-          </Text>
+          </ThemedText>
         </View>
-        <Text style={[
+        <ThemedText style={[
           styles.achievementTitle,
           !isUnlocked && styles.achievementTitleLocked
         ]} numberOfLines={2}>
           {achievement.title}
-        </Text>
+        </ThemedText>
         {count > 1 && (
           <View style={styles.countBadgeBottom}>
-            <Text style={styles.countTextBottom}>x{count}</Text>
+            <ThemedText style={styles.countTextBottom}>x{count}</ThemedText>
           </View>
         )}
       </Animated.View>
@@ -119,12 +120,12 @@ function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlip
         pointerEvents={isFlipped ? 'auto' : 'none'}
       >
         <View style={styles.achievementBackContent}>
-          <Text style={styles.achievementBackTitle}>
+          <ThemedText style={styles.achievementBackTitle}>
             {achievement.backTitle}
-          </Text>
-          <Text style={styles.achievementDescriptionText}>
+          </ThemedText>
+          <ThemedText style={styles.achievementDescriptionText}>
             {achievement.message}
-          </Text>
+          </ThemedText>
         </View>
       </Animated.View>
     </TouchableOpacity >
@@ -197,19 +198,19 @@ function EnduranceFlipCard({ threshold, isUnlocked, title, icon, backTitle, back
         pointerEvents={isFlipped ? 'none' : 'auto'}
       >
         <View style={styles.achievementEmojiContainer}>
-          <Text style={[
+          <ThemedText style={[
             styles.achievementEmoji,
             !isUnlocked && styles.achievementEmojiLocked
           ]}>
             {icon}
-          </Text>
+          </ThemedText>
         </View>
-        <Text style={[
+        <ThemedText style={[
           styles.achievementTitle,
           !isUnlocked && styles.achievementTitleLocked
         ]} numberOfLines={2}>
           {title}
-        </Text>
+        </ThemedText>
       </Animated.View>
 
       {/* Back Face */}
@@ -222,12 +223,12 @@ function EnduranceFlipCard({ threshold, isUnlocked, title, icon, backTitle, back
         pointerEvents={isFlipped ? 'auto' : 'none'}
       >
         <View style={styles.achievementBackContent}>
-          <Text style={styles.enduranceBackTitle}>
+          <ThemedText style={styles.enduranceBackTitle}>
             {backTitle}
-          </Text>
-          <Text style={styles.enduranceBackMessage}>
+          </ThemedText>
+          <ThemedText style={styles.enduranceBackMessage}>
             {backMessage}
-          </Text>
+          </ThemedText>
         </View>
       </Animated.View>
     </TouchableOpacity>
@@ -302,24 +303,24 @@ function AdventureFlipCard({ badge, isUnlocked, gender }: AdventureFlipCardProps
           styles.badgeIconContainer,
           !isUnlocked && styles.badgeIconContainerLocked
         ]}>
-          <Text style={[
+          <ThemedText style={[
             styles.badgeIcon,
             !isUnlocked && styles.badgeIconLocked
           ]}>
             {getBadgeIcon(badge, gender)}
-          </Text>
+          </ThemedText>
         </View>
 
         <View style={styles.badgeInfo}>
-          <Text style={[
+          <ThemedText style={[
             styles.badgeTitle,
             !isUnlocked && styles.badgeTitleLocked
           ]}>
             {getBadgeTitle(badge, gender)}
-          </Text>
-          <Text style={styles.badgeThreshold}>
+          </ThemedText>
+          <ThemedText style={styles.badgeThreshold}>
             {isUnlocked ? `${badge.threshold} Challenges` : `${badge.threshold} Challenges`}
-          </Text>
+          </ThemedText>
         </View>
 
         {/* Visual Indicator for Acquired/Locked (Optional, but color shift handles it) */}
@@ -333,27 +334,43 @@ function AdventureFlipCard({ badge, isUnlocked, gender }: AdventureFlipCardProps
         ]}
         pointerEvents={isFlipped ? 'auto' : 'none'}
       >
-        <Text style={styles.adventureBackText}>
+        <ThemedText style={styles.adventureBackText}>
           {isUnlocked ? badge.message : "Mystère... Encore un peu d'entraînement ! 🔒"}
-        </Text>
+        </ThemedText>
       </Animated.View>
     </TouchableOpacity>
   );
 }
-
 
 export default function CollectionModal({
   visible,
   onClose,
   theme,
   gender,
+  targetUser,
 }: CollectionModalProps) {
-  const { currentUser, anonymousChallengesCompleted, getAchievements } = useApp();
-  const unlockedAchievements = getAchievements();
+  const { currentUser, anonymousChallengesCompleted, anonymousAchievements, anonymousPersistenceBadges } = useApp();
+
+  // Determine source of truth: targetUser -> currentUser -> Anonymous
+  const effectiveUser = targetUser || currentUser;
+
+  const unlockedAchievements = useMemo(() => {
+    if (effectiveUser) return effectiveUser.achievements || [];
+    return anonymousAchievements || [];
+  }, [effectiveUser, anonymousAchievements]);
 
   const challengesCompleted = useMemo(() => {
-    return currentUser?.challengesCompleted || anonymousChallengesCompleted || 0;
-  }, [currentUser, anonymousChallengesCompleted]);
+    if (effectiveUser) return effectiveUser.challengesCompleted || 0;
+    return anonymousChallengesCompleted || 0;
+  }, [effectiveUser, anonymousChallengesCompleted]);
+
+  // Use effectiveUser for endurance badges check
+  const hasEnduranceBadge = (threshold: number) => {
+    // If user object has endurance badges map
+    if (effectiveUser?.enduranceBadges?.[threshold]) return true;
+    return false;
+  };
+
 
   // Get badges for current theme
   const badges = useMemo(() => {
@@ -394,7 +411,7 @@ export default function CollectionModal({
           >
             {/* ZONE 1: MON AVENTURE */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>MON AVENTURE</Text>
+              <ThemedText style={styles.sectionTitle}>MON AVENTURE</ThemedText>
               <View style={styles.adventureList}>
                 {badges.map((badge, index) => {
                   const isUnlocked = challengesCompleted >= badge.threshold;
@@ -415,7 +432,7 @@ export default function CollectionModal({
 
             {/* ZONE 2: MES EXPLOITS */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>MES EXPLOITS</Text>
+              <ThemedText style={styles.sectionTitle}>MES EXPLOITS</ThemedText>
               <View style={styles.achievementsGrid}>
                 {sortedAchievements.map((achievement) => {
                   const unlocked = unlockedAchievements.find(ua => ua.id === achievement.id);
@@ -438,10 +455,10 @@ export default function CollectionModal({
 
             {/* ZONE 3: ENDURANCE */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>ENDURANCE</Text>
+              <ThemedText style={styles.sectionTitle}>ENDURANCE</ThemedText>
               <View style={styles.achievementsGrid}>
                 {ENDURANCE_BADGES.map((badge) => {
-                  const isUnlocked = currentUser?.enduranceBadges?.[badge.threshold] || false;
+                  const isUnlocked = hasEnduranceBadge(badge.threshold);
 
                   return (
                     <EnduranceFlipCard

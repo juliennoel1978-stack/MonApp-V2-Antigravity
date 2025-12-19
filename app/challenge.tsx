@@ -4,7 +4,6 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  Text,
   Dimensions,
   KeyboardAvoidingView,
   Platform,
@@ -14,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
 import BadgeOverlay from '@/components/BadgeOverlay';
+import { ThemedText } from '@/components/ThemedText';
 import { ChallengeHeader } from '@/components/challenge/ChallengeHeader';
 import { ChallengeStats } from '@/components/challenge/ChallengeStats';
 import { ChallengeTimer } from '@/components/challenge/ChallengeTimer';
@@ -59,12 +59,12 @@ const MidChallengeBoostModal = ({
   return (
     <View style={styles.boostOverlay}>
       <Animated.View style={[styles.boostCard, { transform: [{ scale: scaleAnim }] }]}>
-        <Text style={styles.boostTitle}>{data.title}</Text>
+        <ThemedText style={styles.boostTitle}>{data.title}</ThemedText>
         <View style={styles.boostImageContainer}>
-          <Text style={styles.boostEmojiMain}>{data.image}</Text>
-          <Text style={styles.boostEmojiItem}>{data.item}</Text>
+          <ThemedText style={styles.boostEmojiMain}>{data.image}</ThemedText>
+          <ThemedText style={styles.boostEmojiItem}>{data.item}</ThemedText>
         </View>
-        <Text style={styles.boostSubtitle}>{data.subtitle}</Text>
+        <ThemedText style={styles.boostSubtitle}>{data.subtitle}</ThemedText>
       </Animated.View>
     </View>
   );
@@ -236,7 +236,7 @@ export default function ChallengeScreen() {
                     onPress={checkAnswer}
                     testID="submit-button"
                   >
-                    <Text style={styles.submitButtonText}>Valider</Text>
+                    <ThemedText style={styles.submitButtonText}>Valider</ThemedText>
                   </TouchableOpacity>
                 )}
               </>

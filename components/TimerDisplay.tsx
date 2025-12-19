@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, StyleSheet, Animated } from 'react-native';
+import { ThemedText } from './ThemedText';
 import { AppColors } from '@/constants/colors';
 
 interface TimerDisplayProps {
@@ -22,7 +23,7 @@ export default function TimerDisplay({ duration, timeRemaining, mode }: TimerDis
 
   const getBarColor = () => {
     const progress = timeRemaining / duration;
-    
+
     if (progress > 0.66) {
       return '#34D399';
     } else if (progress > 0.33) {
@@ -34,7 +35,7 @@ export default function TimerDisplay({ duration, timeRemaining, mode }: TimerDis
 
   if (mode === 'bar') {
     const barColor = getBarColor();
-    
+
     return (
       <View style={styles.barContainer}>
         <View style={styles.barBackground}>
@@ -51,9 +52,9 @@ export default function TimerDisplay({ duration, timeRemaining, mode }: TimerDis
             ]}
           />
         </View>
-        <Text style={[styles.barText, { color: barColor }]}>
+        <ThemedText style={[styles.barText, { color: barColor }]}>
           {timeRemaining}s
-        </Text>
+        </ThemedText>
       </View>
     );
   }
@@ -61,9 +62,9 @@ export default function TimerDisplay({ duration, timeRemaining, mode }: TimerDis
   return (
     <View style={styles.chronometerContainer}>
       <View style={[styles.chronometerCircle, { borderColor: getBarColor() }]}>
-        <Text style={[styles.chronometerText, { color: getBarColor() }]}>
+        <ThemedText style={[styles.chronometerText, { color: getBarColor() }]}>
           {timeRemaining}
-        </Text>
+        </ThemedText>
       </View>
     </View>
   );

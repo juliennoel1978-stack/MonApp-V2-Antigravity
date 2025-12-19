@@ -18,9 +18,12 @@ export interface UserSettings {
   timerDuration: number;
   timerDisplayMode: 'bar' | 'chronometer';
   soundEnabled: boolean;
+  hapticsEnabled: boolean;
+  dyslexiaFontEnabled: boolean;
   avatarId: string;
   challengeQuestions?: number;
   badgeTheme?: BadgeTheme;
+  zenMode?: boolean;
 }
 
 export interface Badge {
@@ -71,6 +74,11 @@ export interface User {
   challengeBadges?: string[];
   persistenceBadges?: PersistenceBadge[];
   badgeTheme?: BadgeTheme;
+  voiceEnabled?: boolean;
+  soundEnabled?: boolean;
+  hapticsEnabled?: boolean;
+  dyslexiaFontEnabled?: boolean;
+  zenMode?: boolean;
   challengesCompleted?: number;
   achievements?: UnlockedAchievement[];
   challengePlayDates?: string[];

@@ -25,9 +25,12 @@ const DEFAULT_SETTINGS: UserSettings = {
   timerDuration: 10,
   timerDisplayMode: 'chronometer',
   soundEnabled: true,
+  hapticsEnabled: true,
+  dyslexiaFontEnabled: false,
   avatarId: 'avatar1',
   challengeQuestions: 15,
   badgeTheme: 'space',
+  zenMode: false,
 };
 
 const INITIAL_BADGES: Badge[] = [
@@ -295,7 +298,8 @@ export const [AppProvider, useApp] = createContextHook(() => {
     correct: number,
     total: number,
     stars: number,
-    level?: 1 | 2
+    level?: 1 | 2,
+    sessionAverageTime?: number
   ) => {
     // Use callback form to access latest state if we were using setProgress directly,
     // but here we need to read from ref to ensure we have latest base
@@ -303,12 +307,23 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
     const newProgress = currentProg.map(p => {
       if (p.tableNumber === tableNumber) {
+        // Calculate new weighted average time
+        let newAverageTime = p.averageTime;
+        if (sessionAverageTime && total > 0) {
+          const previousTotal = p.totalAttempts || 0;
+          const previousAverage = p.averageTime || 0;
+          newAverageTime = Math.round(
+            ((previousAverage * previousTotal) + (sessionAverageTime * total)) / (previousTotal + total)
+          );
+        }
+
         const updates: Partial<UserProgress> = {
           correctAnswers: p.correctAnswers + correct,
           totalAttempts: p.totalAttempts + total,
           starsEarned: Math.max(p.starsEarned, stars),
           completed: stars >= 3,
           lastPracticed: new Date().toISOString(),
+          averageTime: newAverageTime,
         };
 
         if (level === 1 && correct === 10) {
@@ -725,6 +740,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     isLoading,
     anonymousChallengesCompleted,
     anonymousPersistenceBadges,
+    anonymousAchievements,
     updateTableProgress,
     batchUpdateTableProgress,
     unlockBadge,

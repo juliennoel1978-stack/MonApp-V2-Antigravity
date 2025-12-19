@@ -1,5 +1,6 @@
 import React, { forwardRef } from 'react';
-import { View, Text, TextInput, StyleSheet, Dimensions, Platform } from 'react-native';
+import { View, TextInput, StyleSheet, Dimensions, Platform } from 'react-native';
+import { ThemedText } from '../ThemedText';
 import { AppColors } from '@/constants/colors';
 
 const { width } = Dimensions.get('window');
@@ -18,9 +19,9 @@ export const ChallengeQuestion = forwardRef<TextInput, ChallengeQuestionProps>(
         return (
             <>
                 <View style={styles.questionCard}>
-                    <Text style={styles.questionText}>
+                    <ThemedText style={styles.questionText}>
                         {question.displayText}
-                    </Text>
+                    </ThemedText>
                 </View>
 
                 <View style={styles.inputContainer}>

@@ -1,11 +1,10 @@
 
 import { useRouter, useFocusEffect } from 'expo-router';
-import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X } from 'lucide-react-native';
+import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X, Shield } from 'lucide-react-native';
 import React, { useEffect, useCallback, useRef } from 'react';
 
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Animated,
@@ -22,6 +21,8 @@ import { useApp } from '@/contexts/AppContext';
 import { BADGE_THRESHOLDS, getBadgeForThreshold, getBadgeIcon, getBadgeTitle } from '@/constants/badges';
 import ChallengeDashboardCard from '@/components/ChallengeDashboardCard';
 import CollectionModal from '@/components/CollectionModal';
+import { ParentGateModal } from '@/components/ParentGateModal';
+import { ThemedText } from '@/components/ThemedText';
 
 const { width } = Dimensions.get('window');
 
@@ -30,6 +31,7 @@ export default function HomeScreen() {
   const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData, settings, anonymousChallengesCompleted, getPersistenceBadges, getBestStreak } = useApp();
   const [showTablesModal, setShowTablesModal] = React.useState(false);
   const [showCollectionModal, setShowCollectionModal] = React.useState(false);
+  const [showParentGate, setShowParentGate] = React.useState(false);
   const tablesModalOpacity = React.useRef(new Animated.Value(0)).current;
   const tablesModalScale = React.useRef(new Animated.Value(0.9)).current;
   const [dataVersion, setDataVersion] = React.useState(0);
@@ -290,16 +292,17 @@ export default function HomeScreen() {
 
   const strongestTable = React.useMemo(() => {
     // 1. STRICT: Only use Snapshot "Last Session"
-    // The user explicitly wants to purge "Table 9" (history) if it's not the current best.
-    // We REMOVE the fallback to currentUser.strongestTable.
-
-    if (currentUser?.lastSessionBestTable && currentUser.lastSessionBestTable > 0) {
+    if (currentUser?.lastSessionBestTable) {
       return currentUser.lastSessionBestTable;
     }
 
     // 2. Default to 1. (Do NOT show history)
     return 1;
   }, [currentUser?.lastSessionBestTable]);
+
+  const zenMode = React.useMemo(() => {
+    return (currentUser?.zenMode ?? settings.zenMode) || false;
+  }, [currentUser, settings.zenMode]);
 
   const missionTable = React.useMemo(() => {
     // 1. Default: If no challenges completed, start with Table 1.
@@ -375,7 +378,7 @@ export default function HomeScreen() {
   if (!isReady) {
     return (
       <View style={{ flex: 1, backgroundColor: AppColors.background, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ fontSize: 24, color: AppColors.text }}>Chargement...</Text>
+        <ThemedText style={{ fontSize: 24, color: AppColors.text }}>Chargement...</ThemedText>
       </View>
     );
   }
@@ -394,7 +397,7 @@ export default function HomeScreen() {
           alignItems: 'center',
           zIndex: 1000,
         }}>
-          <Text style={{ fontSize: 18, color: AppColors.text }}>Mise à jour...</Text>
+          <ThemedText style={{ fontSize: 18, color: AppColors.text }}>Mise à jour...</ThemedText>
         </View>
       )}
       <SafeAreaView style={styles.container} edges={['top']}>
@@ -406,33 +409,16 @@ export default function HomeScreen() {
           >
             <Users size={28} color={AppColors.text} />
           </TouchableOpacity>
-          <Pressable
+
+          <TouchableOpacity
             style={styles.settingsButton}
-            onPressIn={handleSettingsPressIn}
-            onPressOut={handleSettingsPressOut}
+            onPress={() => setShowParentGate(true)}
             testID="settings-button"
           >
             <View style={styles.settingsButtonInner}>
               <SettingsIcon size={28} color={AppColors.text} />
-              {settingsProgress > 0 && (
-                <View style={styles.settingsProgressContainer}>
-                  <Animated.View
-                    style={[
-                      styles.settingsProgressRing,
-                      {
-                        transform: [{
-                          rotate: settingsProgressAnim.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ['0deg', '360deg'],
-                          }),
-                        }],
-                      },
-                    ]}
-                  />
-                </View>
-              )}
             </View>
-          </Pressable>
+          </TouchableOpacity>
         </View>
 
         <ScrollView
@@ -454,35 +440,39 @@ export default function HomeScreen() {
             }
           >
             <View style={styles.titleContainer}>
-              <View style={styles.sparkleLeft}>
-                <Sparkles size={32} color={AppColors.primary} />
-              </View>
+              {!zenMode && (
+                <View style={styles.sparkleLeft}>
+                  <Sparkles size={32} color={AppColors.primary} />
+                </View>
+              )}
               <View style={styles.titleContent}>
-                <Text style={styles.title}>Tables Magiques</Text>
+                <ThemedText style={styles.title}>Tables Magiques</ThemedText>
                 {currentUser && (
-                  <Text style={styles.userName}>Bonjour {currentUser.firstName} !</Text>
+                  <ThemedText style={styles.userName}>Bonjour {currentUser.firstName} !</ThemedText>
                 )}
               </View>
-              <View style={styles.sparkleRight}>
-                <Sparkles size={32} color={AppColors.secondary} />
-              </View>
+              {!zenMode && (
+                <View style={styles.sparkleRight}>
+                  <Sparkles size={32} color={AppColors.secondary} />
+                </View>
+              )}
             </View>
 
             <View style={styles.subtitleContainer}>
-              <Text style={styles.subtitleMain}>Deviens un as du calcul ✨</Text>
-              <Text style={styles.subtitleSecondary}>Apprends en t{"'"}amusant !</Text>
+              <ThemedText style={styles.subtitleMain}>Deviens un as du calcul ✨</ThemedText>
+              <ThemedText style={styles.subtitleSecondary}>Apprends en t{"'"}amusant !</ThemedText>
             </View>
 
             <View style={styles.progressCard}>
               <View style={styles.progressHeader}>
                 <Trophy size={20} color={AppColors.warning} />
-                <Text style={styles.progressTitle}>Ta Progression</Text>
+                <ThemedText style={styles.progressTitle}>Ta Progression</ThemedText>
               </View>
 
               <View style={styles.statsContainer}>
                 <View style={styles.statItem}>
-                  <Text style={styles.statValue}>{totalStars}</Text>
-                  <Text style={styles.statLabel}>⭐ Étoiles</Text>
+                  <ThemedText style={styles.statValue}>{totalStars}</ThemedText>
+                  <ThemedText style={styles.statLabel}>⭐ Étoiles</ThemedText>
                 </View>
 
                 <View style={styles.statDivider} />
@@ -493,10 +483,10 @@ export default function HomeScreen() {
                   testID="tables-progress-button"
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.statValue}>
+                  <ThemedText style={styles.statValue}>
                     {completedTables}/{totalTables}
-                  </Text>
-                  <Text style={styles.statLabel}>Tables</Text>
+                  </ThemedText>
+                  <ThemedText style={styles.statLabel}>Tables</ThemedText>
                 </TouchableOpacity>
               </View>
 
@@ -520,9 +510,9 @@ export default function HomeScreen() {
                   testID="mission-button"
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.missionIcon}>🎯</Text>
-                  <Text style={styles.missionButtonText}>Mission : Table de {missionTable}</Text>
-                  <Text style={styles.missionChevron}>➔</Text>
+                  <ThemedText style={styles.missionIcon}>🎯</ThemedText>
+                  <ThemedText style={styles.missionButtonText}>Mission : Table de {missionTable}</ThemedText>
+                  <ThemedText style={styles.missionChevron}>➔</ThemedText>
                 </TouchableOpacity>
               )}
             </View>
@@ -532,7 +522,7 @@ export default function HomeScreen() {
               onPress={() => router.push('/tables' as any)}
               testID="start-button"
             >
-              <Text style={styles.startButtonText}>Commencer</Text>
+              <ThemedText style={styles.startButtonText}>Commencer</ThemedText>
               <Sparkles size={24} color="#FFFFFF" />
             </TouchableOpacity>
 
@@ -541,7 +531,7 @@ export default function HomeScreen() {
               onPress={() => router.push('/challenge' as any)}
               testID="challenge-button"
             >
-              <Text style={styles.challengeButtonText}>Challenge</Text>
+              <ThemedText style={styles.challengeButtonText}>Challenge</ThemedText>
               <Zap size={24} color="#FFFFFF" />
             </TouchableOpacity>
 
@@ -564,6 +554,15 @@ export default function HomeScreen() {
           onClose={() => setShowCollectionModal(false)}
           theme={badgeTheme}
           gender={gender}
+        />
+
+        <ParentGateModal
+          visible={showParentGate}
+          onClose={() => setShowParentGate(false)}
+          onSuccess={() => {
+            setShowParentGate(false);
+            router.push('/settings' as any);
+          }}
         />
 
         {showTablesModal && (
@@ -591,7 +590,7 @@ export default function HomeScreen() {
               >
                 <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
                   <View style={styles.tablesModalHeader}>
-                    <Text style={styles.tablesModalTitle}>Mes Tables</Text>
+                    <ThemedText style={styles.tablesModalTitle}>Mes Tables</ThemedText>
                     <TouchableOpacity
                       style={styles.tablesModalCloseButton}
                       onPress={closeTablesModal}
@@ -617,7 +616,7 @@ export default function HomeScreen() {
                             !hasAttempts && !isCompleted && styles.tablesGridCardNotSeen,
                           ]}
                         >
-                          <Text
+                          <ThemedText
                             style={[
                               styles.tablesGridNumber,
                               {
@@ -630,10 +629,10 @@ export default function HomeScreen() {
                             ]}
                           >
                             {tableNumber}
-                          </Text>
+                          </ThemedText>
                           {isCompleted && (
                             <View style={styles.tablesGridStar}>
-                              <Text style={styles.tablesGridStarIcon}>⭐</Text>
+                              <ThemedText style={styles.tablesGridStarIcon}>⭐</ThemedText>
                             </View>
                           )}
                         </View>
@@ -644,13 +643,13 @@ export default function HomeScreen() {
                   <View style={styles.tablesModalLegend}>
                     <View style={styles.legendItem}>
                       <View style={[styles.legendBox, styles.legendBoxNotSeen]} />
-                      <Text style={styles.legendText}>Non vue</Text>
+                      <ThemedText style={styles.legendText}>Non vue</ThemedText>
                     </View>
                     <View style={styles.legendItem}>
                       <View style={[styles.legendBox, styles.legendBoxCompleted]}>
-                        <Text style={styles.legendStarSmall}>⭐</Text>
+                        <ThemedText style={styles.legendStarSmall}>⭐</ThemedText>
                       </View>
-                      <Text style={styles.legendText}>Maîtrisée</Text>
+                      <ThemedText style={styles.legendText}>Maîtrisée</ThemedText>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -685,12 +684,12 @@ export default function HomeScreen() {
                     <X size={24} color={AppColors.text} />
                   </TouchableOpacity>
                   <View style={styles.modalHeaderContent}>
-                    <Text style={styles.modalTitle}>Qui es-tu ?</Text>
-                    <Text style={styles.modalSubtitle}>Choisis ton profil</Text>
+                    <ThemedText style={styles.modalTitle}>Qui es-tu ?</ThemedText>
+                    <ThemedText style={styles.modalSubtitle}>Choisis ton profil</ThemedText>
                     {users.length > 0 && (
-                      <Text style={{ fontSize: 10, color: AppColors.textSecondary, marginTop: 4 }}>
+                      <ThemedText style={{ fontSize: 10, color: AppColors.textSecondary, marginTop: 4 }}>
                         ({users.length} utilisateurs disponibles)
-                      </Text>
+                      </ThemedText>
                     )}
                   </View>
                 </View>
@@ -702,12 +701,12 @@ export default function HomeScreen() {
                   <View style={styles.userGrid}>
                     {users.length === 0 && (
                       <View style={{ width: '100%', padding: 20, alignItems: 'center' }}>
-                        <Text style={{ fontSize: 16, color: AppColors.textSecondary, textAlign: 'center' }}>
+                        <ThemedText style={{ fontSize: 16, color: AppColors.textSecondary, textAlign: 'center' }}>
                           Aucun utilisateur trouvé
-                        </Text>
-                        <Text style={{ fontSize: 14, color: AppColors.textSecondary, marginTop: 10, textAlign: 'center' }}>
+                        </ThemedText>
+                        <ThemedText style={{ fontSize: 14, color: AppColors.textSecondary, marginTop: 10, textAlign: 'center' }}>
                           Crée un profil pour commencer !
-                        </Text>
+                        </ThemedText>
                       </View>
                     )}
                     {users.map(user => (
@@ -722,14 +721,14 @@ export default function HomeScreen() {
                             <Image source={{ uri: user.photoUri }} style={styles.modalAvatar} />
                           ) : (
                             <View style={styles.modalAvatarPlaceholder}>
-                              <Text style={styles.modalAvatarEmoji}>
+                              <ThemedText style={styles.modalAvatarEmoji}>
                                 {user.gender === 'boy' ? '👦' : '👧'}
-                              </Text>
+                              </ThemedText>
                             </View>
                           )}
                         </View>
-                        <Text style={styles.modalUserName} numberOfLines={1} adjustsFontSizeToFit>{user.firstName}</Text>
-                        <Text style={styles.modalUserInfo}>{user.age} ans</Text>
+                        <ThemedText style={styles.modalUserName} numberOfLines={1} adjustsFontSizeToFit>{user.firstName}</ThemedText>
+                        <ThemedText style={styles.modalUserInfo}>{user.age} ans</ThemedText>
                       </TouchableOpacity>
                     ))}
 
@@ -746,7 +745,7 @@ export default function HomeScreen() {
                           <Plus size={48} color={AppColors.primary} />
                         </View>
                       </View>
-                      <Text style={styles.addUserName}>Ajouter</Text>
+                      <ThemedText style={styles.addUserName}>Ajouter</ThemedText>
                     </TouchableOpacity>
 
                     {users.length > 0 && (
@@ -760,8 +759,8 @@ export default function HomeScreen() {
                             <UserX size={40} color={AppColors.textSecondary} />
                           </View>
                         </View>
-                        <Text style={styles.anonymousUserName}>Mode
-                          Anonyme</Text>
+                        <ThemedText style={styles.anonymousUserName}>Mode
+                          Anonyme</ThemedText>
                       </TouchableOpacity>
                     )}
                   </View>
@@ -780,11 +779,11 @@ export default function HomeScreen() {
           >
             <View style={styles.firstLaunchOverlay}>
               <View style={styles.firstLaunchContent}>
-                <Text style={styles.firstLaunchEmoji}>👋</Text>
-                <Text style={styles.firstLaunchTitle}>Qui es-tu ?</Text>
-                <Text style={styles.firstLaunchSubtitle}>
+                <ThemedText style={styles.firstLaunchEmoji}>👋</ThemedText>
+                <ThemedText style={styles.firstLaunchTitle}>Qui es-tu ?</ThemedText>
+                <ThemedText style={styles.firstLaunchSubtitle}>
                   Bienvenue dans Tables Magiques !{"\n"}Crée ton profil pour sauvegarder ta progression.
-                </Text>
+                </ThemedText>
 
                 <TouchableOpacity
                   style={styles.firstLaunchCreateButton}
@@ -795,7 +794,7 @@ export default function HomeScreen() {
                   testID="first-launch-create"
                 >
                   <Plus size={24} color="#FFFFFF" />
-                  <Text style={styles.firstLaunchCreateButtonText}>Créer un profil</Text>
+                  <ThemedText style={styles.firstLaunchCreateButtonText}>Créer un profil</ThemedText>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -807,7 +806,7 @@ export default function HomeScreen() {
                   testID="first-launch-anonymous"
                 >
                   <UserX size={20} color={AppColors.textSecondary} />
-                  <Text style={styles.firstLaunchAnonymousButtonText}>Mode Anonyme</Text>
+                  <ThemedText style={styles.firstLaunchAnonymousButtonText}>Mode Anonyme</ThemedText>
                 </TouchableOpacity>
               </View>
             </View>

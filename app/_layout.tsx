@@ -2,6 +2,8 @@ import '../polyfill';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { useFonts } from 'expo-font';
+import { Lexend_400Regular, Lexend_700Bold } from '@expo-google-fonts/lexend';
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { TouchableOpacity, Text, View } from "react-native";
@@ -70,10 +72,20 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    'Lexend': Lexend_400Regular,
+    'Lexend-Bold': Lexend_700Bold,
+  });
+
   useEffect(() => {
-    // Hide splash screen immediately since we rely on system fonts now
-    SplashScreen.hideAsync();
-  }, []);
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

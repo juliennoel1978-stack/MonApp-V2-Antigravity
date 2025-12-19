@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { View, Text, Animated, StyleSheet } from 'react-native';
+import { View, Animated, StyleSheet } from 'react-native';
 import { Check, X, Clock } from 'lucide-react-native';
+import { ThemedText } from '../ThemedText';
 import { AppColors } from '@/constants/colors';
 import type { User } from '@/types';
 
@@ -63,11 +64,11 @@ export const ChallengeFeedback = ({
                     },
                 ]}
             >
-                <Text style={styles.celebrationEmoji}>🎉</Text>
-                <Text style={styles.celebrationText}>Bravo !</Text>
-                <Text style={styles.celebrationSubtext}>
+                <ThemedText style={styles.celebrationEmoji}>🎉</ThemedText>
+                <ThemedText style={styles.celebrationText}>Bravo !</ThemedText>
+                <ThemedText style={styles.celebrationSubtext}>
                     4 bonnes réponses d&apos;affilée !
-                </Text>
+                </ThemedText>
             </Animated.View>
         );
     }
@@ -83,43 +84,43 @@ export const ChallengeFeedback = ({
                 {isCorrect ? (
                     <View style={styles.feedbackBox}>
                         <Check size={48} color={AppColors.success} />
-                        <Text style={[styles.feedbackText, { color: AppColors.success }]}>
+                        <ThemedText style={[styles.feedbackText, { color: AppColors.success }]}>
                             Correct !
-                        </Text>
-                        <Text style={styles.encouragementText}>
+                        </ThemedText>
+                        <ThemedText style={styles.encouragementText}>
                             {currentCorrectPhrase}
-                        </Text>
+                        </ThemedText>
                     </View>
                 ) : isTimeout ? (
                     <View style={styles.feedbackBox}>
                         <Clock size={48} color={AppColors.timerMiddle} />
-                        <Text style={[styles.feedbackText, { color: AppColors.timerMiddle, textAlign: 'center' }]}>
+                        <ThemedText style={[styles.feedbackText, { color: AppColors.timerMiddle, textAlign: 'center' }]}>
                             {timerDisplayMode === 'bar'
                                 ? "Prends ton temps,\non regarde la réponse ensemble."
                                 : "Temps écoulé !"}
-                        </Text>
+                        </ThemedText>
                         {showCorrectAnswer && currentQuestion && (
                             <View style={styles.answerContainer}>
-                                <Text style={styles.correctAnswerLabel}>
-                                    La bonne réponse est : <Text style={styles.correctAnswerValue}>{currentQuestion.answer}</Text>
-                                </Text>
+                                <ThemedText style={styles.correctAnswerLabel}>
+                                    La bonne réponse est : <ThemedText style={styles.correctAnswerValue}>{currentQuestion.answer}</ThemedText>
+                                </ThemedText>
                                 <View style={styles.equationContainer}>
-                                    <Text style={styles.equationText}>
+                                    <ThemedText style={styles.equationText}>
                                         {currentQuestion.type === 'multiplicand' && (
-                                            <Text style={styles.underlined}>{currentQuestion.num1}</Text>
+                                            <ThemedText style={styles.underlined}>{currentQuestion.num1}</ThemedText>
                                         )}
                                         {currentQuestion.type !== 'multiplicand' && currentQuestion.num1}
                                         {' × '}
                                         {currentQuestion.type === 'multiplier' && (
-                                            <Text style={styles.underlined}>{currentQuestion.num2}</Text>
+                                            <ThemedText style={styles.underlined}>{currentQuestion.num2}</ThemedText>
                                         )}
                                         {currentQuestion.type !== 'multiplier' && currentQuestion.num2}
                                         {' = '}
                                         {currentQuestion.type === 'result' && (
-                                            <Text style={styles.underlined}>{currentQuestion.answer}</Text>
+                                            <ThemedText style={styles.underlined}>{currentQuestion.answer}</ThemedText>
                                         )}
                                         {currentQuestion.type !== 'result' && currentQuestion.num1 * currentQuestion.num2}
-                                    </Text>
+                                    </ThemedText>
                                 </View>
                             </View>
                         )}
@@ -127,35 +128,35 @@ export const ChallengeFeedback = ({
                 ) : (
                     <View style={styles.feedbackBox}>
                         <X size={48} color={attempts === 1 ? AppColors.timerMiddle : AppColors.timerEnd} />
-                        <Text style={[styles.feedbackText, { color: attempts === 1 ? AppColors.timerMiddle : AppColors.timerEnd }]}>
+                        <ThemedText style={[styles.feedbackText, { color: attempts === 1 ? AppColors.timerMiddle : AppColors.timerEnd }]}>
                             {attempts === 1 ? 'On réessaie 😌' : 'Pas tout à fait...'}
-                        </Text>
+                        </ThemedText>
                         {showCorrectAnswer && currentQuestion && (
                             <View style={styles.answerContainer}>
-                                <Text style={styles.correctAnswerLabel}>
-                                    La bonne réponse est : <Text style={styles.correctAnswerValue}>{currentQuestion.answer}</Text>
-                                </Text>
+                                <ThemedText style={styles.correctAnswerLabel}>
+                                    La bonne réponse est : <ThemedText style={styles.correctAnswerValue}>{currentQuestion.answer}</ThemedText>
+                                </ThemedText>
                                 <View style={styles.equationContainer}>
-                                    <Text style={styles.equationText}>
+                                    <ThemedText style={styles.equationText}>
                                         {currentQuestion.type === 'multiplicand' && (
-                                            <Text style={styles.underlined}>{currentQuestion.num1}</Text>
+                                            <ThemedText style={styles.underlined}>{currentQuestion.num1}</ThemedText>
                                         )}
                                         {currentQuestion.type !== 'multiplicand' && currentQuestion.num1}
                                         {' × '}
                                         {currentQuestion.type === 'multiplier' && (
-                                            <Text style={styles.underlined}>{currentQuestion.num2}</Text>
+                                            <ThemedText style={styles.underlined}>{currentQuestion.num2}</ThemedText>
                                         )}
                                         {currentQuestion.type !== 'multiplier' && currentQuestion.num2}
                                         {' = '}
                                         {currentQuestion.type === 'result' && (
-                                            <Text style={styles.underlined}>{currentQuestion.answer}</Text>
+                                            <ThemedText style={styles.underlined}>{currentQuestion.answer}</ThemedText>
                                         )}
                                         {currentQuestion.type !== 'result' && currentQuestion.num1 * currentQuestion.num2}
-                                    </Text>
+                                    </ThemedText>
                                 </View>
-                                <Text style={styles.kindPhraseText}>
+                                <ThemedText style={styles.kindPhraseText}>
                                     {currentErrorPhrase}
-                                </Text>
+                                </ThemedText>
                             </View>
                         )}
                     </View>

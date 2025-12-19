@@ -3,7 +3,6 @@ import { Plus, ArrowLeft } from 'lucide-react-native';
 import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
@@ -13,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
+import { ThemedText } from '@/components/ThemedText';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 60) / 2;
@@ -49,8 +49,8 @@ export default function SelectUserScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.header}>
-          <Text style={styles.title}>Qui es-tu ?</Text>
-          <Text style={styles.subtitle}>Choisis ton profil</Text>
+          <ThemedText style={styles.title}>Qui es-tu ?</ThemedText>
+          <ThemedText style={styles.subtitle}>Choisis ton profil</ThemedText>
         </View>
 
         <ScrollView
@@ -70,21 +70,21 @@ export default function SelectUserScreen() {
                     <Image source={{ uri: user.photoUri }} style={styles.avatar} />
                   ) : (
                     <View style={styles.avatarPlaceholder}>
-                      <Text style={styles.avatarEmoji}>
+                      <ThemedText style={styles.avatarEmoji}>
                         {user.gender === 'boy' ? '👦' : '👧'}
-                      </Text>
+                      </ThemedText>
                     </View>
                   )}
                 </View>
-                <Text 
-                  style={styles.userName} 
-                  numberOfLines={1} 
+                <ThemedText
+                  style={styles.userName}
+                  numberOfLines={1}
                   adjustsFontSizeToFit
                 >
                   {user.firstName}
-                </Text>
-                <Text style={styles.userAge}>{user.age} ans</Text>
-                <Text style={styles.userGrade}>{user.grade}</Text>
+                </ThemedText>
+                <ThemedText style={styles.userAge}>{user.age} ans</ThemedText>
+                <ThemedText style={styles.userGrade}>{user.grade}</ThemedText>
               </TouchableOpacity>
             ))}
 
@@ -96,7 +96,7 @@ export default function SelectUserScreen() {
               <View style={styles.addIconContainer}>
                 <Plus size={40} color={AppColors.primary} />
               </View>
-              <Text style={styles.addText}>Ajouter</Text>
+              <ThemedText style={styles.addText}>Ajouter</ThemedText>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -105,9 +105,9 @@ export default function SelectUserScreen() {
               testID="guest-mode"
             >
               <View style={[styles.addIconContainer, styles.guestIconContainer]}>
-                <Text style={{ fontSize: 32 }}>🕵️</Text>
+                <ThemedText style={{ fontSize: 32 }}>🕵️</ThemedText>
               </View>
-              <Text style={[styles.addText, styles.guestText]}>Mode Invité</Text>
+              <ThemedText style={[styles.addText, styles.guestText]}>Mode Invité</ThemedText>
             </TouchableOpacity>
           </View>
         </ScrollView>

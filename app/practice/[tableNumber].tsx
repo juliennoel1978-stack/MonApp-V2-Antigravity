@@ -1,10 +1,10 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Home, Check, X, Star, RefreshCw, ArrowRight } from 'lucide-react-native';
+import { Home, Check, X, Star, RefreshCw, ArrowRight, Volume2, VolumeX } from 'lucide-react-native';
 import React, { useState, useEffect, useRef } from 'react';
+import { ThemedText } from '@/components/ThemedText';
 
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Animated,
@@ -15,7 +15,8 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { speak, stop } from '@/utils/speech';
+import { useAudio } from '@/hooks/useAudio';
+import { useHaptics } from '@/hooks/useHaptics';
 import { AppColors, NumberColors } from '@/constants/colors';
 import { getTableByNumber, TIPS_BY_TABLE } from '@/constants/tables';
 import { useApp } from '@/contexts/AppContext';
@@ -26,7 +27,9 @@ import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 
 // Short "Ding" sound (Base64 MP3)
-const SUCCESS_AUDIO_B64 = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//oeMAAAAAAAAAAAAAAAAAAAAAAAAAAAAABYaW5nAAAABQAAAA4AAA0wAA8PDxMTExcXFxsbGx8fH2BgYGRkZGlpaW9vb3Nzc3t7e4CAgISEhImJiaGhoaSkpK2trbGxsbq6usPDw8jIyM3NzdTU1N3d3eHh4evr6/Hx8fb29v///wAAAABMYXZjNTguNTQuMTAwAAAAAAAAAAAAAAAAIjwAAAAAANIAAAAAAA0w8l/O2gAAAAAAAAAAAAAAAAAAAAAA//oeMMAAAADSAAAAABAAAAAAAAAAABInfoAAAAqMAAAAKgAAAAQAAQIEBAQO2e5V323/577777///////77///5wAAAAAD/8AAAAAAAAAAABiLm1wM//oeMMQAACqgAAACqAAABAAABAAABAAAP/yAA//IAA//IA/8gAAAAA3/8wAAAAA5//MAAAAAOkAANf/6HjDEAAmqAAAAKqAAAAQAAAQAAAQAA//IAAAABAA//ID/8gAAAAAN//MAAAAAOf/zAAAAADpAABAAAAA//oeMMQAACqgAAACqAAABAAABAAABAAAP/yAA//IAA//IA/8gAAAAA3/8wAAAAA5//MAAAAAOkAAEAAP/yAA//oeMMQAACqgAAACqAAABAAABAAABAAAP/yAA//IAA//IA/8gAAAAA3/8wAAAAA5//MAAAAAOkAAEAAP/yAA//oeMMQAACqgAAACqAAABAAABAAABAAAP/yAA//IAA//IA/8gAAAAA3/8wAAAAA5//MAAAAAOkAAEAAP/yAA';
+
+
+// Short "Ding" sound (Base64 MP3) - Moved to utils/soundPlayer.ts
 
 const COACH_THEMES = {
   animals: '🐒',
@@ -83,12 +86,12 @@ const CheckpointModal = ({
   return (
     <View style={styles.checkpointOverlay}>
       <Animated.View style={[styles.checkpointCard, { transform: [{ scale: scaleAnim }] }]}>
-        <Text style={styles.checkpointTitle}>{data.title}</Text>
+        <ThemedText style={styles.checkpointTitle}>{data.title}</ThemedText>
         <View style={styles.checkpointImageContainer}>
-          <Text style={styles.checkpointEmojiMain}>{data.image}</Text>
-          <Text style={styles.checkpointEmojiItem}>{data.item}</Text>
+          <ThemedText style={styles.checkpointEmojiMain}>{data.image}</ThemedText>
+          <ThemedText style={styles.checkpointEmojiItem}>{data.item}</ThemedText>
         </View>
-        <Text style={styles.checkpointSubtitle}>{data.subtitle}</Text>
+        <ThemedText style={styles.checkpointSubtitle}>{data.subtitle}</ThemedText>
       </Animated.View>
     </View>
   );
@@ -144,10 +147,10 @@ const CoachFeedback = ({
           },
         ]}
       >
-        <Text style={styles.coachMessage}>{message} {['🎉', '🌟', '🔥', '🚀', '👏', '💪'][Math.floor(Math.random() * 6)]}</Text>
+        <ThemedText style={styles.coachMessage}>{message} {['🎉', '🌟', '🔥', '🚀', '👏', '💪'][Math.floor(Math.random() * 6)]}</ThemedText>
         <View style={styles.coachBubbleArrow} />
       </Animated.View>
-      <Text style={styles.coachEmoji}>{coachEmoji}</Text>
+      <ThemedText style={styles.coachEmoji}>{coachEmoji}</ThemedText>
     </View>
   );
 };
@@ -159,9 +162,12 @@ export default function PracticeScreen() {
   const { tableNumber } = useLocalSearchParams();
   const table = getTableByNumber(Number(tableNumber));
   const { updateTableProgress, unlockBadge, getTableProgress, settings, currentUser } = useApp();
+  const { playSound, speak, stopSpeech, isVoiceEnabled } = useAudio();
+  const { vibrate } = useHaptics();
 
   const tableProgress = getTableProgress(Number(tableNumber));
   const initialLevel = tableProgress?.level1Completed ? 2 : 1;
+  const [localVoiceEnabled, setLocalVoiceEnabled] = useState(isVoiceEnabled);
 
   const [level, setLevel] = useState<1 | 2>(initialLevel);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -196,6 +202,15 @@ export default function PracticeScreen() {
   const inputRef = useRef<TextInput>(null);
   const isMounted = useRef(true);
 
+  // Silent Data Collection Refs
+  const startTimeRef = useRef<number>(Date.now());
+  const totalTimeRef = useRef<number>(0);
+
+  useEffect(() => {
+    // Reset timer on every new question
+    startTimeRef.current = Date.now();
+  }, [currentQuestionIndex, questions]);
+
   useEffect(() => {
     isMounted.current = true;
 
@@ -226,12 +241,46 @@ export default function PracticeScreen() {
     }
   }, [table]);
 
+  // Effect to speak the question when it changes or when the screen is ready
+  // MOVED HERE TO AVOID "RENDERED MORE HOOKS" ERROR
+  useEffect(() => {
+    // Safely access currentQuestion inside the effect
+    const safeCurrentQuestion = questions[currentQuestionIndex];
 
+    if (
+      safeCurrentQuestion &&
+      !showResult &&
+      !showLevelTransition &&
+      !showErrorFeedback &&
+      !showCoachFeedback &&
+      !showCheckpoint &&
+      isMounted.current
+    ) {
+      // Small delay to ensure UI is ready and previous sounds are finished
+      const timer = setTimeout(() => {
+        if (isMounted.current && localVoiceEnabled) {
+          speak(`${safeCurrentQuestion.multiplicand} fois ${safeCurrentQuestion.multiplier} ?`);
+        }
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [
+    // Dependencies must be stable or simple values
+    questions,
+    currentQuestionIndex,
+    showResult,
+    showLevelTransition,
+    showErrorFeedback,
+    showCoachFeedback,
+    showCheckpoint,
+    speak,
+    localVoiceEnabled
+  ]);
 
   if (!table || questions.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>Chargement...</Text>
+        <ThemedText style={styles.errorText}>Chargement...</ThemedText>
       </SafeAreaView>
     );
   }
@@ -241,7 +290,8 @@ export default function PracticeScreen() {
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
   const speakCorrection = (question: Question) => {
-    if (settings?.voiceEnabled) {
+    // We also respect local toggle for correction
+    if (localVoiceEnabled) {
       const tip = TIPS_BY_TABLE[table.number];
       let errorText = tip?.erreur || '';
 
@@ -269,7 +319,12 @@ export default function PracticeScreen() {
 
     if (correct) {
       setCorrectCount(newCorrectCount);
+
+      // Silent Data Collection: Track time for correct answer
+      totalTimeRef.current += (Date.now() - startTimeRef.current);
+
       // Level 1: Just regular loop, no streak/checkpoint logic needed as per request
+      vibrate('success');
       triggerCoachSuccess();
       setTimeout(() => {
         if (isMounted.current) {
@@ -279,6 +334,7 @@ export default function PracticeScreen() {
       }, 1200);
     } else {
       setStreak(0); // Reset streak on error even in Level 1 for consistency
+      vibrate('error');
       animateError();
       if (isReviewMode) {
         const alreadyInReviewErrors = reviewErrors.some(
@@ -313,11 +369,15 @@ export default function PracticeScreen() {
     if (correct) {
       setCorrectCount(newCorrectCount);
 
+      // Silent Data Collection: Track time for correct answer
+      totalTimeRef.current += (Date.now() - startTimeRef.current);
+
       const newStreak = streak + 1;
       setStreak(newStreak);
 
       // Checkpoint Trigger (Level 2 ONLY, 5 Consecutive)
       if (level === 2 && newStreak === 5) {
+        vibrate('success');
         triggerCheckpoint();
         // Wait 2.5s for checkpoint, then proceed
         setTimeout(() => {
@@ -328,6 +388,7 @@ export default function PracticeScreen() {
         }, 2500);
       } else {
         // Standard Success
+        vibrate('success');
         triggerCoachSuccess();
         setTimeout(() => {
           if (isMounted.current) {
@@ -339,6 +400,7 @@ export default function PracticeScreen() {
 
     } else {
       setStreak(0); // Reset streak on error
+      vibrate('error');
       animateError();
       if (isReviewMode) {
         const alreadyInReviewErrors = reviewErrors.some(
@@ -362,13 +424,13 @@ export default function PracticeScreen() {
 
   const handleContinueAfterError = () => {
     setShowErrorFeedback(false);
-    stop();
+    stopSpeech();
     nextQuestion(correctCount);
   };
 
   const handleRetryQuestion = () => {
     setShowErrorFeedback(false);
-    stop();
+    stopSpeech();
     setSelectedAnswer(null);
     setUserInput('');
     setIsCorrect(null);
@@ -381,76 +443,16 @@ export default function PracticeScreen() {
     }
   };
 
-  const playSuccessSound = async (isCheckpoint = false) => {
-    if (Platform.OS === 'web') {
-      try {
-        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-        if (!AudioContext) return;
-
-        const ctx = new AudioContext();
-
-        // Create oscillator
-        const osc = ctx.createOscillator();
-        const gainNode = ctx.createGain();
-
-        osc.type = 'sine';
-        if (isCheckpoint) {
-          // Checkpoint Tune: C5 - E5 - G5 (Arpeggio)
-          osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
-          osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
-        } else {
-          osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-          osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.1);
-        }
-
-        // Envelope
-        gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (isCheckpoint ? 0.6 : 0.3));
-
-        osc.connect(gainNode);
-        gainNode.connect(ctx.destination);
-
-        osc.start();
-        osc.stop(ctx.currentTime + (isCheckpoint ? 0.6 : 0.3));
-      } catch (e) {
-        console.error("Audio error", e);
-      }
-    } else {
-      // NATIVE (iOS/Android)
-      try {
-        // 1. Haptic Feedback (Physical feel)
-        await Haptics.notificationAsync(
-          isCheckpoint ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Success
-        );
-
-        // 2. Play Sound from Base64
-        // Use same sound for now, or could define a different B64 for checkpoint
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: SUCCESS_AUDIO_B64 },
-          { shouldPlay: true }
-        );
-
-        // Auto-unload after playing
-        sound.setOnPlaybackStatusUpdate(async (status) => {
-          if (status.isLoaded && status.didJustFinish) {
-            await sound.unloadAsync();
-          }
-        });
-      } catch (error) {
-        console.log("Native Sound Error", error);
-      }
-    }
-  };
+  /* Shared utility replaced local implementation */
 
   const triggerCheckpoint = () => {
-    playSuccessSound(true); // Play special tune (Web) or Standard (Native)
+    playSound('checkpoint'); // Play special character sound
     setShowCheckpoint(true);
   };
 
   const triggerCoachSuccess = async () => {
-    // 1. Play Sound (Web Audio API)
-    playSuccessSound();
+    // 1. Play Sound (Web Audio API or Native)
+    playSound(level === 2 ? 'magic' : 'default');
 
     // 2. Select Message
     const isGendered = Math.random() > 0.5;
@@ -551,10 +553,13 @@ export default function PracticeScreen() {
       return;
     }
 
+    const averageTime = questions.length > 0 ? Math.round(totalTimeRef.current / questions.length) : 0;
+
     if (level === 1) {
       if (finalCorrectCount >= 8) {
-        updateTableProgress(table.number, finalCorrectCount, questions.length, finalCorrectCount === 10 ? 2 : 1, 1);
+        updateTableProgress(table.number, finalCorrectCount, questions.length, finalCorrectCount === 10 ? 2 : 1, 1, averageTime);
         if (finalCorrectCount === 10) setQuestionsToReview([]);
+        vibrate('heavy'); // Celebrate passing level 1
         setShowLevelTransition(true);
       } else {
         setShowResult(true);
@@ -566,10 +571,15 @@ export default function PracticeScreen() {
       else if (totalCorrectLevel2 >= 8) stars = 3;
       else if (totalCorrectLevel2 >= 5) stars = 2;
 
-      updateTableProgress(table.number, totalCorrectLevel2, questions.length, stars, 2);
+      updateTableProgress(table.number, totalCorrectLevel2, questions.length, stars, 2, averageTime);
 
       if (stars >= 4) {
         unlockBadge('perfect_score');
+        playSound('mastery');
+      }
+
+      if (stars >= 3) { // 8/10 or better
+        vibrate('heavy'); // Celebrate passing level 2
       }
 
       if (currentQuestionIndex === 0) {
@@ -583,6 +593,7 @@ export default function PracticeScreen() {
   const startLevel2 = () => {
     setLevel(2);
     setQuestions(generateQuestions(table.number, 10));
+    totalTimeRef.current = 0; // Reset timer for new level
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
     setUserInput('');
@@ -602,6 +613,7 @@ export default function PracticeScreen() {
 
   const retry = () => {
     setQuestions(generateQuestions(table.number, 10));
+    totalTimeRef.current = 0; // Reset timer for retry
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
     setUserInput('');
@@ -626,6 +638,7 @@ export default function PracticeScreen() {
     const reviewQuestions = [...questionsToReview];
     setIsReviewMode(true);
     setQuestions(reviewQuestions);
+    totalTimeRef.current = 0; // Reset timer for review
     setReviewErrors([]);
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
@@ -667,12 +680,12 @@ export default function PracticeScreen() {
       <View style={styles.backgroundContainer}>
         <SafeAreaView style={styles.container}>
           <View style={styles.resultContainer}>
-            <Text style={styles.resultTitle}>Bravo {userName ? `${userName} ` : ''}! 🎉</Text>
-            <Text style={styles.resultSubtitle}>
+            <ThemedText style={styles.resultTitle}>Bravo {userName ? `${userName} ` : ''}! 🎉</ThemedText>
+            <ThemedText style={styles.resultSubtitle}>
               {correctCount === 10
                 ? 'Tu maîtrises cette table !'
                 : 'Tu as débloqué le niveau 2 !'}
-            </Text>
+            </ThemedText>
 
             <View style={[styles.resultCard, { borderColor: tableColor }]}>
               <View style={styles.starsContainer}>
@@ -685,11 +698,11 @@ export default function PracticeScreen() {
                   />
                 ))}
               </View>
-              <Text style={styles.intermediateStarsText}>{starsEarnedLevel1} étoile{starsEarnedLevel1 > 1 ? 's' : ''} sur 4</Text>
-              <Text style={styles.transitionDescriptionFirst}>Maintenant, allons plus loin !</Text>
-              <Text style={styles.transitionDescriptionSecond}>
+              <ThemedText style={styles.intermediateStarsText}>{starsEarnedLevel1} étoile{starsEarnedLevel1 > 1 ? 's' : ''} sur 4</ThemedText>
+              <ThemedText style={styles.transitionDescriptionFirst}>Maintenant, allons plus loin !</ThemedText>
+              <ThemedText style={styles.transitionDescriptionSecond}>
                 Tape les réponses pour obtenir{'\n'}les {4 - starsEarnedLevel1} étoile{4 - starsEarnedLevel1 > 1 ? 's' : ''} restante{4 - starsEarnedLevel1 > 1 ? 's' : ''}.
-              </Text>
+              </ThemedText>
             </View>
 
             <View style={styles.resultButtonsColumn}>
@@ -697,17 +710,17 @@ export default function PracticeScreen() {
                 style={[styles.primaryButton, { backgroundColor: tableColor }]}
                 onPress={startLevel2}
               >
-                <Text style={styles.primaryButtonText}>Passer au niveau 2 🚀</Text>
+                <ThemedText style={styles.primaryButtonText}>Passer au niveau 2 🚀</ThemedText>
               </TouchableOpacity>
 
               {questionsToReview.length > 0 && (
                 <View style={styles.reviewSectionContainer}>
-                  <Text style={styles.reviewSectionTitle}>Tu veux d&apos;abord revoir tes erreurs ?</Text>
+                  <ThemedText style={styles.reviewSectionTitle}>Tu veux d&apos;abord revoir tes erreurs ?</ThemedText>
                   <TouchableOpacity
                     style={styles.reviewButtonSecondary}
                     onPress={startReview}
                   >
-                    <Text style={styles.reviewButtonSecondaryText}>Oui, réviser {questionsToReview.length === 1 ? 'mon' : `mes ${questionsToReview.length}`} erreur{questionsToReview.length > 1 ? 's' : ''}</Text>
+                    <ThemedText style={styles.reviewButtonSecondaryText}>Oui, réviser {questionsToReview.length === 1 ? 'mon' : `mes ${questionsToReview.length}`} erreur{questionsToReview.length > 1 ? 's' : ''}</ThemedText>
                   </TouchableOpacity>
                 </View>
               )}
@@ -716,7 +729,7 @@ export default function PracticeScreen() {
                 style={styles.backToMenuButton}
                 onPress={() => router.push('/tables' as any)}
               >
-                <Text style={styles.backToMenuButtonText}>Retour au menu</Text>
+                <ThemedText style={styles.backToMenuButtonText}>Retour au menu</ThemedText>
               </TouchableOpacity>
             </View>
           </View>
@@ -737,10 +750,10 @@ export default function PracticeScreen() {
           <View style={styles.backgroundContainer}>
             <SafeAreaView style={styles.container}>
               <View style={styles.resultContainer}>
-                <Text style={styles.resultTitle}>Bravo {userName ? `${userName} ` : ''}! 🎉</Text>
-                <Text style={styles.resultSubtitle}>
+                <ThemedText style={styles.resultTitle}>Bravo {userName ? `${userName} ` : ''}! 🎉</ThemedText>
+                <ThemedText style={styles.resultSubtitle}>
                   Tu as réussi toutes les questions de révision !
-                </Text>
+                </ThemedText>
 
                 <View style={styles.resultButtonsColumn}>
                   <TouchableOpacity
@@ -748,7 +761,7 @@ export default function PracticeScreen() {
                     onPress={retry}
                     testID="retry-button"
                   >
-                    <Text style={styles.primaryButtonText}>Recommencer le quiz complet</Text>
+                    <ThemedText style={styles.primaryButtonText}>Recommencer le quiz complet</ThemedText>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -756,7 +769,7 @@ export default function PracticeScreen() {
                     onPress={() => router.push('/tables' as any)}
                     testID="back-button-result"
                   >
-                    <Text style={[styles.primaryButtonText, { color: tableColor }]}>Aller à une autre table</Text>
+                    <ThemedText style={[styles.primaryButtonText, { color: tableColor }]}>Aller à une autre table</ThemedText>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -770,33 +783,33 @@ export default function PracticeScreen() {
         <View style={styles.backgroundContainer}>
           <SafeAreaView style={styles.container}>
             <View style={styles.resultContainer}>
-              <Text style={styles.resultTitle}>Presque !</Text>
+              <ThemedText style={styles.resultTitle}>Presque !</ThemedText>
 
               <View style={[styles.resultCardCompact, { borderColor: tableColor }]}>
-                <Text style={styles.resultScore}>
+                <ThemedText style={styles.resultScore}>
                   {correctCount}/{questions.length}
-                </Text>
-                <Text style={styles.resultLabel}>Bonnes réponses</Text>
+                </ThemedText>
+                <ThemedText style={styles.resultLabel}>Bonnes réponses</ThemedText>
 
-                <Text style={styles.encouragementLarge}>
+                <ThemedText style={styles.encouragementLarge}>
                   💪 Continue à t&apos;entraîner, tu vas y arriver !
-                </Text>
-                <Text style={styles.encouragementSmall}>
+                </ThemedText>
+                <ThemedText style={styles.encouragementSmall}>
                   Il te faut au moins 8/10 pour passer au niveau suivant.
-                </Text>
+                </ThemedText>
               </View>
 
               <View style={styles.resultButtonsColumn}>
                 {questionsToReview.length > 0 && (
                   <View style={styles.reviewContainer}>
-                    <Text style={styles.reviewText}>
+                    <ThemedText style={styles.reviewText}>
                       Tu veux revoir uniquement les questions qui t&apos;ont posé problème ?
-                    </Text>
+                    </ThemedText>
                     <TouchableOpacity
                       style={styles.reviewConfirmButton}
                       onPress={startReview}
                     >
-                      <Text style={styles.reviewConfirmButtonText}>Oui</Text>
+                      <ThemedText style={styles.reviewConfirmButtonText}>Oui</ThemedText>
                     </TouchableOpacity>
                   </View>
                 )}
@@ -807,7 +820,7 @@ export default function PracticeScreen() {
                     onPress={() => router.push(`/discovery/${table.number}?step=2` as any)}
                     testID="review-lesson-button"
                   >
-                    <Text style={styles.resultButtonText}>Réviser la table</Text>
+                    <ThemedText style={styles.resultButtonText}>Réviser la table</ThemedText>
                   </TouchableOpacity>
                 </View>
 
@@ -817,7 +830,7 @@ export default function PracticeScreen() {
                     onPress={retry}
                     testID="retry-button"
                   >
-                    <Text style={styles.secondaryButtonText}>Réessayer{"\n"}le quiz</Text>
+                    <ThemedText style={styles.secondaryButtonText}>Réessayer{"\n"}le quiz</ThemedText>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -825,7 +838,7 @@ export default function PracticeScreen() {
                     onPress={() => router.push('/tables' as any)}
                     testID="back-button-result"
                   >
-                    <Text style={[styles.outlineButtonText, { color: tableColor }]}>Autre{"\n"}table</Text>
+                    <ThemedText style={[styles.outlineButtonText, { color: tableColor }]}>Autre{"\n"}table</ThemedText>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -844,10 +857,10 @@ export default function PracticeScreen() {
         <View style={styles.backgroundContainer}>
           <SafeAreaView style={styles.container}>
             <View style={styles.resultContainer}>
-              <Text style={styles.resultTitle}>Bravo {userName ? `${userName} ` : ''}! 🎉</Text>
-              <Text style={styles.resultSubtitle}>
+              <ThemedText style={styles.resultTitle}>Bravo {userName ? `${userName} ` : ''}! 🎉</ThemedText>
+              <ThemedText style={styles.resultSubtitle}>
                 Tu as réussi toutes les questions de révision !
-              </Text>
+              </ThemedText>
 
               <View style={styles.resultButtonsColumn}>
                 <TouchableOpacity
@@ -855,7 +868,7 @@ export default function PracticeScreen() {
                   onPress={retry}
                   testID="retry-button"
                 >
-                  <Text style={styles.primaryButtonText}>Recommencer le quiz complet</Text>
+                  <ThemedText style={styles.primaryButtonText}>Recommencer le quiz complet</ThemedText>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -863,7 +876,7 @@ export default function PracticeScreen() {
                   onPress={() => router.push('/tables' as any)}
                   testID="back-button-result"
                 >
-                  <Text style={[styles.primaryButtonText, { color: tableColor }]}>Aller à une autre table</Text>
+                  <ThemedText style={[styles.primaryButtonText, { color: tableColor }]}>Aller à une autre table</ThemedText>
                 </TouchableOpacity>
               </View>
             </View>
@@ -884,20 +897,20 @@ export default function PracticeScreen() {
       <View style={styles.backgroundContainer}>
         <SafeAreaView style={styles.container}>
           <View style={styles.resultContainer}>
-            <Text style={styles.resultTitle}>
+            <ThemedText style={styles.resultTitle}>
               {passed
                 ? `Bravo ${userName ? `${userName} ` : ''}! 🎉`
                 : `Presque ${userName ? `${userName} ` : ''}! 😕`}
-            </Text>
-            <Text style={styles.resultSubtitle}>
+            </ThemedText>
+            <ThemedText style={styles.resultSubtitle}>
               {passed ? 'Tu as terminé l\'entraînement' : 'Entraîne-toi encore un peu'}
-            </Text>
+            </ThemedText>
 
             <View style={[styles.resultCard, { borderColor: tableColor }]}>
-              <Text style={styles.resultScore}>
+              <ThemedText style={styles.resultScore}>
                 {correctCount}/{questions.length}
-              </Text>
-              <Text style={styles.resultLabel}>Bonnes réponses</Text>
+              </ThemedText>
+              <ThemedText style={styles.resultLabel}>Bonnes réponses</ThemedText>
 
               <View style={styles.starsContainer}>
                 {[1, 2, 3, 4].map(starIndex => (
@@ -910,25 +923,25 @@ export default function PracticeScreen() {
                 ))}
               </View>
 
-              <Text style={styles.encouragement}>
+              <ThemedText style={styles.encouragement}>
                 {stars === 4 ? `Super ! Tu maîtrises parfaitement la table de ${table.number} !` :
                   stars === 3 ? 'Très bien ! Continue comme ça !' :
                     stars === 2 ? 'Bon début ! Entraîne-toi encore !' :
                       'Continue à t\'entraîner, tu vas y arriver !'}
-              </Text>
+              </ThemedText>
             </View>
 
             <View style={styles.resultButtonsColumn}>
               {questionsToReview.length > 0 && (
                 <View style={styles.reviewSectionContainer}>
-                  <Text style={styles.reviewSectionTitle}>
+                  <ThemedText style={styles.reviewSectionTitle}>
                     Tu veux revoir tes erreurs avant de continuer ?
-                  </Text>
+                  </ThemedText>
                   <TouchableOpacity
                     style={styles.reviewButtonSecondary}
                     onPress={startReview}
                   >
-                    <Text style={styles.reviewButtonSecondaryText}>Oui, réviser {questionsToReview.length === 1 ? 'mon' : `mes ${questionsToReview.length}`} erreur{questionsToReview.length > 1 ? 's' : ''}</Text>
+                    <ThemedText style={styles.reviewButtonSecondaryText}>Oui, réviser {questionsToReview.length === 1 ? 'mon' : `mes ${questionsToReview.length}`} erreur{questionsToReview.length > 1 ? 's' : ''}</ThemedText>
                   </TouchableOpacity>
                 </View>
               )}
@@ -941,12 +954,12 @@ export default function PracticeScreen() {
                   ]}
                   onPress={retry}
                 >
-                  <Text style={[
+                  <ThemedText style={[
                     styles.actionButtonText,
                     passed && { color: AppColors.text }
                   ]}>
                     {passed ? 'Refaire le niveau' : 'Refaire le niveau'}
-                  </Text>
+                  </ThemedText>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -957,12 +970,12 @@ export default function PracticeScreen() {
                   ]}
                   onPress={() => router.push('/tables')}
                 >
-                  <Text style={[
+                  <ThemedText style={[
                     styles.actionButtonText,
                     !passed && { color: tableColor }
                   ]}>
                     {passed ? 'Non, autre table' : 'Non, autre table'}
-                  </Text>
+                  </ThemedText>
                 </TouchableOpacity>
               </View>
             </View>
@@ -976,13 +989,26 @@ export default function PracticeScreen() {
     <View style={styles.backgroundContainer}>
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={handleHomePress}
-            testID="back-button"
-          >
-            <Home size={24} color={AppColors.primary} />
-          </TouchableOpacity>
+          <View style={styles.headerLeft}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={handleHomePress}
+              testID="back-button"
+            >
+              <Home size={24} color={AppColors.primary} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.soundToggleButton}
+              onPress={() => setLocalVoiceEnabled(!localVoiceEnabled)}
+            >
+              {localVoiceEnabled ? (
+                <Volume2 size={24} color={AppColors.primary} />
+              ) : (
+                <VolumeX size={24} color={AppColors.textSecondary} />
+              )}
+            </TouchableOpacity>
+          </View>
 
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
@@ -993,13 +1019,13 @@ export default function PracticeScreen() {
                 ]}
               />
             </View>
-            <Text style={styles.progressText}>
+            <ThemedText style={styles.progressText}>
               {isReviewMode ? 'Révision' : `Niveau ${level}`} - Question {currentQuestionIndex + 1}/{questions.length}
-            </Text>
+            </ThemedText>
           </View>
 
           <View style={styles.scoreContainer}>
-            <Text style={styles.scoreText}>{correctCount}/{questions.length}</Text>
+            <ThemedText style={styles.scoreText}>{correctCount}/{questions.length}</ThemedText>
             <Check size={20} color={AppColors.success} />
           </View>
         </View>
@@ -1032,21 +1058,42 @@ export default function PracticeScreen() {
               >
                 {level === 1 ? (
                   <>
-                    <Text style={styles.questionLabel}>Combien font :</Text>
-                    <View style={styles.questionRow}>
-                      <Text style={[styles.questionNumber, { color: tableColor }]}>
-                        {currentQuestion.multiplicand}
-                      </Text>
-                      <Text style={styles.questionOperator}>×</Text>
-                      <Text style={[styles.questionNumber, { color: tableColor }]}>
-                        {currentQuestion.multiplier}
-                      </Text>
-                    </View>
+                    <ThemedText style={styles.questionLabel}>Combien font :</ThemedText>
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (localVoiceEnabled) {
+                          speak(`${currentQuestion.multiplicand} fois ${currentQuestion.multiplier} ?`);
+                        }
+                      }}
+                      activeOpacity={localVoiceEnabled ? 0.7 : 1}
+                    >
+                      <View style={styles.questionRow}>
+                        <ThemedText style={[styles.questionNumber, { color: tableColor }]}>
+                          {currentQuestion.multiplicand}
+                        </ThemedText>
+                        <ThemedText style={styles.questionOperator}>×</ThemedText>
+                        <ThemedText style={[styles.questionNumber, { color: tableColor }]}>
+                          {currentQuestion.multiplier}
+                        </ThemedText>
+                        {localVoiceEnabled && <Volume2 size={24} color={AppColors.textSecondary} style={{ marginLeft: 16, opacity: 0.5 }} />}
+                      </View>
+                    </TouchableOpacity>
                   </>
                 ) : (
-                  <Text style={styles.level2QuestionText}>
-                    {currentQuestion.multiplicand} × {currentQuestion.multiplier} = ?
-                  </Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (localVoiceEnabled) {
+                        speak(`${currentQuestion.multiplicand} fois ${currentQuestion.multiplier} ?`);
+                      }
+                    }}
+                    activeOpacity={localVoiceEnabled ? 0.7 : 1}
+                    style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}
+                  >
+                    <ThemedText style={styles.level2QuestionText}>
+                      {currentQuestion.multiplicand} × {currentQuestion.multiplier} = ?
+                    </ThemedText>
+                    {localVoiceEnabled && <Volume2 size={28} color={AppColors.textSecondary} style={{ opacity: 0.5 }} />}
+                  </TouchableOpacity>
                 )}
               </View>
 
@@ -1072,14 +1119,14 @@ export default function PracticeScreen() {
                         disabled={selectedAnswer !== null}
                         testID={`option-${index}`}
                       >
-                        <Text
+                        <ThemedText
                           style={[
                             styles.optionText,
                             (showCorrect || showWrong) && styles.optionTextSelected,
                           ]}
                         >
                           {option}
-                        </Text>
+                        </ThemedText>
                         {showCorrect && <Check size={24} color="#FFFFFF" />}
                         {showWrong && <X size={24} color="#FFFFFF" />}
                       </TouchableOpacity>
@@ -1109,7 +1156,7 @@ export default function PracticeScreen() {
                       onPress={handleInputSubmit}
                       testID="submit-button"
                     >
-                      <Text style={styles.level2SubmitButtonText}>Valider</Text>
+                      <ThemedText style={styles.level2SubmitButtonText}>Valider</ThemedText>
                     </TouchableOpacity>
                   )}
 
@@ -1117,9 +1164,9 @@ export default function PracticeScreen() {
                     <View style={styles.level2FeedbackContainer}>
                       <View style={styles.level2FeedbackBox}>
                         <Check size={48} color={AppColors.success} />
-                        <Text style={[styles.level2FeedbackText, { color: AppColors.success }]}>
+                        <ThemedText style={[styles.level2FeedbackText, { color: AppColors.success }]}>
                           Correct !
-                        </Text>
+                        </ThemedText>
                       </View>
                     </View>
                   )}
@@ -1155,15 +1202,15 @@ export default function PracticeScreen() {
         {showErrorFeedback && (
           <View style={styles.fullScreenOverlay}>
             <View style={[styles.errorCard, { borderColor: AppColors.warning }]}>
-              <Text style={styles.errorTitle}>On corrige ensemble ✨</Text>
+              <ThemedText style={styles.errorTitle}>On corrige ensemble ✨</ThemedText>
 
               <View style={styles.correctionContainer}>
-                <Text style={styles.correctionText}>
+                <ThemedText style={styles.correctionText}>
                   {currentQuestion.multiplicand} × {currentQuestion.multiplier} = {currentQuestion.correctAnswer}
-                </Text>
-                <Text style={styles.errorTipText}>
+                </ThemedText>
+                <ThemedText style={styles.errorTipText}>
                   {TIPS_BY_TABLE[table.number]?.erreur || ''}
-                </Text>
+                </ThemedText>
               </View>
 
               <View style={styles.errorButtons}>
@@ -1173,7 +1220,7 @@ export default function PracticeScreen() {
                     onPress={handleRetryQuestion}
                   >
                     <RefreshCw size={20} color={AppColors.text} />
-                    <Text style={styles.errorButtonText}>Réessayer cette question</Text>
+                    <ThemedText style={styles.errorButtonText}>Réessayer cette question</ThemedText>
                   </TouchableOpacity>
                 )}
 
@@ -1181,7 +1228,7 @@ export default function PracticeScreen() {
                   style={[styles.errorButton, styles.continueButton]}
                   onPress={handleContinueAfterError}
                 >
-                  <Text style={[styles.errorButtonText, { color: '#FFF' }]}>Continuer</Text>
+                  <ThemedText style={[styles.errorButtonText, { color: '#FFF' }]}>Continuer</ThemedText>
                   <ArrowRight size={20} color="#FFF" />
                 </TouchableOpacity>
               </View>
@@ -1220,13 +1267,36 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: AppColors.border,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  soundToggleButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: AppColors.surfaceLight,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: AppColors.surfaceLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: AppColors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   progressContainer: {
     flex: 1,
@@ -1571,6 +1641,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
+
   level2SubmitButton: {
     paddingVertical: 16,
     paddingHorizontal: 60,

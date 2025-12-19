@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Animated,
@@ -19,6 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import { AppColors, NumberColors } from '@/constants/colors';
 import { getTableByNumber } from '@/constants/tables';
+import { ThemedText } from '@/components/ThemedText';
 
 // Keep this for static styles usage, while component uses hook for dynamic updates
 const { width } = Dimensions.get('window');
@@ -351,7 +351,7 @@ export default function DiscoveryScreen() {
   if (!table) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>Table non trouvée</Text>
+        <ThemedText style={styles.errorText}>Table non trouvée</ThemedText>
       </SafeAreaView>
     );
   }
@@ -369,10 +369,10 @@ export default function DiscoveryScreen() {
           onPress={() => setCurrentStep(1)}
           activeOpacity={0.8}
         >
-          <Text style={[styles.bigNumber, { color: tableColor }]}>
+          <ThemedText style={[styles.bigNumber, { color: tableColor }]}>
             {table.number}
-          </Text>
-          <Text style={styles.visualText}>Table de {table.number}</Text>
+          </ThemedText>
+          <ThemedText style={styles.visualText}>Table de {table.number}</ThemedText>
         </TouchableOpacity>
       ),
     },
@@ -381,18 +381,18 @@ export default function DiscoveryScreen() {
       content: table.tip,
       visual: (
         <View style={styles.tipContainer}>
-          <Text style={styles.tipEmoji}>💡</Text>
-          <Text style={styles.tipText}>{table.tip}</Text>
+          <ThemedText style={styles.tipEmoji}>💡</ThemedText>
+          <ThemedText style={styles.tipText}>{table.tip}</ThemedText>
           <View style={styles.tipExamplesContainer}>
             {getTipExamples(table.number).map((example, idx) => (
               <View key={idx} style={[styles.tipExampleCard, { borderColor: tableColor }]}>
-                <Text
+                <ThemedText
                   style={[styles.tipExampleText, { color: tableColor }]}
                   numberOfLines={1}
                   adjustsFontSizeToFit
                 >
                   {example}
-                </Text>
+                </ThemedText>
               </View>
             ))}
           </View>
@@ -427,16 +427,16 @@ export default function DiscoveryScreen() {
                   onPress={() => handleMultiplicationPress(i, result)}
                   activeOpacity={0.7}
                 >
-                  <Text
+                  <ThemedText
                     style={[styles.countingNumber, { color: isClicked ? '#FFFFFF' : tableColor }]}
                   >
                     {result}
-                  </Text>
-                  <Text
+                  </ThemedText>
+                  <ThemedText
                     style={[styles.countingLabel, { color: isClicked ? '#FFFFFF' : AppColors.textSecondary }]}
                   >
                     {table.number} × {i}
-                  </Text>
+                  </ThemedText>
                   {isClicked && (
                     <View style={styles.checkmarkBadge}>
                       <Check size={10} color="#FFFFFF" />
@@ -454,14 +454,14 @@ export default function DiscoveryScreen() {
       content: 'Maintenant, teste tes connaissances avec le quiz !',
       visual: (
         <View style={styles.readyContainer}>
-          <Text style={styles.readyEmoji}>🚀 🌟</Text>
-          <Text style={styles.readyTitle}>C&apos;est parti !</Text>
-          <Text style={styles.encouragementText}>Tu vas assurer comme un champion ! {"\n"} Prêt à gagner des étoiles ?</Text>
+          <ThemedText style={styles.readyEmoji}>🚀 🌟</ThemedText>
+          <ThemedText style={styles.readyTitle}>C&apos;est parti !</ThemedText>
+          <ThemedText style={styles.encouragementText}>Tu vas assurer comme un champion ! {"\n"} Prêt à gagner des étoiles ?</ThemedText>
           <TouchableOpacity
             style={[styles.practiceButton, { backgroundColor: tableColor }]}
             onPress={() => router.push(`/practice/${table.number}` as any)}
           >
-            <Text style={styles.practiceButtonText}>Commencer le quiz</Text>
+            <ThemedText style={styles.practiceButtonText}>Commencer le quiz</ThemedText>
             <ArrowRight size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
@@ -516,18 +516,18 @@ export default function DiscoveryScreen() {
 
             {selectedMultiplication && table && (
               <View style={styles.modalInner}>
-                <Text style={[styles.modalNumber, { color: tableColor }]}>
+                <ThemedText style={[styles.modalNumber, { color: tableColor }]}>
                   {selectedMultiplication.result}
-                </Text>
-                <Text style={[styles.modalEquation, { color: tableColor }]}>
+                </ThemedText>
+                <ThemedText style={[styles.modalEquation, { color: tableColor }]}>
                   {table.number} × {selectedMultiplication.multiplier} = {selectedMultiplication.result}
-                </Text>
+                </ThemedText>
                 <TouchableOpacity
                   style={[styles.repeatButton, { backgroundColor: tableColor }]}
                   onPress={() => speakMultiplication(table.number, selectedMultiplication.multiplier, selectedMultiplication.result)}
                 >
                   <Volume2 size={24} color="#FFFFFF" />
-                  <Text style={styles.repeatButtonText}>Réécouter</Text>
+                  <ThemedText style={styles.repeatButtonText}>Réécouter</ThemedText>
                 </TouchableOpacity>
               </View>
             )}
@@ -594,8 +594,8 @@ export default function DiscoveryScreen() {
             ]}
           >
             <View style={styles.content}>
-              <Text style={styles.stepTitle}>{currentStepData.title}</Text>
-              <Text style={styles.stepContent}>{currentStepData.content}</Text>
+              <ThemedText style={styles.stepTitle}>{currentStepData.title}</ThemedText>
+              <ThemedText style={styles.stepContent}>{currentStepData.content}</ThemedText>
 
               {currentStepData.visual}
             </View>
@@ -610,7 +610,7 @@ export default function DiscoveryScreen() {
               testID="prev-button"
             >
               <ArrowLeft size={20} color={AppColors.text} />
-              <Text style={styles.navButtonText}>Précédent</Text>
+              <ThemedText style={styles.navButtonText}>Précédent</ThemedText>
             </TouchableOpacity>
           )}
 
@@ -625,7 +625,7 @@ export default function DiscoveryScreen() {
               onPress={() => setCurrentStep(currentStep + 1)}
               testID="next-button"
             >
-              <Text style={styles.nextButtonText}>Suivant</Text>
+              <ThemedText style={styles.nextButtonText}>Suivant</ThemedText>
               <ArrowRight size={20} color="#FFFFFF" />
             </TouchableOpacity>
           )}

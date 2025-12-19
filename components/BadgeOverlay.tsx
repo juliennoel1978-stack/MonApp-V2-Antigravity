@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableWithoutFeedback,
   Animated,
@@ -9,6 +8,7 @@ import {
   Keyboard,
 } from 'react-native';
 import { AppColors } from '@/constants/colors';
+import { ThemedText } from './ThemedText';
 import type { QueuedReward } from '@/types';
 
 const { width } = Dimensions.get('window');
@@ -31,11 +31,11 @@ export default function BadgeOverlay({
   useEffect(() => {
     if (visible && currentReward) {
       Keyboard.dismiss();
-      
+
       fadeAnim.setValue(0);
       scaleAnim.setValue(0.3);
       bounceAnim.setValue(0);
-      
+
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
@@ -108,32 +108,32 @@ export default function BadgeOverlay({
           ]}
         >
           <View style={styles.sparkleContainer}>
-            <Text style={styles.sparkle}>✨</Text>
-            <Text style={[styles.sparkle, styles.sparkleRight]}>✨</Text>
+            <ThemedText style={styles.sparkle}>✨</ThemedText>
+            <ThemedText style={[styles.sparkle, styles.sparkleRight]}>✨</ThemedText>
           </View>
-          
-          <Text style={[styles.headerLabel, { color: headerColor }]}>
+
+          <ThemedText style={[styles.headerLabel, { color: headerColor }]}>
             {currentReward.headerText}
-          </Text>
-          
+          </ThemedText>
+
           <View style={[styles.emojiContainer, { borderColor }]}>
-            <Text style={styles.badgeEmoji}>{currentReward.icon}</Text>
+            <ThemedText style={styles.badgeEmoji}>{currentReward.icon}</ThemedText>
           </View>
-          
-          <Text style={styles.badgeTitle}>{currentReward.title}</Text>
-          <Text style={styles.badgeMessage}>{currentReward.message}</Text>
-          
+
+          <ThemedText style={styles.badgeTitle}>{currentReward.title}</ThemedText>
+          <ThemedText style={styles.badgeMessage}>{currentReward.message}</ThemedText>
+
           {isLevelBadge && currentReward.nextBadgeInfo && (
             <View style={styles.nextBadgeContainer}>
               <View style={styles.nextBadgeDivider} />
-              <Text style={styles.nextBadgeLabel}>Prochain badge</Text>
+              <ThemedText style={styles.nextBadgeLabel}>Prochain badge</ThemedText>
               <View style={styles.nextBadgeRow}>
-                <Text style={styles.nextBadgeIcon}>{currentReward.nextBadgeInfo.icon}</Text>
+                <ThemedText style={styles.nextBadgeIcon}>{currentReward.nextBadgeInfo.icon}</ThemedText>
                 <View style={styles.nextBadgeInfo}>
-                  <Text style={styles.nextBadgeTitle}>{currentReward.nextBadgeInfo.title}</Text>
-                  <Text style={styles.nextBadgeProgress}>
+                  <ThemedText style={styles.nextBadgeTitle}>{currentReward.nextBadgeInfo.title}</ThemedText>
+                  <ThemedText style={styles.nextBadgeProgress}>
                     Plus que {currentReward.nextBadgeInfo.challengesRemaining} challenge{currentReward.nextBadgeInfo.challengesRemaining > 1 ? 's' : ''} !
-                  </Text>
+                  </ThemedText>
                 </View>
               </View>
             </View>
@@ -142,17 +142,17 @@ export default function BadgeOverlay({
           {isLevelBadge && !currentReward.nextBadgeInfo && (
             <View style={styles.maxBadgeContainer}>
               <View style={styles.nextBadgeDivider} />
-              <Text style={styles.maxBadgeText}>🏆 Tu as tous les badges !</Text>
+              <ThemedText style={styles.maxBadgeText}>🏆 Tu as tous les badges !</ThemedText>
             </View>
           )}
 
           {!isLevelBadge && currentReward.achievementType === 'RECURRING' && (
             <View style={styles.recurringBadge}>
-              <Text style={styles.recurringText}>🔄 Peut être obtenu à nouveau</Text>
+              <ThemedText style={styles.recurringText}>🔄 Peut être obtenu à nouveau</ThemedText>
             </View>
           )}
-          
-          <Text style={styles.tapHint}>Touche pour continuer</Text>
+
+          <ThemedText style={styles.tapHint}>Touche pour continuer</ThemedText>
         </Animated.View>
       </Animated.View>
     </TouchableWithoutFeedback>

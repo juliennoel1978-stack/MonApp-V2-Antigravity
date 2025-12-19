@@ -1,9 +1,12 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
 import { User } from '@/types';
 import { useApp } from '@/contexts/AppContext';
+import { ThemedText } from '../ThemedText';
+import { useAudio } from '@/hooks/useAudio';
+import { useHaptics } from '@/hooks/useHaptics';
 
 type ChallengeResultsProps = {
     isReviewMode: boolean;
@@ -52,16 +55,16 @@ export const ChallengeResults = ({
                         showsVerticalScrollIndicator={false}
                     >
                         <View style={styles.finishedContainer}>
-                            <Text style={styles.finishedEmoji}>✅</Text>
-                            <Text style={styles.finishedTitle}>
+                            <ThemedText style={styles.finishedEmoji}>✅</ThemedText>
+                            <ThemedText style={styles.finishedTitle}>
                                 Bien joué{currentUser ? ` ${currentUser.firstName}` : ''} !
-                            </Text>
-                            <Text style={styles.finishedSubtitle}>Tu as corrigé tes erreurs</Text>
+                            </ThemedText>
+                            <ThemedText style={styles.finishedSubtitle}>Tu as corrigé tes erreurs</ThemedText>
 
                             <View style={styles.finishedStats}>
-                                <Text style={styles.correctionMessage}>
+                                <ThemedText style={styles.correctionMessage}>
                                     {randomMessage}
-                                </Text>
+                                </ThemedText>
                             </View>
 
                             <View style={styles.finishedButtonsContainer}>
@@ -69,14 +72,14 @@ export const ChallengeResults = ({
                                     style={styles.finishedButton}
                                     onPress={onRestart}
                                 >
-                                    <Text style={styles.finishedButtonText} numberOfLines={1}>Refaire un Challenge</Text>
+                                    <ThemedText style={styles.finishedButtonText} numberOfLines={1}>Refaire un Challenge</ThemedText>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
                                     style={[styles.finishedButton, styles.finishedButtonOutline]}
                                     onPress={onHome}
                                 >
-                                    <Text style={[styles.finishedButtonText, styles.finishedButtonOutlineText]} numberOfLines={1}>Retour à l&apos;accueil</Text>
+                                    <ThemedText style={[styles.finishedButtonText, styles.finishedButtonOutlineText]} numberOfLines={1}>Retour à l&apos;accueil</ThemedText>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -89,6 +92,8 @@ export const ChallengeResults = ({
     // INTEGRATION FIX: We use the context directly here to save what we DISPLAY.
     // This ensures "What You See Is What You Get".
     const { updateStrongestTable } = useApp();
+    const { playSound } = useAudio();
+    const { vibrate } = useHaptics();
 
     const { bestTable, worstTable, bestStreakValue } = React.useMemo(() => {
         let best = -1;
@@ -116,6 +121,10 @@ export const ChallengeResults = ({
     // Side Effect: Save the Best Table to Context immediately when calculated.
     // This runs once when the component mounts (Results screen appears).
     React.useEffect(() => {
+        // Play Finish Sound
+        playSound('finish');
+        vibrate('heavy'); // Significant feedback for completion
+
         if (bestTable > 0) {
             console.log('🏆 UI-Driven Save: Updating Strongest Table to', bestTable);
             updateStrongestTable(bestTable);
@@ -130,46 +139,46 @@ export const ChallengeResults = ({
                     showsVerticalScrollIndicator={false}
                 >
                     <View style={styles.finishedContainer}>
-                        <Text style={styles.finishedEmoji}>🎉</Text>
-                        <Text style={styles.finishedTitle}>
+                        <ThemedText style={styles.finishedEmoji}>🎉</ThemedText>
+                        <ThemedText style={styles.finishedTitle}>
                             {currentUser ? `Bravo ${currentUser.firstName} !` : 'Félicitations !'}
-                        </Text>
-                        <Text style={styles.finishedSubtitle}>
+                        </ThemedText>
+                        <ThemedText style={styles.finishedSubtitle}>
                             Challenge terminé ! (n°{completedChallengeCount > 0 ? completedChallengeCount : (currentUser ? (currentUser.challengesCompleted || 0) : anonymousChallengesCompleted)})
-                        </Text>
+                        </ThemedText>
 
                         <View style={styles.finishedStats}>
                             <View style={styles.finishedStatRow}>
-                                <Text style={styles.finishedStatLabel}>Précision</Text>
-                                <Text style={[styles.finishedStatValue, { color: AppColors.primary }]} numberOfLines={1}>
+                                <ThemedText style={styles.finishedStatLabel}>Précision</ThemedText>
+                                <ThemedText style={[styles.finishedStatValue, { color: AppColors.primary }]} numberOfLines={1}>
                                     {correctCount} / {maxQuestions} 👍
-                                </Text>
+                                </ThemedText>
                             </View>
 
                             {bestStreak > 0 && (
                                 <View style={styles.finishedStatRow}>
-                                    <Text style={styles.finishedStatLabel}>Ta meilleure série</Text>
-                                    <Text style={[styles.finishedStatValue, { color: AppColors.success }]} numberOfLines={1}>
+                                    <ThemedText style={styles.finishedStatLabel}>Ta meilleure série</ThemedText>
+                                    <ThemedText style={[styles.finishedStatValue, { color: AppColors.success }]} numberOfLines={1}>
                                         {bestStreak} {bestStreak === 1 ? 'bonne' : 'bonnes'} d&apos;affilée ✨
-                                    </Text>
+                                    </ThemedText>
                                 </View>
                             )}
 
                             {bestTable > 0 && (
                                 <View style={styles.finishedStatRow}>
-                                    <Text style={styles.finishedStatLabel}>Table la plus solide</Text>
-                                    <Text style={[styles.finishedStatValue, { color: AppColors.success }]} numberOfLines={1}>
+                                    <ThemedText style={styles.finishedStatLabel}>Table la plus solide</ThemedText>
+                                    <ThemedText style={[styles.finishedStatValue, { color: AppColors.success }]} numberOfLines={1}>
                                         {bestTable} 💪
-                                    </Text>
+                                    </ThemedText>
                                 </View>
                             )}
 
                             {worstTable > 0 && (
                                 <View style={styles.finishedStatRow}>
-                                    <Text style={styles.finishedStatLabel}>Table à surveiller</Text>
-                                    <Text style={[styles.finishedStatValue, { color: AppColors.timerMiddle }]} numberOfLines={1}>
+                                    <ThemedText style={styles.finishedStatLabel}>Table à surveiller</ThemedText>
+                                    <ThemedText style={[styles.finishedStatValue, { color: AppColors.timerMiddle }]} numberOfLines={1}>
                                         {worstTable} 🚸
-                                    </Text>
+                                    </ThemedText>
                                 </View>
                             )}
                         </View>
@@ -180,7 +189,7 @@ export const ChallengeResults = ({
                                     style={[styles.finishedButton, styles.finishedButtonSecondary]}
                                     onPress={onReviewErrors}
                                 >
-                                    <Text style={styles.finishedButtonText} numberOfLines={1}>Revoir mes erreurs</Text>
+                                    <ThemedText style={styles.finishedButtonText} numberOfLines={1}>Revoir mes erreurs</ThemedText>
                                 </TouchableOpacity>
                             )}
 
@@ -188,14 +197,14 @@ export const ChallengeResults = ({
                                 style={styles.finishedButton}
                                 onPress={onRestart}
                             >
-                                <Text style={styles.finishedButtonText} numberOfLines={1}>Refaire un Challenge</Text>
+                                <ThemedText style={styles.finishedButtonText} numberOfLines={1}>Refaire un Challenge</ThemedText>
                             </TouchableOpacity>
 
                             <TouchableOpacity
                                 style={[styles.finishedButton, styles.finishedButtonOutline]}
                                 onPress={onHome}
                             >
-                                <Text style={[styles.finishedButtonText, styles.finishedButtonOutlineText]} numberOfLines={1}>Retour à l&apos;accueil</Text>
+                                <ThemedText style={[styles.finishedButtonText, styles.finishedButtonOutlineText]} numberOfLines={1}>Retour à l&apos;accueil</ThemedText>
                             </TouchableOpacity>
                         </View>
                     </View>

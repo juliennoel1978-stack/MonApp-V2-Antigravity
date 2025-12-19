@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Home } from 'lucide-react-native';
+import { ThemedText } from '../ThemedText';
 import { AppColors } from '@/constants/colors';
 
 type ChallengeHeaderProps = {
@@ -18,7 +19,7 @@ export const ChallengeHeader = ({ onHomePress, title = 'Challenge' }: ChallengeH
             >
                 <Home size={24} color={AppColors.text} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>{title}</Text>
+            <ThemedText style={styles.headerTitle}>{title}</ThemedText>
             <View style={styles.placeholder} />
         </View>
     );

@@ -1,9 +1,10 @@
 import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react';
 
-import { View, StyleSheet, useWindowDimensions, TouchableOpacity, Animated, Text } from 'react-native';
+import { View, StyleSheet, useWindowDimensions, TouchableOpacity, Animated } from 'react-native';
 import { AppColors } from '@/constants/colors';
 import type { BadgeTheme } from '@/types';
 import { getNextBadgeInfo } from '@/constants/badges';
+import { ThemedText } from './ThemedText';
 
 interface CurrentBadge {
   icon: string;
@@ -135,8 +136,8 @@ function FlipCard({ icon, frontText, backText, isZeroState, isSmallScreen }: Fli
           ]}
           pointerEvents={isFlipped ? 'none' : 'auto'}
         >
-          <Text style={styles.statEmoji}>{icon}</Text>
-          <Text
+          <ThemedText style={styles.statEmoji}>{icon}</ThemedText>
+          <ThemedText
             style={[
               isZeroState ? styles.statMainTextNew : styles.statMainTextStats,
               isSmallScreen && styles.statMainTextSmall,
@@ -146,7 +147,7 @@ function FlipCard({ icon, frontText, backText, isZeroState, isSmallScreen }: Fli
             minimumFontScale={0.5}
           >
             {frontText}
-          </Text>
+          </ThemedText>
         </Animated.View>
         {/* Back Face */}
         <Animated.View
@@ -157,9 +158,9 @@ function FlipCard({ icon, frontText, backText, isZeroState, isSmallScreen }: Fli
           ]}
           pointerEvents={isFlipped ? 'auto' : 'none'}
         >
-          <Text style={[styles.backText, isSmallScreen && styles.backTextSmall]}>
+          <ThemedText style={[styles.backText, isSmallScreen && styles.backTextSmall]}>
             {backText}
-          </Text>
+          </ThemedText>
         </Animated.View>
       </View>
     </TouchableOpacity >
@@ -228,16 +229,16 @@ export default function ChallengeDashboardCard({
       >
         {/* Row 1: Badge Icon + Level Title */}
         <View style={styles.levelRow}>
-          <Text style={[styles.badgeIcon, isSmallScreen && styles.badgeIconSmall]}>
+          <ThemedText style={[styles.badgeIcon, isSmallScreen && styles.badgeIconSmall]}>
             {currentBadge?.icon || '🌟'}
-          </Text>
+          </ThemedText>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.levelTitle, isSmallScreen && styles.levelTitleSmall]}>
+            <ThemedText style={[styles.levelTitle, isSmallScreen && styles.levelTitleSmall]}>
               Niveau Actuel : {currentBadge?.title || 'Débutant'}
-            </Text>
-            <Text style={{ fontSize: 11, color: AppColors.textSecondary, marginTop: 2 }}>
+            </ThemedText>
+            <ThemedText style={{ fontSize: 11, color: AppColors.textSecondary, marginTop: 2 }}>
               Voir ma collection ›
-            </Text>
+            </ThemedText>
           </View>
         </View>
 
@@ -254,9 +255,9 @@ export default function ChallengeDashboardCard({
         </View>
 
         {/* Row 3: Dynamic Text */}
-        <Text style={[styles.progressText, isSmallScreen && styles.progressTextSmall]}>
+        <ThemedText style={[styles.progressText, isSmallScreen && styles.progressTextSmall]}>
           {getProgressMessage()}
-        </Text>
+        </ThemedText>
       </TouchableOpacity>
 
       {/* FOOTER SECTION - Interactive Stats Grid */}

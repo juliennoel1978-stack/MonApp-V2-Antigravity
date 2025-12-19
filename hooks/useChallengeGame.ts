@@ -9,7 +9,10 @@ import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
 
-const POWERUP_AUDIO_B64 = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//oeMAAAAAAAAAAAAAAAAAAAAAAAAAAAAABYaW5nAAAABQAAAA4AAA0wAA8PDxMTExcXFxsbGx8fH2BgYGRkZGlpaW9vb3Nzc3t7e4CAgISEhImJiaGhoaSkpK2trbGxsbq6usPDw8jIyM3NzdTU1N3d3eHh4evr6/Hx8fb29v///wAAAABMYXZjNTguNTQuMTAwAAAAAAAAAAAAAAAAIjwAAAAAANIAAAAAAA0w8l/O2gAAAAAAAAAAAAAAAAAAAAAA//oeMMAAAADSAAAAABAAAAAAAAAAABInfoAAAAqMAAAAKgAAAAQAAQIEBAQO2e5V323/577777///////77///5wAAAAAD/8AAAAAAAAAAABiLm1wM//oeMMQAACqgAAACqAAABAAABAAABAAAP/yAA//IAA//IA/8gAAAAA3/8wAAAAA5//MAAAAAOkAANf/6HjDEAAmqAAAAKqAAAAQAAAQAAAQAA//IAAAABAA//ID/8gAAAAAN//MAAAAAOf/zAAAAADpAABAAAAA//oeMMQAACqgAAACqAAABAAABAAABAAAP/yAA//IAA//IA/8gAAAAA3/8wAAAAA5//MAAAAAOkAAEAAP/yAA//oeMMQAACqgAAACqAAABAAABAAABAAAP/yAA//IAA//IA/8gAAAAA3/8wAAAAA5//MAAAAAOkAAEAAP/yAA//oeMMQAACqgAAACqAAABAAABAAABAAAP/yAA//IAA//IA/8gAAAAA3/8wAAAAA5//MAAAAAOkAAEAAP/yAA';
+import { useAudio } from '@/hooks/useAudio';
+import { useHaptics } from '@/hooks/useHaptics';
+
+
 
 const CORRECT_PHRASES = [
     "Bravo, c'est exactement ça !",
@@ -61,6 +64,9 @@ export const useChallengeGame = () => {
         updateUser,
     } = useApp();
 
+    const { playSound } = useAudio();
+    const { vibrate } = useHaptics();
+
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
     const [userAnswer, setUserAnswer] = useState<string>('');
     const [attempts, setAttempts] = useState<number>(0);
@@ -111,6 +117,13 @@ export const useChallengeGame = () => {
             ? (currentUser.challengeQuestions || 15)
             : (settings.challengeQuestions || 15);
         setMaxQuestions(questions);
+
+        // Configure Audio for iOS Silent Mode
+        Audio.setAudioModeAsync({
+            playsInSilentModeIOS: true,
+            shouldDuckAndroid: true,
+            playThroughEarpieceAndroid: false,
+        }).catch(err => console.error('Failed to set audio mode', err));
 
         return () => {
             isMounted.current = false;
@@ -346,7 +359,7 @@ export const useChallengeGame = () => {
         } else {
             setIsFinished(true);
         }
-    }, [isReviewMode, incrementChallengesCompleted, addPlayDate, currentUser, settings, correctCount, maxQuestions, getPersistenceBadges, getAchievements, getPlayDates, tableStats, batchUpdateTableProgress, updateStrongestTable]);
+    }, [isReviewMode, incrementChallengesCompleted, addPlayDate, currentUser, settings, correctCount, maxQuestions, getPersistenceBadges, getAchievements, getPlayDates, tableStats, batchUpdateTableProgress, updateStrongestTable, updateUser]);
 
     const startReviewMode = useCallback((wrongAnswersToReview: { num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]) => {
         setIsFinished(false);
@@ -469,6 +482,8 @@ export const useChallengeGame = () => {
         ]).start();
 
         if (correct) {
+            playSound('challenge');
+            vibrate('success');
             setCorrectCount(prev => prev + 1);
             setTotalQuestions(prev => prev + 1);
             setCurrentCorrectPhrase(getRandomPhrase(CORRECT_PHRASES));
@@ -525,7 +540,9 @@ export const useChallengeGame = () => {
 
             // MID-COURSE BOOST TRIGGER
             // Check if we hit exactly 50%
-            if (totalQuestions + 1 === Math.floor(maxQuestions / 2)) {
+            const zenMode = (currentUser?.zenMode ?? settings.zenMode) || false;
+
+            if (!zenMode && totalQuestions + 1 === Math.floor(maxQuestions / 2)) {
                 playBoostSound();
                 setShowMidBoost(true);
 
@@ -545,6 +562,7 @@ export const useChallengeGame = () => {
                 }
             }, 1500);
         } else {
+            vibrate('error');
             setConsecutiveCorrect(0);
 
             if (attempts === 0) {
@@ -599,7 +617,7 @@ export const useChallengeGame = () => {
                 }
             }
         }
-    }, [currentQuestion, userAnswer, showFeedback, attempts, correctCount, totalQuestions, consecutiveCorrect, bestStreak, isReviewMode, reviewQuestions, maxQuestions, showCelebration, wrongAnswers, handleChallengeEnd, generateNewQuestion, updateBestStreak]);
+    }, [currentQuestion, userAnswer, showFeedback, attempts, correctCount, totalQuestions, consecutiveCorrect, bestStreak, isReviewMode, reviewQuestions, maxQuestions, showCelebration, wrongAnswers, handleChallengeEnd, generateNewQuestion, updateBestStreak, playSound, vibrate]);
 
     const restartGame = useCallback(() => {
         setIsFinished(false);
@@ -621,40 +639,12 @@ export const useChallengeGame = () => {
     }, [currentUser, settings, generateNewQuestion]);
 
     const playBoostSound = async () => {
-        if (Platform.OS === 'web') {
-            try {
-                const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-                if (!AudioContext) return;
-                const ctx = new AudioContext();
-                const osc = ctx.createOscillator();
-                const gainNode = ctx.createGain();
+        await playSound('boost');
+        vibrate('heavy');
+    };
 
-                // Rising Tone (Power Up)
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(220, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.5); // A3 to A5
-
-                gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.5);
-
-                osc.connect(gainNode);
-                gainNode.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.5);
-            } catch (e) {
-                console.error(e);
-            }
-        } else {
-            try {
-                await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                const { sound } = await Audio.Sound.createAsync(
-                    { uri: POWERUP_AUDIO_B64 },
-                    { shouldPlay: true }
-                );
-                // Pitch up for effect
-                await sound.setRateAsync(1.5, true);
-            } catch (e) { }
-        }
+    const playSuccessSoundInternal = async () => {
+        await playSound();
     };
 
     return {
@@ -703,5 +693,6 @@ export const useChallengeGame = () => {
         // Context
         currentUser,
         settings,
+        zenMode: (currentUser?.zenMode ?? settings.zenMode) || false,
     };
 };

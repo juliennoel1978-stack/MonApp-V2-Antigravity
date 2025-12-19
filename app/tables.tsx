@@ -3,7 +3,6 @@ import { Home, Star } from 'lucide-react-native';
 import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   useWindowDimensions,
@@ -12,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors, NumberColors } from '@/constants/colors';
 import { MULTIPLICATION_TABLES } from '@/constants/tables';
 import { useApp } from '@/contexts/AppContext';
+import { ThemedText } from '@/components/ThemedText';
 
 export default function TablesScreen() {
   const router = useRouter();
@@ -81,7 +81,7 @@ export default function TablesScreen() {
           >
             <Home size={24} color={AppColors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Choisis ta table</Text>
+          <ThemedText style={styles.headerTitle}>Choisis ta table</ThemedText>
           <View style={styles.placeholder} />
         </View>
 
@@ -113,7 +113,7 @@ export default function TablesScreen() {
                   testID={`table-${table.number}`}
                 >
                   <View style={styles.cardContent}>
-                    <Text
+                    <ThemedText
                       style={[
                         styles.tableNumber,
                         {
@@ -125,7 +125,7 @@ export default function TablesScreen() {
                       ]}
                     >
                       {table.number}
-                    </Text>
+                    </ThemedText>
 
                     <View
                       style={[
@@ -136,14 +136,14 @@ export default function TablesScreen() {
                         },
                       ]}
                     >
-                      <Text
+                      <ThemedText
                         style={[
                           styles.difficultyText,
                           { color: getDifficultyTextColor(table.difficulty) },
                         ]}
                       >
                         {getDifficultyLabel(table.difficulty)}
-                      </Text>
+                      </ThemedText>
                     </View>
 
                     <View style={styles.starsContainer}>
@@ -167,7 +167,7 @@ export default function TablesScreen() {
 
                     {isCompleted && (
                       <View style={styles.completedBadge}>
-                        <Text style={styles.completedText}>✓</Text>
+                        <ThemedText style={styles.completedText}>✓</ThemedText>
                       </View>
                     )}
                   </View>
