@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Volume2, VolumeX, Clock, User, Users, Trash2, Edit, RotateCcw, Award, Type, Zap, RefreshCw, Calendar, Check, ChevronDown, ChevronUp, Play, Mic, Timer } from 'lucide-react-native';
+import { Clock, Users, Trash2, Edit, RotateCcw, Award, Zap, RefreshCw, Calendar, ChevronDown, ChevronUp, Play, Timer } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   View,
@@ -10,9 +10,7 @@ import {
   Switch,
   Alert,
   Platform,
-  Dimensions,
   Image,
-  Modal
 } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,7 +18,7 @@ import { AppColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
 import CollectionModal from '@/components/CollectionModal';
 
-const { width } = Dimensions.get('window');
+
 
 // Helper to format date
 const formatDate = (dateString?: string) => {
@@ -67,15 +65,20 @@ export default function SettingsScreen() {
   const getTableStatusColor = (user: any, tableNum: number) => {
     const p = user.progress.find((tp: any) => tp.tableNumber === tableNum);
 
-    if (!p) return '#E0E0E0';
-    if (p.completed || (p.starsEarned >= 3)) return AppColors.success;
-    if ((p.totalAttempts || 0) === 0) return '#F0F0F0';
+    // 1. Not Started -> GREY
+    // If no progress entry exists OR totalAttempts is 0.
+    if (!p || (p.totalAttempts || 0) === 0) return '#F0F0F0';
 
-    const rate = p.correctAnswers / p.totalAttempts;
-    if (rate < 0.5) return AppColors.error;
-    if (rate < 0.8) return AppColors.warning;
+    // 2. Mastered -> GREEN
+    // "niveau un et niveau 2 fait" -> level1Completed AND level2Completed
+    // OR 3 stars OR completed flag (legacy support)
+    if ((p.level1Completed && p.level2Completed) || p.completed || (p.starsEarned >= 3)) {
+      return AppColors.success;
+    }
 
-    return AppColors.success;
+    // 3. In Progress -> YELLOW (Warning)
+    // "un seul niveau validé jaune" -> Matches here if not fully mastered.
+    return AppColors.warning;
   };
 
   const getStrongestTable = (user: any) => {
@@ -99,19 +102,47 @@ export default function SettingsScreen() {
   };
 
   const getWeakestTable = (user: any) => {
-    let worstTable = 0;
-    let worstRate = 2; // Start higher than 1
+    // SMART RECOMMENDATION LOGIC (Mission Button Logic)
+    // 1. PROGRESSION: Find first table (1-10) not mastered.
+    // Definition of 'not mastered' must match Green status above.
+    const isMastered = (p: any) => (p.level1Completed && p.level2Completed) || p.completed || (p.starsEarned >= 3);
 
-    user.progress.forEach((p: any) => {
-      if (p.totalAttempts > 5) {
-        const rate = p.correctAnswers / p.totalAttempts;
-        if (rate < worstRate && rate < 0.8) {
+    for (let i = 1; i <= 10; i++) {
+      const p = user.progress.find((prog: any) => prog.tableNumber === i);
+      // If not started (no p) or not mastered -> Recommend it
+      if (!p || !isMastered(p)) {
+        return i;
+      }
+    }
+
+    // 2. WEAKNESS/CONSOLIDATION: If all 1-10 mastered, check for poor success rate
+    const tablesWithAttempts = user.progress.filter((p: any) => p.tableNumber >= 1 && p.tableNumber <= 10 && p.totalAttempts > 0);
+    let worstTable = 0;
+    let worstRate = 1.0;
+
+    for (const p of tablesWithAttempts) {
+      const rate = p.correctAnswers / p.totalAttempts;
+      if (rate < 0.85) {
+        if (rate < worstRate) {
           worstRate = rate;
           worstTable = p.tableNumber;
         }
       }
+    }
+    if (worstTable !== 0) return worstTable;
+
+    // 3. MAINTENANCE: If all good, pick least recently practiced
+    const sortedByDate = [...tablesWithAttempts].sort((a: any, b: any) => {
+      if (!a.lastPracticed) return -1;
+      if (!b.lastPracticed) return 1;
+      return new Date(a.lastPracticed).getTime() - new Date(b.lastPracticed).getTime();
     });
-    return worstTable !== 0 ? worstTable : '-';
+
+    if (sortedByDate.length > 0) {
+      return sortedByDate[0].tableNumber;
+    }
+
+    return "Aucune";
   };
 
   const getAverageTime = (user: any) => {
@@ -442,10 +473,43 @@ export default function SettingsScreen() {
               />
             </View>
 
+            {settings.voiceEnabled && (
+              <View style={styles.settingItem}>
+                <View style={styles.settingLeft}>
+                  <ThemedText style={styles.settingTitle}>Voix de l&apos;Assistant</ThemedText>
+                  <Text style={styles.settingSubTitle}>Masculine ou Féminine</Text>
+                </View>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <TouchableOpacity
+                    onPress={() => updateSettings({ voiceGender: 'female' })}
+                    style={{
+                      padding: 8,
+                      borderRadius: 8,
+                      backgroundColor: settings.voiceGender === 'female' ? AppColors.primary : AppColors.surfaceLight,
+                      opacity: settings.voiceGender === 'female' ? 1 : 0.5
+                    }}
+                  >
+                    <Text style={{ fontSize: 24 }}>👩</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => updateSettings({ voiceGender: 'male' })}
+                    style={{
+                      padding: 8,
+                      borderRadius: 8,
+                      backgroundColor: settings.voiceGender === 'male' ? AppColors.primary : AppColors.surfaceLight,
+                      opacity: settings.voiceGender === 'male' ? 1 : 0.5
+                    }}
+                  >
+                    <Text style={{ fontSize: 24 }}>👨</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
             <View style={styles.settingItem}>
               <View style={styles.settingLeft}>
                 <ThemedText style={styles.settingTitle}>Mode Zen</ThemedText>
-                <Text style={styles.settingSubTitle}>Moins d'animations</Text>
+                <Text style={styles.settingSubTitle}>Moins d&apos;animations</Text>
               </View>
               <Switch
                 value={settings.zenMode}
@@ -454,16 +518,59 @@ export default function SettingsScreen() {
               />
             </View>
 
-            <View style={styles.settingItem}>
-              <View style={styles.settingLeft}>
-                <ThemedText style={styles.settingTitle}>Police Dyslexie</ThemedText>
-                <Text style={styles.settingSubTitle}>Police Lexend améliorée</Text>
+            <View style={[styles.settingItem, { flexDirection: 'column', alignItems: 'flex-start' }]}>
+              <Text style={[styles.settingTitle, { marginBottom: 12 }]}>Police d&apos;écriture</Text>
+              <Text style={[styles.settingSubTitle, { marginBottom: 16 }]}>Choisissez le style de texte le plus confortable</Text>
+
+              <View style={[styles.challengeQuestionsButtons, { flexDirection: 'column', width: '100%', gap: 8 }]}>
+                {/* Standard */}
+                <TouchableOpacity
+                  style={[
+                    styles.challengeQuestionButton,
+                    { width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 16 },
+                    (settings.fontPreference === 'standard' || (!settings.fontPreference && !settings.dyslexiaFontEnabled)) && styles.challengeQuestionButtonActive
+                  ]}
+                  onPress={() => updateSettings({ fontPreference: 'standard', dyslexiaFontEnabled: false })}
+                >
+                  <Text style={{ fontSize: 16, color: '#333' }}>Standard</Text>
+                  <Text style={{ fontSize: 14, color: '#666' }}>Arrondie (Défaut)</Text>
+                </TouchableOpacity>
+
+                {/* Lexend */}
+                <TouchableOpacity
+                  style={[
+                    styles.challengeQuestionButton,
+                    { width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 16 },
+                    (settings.fontPreference === 'lexend' || (!settings.fontPreference && settings.dyslexiaFontEnabled)) && styles.challengeQuestionButtonActive
+                  ]}
+                  onPress={() => updateSettings({ fontPreference: 'lexend', dyslexiaFontEnabled: true })}
+                >
+                  <Text style={{ fontSize: 16, fontFamily: 'Lexend', color: '#333' }}>Moderne</Text>
+                  <Text style={{ fontSize: 14, color: '#666' }}>Fluide (Lexend)</Text>
+                </TouchableOpacity>
+
+                {/* OpenDyslexic */}
+                <TouchableOpacity
+                  style={[
+                    styles.challengeQuestionButton,
+                    {
+                      width: '100%',
+                      flexDirection: 'row',
+                      alignItems: 'center', // Align items vertically center
+                      justifyContent: 'space-between',
+                      paddingHorizontal: 16,
+                      minHeight: 56, // Ensure enough height for wrap
+                    },
+                    settings.fontPreference === 'opendyslexic' && styles.challengeQuestionButtonActive
+                  ]}
+                  onPress={() => updateSettings({ fontPreference: 'opendyslexic', dyslexiaFontEnabled: false })}
+                >
+                  <View style={{ flex: 1, marginRight: 8 }}>
+                    <Text style={{ fontSize: 16, fontFamily: 'OpenDyslexic', color: '#333' }}>Spéciale Dys</Text>
+                  </View>
+                  <Text style={{ fontSize: 14, color: '#666' }}>OpenDyslexic</Text>
+                </TouchableOpacity>
               </View>
-              <Switch
-                value={settings.dyslexiaFontEnabled}
-                onValueChange={v => updateSettings({ dyslexiaFontEnabled: v })}
-                trackColor={{ false: AppColors.borderLight, true: AppColors.primary }}
-              />
             </View>
 
             {/* ANONYMOUS RESET BTN - Moved here for better visibility */}
@@ -559,7 +666,7 @@ export default function SettingsScreen() {
               <View style={{ marginTop: -12, marginBottom: 20, paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: AppColors.borderLight }}>
 
                 {/* Timer Mode */}
-                <Text style={[styles.settingTitle, { fontSize: 14, marginBottom: 8, marginTop: 8 }]}>Mode d'affichage</Text>
+                <Text style={[styles.settingTitle, { fontSize: 14, marginBottom: 8, marginTop: 8 }]}>Mode d&apos;affichage</Text>
                 <View style={styles.challengeQuestionsButtons}>
                   {[
                     { id: 'chronometer', label: '⏱️ Chrono' },

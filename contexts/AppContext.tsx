@@ -31,6 +31,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   challengeQuestions: 15,
   badgeTheme: 'space',
   zenMode: false,
+  fontPreference: 'standard',
 };
 
 const INITIAL_BADGES: Badge[] = [
@@ -148,6 +149,16 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
 
     try {
+      if (settingsData) {
+        const parsedSettings = JSON.parse(settingsData);
+        // Migration: dyslexiaFontEnabled -> fontPreference
+        if (parsedSettings.dyslexiaFontEnabled && !parsedSettings.fontPreference) {
+          parsedSettings.fontPreference = 'lexend';
+        } else if (!parsedSettings.fontPreference) {
+          parsedSettings.fontPreference = 'standard';
+        }
+        setSettings(parsedSettings);
+      }
 
 
 
@@ -179,6 +190,12 @@ export const [AppProvider, useApp] = createContextHook(() => {
           if (user) {
 
             setCurrentUser(user);
+            // Migration for user object as well
+            if (user.dyslexiaFontEnabled && !user.fontPreference) {
+              user.fontPreference = 'lexend';
+            } else if (!user.fontPreference) {
+              user.fontPreference = 'standard';
+            }
             setProgress(user.progress || INITIAL_PROGRESS);
           } else {
 
@@ -202,9 +219,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         }
       }
 
-      if (settingsData) {
-        setSettings(JSON.parse(settingsData));
-      }
+
 
       if (badgesData) {
         setBadges(JSON.parse(badgesData));

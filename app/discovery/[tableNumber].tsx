@@ -15,10 +15,10 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Audio } from 'expo-av';
 import { AppColors, NumberColors } from '@/constants/colors';
 import { getTableByNumber } from '@/constants/tables';
 import { ThemedText } from '@/components/ThemedText';
+import { useAudio } from '@/hooks/useAudio';
 
 // Keep this for static styles usage, while component uses hook for dynamic updates
 const { width } = Dimensions.get('window');
@@ -96,9 +96,10 @@ export default function DiscoveryScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const modalScaleAnim = useRef(new Animated.Value(0)).current;
-  const soundRef = useRef<Audio.Sound | null>(null);
-  const modalSoundRef = useRef<Audio.Sound | null>(null);
+  // soundRef and modalSoundRef removed
   const isMounted = useRef(true);
+
+  const { speak, stopSpeech } = useAudio();
 
   const { width } = useWindowDimensions();
   const isTablet = width > 600;
@@ -168,55 +169,13 @@ export default function DiscoveryScreen() {
     isMounted.current = true;
     return () => {
       isMounted.current = false;
-      if (soundRef.current) {
-        soundRef.current.unloadAsync();
-      }
-      if (modalSoundRef.current) {
-        modalSoundRef.current.unloadAsync();
-      }
+      stopSpeech();
     };
   }, []);
 
   const speakMultiplication = async (tableNum: number, multiplier: number, result: number) => {
     const text = `${tableNum} fois ${multiplier} égale ${result}`;
-
-    if (Platform.OS === 'web') {
-      // @ts-ignore
-      const utterance = new SpeechSynthesisUtterance(text);
-      // @ts-ignore
-      utterance.lang = 'fr-FR';
-      // @ts-ignore
-      utterance.rate = 0.8;
-      // @ts-ignore
-      window.speechSynthesis.speak(utterance);
-    } else {
-      try {
-        if (modalSoundRef.current) {
-          await modalSoundRef.current.unloadAsync();
-        }
-
-        await Audio.setAudioModeAsync({
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: false,
-        });
-
-        const uri = `https://translate.google.com/translate_tts?ie=UTF-8&tl=fr&client=tw-ob&q=${encodeURIComponent(text)}`;
-
-        const { sound } = await Audio.Sound.createAsync(
-          { uri },
-          { shouldPlay: true },
-          (status) => {
-            if (status.isLoaded && status.didJustFinish) {
-              sound.unloadAsync();
-            }
-          }
-        );
-
-        modalSoundRef.current = sound;
-      } catch (error) {
-        console.error('Error playing audio:', error);
-      }
-    }
+    speak(text);
   };
 
   const closeModal = useCallback(() => {
@@ -228,11 +187,8 @@ export default function DiscoveryScreen() {
       setSelectedMultiplication(null);
     });
 
-    if (modalSoundRef.current) {
-      modalSoundRef.current.unloadAsync();
-      modalSoundRef.current = null;
-    }
-  }, [modalScaleAnim]);
+    stopSpeech();
+  }, [modalScaleAnim, stopSpeech]);
 
 
 
@@ -258,94 +214,26 @@ export default function DiscoveryScreen() {
   const speakTable = async () => {
     if (!table) return;
 
-    if (Platform.OS === 'web') {
-      if (isPlayingAudio) {
-        // @ts-ignore
-        window.speechSynthesis.cancel();
-        setIsPlayingAudio(false);
-        return;
-      }
-
-      setIsPlayingAudio(true);
-      // @ts-ignore
-      const utterances: SpeechSynthesisUtterance[] = [];
-
-      for (let i = 1; i <= 10; i++) {
-        const result = table.number * i;
-        const text = `${table.number} fois ${i} égale ${result}`;
-        // @ts-ignore
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'fr-FR';
-        utterance.rate = 0.8;
-        utterances.push(utterance);
-      }
-
-      for (let i = 0; i < utterances.length; i++) {
-        if (!isMounted.current) break;
-        await new Promise<void>((resolve) => {
-          // @ts-ignore
-          utterances[i].onend = () => resolve();
-          // @ts-ignore
-          window.speechSynthesis.speak(utterances[i]);
-        });
-      }
-
-      if (isMounted.current) {
-        setIsPlayingAudio(false);
-      }
-    } else {
-      if (isPlayingAudio) {
-        if (soundRef.current) {
-          await soundRef.current.stopAsync();
-          await soundRef.current.unloadAsync();
-          soundRef.current = null;
-        }
-        if (isMounted.current) {
-          setIsPlayingAudio(false);
-        }
-        return;
-      }
-
-      if (isMounted.current) {
-        setIsPlayingAudio(true);
-      }
-
-      try {
-        await Audio.setAudioModeAsync({
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: false,
-        });
-
-        const speechTexts: string[] = [];
-        for (let i = 1; i <= 10; i++) {
-          const result = table.number * i;
-          speechTexts.push(`${table.number} fois ${i} égale ${result}`);
-        }
-
-        const fullText = speechTexts.join('. ');
-        const uri = `https://translate.google.com/translate_tts?ie=UTF-8&tl=fr&client=tw-ob&q=${encodeURIComponent(fullText)}`;
-
-        const { sound } = await Audio.Sound.createAsync(
-          { uri },
-          { shouldPlay: true },
-          (status) => {
-            if (status.isLoaded && status.didJustFinish) {
-              if (isMounted.current) {
-                setIsPlayingAudio(false);
-              }
-              sound.unloadAsync();
-            }
-          }
-        );
-
-        soundRef.current = sound;
-      } catch (error) {
-        console.error('Error playing audio:', error);
-        if (isMounted.current) {
-          setIsPlayingAudio(false);
-        }
-      }
+    if (isPlayingAudio) {
+      stopSpeech();
+      setIsPlayingAudio(false);
+      return;
     }
+
+    setIsPlayingAudio(true);
+
+    // Construct the full text for continuous offline reading
+    const speechTexts: string[] = [];
+    for (let i = 1; i <= 10; i++) {
+      const result = table.number * i;
+      speechTexts.push(`${table.number} fois ${i} égale ${result}`);
+    }
+    const fullText = speechTexts.join('. ');
+
+    speak(fullText, {
+      onDone: () => setIsPlayingAudio(false),
+      onStopped: () => setIsPlayingAudio(false),
+    });
   };
 
   if (!table) {

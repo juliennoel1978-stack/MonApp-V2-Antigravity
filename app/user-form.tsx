@@ -37,9 +37,11 @@ export default function UserFormScreen() {
   const [challengeQuestions, setChallengeQuestions] = useState(15);
   const [badgeTheme, setBadgeTheme] = useState<BadgeTheme>('space');
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [voiceGender, setVoiceGender] = useState<'male' | 'female'>('female');
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [hapticsEnabled, setHapticsEnabled] = useState(true);
   const [dyslexiaFontEnabled, setDyslexiaFontEnabled] = useState(false);
+  const [fontPreference, setFontPreference] = useState<'standard' | 'lexend' | 'opendyslexic'>('standard');
   const [zenMode, setZenMode] = useState(false);
   const firstNameRef = React.useRef<TextInput>(null);
   const ageRef = React.useRef<TextInput>(null);
@@ -67,9 +69,16 @@ export default function UserFormScreen() {
           setBadgeTheme(user.badgeTheme);
         }
         setVoiceEnabled(user.voiceEnabled ?? true);
+        setVoiceGender(user.voiceGender ?? 'female');
         setSoundEnabled(user.soundEnabled ?? true);
         setHapticsEnabled(user.hapticsEnabled ?? true);
         setDyslexiaFontEnabled(user.dyslexiaFontEnabled ?? false);
+        // Migration logic for initial load
+        if (user.fontPreference) {
+          setFontPreference(user.fontPreference);
+        } else {
+          setFontPreference(user.dyslexiaFontEnabled ? 'lexend' : 'standard');
+        }
         setZenMode(user.zenMode ?? false);
       }
     }
@@ -173,9 +182,11 @@ export default function UserFormScreen() {
           challengeQuestions,
           badgeTheme,
           voiceEnabled,
+          voiceGender,
           soundEnabled,
           hapticsEnabled,
-          dyslexiaFontEnabled,
+          dyslexiaFontEnabled: fontPreference === 'lexend', // Backwards compat
+          fontPreference,
           zenMode,
         });
         router.back();
@@ -190,9 +201,11 @@ export default function UserFormScreen() {
           challengeQuestions,
           badgeTheme,
           voiceEnabled,
+          voiceGender,
           soundEnabled,
           hapticsEnabled,
-          dyslexiaFontEnabled,
+          dyslexiaFontEnabled: fontPreference === 'lexend', // Backwards compat
+          fontPreference,
           zenMode,
         });
         console.log('👤 New user created:', newUser.id, newUser.firstName);
@@ -482,6 +495,36 @@ export default function UserFormScreen() {
                 </Text>
               </TouchableOpacity>
 
+              {voiceEnabled && (
+                <View style={{ flexDirection: 'row', gap: 12, marginBottom: 12, paddingLeft: 8 }}>
+                  <TouchableOpacity
+                    style={[
+                      styles.challengeQuestionButton,
+                      { flex: 1, flexDirection: 'row', gap: 8, justifyContent: 'center' },
+                      // @ts-ignore - Assuming state voiceGender exists or will be added
+                      voiceGender === 'female' && styles.challengeQuestionButtonActive
+                    ]}
+                    onPress={() => setVoiceGender('female')}
+                  >
+                    <Text style={{ fontSize: 20 }}>👩</Text>
+                    <Text style={[styles.challengeQuestionButtonText, voiceGender === 'female' && styles.challengeQuestionButtonTextActive]}>Femme</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.challengeQuestionButton,
+                      { flex: 1, flexDirection: 'row', gap: 8, justifyContent: 'center' },
+                      // @ts-ignore
+                      voiceGender === 'male' && styles.challengeQuestionButtonActive
+                    ]}
+                    onPress={() => setVoiceGender('male')}
+                  >
+                    <Text style={{ fontSize: 20 }}>👨</Text>
+                    <Text style={[styles.challengeQuestionButtonText, voiceGender === 'male' && styles.challengeQuestionButtonTextActive]}>Homme</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
               <TouchableOpacity
                 style={[
                   styles.timerToggle,
@@ -530,23 +573,64 @@ export default function UserFormScreen() {
 
             <View style={styles.section}>
               <Text style={styles.label}>Accessibilité</Text>
-              <TouchableOpacity
-                style={[
-                  styles.timerToggle,
-                  dyslexiaFontEnabled && styles.timerToggleActive,
-                ]}
-                onPress={() => setDyslexiaFontEnabled(!dyslexiaFontEnabled)}
-              >
-                <Type size={24} color={dyslexiaFontEnabled ? AppColors.primary : AppColors.textSecondary} />
-                <Text
-                  style={[
-                    styles.timerToggleText,
-                    dyslexiaFontEnabled && styles.timerToggleTextActive,
-                  ]}
-                >
-                  {dyslexiaFontEnabled ? 'Police dyslexie activée' : 'Police standard'}
+              <View style={{ marginBottom: 20 }}>
+                <Text style={styles.label}>Police d&apos;écriture</Text>
+                <Text style={styles.challengeSubLabel}>
+                  Choix de la police pour cet utilisateur
                 </Text>
-              </TouchableOpacity>
+
+                <View style={{ flexDirection: 'column', gap: 8, marginTop: 8 }}>
+                  <TouchableOpacity
+                    style={[
+                      styles.timerToggle,
+                      fontPreference === 'standard' && styles.timerToggleActive,
+                      { paddingVertical: 12 }
+                    ]}
+                    onPress={() => setFontPreference('standard')}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.timerToggleText, fontPreference === 'standard' && styles.timerToggleTextActive]}>
+                        Standard (Arrondie)
+                      </Text>
+                    </View>
+                    {fontPreference === 'standard' && <Text style={{ fontSize: 12 }}>✓</Text>}
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.timerToggle,
+                      fontPreference === 'lexend' && styles.timerToggleActive,
+                      { paddingVertical: 12 }
+                    ]}
+                    onPress={() => setFontPreference('lexend')}
+                  >
+                    <Text style={{ fontSize: 16, fontFamily: 'Lexend', color: fontPreference === 'lexend' ? AppColors.primary : AppColors.textSecondary, marginRight: 10 }}>Abc</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.timerToggleText, fontPreference === 'lexend' && styles.timerToggleTextActive]}>
+                        Moderne (Lexend)
+                      </Text>
+                    </View>
+                    {fontPreference === 'lexend' && <Text style={{ fontSize: 12 }}>✓</Text>}
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.timerToggle,
+                      fontPreference === 'opendyslexic' && styles.timerToggleActive,
+                      { paddingVertical: 12 }
+                    ]}
+                    onPress={() => setFontPreference('opendyslexic')}
+                  >
+                    <Text style={{ fontSize: 16, fontFamily: 'OpenDyslexic', color: fontPreference === 'opendyslexic' ? AppColors.primary : AppColors.textSecondary, marginRight: 10 }}>Abc</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.timerToggleText, fontPreference === 'opendyslexic' && styles.timerToggleTextActive]}>
+                        Spéciale Dys (OpenDyslexic)
+                      </Text>
+                    </View>
+                    {fontPreference === 'opendyslexic' && <Text style={{ fontSize: 12 }}>✓</Text>}
+                  </TouchableOpacity>
+                </View>
+              </View>
 
               <TouchableOpacity
                 style={[

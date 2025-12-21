@@ -24,6 +24,7 @@ export interface UserSettings {
   challengeQuestions?: number;
   badgeTheme?: BadgeTheme;
   zenMode?: boolean;
+  fontPreference: 'standard' | 'lexend' | 'opendyslexic';
 }
 
 export interface Badge {
@@ -75,9 +76,11 @@ export interface User {
   persistenceBadges?: PersistenceBadge[];
   badgeTheme?: BadgeTheme;
   voiceEnabled?: boolean;
+  voiceGender?: 'male' | 'female';
   soundEnabled?: boolean;
   hapticsEnabled?: boolean;
   dyslexiaFontEnabled?: boolean;
+  fontPreference?: 'standard' | 'lexend' | 'opendyslexic';
   zenMode?: boolean;
   challengesCompleted?: number;
   achievements?: UnlockedAchievement[];

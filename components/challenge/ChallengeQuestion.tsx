@@ -15,7 +15,7 @@ type ChallengeQuestionProps = {
 };
 
 export const ChallengeQuestion = forwardRef<TextInput, ChallengeQuestionProps>(
-    ({ question, userAnswer, setUserAnswer, showCorrectAnswer }, ref) => {
+    ({ question, userAnswer, showCorrectAnswer }, ref) => {
         return (
             <>
                 <View style={styles.questionCard}>
@@ -25,18 +25,14 @@ export const ChallengeQuestion = forwardRef<TextInput, ChallengeQuestionProps>(
                 </View>
 
                 <View style={styles.inputContainer}>
-                    <TextInput
-                        ref={ref}
-                        style={styles.input}
-                        value={userAnswer}
-                        onChangeText={setUserAnswer}
-                        keyboardType="number-pad"
-                        placeholder="Ta réponse"
-                        placeholderTextColor={AppColors.textLight}
-                        autoFocus
-                        editable={!showCorrectAnswer}
-                        testID="answer-input"
-                    />
+                    <View style={styles.inputLike}>
+                        {userAnswer ? (
+                            <ThemedText style={styles.inputText}>{userAnswer}</ThemedText>
+                        ) : (
+                            <ThemedText style={styles.placeholder}>Ta réponse</ThemedText>
+                        )}
+                        {!showCorrectAnswer && <View style={styles.cursor} />}
+                    </View>
                 </View>
             </>
         );
@@ -66,16 +62,19 @@ const styles = StyleSheet.create({
     inputContainer: {
         width: width - 48,
         marginBottom: 16,
+        alignItems: 'center',
     },
-    input: {
+    inputLike: {
         backgroundColor: AppColors.surface,
         borderRadius: 14,
-        paddingVertical: 10,
+        paddingVertical: 14, // Slightly taller
         paddingHorizontal: 20,
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: AppColors.text,
-        textAlign: 'center',
+        minWidth: 150,
+        width: '100%',
+        maxWidth: 250,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
         borderWidth: 2,
         borderColor: AppColors.primary,
         shadowColor: AppColors.shadow,
@@ -83,5 +82,23 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 3,
+    },
+    inputText: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: AppColors.text,
+        textAlign: 'center',
+    },
+    placeholder: {
+        fontSize: 22,
+        color: AppColors.textLight,
+        fontStyle: 'italic',
+    },
+    cursor: {
+        width: 2,
+        height: 24,
+        backgroundColor: AppColors.primary,
+        marginLeft: 4,
+        opacity: 0.6,
     },
 });

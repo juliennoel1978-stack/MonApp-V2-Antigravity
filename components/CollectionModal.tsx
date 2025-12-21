@@ -15,7 +15,7 @@ import { ThemedText } from './ThemedText';
 import { PERSISTENCE_BADGES, getBadgeIcon, getBadgeTitle, ENDURANCE_BADGES } from '@/constants/badges';
 import { ACHIEVEMENTS } from '@/constants/achievements';
 import { useApp } from '@/contexts/AppContext';
-import { BadgeTheme } from '@/types';
+import { BadgeTheme, User } from '@/types';
 
 const { width, height } = Dimensions.get('window');
 
@@ -24,7 +24,7 @@ interface CollectionModalProps {
   onClose: () => void;
   theme: BadgeTheme;
   gender?: 'boy' | 'girl';
-  targetUser?: any; // Allow passing a specific user to view
+  targetUser?: User | null;
 }
 
 interface AchievementFlipCardProps {
@@ -365,7 +365,7 @@ export default function CollectionModal({
   }, [effectiveUser, anonymousChallengesCompleted]);
 
   // Use effectiveUser for endurance badges check
-  const hasEnduranceBadge = (threshold: number) => {
+  const hasEnduranceBadge = (threshold: 20 | 30 | 50) => {
     // If user object has endurance badges map
     if (effectiveUser?.enduranceBadges?.[threshold]) return true;
     return false;

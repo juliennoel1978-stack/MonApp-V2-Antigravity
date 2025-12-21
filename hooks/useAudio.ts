@@ -9,6 +9,7 @@ export const useAudio = () => {
     // Logic: User preference overrides global setting.
     // If user preference is undefined, fallback to global setting.
     const isVoiceEnabled = currentUser?.voiceEnabled ?? settings.voiceEnabled ?? true;
+    const voiceGender = currentUser?.voiceGender ?? settings.voiceGender ?? 'female';
     const isSoundEnabled = currentUser?.soundEnabled ?? settings.soundEnabled ?? true;
 
     const playSound = useCallback(async (variant: 'default' | 'magic' | 'boost' | 'challenge' | 'finish' | 'mastery' | 'checkpoint' = 'default') => {
@@ -17,11 +18,11 @@ export const useAudio = () => {
         }
     }, [isSoundEnabled]);
 
-    const speak = useCallback(async (text: string) => {
+    const speak = useCallback(async (text: string, callbacks?: { onDone?: () => void; onStopped?: () => void }) => {
         if (isVoiceEnabled) {
-            await speakTextUtil(text);
+            await speakTextUtil(text, voiceGender, callbacks);
         }
-    }, [isVoiceEnabled]);
+    }, [isVoiceEnabled, voiceGender]);
 
     const stopSpeech = useCallback(async () => {
         await stopSpeechUtil();

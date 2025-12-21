@@ -2,12 +2,9 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { Animated, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useApp } from '@/contexts/AppContext';
-import { checkForRewards, checkStrategistAchievement } from '@/utils/rewardQueue';
+import { checkForRewards } from '@/utils/rewardQueue';
 import type { QueuedReward, UnlockedAchievement } from '@/types';
-import { AppColors } from '@/constants/colors';
 import { Audio } from 'expo-av';
-import * as Haptics from 'expo-haptics';
-import { Platform } from 'react-native';
 
 import { useAudio } from '@/hooks/useAudio';
 import { useHaptics } from '@/hooks/useHaptics';
@@ -452,6 +449,11 @@ export const useChallengeGame = () => {
         startReviewMode([...wrongAnswers]);
     }, [wrongAnswers, startReviewMode]);
 
+    const playBoostSound = useCallback(async () => {
+        await playSound('boost');
+        vibrate('heavy');
+    }, [playSound, vibrate]);
+
     const checkAnswer = useCallback(() => {
         if (!currentQuestion || userAnswer.trim() === '') return;
         if (showFeedback) return;
@@ -638,14 +640,7 @@ export const useChallengeGame = () => {
         generateNewQuestion();
     }, [currentUser, settings, generateNewQuestion]);
 
-    const playBoostSound = async () => {
-        await playSound('boost');
-        vibrate('heavy');
-    };
 
-    const playSuccessSoundInternal = async () => {
-        await playSound();
-    };
 
     return {
         // State

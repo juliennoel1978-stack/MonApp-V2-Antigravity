@@ -12,22 +12,49 @@ export type ThemedTextProps = TextProps & {
 export const ThemedText = ({ style, ...props }: ThemedTextProps) => {
     const { settings, currentUser } = useApp();
 
-    const isDyslexiaFontEnabled = currentUser?.dyslexiaFontEnabled ?? settings.dyslexiaFontEnabled ?? false;
+    // Fallback to settings if user specific is not set, or migration logic will handle it
+    const fontPreference = currentUser?.fontPreference ?? settings.fontPreference ?? (settings.dyslexiaFontEnabled ? 'lexend' : 'standard');
 
-    const fontFamilyStyle = useMemo(() => {
-        if (isDyslexiaFontEnabled) {
-            // Assuming 'Lexend' is the loaded font name or variant you want
-            return { fontFamily: 'Lexend' };
+    const logic = useMemo(() => {
+        if (fontPreference === 'opendyslexic') {
+            return {
+                fontFamily: 'OpenDyslexic',
+                scale: 0.9, // 10% reduction
+                adjustsFontSizeToFit: true,
+            };
+        } else if (fontPreference === 'lexend') {
+            const flattenedStyle = StyleSheet.flatten(style);
+            const isBold = flattenedStyle?.fontWeight === 'bold' ||
+                flattenedStyle?.fontWeight === '700' ||
+                flattenedStyle?.fontWeight === '800' ||
+                flattenedStyle?.fontWeight === '900';
+            return {
+                fontFamily: isBold ? 'Lexend-Bold' : 'Lexend',
+                fontWeight: undefined,
+                scale: 1,
+                adjustsFontSizeToFit: false,
+            };
         }
-        return {};
-    }, [isDyslexiaFontEnabled]);
+        // Standard
+        return {
+            fontFamily: undefined,
+            scale: 1,
+            adjustsFontSizeToFit: false,
+        };
+    }, [fontPreference, style]);
+
+    const finalStyle = [
+        style,
+        logic.fontFamily ? { fontFamily: logic.fontFamily } : {},
+        logic.fontWeight !== undefined ? { fontWeight: logic.fontWeight as any } : {},
+        logic.scale !== 1 && style ? { fontSize: (StyleSheet.flatten(style).fontSize || 16) * logic.scale } : {}
+    ];
 
     return (
         <Text
-            // Safe layout enforcement for dyslexic font which might be wider
-            adjustsFontSizeToFit={isDyslexiaFontEnabled}
+            adjustsFontSizeToFit={props.adjustsFontSizeToFit ?? logic.adjustsFontSizeToFit}
             minimumFontScale={0.8}
-            style={[style, fontFamilyStyle]}
+            style={finalStyle}
             {...props}
         />
     );

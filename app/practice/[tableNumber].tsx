@@ -2,6 +2,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Home, Check, X, Star, RefreshCw, ArrowRight, Volume2, VolumeX } from 'lucide-react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { ThemedText } from '@/components/ThemedText';
+import { Keypad } from '@/components/Keypad';
 
 import {
   View,
@@ -52,22 +53,34 @@ const CHECKPOINT_THEMES = {
 const CheckpointModal = ({
   visible,
   theme,
+  isZenMode,
   onClose,
 }: {
   visible: boolean;
   theme: string;
+  isZenMode?: boolean;
   onClose: () => void;
 }) => {
   const [scaleAnim] = useState(new Animated.Value(0));
 
   useEffect(() => {
     if (visible) {
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        tension: 50,
-        friction: 5,
-        useNativeDriver: true,
-      }).start();
+      if (isZenMode) {
+        // Zen Mode: Simple Fade
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      } else {
+        // Normal Mode: Bounce
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 50,
+          friction: 5,
+          useNativeDriver: true,
+        }).start();
+      }
 
       // Auto close after 2.5 seconds
       const timer = setTimeout(() => {
@@ -101,11 +114,13 @@ const CoachFeedback = ({
   visible,
   theme,
   gender,
+  isZenMode,
   message,
 }: {
   visible: boolean;
   theme: string;
   gender?: 'boy' | 'girl';
+  isZenMode?: boolean;
   message: string;
 }) => {
   const [scaleAnim] = useState(new Animated.Value(0));
@@ -113,24 +128,35 @@ const CoachFeedback = ({
 
   useEffect(() => {
     if (visible) {
-      Animated.parallel([
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          tension: 50,
-          friction: 7,
-          useNativeDriver: true,
-        }),
+      if (isZenMode) {
+        // Zen Mode: Simple Fade In, no movement
+        scaleAnim.setValue(1); // Immediate scale
         Animated.timing(opacityAnim, {
           toValue: 1,
           duration: 200,
           useNativeDriver: true,
-        }),
-      ]).start();
+        }).start();
+      } else {
+        // Normal Mode: Spring + Move + Fade
+        Animated.parallel([
+          Animated.spring(scaleAnim, {
+            toValue: 1,
+            tension: 50,
+            friction: 7,
+            useNativeDriver: true,
+          }),
+          Animated.timing(opacityAnim, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }
     } else {
-      scaleAnim.setValue(0);
+      if (!isZenMode) scaleAnim.setValue(0);
       opacityAnim.setValue(0);
     }
-  }, [visible]);
+  }, [visible, isZenMode]);
 
   if (!visible) return null;
 
@@ -143,14 +169,20 @@ const CoachFeedback = ({
           styles.coachBubble,
           {
             opacity: opacityAnim,
-            transform: [{ scale: scaleAnim }, { translateY: -20 }],
+            // In Zen Mode, we remove the translateY movement and purely rely on static positioning
+            transform: isZenMode
+              ? []
+              : [{ scale: scaleAnim }, { translateY: -20 }],
           },
         ]}
       >
-        <ThemedText style={styles.coachMessage}>{message} {['🎉', '🌟', '🔥', '🚀', '👏', '💪'][Math.floor(Math.random() * 6)]}</ThemedText>
+        <ThemedText style={styles.coachMessage}>
+          {message}
+          {!isZenMode && ['🎉', '🌟', '🔥', '🚀', '👏', '💪'][Math.floor(Math.random() * 6)]}
+        </ThemedText>
         <View style={styles.coachBubbleArrow} />
       </Animated.View>
-      <ThemedText style={styles.coachEmoji}>{coachEmoji}</ThemedText>
+      {!isZenMode && <ThemedText style={styles.coachEmoji}>{coachEmoji}</ThemedText>}
     </View>
   );
 };
@@ -168,6 +200,7 @@ export default function PracticeScreen() {
   const tableProgress = getTableProgress(Number(tableNumber));
   const initialLevel = tableProgress?.level1Completed ? 2 : 1;
   const [localVoiceEnabled, setLocalVoiceEnabled] = useState(isVoiceEnabled);
+  const isZenMode = currentUser?.zenMode ?? settings.zenMode ?? false;
 
   const [level, setLevel] = useState<1 | 2>(initialLevel);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -184,6 +217,7 @@ export default function PracticeScreen() {
   const [showErrorFeedback, setShowErrorFeedback] = useState(false);
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [reviewErrors, setReviewErrors] = useState<Question[]>([]);
+  const [level1Highscore, setLevel1Highscore] = useState(0);
 
   // Coach Feedback State
   const [showCoachFeedback, setShowCoachFeedback] = useState(false);
@@ -434,25 +468,31 @@ export default function PracticeScreen() {
     setSelectedAnswer(null);
     setUserInput('');
     setIsCorrect(null);
-    if (level === 2) {
-      setTimeout(() => {
-        if (isMounted.current) {
-          inputRef.current?.focus();
-        }
-      }, 350);
+    // Focus logic removed as we use custom keypad
+  };
+
+  const onKeyPress = (key: string) => {
+    if (userInput.length < 6) { // Limit length
+      setUserInput(prev => prev + key);
     }
+  };
+
+  const onDelete = () => {
+    setUserInput(prev => prev.slice(0, -1));
   };
 
   /* Shared utility replaced local implementation */
 
   const triggerCheckpoint = () => {
-    playSound('checkpoint'); // Play special character sound
+    playSound(isZenMode ? 'default' : 'checkpoint'); // Play special character sound
     setShowCheckpoint(true);
   };
 
   const triggerCoachSuccess = async () => {
     // 1. Play Sound (Web Audio API or Native)
-    playSound(level === 2 ? 'magic' : 'default');
+    // Zen Mode: Always default sound
+    const soundVar = isZenMode ? 'default' : (level === 2 ? 'magic' : 'default');
+    playSound(soundVar);
 
     // 2. Select Message
     const isGendered = Math.random() > 0.5;
@@ -468,6 +508,8 @@ export default function PracticeScreen() {
   };
 
   const animateSuccess = () => {
+    if (isZenMode) return; // Disable animation in Zen Mode (USER REQUEST)
+
     Animated.sequence([
       Animated.spring(scaleAnim, {
         toValue: 1.1,
@@ -485,6 +527,8 @@ export default function PracticeScreen() {
   };
 
   const animateError = () => {
+    if (isZenMode) return; // Disable visual shake in Zen Mode
+
     Animated.sequence([
       Animated.timing(scaleAnim, {
         toValue: 0.95,
@@ -547,8 +591,19 @@ export default function PracticeScreen() {
           }, 500);
         }
       } else {
+        // Review finished with NO more errors (all corrected)
         setQuestionsToReview([]);
-        setShowResult(true);
+
+        // RESTORATION LOGIC:
+        // If we were in Level 1 and qualified for Level 2 (score >= 8), 
+        // restore the Transition screen instead of generic result.
+        if (level === 1 && level1Highscore >= 8) {
+          // Restore the high score for visual stars display
+          setCorrectCount(level1Highscore);
+          setShowLevelTransition(true);
+        } else {
+          setShowResult(true);
+        }
       }
       return;
     }
@@ -560,6 +615,7 @@ export default function PracticeScreen() {
         updateTableProgress(table.number, finalCorrectCount, questions.length, finalCorrectCount === 10 ? 2 : 1, 1, averageTime);
         if (finalCorrectCount === 10) setQuestionsToReview([]);
         vibrate('heavy'); // Celebrate passing level 1
+        setLevel1Highscore(finalCorrectCount);
         setShowLevelTransition(true);
       } else {
         setShowResult(true);
@@ -985,63 +1041,56 @@ export default function PracticeScreen() {
     );
   }
 
+
+
   return (
     <View style={styles.backgroundContainer}>
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={handleHomePress}
-              testID="back-button"
-            >
-              <Home size={24} color={AppColors.primary} />
-            </TouchableOpacity>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+        <View style={{ flex: 1 }}>
+          <View style={styles.header}>
+            <View style={styles.headerLeft}>
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={handleHomePress}
+                testID="back-button"
+              >
+                <Home size={24} color={AppColors.primary} />
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.soundToggleButton}
-              onPress={() => setLocalVoiceEnabled(!localVoiceEnabled)}
-            >
-              {localVoiceEnabled ? (
-                <Volume2 size={24} color={AppColors.primary} />
-              ) : (
-                <VolumeX size={24} color={AppColors.textSecondary} />
-              )}
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${progress}%`, backgroundColor: tableColor },
-                ]}
-              />
+              <TouchableOpacity
+                style={styles.soundToggleButton}
+                onPress={() => setLocalVoiceEnabled(!localVoiceEnabled)}
+              >
+                {localVoiceEnabled ? (
+                  <Volume2 size={24} color={AppColors.primary} />
+                ) : (
+                  <VolumeX size={24} color={AppColors.textSecondary} />
+                )}
+              </TouchableOpacity>
             </View>
-            <ThemedText style={styles.progressText}>
-              {isReviewMode ? 'Révision' : `Niveau ${level}`} - Question {currentQuestionIndex + 1}/{questions.length}
-            </ThemedText>
+
+            <View style={styles.progressContainer}>
+              <View style={styles.progressBar}>
+                <View
+                  style={[
+                    styles.progressFill,
+                    { width: `${progress}%`, backgroundColor: tableColor },
+                  ]}
+                />
+              </View>
+              <ThemedText style={styles.progressText}>
+                {isReviewMode ? 'Révision' : `Niveau ${level}`} - Question {currentQuestionIndex + 1}/{questions.length}
+              </ThemedText>
+            </View>
+
+            <View style={styles.scoreContainer}>
+              <ThemedText style={styles.scoreText}>{correctCount}/{questions.length}</ThemedText>
+              <Check size={20} color={AppColors.success} />
+            </View>
           </View>
 
-          <View style={styles.scoreContainer}>
-            <ThemedText style={styles.scoreText}>{correctCount}/{questions.length}</ThemedText>
-            <Check size={20} color={AppColors.success} />
-          </View>
-        </View>
 
-
-
-        <KeyboardAvoidingView
-          style={styles.keyboardAvoid}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            bounces={false}
-          >
+          <View style={styles.contentContainer}>
             <Animated.View
               style={[
                 level === 2 ? styles.level2Content : { width: '100%' },
@@ -1102,8 +1151,6 @@ export default function PracticeScreen() {
                   {currentQuestion.options.map((option, index) => {
                     const isSelected = selectedAnswer === option;
                     const isCorrectAnswer = option === currentQuestion.correctAnswer;
-                    // Only show correct/wrong indication if we are NOT in error feedback mode (or show it differently?)
-                    // Actually logic is: if error, we show error feedback modal, but here we can keep selection style
                     const showCorrect = selectedAnswer !== null && isCorrectAnswer;
                     const showWrong = isSelected && !isCorrect;
 
@@ -1136,29 +1183,21 @@ export default function PracticeScreen() {
               ) : (
                 <>
                   <View style={styles.level2InputContainer}>
-                    <TextInput
-                      ref={inputRef}
-                      style={[styles.level2Input, { borderColor: tableColor }]}
-                      value={userInput}
-                      onChangeText={setUserInput}
-                      keyboardType="number-pad"
-                      placeholder="Ta réponse"
-                      placeholderTextColor={AppColors.textLight}
-                      autoFocus
-                      editable={selectedAnswer === null}
-                      testID="answer-input"
-                    />
+                    {/* 
+                         Custom TextInput display that mimics standard input but triggered by Keypad 
+                         Must use ThemedText to respect Dyslexia font!
+                     */}
+                    <View style={[styles.level2InputLike, { borderColor: tableColor }]}>
+                      {userInput ? (
+                        <ThemedText style={styles.level2InputText}>{userInput}</ThemedText>
+                      ) : (
+                        <ThemedText style={styles.level2Placeholder}>Ta réponse</ThemedText>
+                      )}
+                      <View style={styles.cursor} />
+                    </View>
                   </View>
 
-                  {!showErrorFeedback && selectedAnswer === null && (
-                    <TouchableOpacity
-                      style={[styles.level2SubmitButton, { backgroundColor: tableColor }]}
-                      onPress={handleInputSubmit}
-                      testID="submit-button"
-                    >
-                      <ThemedText style={styles.level2SubmitButtonText}>Valider</ThemedText>
-                    </TouchableOpacity>
-                  )}
+                  {/* Submit Button Removed - Keypad has OK button */}
 
                   {isCorrect && (
                     <View style={styles.level2FeedbackContainer}>
@@ -1172,31 +1211,41 @@ export default function PracticeScreen() {
                   )}
                 </>
               )}
-
-              <View style={{ height: 100 }} />
             </Animated.View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+          </View>
 
-        {/* Success Feedback Overlay REMOVED - Replaced by Coach */}
+        </View>
+
+        {/* BOTTOM KEYPAD ZONE (Level 2 Only) */}
+        {level === 2 && !showErrorFeedback && selectedAnswer === null && (
+          <Keypad
+            onKeyPress={onKeyPress}
+            onDelete={onDelete}
+            onSubmit={handleInputSubmit}
+            color={tableColor}
+          />
+        )}
+
+        {/* Keeping Coach Feedback, Checkpoint, Error Feedback overlays at root level (zIndex handles visibility) */}
 
         <CoachFeedback
           visible={showCoachFeedback}
           theme={currentUser?.badgeTheme || settings?.badgeTheme || 'animals'}
           gender={currentUser?.gender}
           message={coachMessage}
+          isZenMode={isZenMode}
         />
 
         <CheckpointModal
           visible={showCheckpoint}
           theme={currentUser?.badgeTheme || settings?.badgeTheme || 'animals'}
+          isZenMode={isZenMode}
           onClose={() => {
-            // Focus is handled by the timeout logic in triggerCheckpoint/nextQuestion
-            if (isMounted.current) {
-              inputRef.current?.focus();
-            }
+            // No focus needed
           }}
         />
+
+
 
         {/* Error Feedback Overlay / Card */}
         {showErrorFeedback && (
@@ -1588,15 +1637,41 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginBottom: 12,
   },
-  keyboardAvoid: {
+  contentContainer: {
     flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingTop: 40,
-    paddingBottom: 120,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    width: '100%',
+  },
+  level2InputLike: {
+    backgroundColor: AppColors.surface,
+    borderWidth: 3,
+    borderRadius: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    minWidth: 200,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
+  level2InputText: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: AppColors.text,
+    textAlign: 'center',
+  },
+  level2Placeholder: {
+    fontSize: 24,
+    color: AppColors.textLight,
+    fontStyle: 'italic',
+  },
+  cursor: {
+    width: 2,
+    height: 40,
+    backgroundColor: AppColors.primary,
+    marginLeft: 4,
+    opacity: 0.5,
   },
   level2Content: {
     width: '100%',

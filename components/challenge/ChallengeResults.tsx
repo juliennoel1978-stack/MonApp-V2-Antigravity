@@ -38,6 +38,52 @@ export const ChallengeResults = ({
     onReviewErrors,
 }: ChallengeResultsProps) => {
 
+    // 1. HOOKS ALWAYS CALLED AT TOP LEVEL
+    const { updateStrongestTable } = useApp();
+    const { playSound } = useAudio();
+    const { vibrate } = useHaptics();
+
+    // 2. CALC STATS (Only needed for Results mode, but safe to calc always or memoize based on props)
+    const { bestTable, worstTable, bestStreakValue } = React.useMemo(() => {
+        if (isReviewMode) return { bestTable: -1, worstTable: -1, bestStreakValue: 0 };
+
+        let best = -1;
+        let worst = -1;
+        let bestRate = -1;
+        let worstRate = 2;
+
+        Object.entries(tableStats).forEach(([table, stats]) => {
+            const rate = stats.total > 0 ? stats.correct / stats.total : 0;
+
+            if (rate > bestRate) {
+                bestRate = rate;
+                best = parseInt(table);
+            }
+            if (rate < worstRate && stats.total > 0 && stats.correct < stats.total) {
+                worstRate = rate;
+                worst = parseInt(table);
+            }
+        });
+
+        return { bestTable: best, worstTable: worst, bestStreakValue: bestStreak };
+    }, [tableStats, bestStreak, isReviewMode]);
+
+    // 3. SIDE EFFECTS
+    React.useEffect(() => {
+        // Only trigger sounds/updates if NOT in review mode
+        if (!isReviewMode) {
+            playSound('finish');
+            vibrate('heavy');
+
+            if (bestTable > 0) {
+                console.log('🏆 UI-Driven Save: Updating Strongest Table to', bestTable);
+                updateStrongestTable(bestTable);
+            }
+        }
+    }, [isReviewMode, bestTable, updateStrongestTable, playSound, vibrate]);
+
+
+    // 4. RENDER LOGIC
     if (isReviewMode) {
         const correctionMessages = [
             "Une erreur de moins, bravo. Le Pro s'installe.",
@@ -88,48 +134,6 @@ export const ChallengeResults = ({
             </View>
         );
     }
-
-    // INTEGRATION FIX: We use the context directly here to save what we DISPLAY.
-    // This ensures "What You See Is What You Get".
-    const { updateStrongestTable } = useApp();
-    const { playSound } = useAudio();
-    const { vibrate } = useHaptics();
-
-    const { bestTable, worstTable, bestStreakValue } = React.useMemo(() => {
-        let best = -1;
-        let worst = -1;
-        let bestRate = -1;
-        let worstRate = 2;
-
-        Object.entries(tableStats).forEach(([table, stats]) => {
-            const rate = stats.total > 0 ? stats.correct / stats.total : 0;
-
-            // Logic matches the display exactly
-            if (rate > bestRate) {
-                bestRate = rate;
-                best = parseInt(table);
-            }
-            if (rate < worstRate && stats.total > 0 && stats.correct < stats.total) {
-                worstRate = rate;
-                worst = parseInt(table);
-            }
-        });
-
-        return { bestTable: best, worstTable: worst, bestStreakValue: bestStreak };
-    }, [tableStats, bestStreak]);
-
-    // Side Effect: Save the Best Table to Context immediately when calculated.
-    // This runs once when the component mounts (Results screen appears).
-    React.useEffect(() => {
-        // Play Finish Sound
-        playSound('finish');
-        vibrate('heavy'); // Significant feedback for completion
-
-        if (bestTable > 0) {
-            console.log('🏆 UI-Driven Save: Updating Strongest Table to', bestTable);
-            updateStrongestTable(bestTable);
-        }
-    }, [bestTable, updateStrongestTable]);
 
     return (
         <View style={styles.backgroundContainer}>

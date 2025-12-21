@@ -44,19 +44,8 @@ function RootLayoutNav() {
       <Stack.Screen
         name="settings"
         options={{
-          title: "Paramètres",
+          headerShown: false,
           presentation: "modal",
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={() => {
-                router.dismissAll();
-                router.replace('/');
-              }}
-              style={{ marginRight: 8 }}
-            >
-              <X size={24} color="#000" />
-            </TouchableOpacity>
-          ),
         }}
       />
 
@@ -75,6 +64,7 @@ export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     'Lexend': Lexend_400Regular,
     'Lexend-Bold': Lexend_700Bold,
+    'OpenDyslexic': require('../assets/fonts/OpenDyslexic-Regular.otf'), // Loaded as local asset
   });
 
   useEffect(() => {

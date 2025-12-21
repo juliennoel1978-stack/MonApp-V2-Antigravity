@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Modal, TouchableOpacity, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
+import { View, Modal, TouchableOpacity, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Dimensions, ScrollView } from 'react-native';
 import { ThemedText } from './ThemedText';
 import { AppColors } from '@/constants/colors';
-import { Lock, X, Check } from 'lucide-react-native';
+import { Lock, X, RefreshCw } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -27,8 +27,6 @@ export const ParentGateModal = ({ visible, onClose, onSuccess }: ParentGateModal
     }, [visible]);
 
     const generateChallenge = () => {
-        // Generate a simple math challenge (multiplication or addition)
-        // To ensure it's easy for adults but requires reading/calculating
         const mode = Math.random() > 0.5 ? 'mult' : 'add';
 
         if (mode === 'mult') {
@@ -70,54 +68,72 @@ export const ParentGateModal = ({ visible, onClose, onSuccess }: ParentGateModal
             >
                 <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onClose} />
 
-                <View style={styles.content}>
+                <View style={[styles.content, { width: width * 0.85, maxWidth: 340 }]}>
+
+                    {/* FIXED HEADER - Always visible, never scrolls */}
                     <View style={styles.header}>
-                        <View style={styles.iconContainer}>
-                            <Lock color="#FFF" size={24} />
-                        </View>
-                        <ThemedText style={styles.title}>Zone Parents</ThemedText>
-                        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                        <TouchableOpacity
+                            onPress={onClose}
+                            style={styles.closeButton}
+                            hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+                        >
                             <X color={AppColors.textSecondary} size={24} />
                         </TouchableOpacity>
                     </View>
 
-                    <ThemedText style={styles.subtitle}>
-                        Pour accéder, résolvez ce calcul :
-                    </ThemedText>
-
-                    <View style={styles.challengeContainer}>
-                        <ThemedText style={styles.questionText}>{question} = ?</ThemedText>
-                    </View>
-
-                    <TextInput
-                        style={[styles.input, error && styles.inputError]}
-                        value={input}
-                        onChangeText={(text) => {
-                            setInput(text.replace(/[^0-9]/g, ''));
-                            setError(false);
-                        }}
-                        placeholder="Réponse"
-                        placeholderTextColor={AppColors.textquaternary}
-                        keyboardType="number-pad"
-                        maxLength={3}
-                        autoFocus
-                    />
-
-                    {error && (
-                        <ThemedText style={styles.errorText}>Mauvaise réponse, essayez encore.</ThemedText>
-                    )}
-
-                    <TouchableOpacity
-                        style={styles.verifyButton}
-                        onPress={handleVerify}
+                    {/* SCROLLABLE CONTENT - Handles large fonts (OpenDyslexic) */}
+                    <ScrollView
+                        style={{ width: '100%' }}
+                        contentContainerStyle={styles.scrollContent}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
                     >
-                        <ThemedText style={styles.verifyButtonText}>Valider</ThemedText>
-                        <Check color="#FFF" size={20} />
-                    </TouchableOpacity>
+                        <View style={styles.iconContainer}>
+                            <Lock color={AppColors.primary} size={32} />
+                        </View>
 
-                    <ThemedText style={styles.disclaimer}>
-                        Cette vérification protège les réglages et les données.
-                    </ThemedText>
+                        <ThemedText style={styles.title}>Zone Parents & Réglages</ThemedText>
+
+                        <ThemedText style={styles.subtitle}>
+                            Résolvez pour accéder :
+                        </ThemedText>
+
+                        <TouchableOpacity onPress={generateChallenge} activeOpacity={0.7} style={{ marginBottom: 16 }}>
+                            <View style={styles.challengeContainer}>
+                                <ThemedText style={styles.questionText}>{question} = ?</ThemedText>
+                                <RefreshCw color={AppColors.primary} size={14} style={{ position: 'absolute', top: 6, right: 6, opacity: 0.5 }} />
+                            </View>
+                        </TouchableOpacity>
+
+                        <TextInput
+                            style={[styles.input, error && styles.inputError]}
+                            value={input}
+                            onChangeText={(text) => {
+                                setInput(text.replace(/[^0-9]/g, ''));
+                                setError(false);
+                            }}
+                            placeholder="Réponse"
+                            placeholderTextColor={AppColors.textLight}
+                            keyboardType="number-pad"
+                            maxLength={3}
+                            autoFocus
+                        />
+
+                        {error && (
+                            <ThemedText style={styles.errorText}>Mauvaise réponse</ThemedText>
+                        )}
+
+                        <TouchableOpacity
+                            style={styles.verifyButton}
+                            onPress={handleVerify}
+                        >
+                            <ThemedText style={styles.verifyButtonText}>Valider</ThemedText>
+                        </TouchableOpacity>
+
+                        <ThemedText style={styles.disclaimer}>
+                            Protection des réglages
+                        </ThemedText>
+                    </ScrollView>
                 </View>
             </KeyboardAvoidingView>
         </Modal>
@@ -132,114 +148,121 @@ const styles = StyleSheet.create({
     },
     overlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: 'rgba(0,0,0,0.6)',
     },
     content: {
-        width: width * 0.85,
-        maxWidth: 400,
-        backgroundColor: AppColors.card,
+        backgroundColor: '#FFF',
         borderRadius: 24,
-        padding: 24,
+        paddingVertical: 24,
+        paddingHorizontal: 20, // Horizontal padding for header
         alignItems: 'center',
         shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 4,
-        },
-        shadowOpacity: 0.3,
-        shadowRadius: 4.65,
-        elevation: 8,
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.1,
+        shadowRadius: 20,
+        elevation: 10,
+        maxHeight: Dimensions.get('window').height * 0.85, // Safety cap for height
     },
     header: {
+        width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
-        width: '100%',
-        marginBottom: 20,
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
+        marginBottom: 8,
+        height: 44,
     },
-    iconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: AppColors.primary,
+    closeButton: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: '#F5F5F5',
         justifyContent: 'center',
         alignItems: 'center',
     },
+    scrollContent: {
+        alignItems: 'center',
+        paddingHorizontal: 4, // Inner padding for scroll content
+        paddingBottom: 8,
+    },
+    iconContainer: {
+        marginBottom: 12,
+        backgroundColor: '#F0F3FF',
+        padding: 12,
+        borderRadius: 20,
+    },
     title: {
-        fontSize: 20,
+        fontSize: 18,
         fontFamily: 'Lexend',
         fontWeight: 'bold',
         color: AppColors.text,
-        marginLeft: 12,
-        flex: 1,
-    },
-    closeButton: {
-        padding: 4,
+        marginBottom: 4,
+        textAlign: 'center',
     },
     subtitle: {
-        fontSize: 16,
+        fontSize: 14,
         color: AppColors.textSecondary,
         textAlign: 'center',
         marginBottom: 16,
     },
     challengeContainer: {
-        backgroundColor: AppColors.background,
-        paddingHorizontal: 20,
+        backgroundColor: '#FAFAFA',
+        paddingHorizontal: 24,
         paddingVertical: 12,
-        borderRadius: 12,
-        marginBottom: 20,
-        borderWidth: 2,
-        borderColor: AppColors.border,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: '#EEE',
+        minWidth: 140,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     questionText: {
         fontSize: 24,
         fontWeight: 'bold',
         color: AppColors.primary,
+        fontFamily: 'Lexend',
     },
     input: {
         width: '100%',
-        height: 56,
-        borderWidth: 2,
-        borderColor: AppColors.border,
-        borderRadius: 16,
-        fontSize: 24,
+        height: 50,
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+        borderRadius: 14,
+        fontSize: 20,
         textAlign: 'center',
         marginBottom: 8,
         color: AppColors.text,
         fontFamily: 'Lexend',
-        backgroundColor: AppColors.background,
+        backgroundColor: '#FAFAFA',
     },
     inputError: {
         borderColor: AppColors.error,
-        backgroundColor: '#FFE5E5',
+        backgroundColor: '#FFF5F5',
     },
     errorText: {
         color: AppColors.error,
-        fontSize: 14,
-        marginBottom: 12,
+        fontSize: 12,
+        marginBottom: 8,
+        marginTop: 4,
     },
     verifyButton: {
-        flexDirection: 'row',
-        backgroundColor: AppColors.success,
+        backgroundColor: AppColors.primary,
         paddingVertical: 14,
-        paddingHorizontal: 32,
-        borderRadius: 16,
+        borderRadius: 14,
         alignItems: 'center',
-        marginTop: 8,
+        marginTop: 12,
         width: '100%',
         justifyContent: 'center',
-        gap: 8,
     },
     verifyButtonText: {
         color: '#FFF',
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
         fontFamily: 'Lexend',
     },
     disclaimer: {
-        fontSize: 12,
-        color: AppColors.textquaternary,
+        fontSize: 11,
+        color: '#BBB',
         textAlign: 'center',
-        marginTop: 20,
+        marginTop: 16,
     },
 });

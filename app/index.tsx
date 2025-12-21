@@ -1,6 +1,6 @@
 
 import { useRouter, useFocusEffect } from 'expo-router';
-import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X, Shield } from 'lucide-react-native';
+import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X, Shield, Leaf, Eye, VolumeX } from 'lucide-react-native';
 import React, { useEffect, useCallback, useRef } from 'react';
 
 import {
@@ -304,35 +304,83 @@ export default function HomeScreen() {
     return (currentUser?.zenMode ?? settings.zenMode) || false;
   }, [currentUser, settings.zenMode]);
 
+  const isDyslexic = React.useMemo(() => {
+    const pref = currentUser?.fontPreference ?? settings.fontPreference ?? 'standard';
+    return pref === 'opendyslexic';
+  }, [currentUser, settings.fontPreference]);
+
+  const isMuted = React.useMemo(() => {
+    // Check global settings for sound
+    return settings.soundEnabled === false;
+  }, [settings.soundEnabled]);
+
   const missionTable = React.useMemo(() => {
-    // 1. Default: If no challenges completed, start with Table 1.
-    // Use challengesCompleted as the primary driver for "Mission" progress.
-    if (challengesCompleted === 0) {
-      return 1;
-    }
+    // ---------------------------------------------------------
+    // NEW ALGORITHM: PROGRESSION -> WEAKNESS -> MAINTENANCE
+    // ---------------------------------------------------------
 
-    // 2. Scenario: Challenges played -> Prioritize weakness (most errors / lowest score)
-    // We look at all tables that have been attempted to find the weak spot.
-    const tablesWithAttempts = progress.filter(p => p.totalAttempts > 0);
-
-    // If somehow we have challenges but no attempts recorded (edge case), default to 1.
-    if (tablesWithAttempts.length === 0) {
-      return 1;
-    }
-
-    let worstTable = tablesWithAttempts[0];
-    let worstRate = worstTable.correctAnswers / worstTable.totalAttempts;
-
-    for (const table of tablesWithAttempts) {
-      const rate = table.correctAnswers / table.totalAttempts;
-      // Find the lowest success rate
-      if (rate < worstRate || (rate === worstRate && table.totalAttempts < worstTable.totalAttempts)) {
-        worstRate = rate;
-        worstTable = table;
+    // 1. PROGRESSION: Find the first table (1-10) not yet mastered (e.g. < 3 stars)
+    // We want to guide the user linearly first.
+    // Note: We ignore tables > 10 for the main "Mission" flow to keep it simple for kids.
+    for (let i = 1; i <= 10; i++) {
+      const p = progress.find(prog => prog.tableNumber === i);
+      // If table doesn't exist in progress or stars < 3 (not mastered)
+      if (!p || p.starsEarned < 3) {
+        return i;
       }
     }
-    return worstTable.tableNumber;
-  }, [progress, challengesCompleted]);
+
+    // 2. CONSOLIDATION (Remediation): If all tables 1-10 are "mastered" (3+ stars),
+    // look for specific weaknesses based on success rate from Challenges/Practice.
+    const tablesWithAttempts = progress.filter(p => p.tableNumber >= 1 && p.tableNumber <= 10 && p.totalAttempts > 0);
+
+    // Threshold: 85% success rate. If below, it needs work.
+    let weakestTableValue = null;
+    let lowestRate = 1.0;
+
+    for (const p of tablesWithAttempts) {
+      const rate = p.correctAnswers / p.totalAttempts;
+      if (rate < 0.85) {
+        if (rate < lowestRate) {
+          lowestRate = rate;
+          weakestTableValue = p.tableNumber;
+        }
+      }
+    }
+
+    if (weakestTableValue !== null) {
+      return weakestTableValue;
+    }
+
+    // 3. MAINTENANCE (Spaced Repetition):
+    // If everything is mastered and solid (>85%), pick a table to review.
+    // Logic: 80% chance -> Least Recently Played. 20% chance -> Random.
+
+    // To make it deterministic for this render (so it doesn't flicker), use a pseudo-random
+    // based on something changing but stable for a session? Or just memoize well.
+    // Actually, simple randomness in Memo is fine as long as dependencies don't thrash.
+    // But dataVersion triggers re-runs.
+
+    const isRandomPick = Math.random() < 0.2;
+
+    if (isRandomPick) {
+      return Math.floor(Math.random() * 10) + 1;
+    } else {
+      // Find least recently practiced
+      // Sort by date. Oldest first.
+      const sortedByDate = [...tablesWithAttempts].sort((a, b) => {
+        if (!a.lastPracticed) return -1; // Never practiced comes first
+        if (!b.lastPracticed) return 1;
+        return new Date(a.lastPracticed).getTime() - new Date(b.lastPracticed).getTime();
+      });
+
+      if (sortedByDate.length > 0) {
+        return sortedByDate[0].tableNumber;
+      }
+    }
+
+    return 1; // Fallback
+  }, [progress, challengesCompleted, dataVersion]);
 
   const handleSettingsPressIn = () => {
 
@@ -449,6 +497,29 @@ export default function HomeScreen() {
                 <ThemedText style={styles.title}>Tables Magiques</ThemedText>
                 {currentUser && (
                   <ThemedText style={styles.userName}>Bonjour {currentUser.firstName} !</ThemedText>
+                )}
+
+                {(zenMode || isDyslexic || isMuted) && (
+                  <View style={styles.statusIndicators}>
+                    {zenMode && (
+                      <View style={[styles.statusBadge, { backgroundColor: '#E8F5E9', borderColor: '#C8E6C9' }]}>
+                        <Leaf size={14} color="#2E7D32" />
+                        <ThemedText style={[styles.statusText, { color: '#2E7D32' }]}>Zen</ThemedText>
+                      </View>
+                    )}
+                    {isDyslexic && (
+                      <View style={[styles.statusBadge, { backgroundColor: '#E3F2FD', borderColor: '#BBDEFB' }]}>
+                        <Eye size={14} color="#1565C0" />
+                        <ThemedText style={[styles.statusText, { color: '#1565C0' }]}>Dys</ThemedText>
+                      </View>
+                    )}
+                    {isMuted && (
+                      <View style={[styles.statusBadge, { backgroundColor: '#FFEBEE', borderColor: '#FFCDD2' }]}>
+                        <VolumeX size={14} color="#C62828" />
+                        <ThemedText style={[styles.statusText, { color: '#C62828' }]}>Muet</ThemedText>
+                      </View>
+                    )}
+                  </View>
                 )}
               </View>
               {!zenMode && (
@@ -1430,5 +1501,25 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: AppColors.textSecondary,
     fontWeight: '500' as const,
+  },
+  statusIndicators: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 8,
+    flexWrap: 'wrap',
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+    borderWidth: 1,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600' as const,
   },
 });

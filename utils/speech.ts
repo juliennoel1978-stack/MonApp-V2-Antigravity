@@ -1,96 +1,85 @@
+import * as Speech from 'expo-speech';
 import { Platform } from 'react-native';
-import { Audio as ExpoAudio } from 'expo-av';
 
-let currentSound: ExpoAudio.Sound | null = null;
-
-export async function speak(text: string) {
-  // Stop any current speech
-  await stop();
-
-  if (Platform.OS === 'web') {
-    // Web: Use SpeechSynthesis with careful voice selection
-    const textToSpeak = new SpeechSynthesisUtterance(text);
-
-    // Robust voice loading
-    let voices = window.speechSynthesis.getVoices();
-    if (voices.length === 0) {
-      // Force load attempt for Chrome
-      window.speechSynthesis.cancel();
-      voices = window.speechSynthesis.getVoices();
+export async function speak(text: string, gender: 'male' | 'female' = 'female', callbacks?: { onDone?: () => void; onStopped?: () => void }) {
+  // Always stop before speaking to prevent overlap and ensure zero latency feeling
+  // or simply because user might tap quickly "Replay"
+  try {
+    const isSpeaking = await Speech.isSpeakingAsync();
+    if (isSpeaking) {
+      await Speech.stop();
     }
 
-    // Try to find the best possible French voice
-    const bestVoice =
-      voices.find(v => v.lang.startsWith('fr') && v.name.includes('Google')) || // Best on Chrome
-      voices.find(v => v.lang.startsWith('fr') && v.name.includes('Thomas')) || // Good on Mac
-      voices.find(v => v.lang.startsWith('fr') && v.name.includes('Audrey')) || // Good on Mac
-      voices.find(v => v.lang.startsWith('fr') && v.name.includes('Premium')) || // Apple Premium
-      voices.find(v => v.lang.startsWith('fr')); // Fallback
+    // Default options for natural, pedagogical voice
+    const options: Speech.SpeechOptions = {
+      language: 'fr-FR',
+      pitch: 1.0,
+      rate: 0.9, // Slightly slower for clarity (kids/dyslexia)
+      onDone: callbacks?.onDone,
+      onStopped: callbacks?.onStopped,
+    };
 
-    if (bestVoice) {
-      // @ts-ignore
-      textToSpeak.voice = bestVoice;
-      // @ts-ignore
-      textToSpeak.lang = bestVoice.lang;
-      console.log('Selected voice:', bestVoice.name);
-    } else {
-      // @ts-ignore
-      textToSpeak.lang = 'fr-FR';
-    }
+    // Voice Selection Logic
+    if (Platform.OS !== 'web') {
+      try {
+        const voices = await Speech.getAvailableVoicesAsync();
+        const frenchVoices = voices.filter(v => v.language.includes('fr-FR') || v.language.includes('fr_FR'));
 
-    // Adjust rate and pitch for more natural sound
-    // @ts-ignore
-    textToSpeak.rate = 0.9; // Slightly slower is often more natural/authoritative
-    // @ts-ignore
-    textToSpeak.pitch = 1.0;
+        if (frenchVoices.length > 0) {
+          let selectedVoice = null;
 
-    // @ts-ignore
-    window.speechSynthesis.speak(textToSpeak);
-  } else {
-    // Native: Use expo-av
-    try {
-      await ExpoAudio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
-      });
+          // Heuristics for Male/Female names
+          const maleNames = ['Thomas', 'Martin', 'Daniel', 'Nicolas', 'Arthur', 'Paul', 'Louis', 'Fred'];
+          const femaleNames = ['Marie', 'Audrey', 'Aurélie', 'Aurelie', 'Sara', 'Céline', 'Celine', 'Alice', 'Amelie', 'Amélie', 'Sophie'];
 
-      // Use Google Translate TTS for a smoother, more natural voice on ALL platforms (including Web)
-      // This bypasses the robotic system voices.
-      const uri = `https://translate.google.com/translate_tts?ie=UTF-8&tl=fr&client=tw-ob&q=${encodeURIComponent(text)}`;
+          if (gender === 'male') {
+            selectedVoice = frenchVoices.find(v => maleNames.some(name => v.name.includes(name)));
+            if (!selectedVoice) {
+              // Fallback to any voice that doesn't sound explicitly female if possible, 
+              // or just picking a known male identifier if available on the system
+              selectedVoice = frenchVoices.find(v => v.name.includes('Siri') && v.name.includes('Voice 2')); // iOS often Male
+            }
+          } else {
+            selectedVoice = frenchVoices.find(v => femaleNames.some(name => v.name.includes(name)));
+            if (!selectedVoice) {
+              selectedVoice = frenchVoices.find(v => v.name.includes('Siri') && v.name.includes('Voice 1')); // iOS often Female
+            }
+          }
 
-      const { sound } = await ExpoAudio.Sound.createAsync(
-        { uri },
-        { shouldPlay: true }
-      );
-
-      currentSound = sound;
-
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded && status.didJustFinish) {
-          sound.unloadAsync();
-          if (currentSound === sound) {
-            currentSound = null;
+          // If we found a specific preferred voice, use it
+          if (selectedVoice) {
+            options.voice = selectedVoice.identifier;
+          } else if (gender === 'male') {
+            // Last ditch effort if we wanted male but didn't find known male name: 
+            // try to change pitch slightly deeper if we can't change voice? 
+            // expo-speech pitch 1.0 is normal. 0.8 is deeper.
+            options.pitch = 0.85;
           }
         }
-      });
-    } catch (error) {
-      console.error('Error playing audio:', error);
+      } catch (e) {
+        console.log("Could not select specific voice", e);
+      }
     }
+
+    // Web-specific tweaks if needed (SpeechSynthesis behaves differently with rate)
+    if (Platform.OS === 'web') {
+      // On some browsers, 0.9 might be too slow or fast depending on the implementation
+      // standard is 1.0. 0.9 is safe.
+      // We can try to pick a better voice on Web if desired, but expo-speech
+      // selects the default OS voice usually.
+    }
+
+    Speech.speak(text, options);
+
+  } catch (error) {
+    console.error('Error in speech utility:', error);
   }
 }
 
 export async function stop() {
-  if (Platform.OS === 'web') {
-    window.speechSynthesis.cancel();
-  } else {
-    if (currentSound) {
-      try {
-        await currentSound.stopAsync();
-        await currentSound.unloadAsync();
-      } catch (e) {
-        console.log('Error stopping sound', e);
-      }
-      currentSound = null;
-    }
+  try {
+    await Speech.stop();
+  } catch (error) {
+    console.error('Error stopping speech:', error);
   }
 }

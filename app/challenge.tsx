@@ -21,6 +21,7 @@ import { ChallengeResults } from '@/components/challenge/ChallengeResults';
 import { ChallengeQuestion } from '@/components/challenge/ChallengeQuestion';
 import { ChallengeFeedback } from '@/components/challenge/ChallengeFeedback';
 import { useChallengeGame } from '@/hooks/useChallengeGame';
+import { Keypad } from '@/components/Keypad';
 
 const { width } = Dimensions.get('window');
 
@@ -139,13 +140,23 @@ export default function ChallengeScreen() {
     );
   }
 
+  const onKeyPress = (key: string) => {
+    if (userAnswer.length < 6) { // Limit length
+      setUserAnswer(userAnswer + key);
+    }
+  };
+
+  const onDelete = () => {
+    setUserAnswer(userAnswer.slice(0, -1));
+  };
+
   if (!currentQuestion) {
     return null;
   }
 
   return (
     <View style={styles.backgroundContainer}>
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <BadgeOverlay
           visible={showBadgeOverlay}
           currentReward={currentReward}
@@ -191,58 +202,50 @@ export default function ChallengeScreen() {
           );
         })()}
 
-        <KeyboardAvoidingView
-          style={styles.keyboardAvoid}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            bounces={false}
-          >
+        {/* Main Content Split: Top Part (Questions/Feedback) + Bottom Part (Keypad) */}
+        <View style={{ flex: 1, width: '100%', alignItems: 'center' }}>
 
-            <ChallengeFeedback
-              showCelebration={showCelebration}
-              celebrationAnim={celebrationAnim}
-              showFeedback={showFeedback}
-              scaleAnim={scaleAnim}
-              isCorrect={isCorrect}
-              isTimeout={isTimeout}
-              currentUser={currentUser}
-              timerDisplayMode={currentUser?.timerSettings?.displayMode ?? settings.timerDisplayMode}
-              showCorrectAnswer={showCorrectAnswer}
-              currentQuestion={currentQuestion}
-              attempts={attempts}
-              currentCorrectPhrase={currentCorrectPhrase}
-              currentErrorPhrase={currentErrorPhrase}
-            />
+          <ChallengeFeedback
+            showCelebration={showCelebration}
+            celebrationAnim={celebrationAnim}
+            showFeedback={showFeedback}
+            scaleAnim={scaleAnim}
+            isCorrect={isCorrect}
+            isTimeout={isTimeout}
+            currentUser={currentUser}
+            timerDisplayMode={currentUser?.timerSettings?.displayMode ?? settings.timerDisplayMode}
+            showCorrectAnswer={showCorrectAnswer}
+            currentQuestion={currentQuestion}
+            attempts={attempts}
+            currentCorrectPhrase={currentCorrectPhrase}
+            currentErrorPhrase={currentErrorPhrase}
+          />
 
-            {!showCelebration && currentQuestion && (
-              <>
-                {!showFeedback && (
-                  <ChallengeQuestion
-                    ref={inputRef}
-                    question={currentQuestion}
-                    userAnswer={userAnswer}
-                    setUserAnswer={setUserAnswer}
-                    showCorrectAnswer={showCorrectAnswer}
-                  />
-                )}
+          {!showCelebration && currentQuestion && (
+            <View style={{ width: '100%', alignItems: 'center', paddingHorizontal: 20 }}>
+              {/* We pass a stripped down set of props since we handle input via Keypad */}
+              {!showFeedback && (
+                <ChallengeQuestion
+                  ref={inputRef}
+                  question={currentQuestion}
+                  userAnswer={userAnswer}
+                  setUserAnswer={() => { }} // No-op, managed by Keypad
+                  showCorrectAnswer={showCorrectAnswer}
+                />
+              )}
+            </View>
+          )}
+        </View>
 
-                {!showFeedback && (
-                  <TouchableOpacity
-                    style={styles.submitButton}
-                    onPress={checkAnswer}
-                    testID="submit-button"
-                  >
-                    <ThemedText style={styles.submitButtonText}>Valider</ThemedText>
-                  </TouchableOpacity>
-                )}
-              </>
-            )}
-          </ScrollView>
-        </KeyboardAvoidingView>
+        {/* BOTTOM KEYPAD ZONE */}
+        {!showCelebration && !showFeedback && currentQuestion && (
+          <Keypad
+            onKeyPress={onKeyPress}
+            onDelete={onDelete}
+            onSubmit={checkAnswer}
+            color={AppColors.primary}
+          />
+        )}
       </SafeAreaView>
     </View>
   );
