@@ -10,8 +10,6 @@ import {
   TouchableOpacity,
   Animated,
   Dimensions,
-  TextInput,
-  KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from 'react-native';
@@ -233,7 +231,6 @@ export default function PracticeScreen() {
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const fadeAnim = useRef(new Animated.Value(1)).current;
-  const inputRef = useRef<TextInput>(null);
   const isMounted = useRef(true);
 
   // Silent Data Collection Refs
@@ -322,6 +319,74 @@ export default function PracticeScreen() {
   const tableColor = NumberColors[table.number as keyof typeof NumberColors];
   const currentQuestion = questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+
+  /* Moved helper functions to top to avoid ReferenceErrors */
+
+  const finishLevel = (finalCorrectCount: number) => {
+    if (isReviewMode) {
+      setIsReviewMode(false);
+
+      if (reviewErrors.length > 0) {
+        setQuestionsToReview([...reviewErrors]);
+        setReviewErrors([]);
+        setQuestions([...reviewErrors]);
+        setCurrentQuestionIndex(0);
+        setSelectedAnswer(null);
+        setUserInput('');
+        setIsCorrect(null);
+        setCorrectCount(0);
+        setShowResult(false);
+        setIsReviewMode(true);
+      } else {
+        setQuestionsToReview([]);
+        if (level === 1 && level1Highscore >= 8) {
+          setCorrectCount(level1Highscore);
+          setShowLevelTransition(true);
+        } else {
+          setShowResult(true);
+        }
+      }
+      return;
+    }
+
+    const averageTime = questions.length > 0 ? Math.round(totalTimeRef.current / questions.length) : 0;
+
+    if (level === 1) {
+      if (finalCorrectCount >= 8) {
+        updateTableProgress(table.number, finalCorrectCount, questions.length, finalCorrectCount === 10 ? 2 : 1, 1, averageTime);
+        if (finalCorrectCount === 10) setQuestionsToReview([]);
+        vibrate('heavy');
+        setLevel1Highscore(finalCorrectCount);
+        setShowLevelTransition(true);
+      } else {
+        setShowResult(true);
+      }
+    } else {
+      const totalCorrectLevel2 = finalCorrectCount;
+      let stars = 1;
+      updateTableProgress(table.number, totalCorrectLevel2, questions.length, stars, 2, averageTime);
+      if (stars >= 4) {
+        unlockBadge('perfect_score');
+        playSound('mastery');
+      }
+      if (stars >= 3) vibrate('heavy');
+      if (currentQuestionIndex === 0) unlockBadge('first_table');
+      setShowResult(true);
+    }
+  };
+
+  const nextQuestion = (currentCorrectCount: number) => {
+    if (currentQuestionIndex < questions.length - 1) {
+      fadeAnim.setValue(0);
+      setSelectedAnswer(null);
+      setUserInput('');
+      setIsCorrect(null);
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }).start();
+    } else {
+      finishLevel(currentCorrectCount);
+    }
+  };
 
   const speakCorrection = (question: Question) => {
     // We also respect local toggle for correction
@@ -543,108 +608,7 @@ export default function PracticeScreen() {
     ]).start();
   };
 
-  const nextQuestion = (currentCorrectCount: number) => {
-    if (currentQuestionIndex < questions.length - 1) {
-      fadeAnim.setValue(0);
-      setSelectedAnswer(null);
-      setUserInput('');
-      setIsCorrect(null);
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
 
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-
-      if (level === 2) {
-        setTimeout(() => {
-          inputRef.current?.focus();
-        }, 350);
-      }
-    } else {
-      finishLevel(currentCorrectCount);
-    }
-  };
-
-  const finishLevel = (finalCorrectCount: number) => {
-    if (isReviewMode) {
-      setIsReviewMode(false);
-
-      if (reviewErrors.length > 0) {
-        setQuestionsToReview([...reviewErrors]);
-        setReviewErrors([]);
-        setQuestions([...reviewErrors]);
-        setCurrentQuestionIndex(0);
-        setSelectedAnswer(null);
-        setUserInput('');
-        setIsCorrect(null);
-        setCorrectCount(0);
-        setShowResult(false);
-        setIsReviewMode(true);
-
-        if (level === 2) {
-          setTimeout(() => {
-            if (isMounted.current) {
-              inputRef.current?.focus();
-            }
-          }, 500);
-        }
-      } else {
-        // Review finished with NO more errors (all corrected)
-        setQuestionsToReview([]);
-
-        // RESTORATION LOGIC:
-        // If we were in Level 1 and qualified for Level 2 (score >= 8), 
-        // restore the Transition screen instead of generic result.
-        if (level === 1 && level1Highscore >= 8) {
-          // Restore the high score for visual stars display
-          setCorrectCount(level1Highscore);
-          setShowLevelTransition(true);
-        } else {
-          setShowResult(true);
-        }
-      }
-      return;
-    }
-
-    const averageTime = questions.length > 0 ? Math.round(totalTimeRef.current / questions.length) : 0;
-
-    if (level === 1) {
-      if (finalCorrectCount >= 8) {
-        updateTableProgress(table.number, finalCorrectCount, questions.length, finalCorrectCount === 10 ? 2 : 1, 1, averageTime);
-        if (finalCorrectCount === 10) setQuestionsToReview([]);
-        vibrate('heavy'); // Celebrate passing level 1
-        setLevel1Highscore(finalCorrectCount);
-        setShowLevelTransition(true);
-      } else {
-        setShowResult(true);
-      }
-    } else {
-      const totalCorrectLevel2 = finalCorrectCount;
-      let stars = 1;
-      if (totalCorrectLevel2 === 10) stars = 4;
-      else if (totalCorrectLevel2 >= 8) stars = 3;
-      else if (totalCorrectLevel2 >= 5) stars = 2;
-
-      updateTableProgress(table.number, totalCorrectLevel2, questions.length, stars, 2, averageTime);
-
-      if (stars >= 4) {
-        unlockBadge('perfect_score');
-        playSound('mastery');
-      }
-
-      if (stars >= 3) { // 8/10 or better
-        vibrate('heavy'); // Celebrate passing level 2
-      }
-
-      if (currentQuestionIndex === 0) {
-        unlockBadge('first_table');
-      }
-
-      setShowResult(true);
-    }
-  };
 
   const startLevel2 = () => {
     setLevel(2);
@@ -660,11 +624,6 @@ export default function PracticeScreen() {
     setReviewErrors([]);
     setStreak(0); // Reset streak when starting a new level
 
-    setTimeout(() => {
-      if (isMounted.current) {
-        inputRef.current?.focus();
-      }
-    }, 500);
   };
 
   const retry = () => {
@@ -681,13 +640,6 @@ export default function PracticeScreen() {
     setReviewErrors([]);
     setStreak(0); // Reset streak on retry
 
-    if (level === 2) {
-      setTimeout(() => {
-        if (isMounted.current) {
-          inputRef.current?.focus();
-        }
-      }, 500);
-    }
   };
 
   const startReview = () => {
@@ -705,13 +657,6 @@ export default function PracticeScreen() {
     setShowLevelTransition(false);
     setStreak(0); // Reset streak on starting review
 
-    if (level === 2) {
-      setTimeout(() => {
-        if (isMounted.current) {
-          inputRef.current?.focus();
-        }
-      }, 500);
-    }
   };
 
   const handleHomePress = () => {

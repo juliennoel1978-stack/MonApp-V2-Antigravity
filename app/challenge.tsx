@@ -5,8 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Animated,
 } from 'react-native';
@@ -106,7 +104,6 @@ export default function ChallengeScreen() {
     showMidBoost,
 
     // Refs & Anims
-    inputRef,
     scaleAnim,
     celebrationAnim,
 
@@ -226,7 +223,6 @@ export default function ChallengeScreen() {
               {/* We pass a stripped down set of props since we handle input via Keypad */}
               {!showFeedback && (
                 <ChallengeQuestion
-                  ref={inputRef}
                   question={currentQuestion}
                   userAnswer={userAnswer}
                   setUserAnswer={() => { }} // No-op, managed by Keypad

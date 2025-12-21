@@ -76,7 +76,6 @@ export const ChallengeResults = ({
             vibrate('heavy');
 
             if (bestTable > 0) {
-                console.log('🏆 UI-Driven Save: Updating Strongest Table to', bestTable);
                 updateStrongestTable(bestTable);
             }
         }

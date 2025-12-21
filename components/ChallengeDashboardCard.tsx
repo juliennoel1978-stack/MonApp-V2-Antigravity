@@ -177,7 +177,6 @@ export default function ChallengeDashboardCard({
   gender,
   onPressLevel,
 }: ChallengeDashboardCardProps) {
-  console.log('[ChallengeDashboardCard RENDER] challenges:', totalChallengesCompleted, 'badge:', currentBadge?.title, 'streak:', bestStreak);
   const { width } = useWindowDimensions();
   const isSmallScreen = useMemo(() => width < 375, [width]);
 
@@ -195,14 +194,6 @@ export default function ChallengeDashboardCard({
 
   const hasMaxBadge = !nextBadgeThreshold || remaining <= 0;
   const isZeroState = totalChallengesCompleted === 0;
-
-  console.log('[ChallengeDashboardCard] Progress calculation:', {
-    totalChallengesCompleted,
-    nextBadgeThreshold,
-    remaining,
-    progressPercent: progressPercent.toFixed(1) + '%',
-    isZeroState,
-  });
 
   const getProgressMessage = (): string => {
     if (hasMaxBadge) {

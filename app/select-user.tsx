@@ -21,17 +21,14 @@ export default function SelectUserScreen() {
   const router = useRouter();
   const { users, selectUser, clearCurrentUser } = useApp();
 
-  console.log('🎭 SelectUserScreen - Users available:', users.length);
-  users.forEach(u => console.log('  - User:', u.firstName, u.id));
+
 
   const handleSelectUser = async (userId: string) => {
-    console.log('👉 Selecting user:', userId);
     await selectUser(userId);
     router.replace('/' as any);
   };
 
   const handleGuestMode = async () => {
-    console.log('👉 Selecting guest mode');
     await clearCurrentUser();
     router.replace('/' as any);
   };

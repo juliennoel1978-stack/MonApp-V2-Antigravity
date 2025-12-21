@@ -208,9 +208,7 @@ export default function UserFormScreen() {
           fontPreference,
           zenMode,
         });
-        console.log('👤 New user created:', newUser.id, newUser.firstName);
         await selectUser(newUser.id);
-        console.log('✅ New user selected automatically');
         router.replace('/' as any);
       }
     } catch (error) {

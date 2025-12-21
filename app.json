@@ -4,7 +4,7 @@
     "slug": "tables-magiques-apprendre-les-multiplications-autrement",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.jpg",
+    "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -27,10 +27,10 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.jpg",
+        "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "app.rork.tables-magiques-apprendre-les-multiplications-autrement",
+      "package": "app.rork.tablesmagiques",
       "permissions": [
         "RECORD_AUDIO",
         "CAMERA",

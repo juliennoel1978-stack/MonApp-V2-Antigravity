@@ -1,5 +1,5 @@
-import React, { forwardRef } from 'react';
-import { View, TextInput, StyleSheet, Dimensions, Platform } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import { ThemedText } from '../ThemedText';
 import { AppColors } from '@/constants/colors';
 
@@ -14,31 +14,28 @@ type ChallengeQuestionProps = {
     showCorrectAnswer: boolean;
 };
 
-export const ChallengeQuestion = forwardRef<TextInput, ChallengeQuestionProps>(
-    ({ question, userAnswer, showCorrectAnswer }, ref) => {
-        return (
-            <>
-                <View style={styles.questionCard}>
-                    <ThemedText style={styles.questionText}>
-                        {question.displayText}
-                    </ThemedText>
-                </View>
+export const ChallengeQuestion = ({ question, userAnswer, showCorrectAnswer }: ChallengeQuestionProps) => {
+    return (
+        <>
+            <View style={styles.questionCard}>
+                <ThemedText style={styles.questionText}>
+                    {question.displayText}
+                </ThemedText>
+            </View>
 
-                <View style={styles.inputContainer}>
-                    <View style={styles.inputLike}>
-                        {userAnswer ? (
-                            <ThemedText style={styles.inputText}>{userAnswer}</ThemedText>
-                        ) : (
-                            <ThemedText style={styles.placeholder}>Ta réponse</ThemedText>
-                        )}
-                        {!showCorrectAnswer && <View style={styles.cursor} />}
-                    </View>
+            <View style={styles.inputContainer}>
+                <View style={styles.inputLike}>
+                    {userAnswer ? (
+                        <ThemedText style={styles.inputText}>{userAnswer}</ThemedText>
+                    ) : (
+                        <ThemedText style={styles.placeholder}>Ta réponse</ThemedText>
+                    )}
+                    {!showCorrectAnswer && <View style={styles.cursor} />}
                 </View>
-            </>
-        );
-    }
-);
-ChallengeQuestion.displayName = 'ChallengeQuestion';
+            </View>
+        </>
+    );
+};
 
 const styles = StyleSheet.create({
     questionCard: {

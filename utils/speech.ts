@@ -57,7 +57,7 @@ export async function speak(text: string, gender: 'male' | 'female' = 'female', 
           }
         }
       } catch (e) {
-        console.log("Could not select specific voice", e);
+        // Ignore voice selection error
       }
     }
 

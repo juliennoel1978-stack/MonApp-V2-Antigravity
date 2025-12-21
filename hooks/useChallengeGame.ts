@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Animated, TextInput } from 'react-native';
+import { Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useApp } from '@/contexts/AppContext';
 import { checkForRewards } from '@/utils/rewardQueue';
@@ -98,7 +98,6 @@ export const useChallengeGame = () => {
     const [pendingReviewStart, setPendingReviewStart] = useState<boolean>(false);
 
     const pendingWrongAnswersRef = useRef<{ num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]>([]);
-    const inputRef = useRef<TextInput>(null);
     const tableStatsRef = useRef<Record<number, { correct: number; total: number }>>({}); // Ref for fresh access
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const isMounted = useRef(true);
@@ -196,11 +195,6 @@ export const useChallengeGame = () => {
             : (settings.timerEnabled ? settings.timerDuration : 0);
         setTimeRemaining(duration);
 
-        setTimeout(() => {
-            if (isMounted.current) {
-                inputRef.current?.focus();
-            }
-        }, 100);
     }, [settings.timerDuration, settings.timerEnabled, currentUser, isReviewMode, reviewQuestions, totalQuestions]);
 
     // Initial question generation
@@ -276,17 +270,14 @@ export const useChallengeGame = () => {
         let bestTableRate = -1; // Scores (number of correct answers) are stored here for ranking
 
 
-        console.log('🏁 handleChallengeEnd: Analyzing stats:', JSON.stringify(currentStats));
+
 
         // NOTE: Strongest Table calculation and saving is now handled by the ChallengeResults component
         // to ensure that the value displayed to the user is exactly the one that is persisted.
         // This prevents logic mismatch bugs.
 
         if (tableUpdates.length > 0) {
-            console.log('💾 Saving table stats:', tableUpdates);
             await batchUpdateTableProgress(tableUpdates);
-        } else {
-            console.log('⚠️ No table stats to save this run.');
         }
 
         const badgeTheme = currentUser?.badgeTheme || settings.badgeTheme || 'space';
@@ -380,11 +371,6 @@ export const useChallengeGame = () => {
             : (settings.timerEnabled ? settings.timerDuration : 0);
         setTimeRemaining(duration);
 
-        setTimeout(() => {
-            if (isMounted.current) {
-                inputRef.current?.focus();
-            }
-        }, 100);
     }, [currentUser, settings]);
 
     const getAchievementIdFromTitle = (title: string): string => {
@@ -437,15 +423,12 @@ export const useChallengeGame = () => {
     }, [rewardQueue, currentReward, pendingBadge, pendingAchievements, addPersistenceBadge, addAchievement, pendingReviewStart, startReviewMode]);
 
     const handleReviewErrors = useCallback(() => {
-        console.log('🔄 handleReviewErrors called. Wrong answers count:', wrongAnswers.length);
-
         if (!wrongAnswers || wrongAnswers.length === 0) {
-            console.warn('⚠️ No wrong answers to review (or array is empty).');
             return;
         }
 
         // Unconditionally start review mode as requested
-        console.log('🔄 Starting review directly. Questions:', wrongAnswers);
+        // Unconditionally start review mode as requested
         startReviewMode([...wrongAnswers]);
     }, [wrongAnswers, startReviewMode]);
 
@@ -675,7 +658,6 @@ export const useChallengeGame = () => {
         anonymousChallengesCompleted,
 
         // Refs & Anims
-        inputRef,
         scaleAnim,
         celebrationAnim,
 

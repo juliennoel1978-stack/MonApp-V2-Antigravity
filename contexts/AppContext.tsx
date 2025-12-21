@@ -381,10 +381,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
 
     if (hasChanges) {
-      console.log('💾 batchUpdateTableProgress: Saving progress to storage', newProgress.filter(p => p.totalAttempts > 0));
       await saveProgress(newProgress);
-    } else {
-      console.log('⚠️ batchUpdateTableProgress: No changes detected');
     }
     return newProgress;
   }, [saveProgress]);
@@ -724,7 +721,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         const currentUsrs = usersRef.current;
 
         if (currentU) {
-          console.log(`Force update lastSessionBestTable from ${currentU.lastSessionBestTable} to ${tableNumber}`);
+
           // Update BOTH strongestTable (legacy/backup) and lastSessionBestTable (snapshot display)
           // The user specifically requested lastSessionBestTable for the Home display.
           const updatedUser = {

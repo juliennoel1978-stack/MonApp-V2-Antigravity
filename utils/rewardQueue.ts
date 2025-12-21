@@ -1,15 +1,15 @@
-import type { 
-  QueuedReward, 
-  UnlockedAchievement, 
-  BadgeTheme, 
-  PersistenceBadge 
+import type {
+  QueuedReward,
+  UnlockedAchievement,
+  BadgeTheme,
+  PersistenceBadge
 } from '@/types';
 import { checkForNewBadge, getNextBadgeInfo, type UnlockedBadge } from '@/constants/badges';
-import { 
-  getAchievementById, 
-  isAchievementUnlocked, 
+import {
+  getAchievementById,
+  isAchievementUnlocked,
   canUnlockRecurringAchievement,
-  getDistinctPlayDaysThisWeek 
+  getDistinctPlayDaysThisWeek
 } from '@/constants/achievements';
 
 export interface ChallengeContext {
@@ -41,15 +41,6 @@ export const checkForRewards = (context: ChallengeContext): RewardCheckResult =>
   const newAchievements: UnlockedAchievement[] = [];
   let newBadge: UnlockedBadge | null = null;
 
-  console.log('🎁 Checking rewards with context:', {
-    totalChallenges: context.totalChallengesCompleted,
-    theme: context.badgeTheme,
-    existingBadges: context.existingBadges.length,
-    existingAchievements: context.existingAchievements.length,
-    timerEnabled: context.timerEnabled,
-    scorePercent: context.scorePercent,
-  });
-
   const { newBadge: levelBadge, badgeConfig } = checkForNewBadge(
     context.totalChallengesCompleted,
     context.badgeTheme,
@@ -58,9 +49,8 @@ export const checkForRewards = (context: ChallengeContext): RewardCheckResult =>
   );
 
   if (levelBadge && badgeConfig) {
-    console.log('🏅 Level badge unlocked:', levelBadge.title);
     newBadge = levelBadge;
-    
+
     const nextBadge = getNextBadgeInfo(
       context.totalChallengesCompleted,
       context.badgeTheme,
@@ -81,7 +71,6 @@ export const checkForRewards = (context: ChallengeContext): RewardCheckResult =>
   if (context.timerEnabled) {
     const timeMasterAchievement = getAchievementById('time_master');
     if (timeMasterAchievement && !isAchievementUnlocked('time_master', context.existingAchievements)) {
-      console.log('⏱️ Time master achievement unlocked!');
       const achievement: UnlockedAchievement = {
         id: 'time_master',
         unlockedAt: new Date().toISOString(),
@@ -103,7 +92,6 @@ export const checkForRewards = (context: ChallengeContext): RewardCheckResult =>
   if (context.scorePercent === 100) {
     const perfectScoreAchievement = getAchievementById('perfect_score');
     if (perfectScoreAchievement && canUnlockRecurringAchievement('perfect_score', context.existingAchievements)) {
-      console.log('🎯 Perfect score achievement unlocked!');
       const achievement: UnlockedAchievement = {
         id: 'perfect_score',
         unlockedAt: new Date().toISOString(),
@@ -128,7 +116,6 @@ export const checkForRewards = (context: ChallengeContext): RewardCheckResult =>
   if (hour < 10) {
     const earlyBirdAchievement = getAchievementById('early_bird');
     if (earlyBirdAchievement && canUnlockRecurringAchievement('early_bird', context.existingAchievements)) {
-      console.log('🌅 Early bird achievement unlocked!');
       const achievement: UnlockedAchievement = {
         id: 'early_bird',
         unlockedAt: new Date().toISOString(),
@@ -150,7 +137,6 @@ export const checkForRewards = (context: ChallengeContext): RewardCheckResult =>
   if (hour >= 19) {
     const nightOwlAchievement = getAchievementById('night_owl');
     if (nightOwlAchievement && canUnlockRecurringAchievement('night_owl', context.existingAchievements)) {
-      console.log('🦉 Night owl achievement unlocked!');
       const achievement: UnlockedAchievement = {
         id: 'night_owl',
         unlockedAt: new Date().toISOString(),
@@ -172,13 +158,13 @@ export const checkForRewards = (context: ChallengeContext): RewardCheckResult =>
   const todayStr = new Date().toISOString();
   const updatedPlayDates = [...context.playDates, todayStr];
   const distinctDays = getDistinctPlayDaysThisWeek(updatedPlayDates);
-  
+
   if (distinctDays >= 3) {
     const regularPlayerAchievement = getAchievementById('regular_player');
     if (regularPlayerAchievement) {
       const existing = context.existingAchievements.find(a => a.id === 'regular_player');
       const lastUnlocked = existing?.lastUnlockedAt || existing?.unlockedAt;
-      
+
       let shouldUnlock = false;
       if (!existing) {
         shouldUnlock = true;
@@ -188,9 +174,8 @@ export const checkForRewards = (context: ChallengeContext): RewardCheckResult =>
         const currentWeekStart = getWeekStartForDate(new Date());
         shouldUnlock = lastWeekStart.getTime() !== currentWeekStart.getTime();
       }
-      
+
       if (shouldUnlock) {
-        console.log('📅 Regular player achievement unlocked!');
         const achievement: UnlockedAchievement = {
           id: 'regular_player',
           unlockedAt: new Date().toISOString(),
@@ -212,11 +197,6 @@ export const checkForRewards = (context: ChallengeContext): RewardCheckResult =>
 
   queue.sort((a, b) => a.priority - b.priority);
 
-  console.log('🎁 Reward queue built:', queue.length, 'items');
-  queue.forEach((item, idx) => {
-    console.log(`  ${idx + 1}. ${item.type}: ${item.title}`);
-  });
-
   return {
     queue,
     newBadge,
@@ -229,7 +209,6 @@ export const checkStrategistAchievement = (
 ): QueuedReward | null => {
   const strategistAchievement = getAchievementById('strategist');
   if (strategistAchievement && !isAchievementUnlocked('strategist', existingAchievements)) {
-    console.log('🔎 Strategist achievement unlocked!');
     return {
       type: 'achievement',
       priority: PRIORITY.ONE_SHOT_ACHIEVEMENT,
