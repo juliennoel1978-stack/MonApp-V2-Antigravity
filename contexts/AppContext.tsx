@@ -51,7 +51,7 @@ const INITIAL_PROGRESS: UserProgress[] = MULTIPLICATION_TABLES.map(table => ({
 }));
 
 export const [AppProvider, useApp] = createContextHook(() => {
-  const [progress, setProgress] = useState<UserProgress[]>(INITIAL_PROGRESS);
+  const [progress, setProgress] = useState<UserProgress[]>(() => INITIAL_PROGRESS.map(p => ({ ...p })));
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [badges, setBadges] = useState<Badge[]>(INITIAL_BADGES);
   const [totalStars, setTotalStars] = useState(0);
@@ -166,15 +166,11 @@ export const [AppProvider, useApp] = createContextHook(() => {
       if (usersData) {
         const parsedUsers = JSON.parse(usersData);
 
-        parsedUsers.forEach((u: User, idx: number) => {
 
-        });
 
         const validUsers = parsedUsers.filter((u: User) => {
           const isValid = u && u.id && u.firstName && u.gender && u.age && u.grade && u.createdAt && u.progress;
-          if (!isValid) {
 
-          }
           return isValid;
         });
 
@@ -336,7 +332,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
           correctAnswers: p.correctAnswers + correct,
           totalAttempts: p.totalAttempts + total,
           starsEarned: Math.max(p.starsEarned, stars),
-          completed: stars >= 3,
+          completed: p.completed || stars >= 3,
           lastPracticed: new Date().toISOString(),
           averageTime: newAverageTime,
         };
@@ -415,7 +411,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         STORAGE_KEYS.ANONYMOUS_BADGES,
         STORAGE_KEYS.ANONYMOUS_BEST_STREAK,
       ]);
-      setProgress(INITIAL_PROGRESS);
+      setProgress(INITIAL_PROGRESS.map(p => ({ ...p })));
       setBadges(INITIAL_BADGES);
       setTotalStars(0);
       setAnonymousChallengesCompleted(0);
@@ -449,7 +445,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       ...user,
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
-      progress: INITIAL_PROGRESS,
+      progress: INITIAL_PROGRESS.map(p => ({ ...p })),
       lastSessionBestTable: 0,
     };
     const updatedUsers = [...users, newUser];
@@ -507,14 +503,17 @@ export const [AppProvider, useApp] = createContextHook(() => {
         const prog = JSON.parse(progressData);
         setProgress(prog);
         progressRef.current = prog;
+        progressRef.current = prog;
       } else {
-        setProgress(INITIAL_PROGRESS);
-        progressRef.current = INITIAL_PROGRESS;
+        const resetProg = INITIAL_PROGRESS.map(p => ({ ...p }));
+        setProgress(resetProg);
+        progressRef.current = resetProg;
       }
     } catch (error) {
       console.error('Error clearing current user:', error);
-      setProgress(INITIAL_PROGRESS);
-      progressRef.current = INITIAL_PROGRESS;
+      const resetProg = INITIAL_PROGRESS.map(p => ({ ...p }));
+      setProgress(resetProg);
+      progressRef.current = resetProg;
     }
   }, []);
 

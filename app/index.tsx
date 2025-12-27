@@ -34,33 +34,12 @@ export default function HomeScreen() {
   const [showParentGate, setShowParentGate] = React.useState(false);
   const tablesModalOpacity = React.useRef(new Animated.Value(0)).current;
   const tablesModalScale = React.useRef(new Animated.Value(0.9)).current;
-  const [dataVersion, setDataVersion] = React.useState(0);
+
   const [showFirstLaunchModal, setShowFirstLaunchModal] = React.useState(false);
   const hasCheckedFirstLaunch = useRef(false);
-  const lastFocusTime = useRef(0);
 
-  useFocusEffect(
-    useCallback(() => {
-      const now = Date.now();
-      if (now - lastFocusTime.current < 500) {
 
-        return;
-      }
-      lastFocusTime.current = now;
 
-      // RELOAD DATA REMOVED: Rely on Context State which is fresh. 
-      // reloadData() causes race conditions if storage write is lagging behind memory update.
-      // reloadData(); 
-
-      setTimeout(() => {
-        setDataVersion(prev => {
-          const newVersion = prev + 1;
-
-          return newVersion;
-        });
-      }, 100);
-    }, []) // Removed reloadData from deps to be safe, or just leave empty deps as it is a callback.
-  );
 
 
   const scaleAnim = React.useRef(new Animated.Value(0)).current;
@@ -227,25 +206,25 @@ export default function HomeScreen() {
     const value = currentUser?.challengesCompleted || anonymousChallengesCompleted;
 
     return value;
-  }, [currentUser?.challengesCompleted, anonymousChallengesCompleted, dataVersion]);
+  }, [currentUser?.challengesCompleted, anonymousChallengesCompleted]);
 
   const badgeTheme = React.useMemo(() => {
     return currentUser?.badgeTheme || settings.badgeTheme || 'space';
-  }, [currentUser, settings.badgeTheme, dataVersion]);
+  }, [currentUser, settings.badgeTheme]);
 
   const gender = React.useMemo(() => {
     return currentUser?.gender;
-  }, [currentUser, dataVersion]);
+  }, [currentUser]);
 
   const persistenceBadges = React.useMemo(() => {
     return getPersistenceBadges();
-  }, [getPersistenceBadges, dataVersion]);
+  }, [getPersistenceBadges]);
 
   const bestStreak = React.useMemo(() => {
     const value = getBestStreak();
 
     return value;
-  }, [getBestStreak, dataVersion, currentUser?.bestStreak, anonymousChallengesCompleted]);
+  }, [getBestStreak, currentUser?.bestStreak, anonymousChallengesCompleted]);
 
 
 
@@ -279,7 +258,7 @@ export default function HomeScreen() {
       }
     }
     return lastEarnedBadge;
-  }, [challengesCompleted, badgeTheme, gender, persistenceBadges, dataVersion]);
+  }, [challengesCompleted, badgeTheme, gender, persistenceBadges]);
 
   const nextBadgeThreshold = React.useMemo(() => {
     for (const threshold of BADGE_THRESHOLDS) {
@@ -380,7 +359,7 @@ export default function HomeScreen() {
     }
 
     return 1; // Fallback
-  }, [progress, challengesCompleted, dataVersion]);
+  }, [progress, challengesCompleted]);
 
   const handleSettingsPressIn = () => {
 
@@ -607,7 +586,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
 
             <ChallengeDashboardCard
-              key={`challenge - card - ${dataVersion} `}
+
               theme={badgeTheme}
               currentBadge={currentBadgeData}
               nextBadgeThreshold={nextBadgeThreshold}

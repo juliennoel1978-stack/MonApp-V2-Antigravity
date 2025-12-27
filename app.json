@@ -2,7 +2,7 @@
   "expo": {
     "name": "Tables Magiques – Apprendre les multiplications autrement",
     "slug": "tables-magiques-apprendre-les-multiplications-autrement",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -16,13 +16,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.rork.tables-magiques-apprendre-les-multiplications-autrement",
+      "buildNumber": "2",
       "infoPlist": {
-        "UIBackgroundModes": [
-          "audio"
-        ],
-        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
+        "UIBackgroundModes": [],
         "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
-        "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera"
+        "NSCameraUsageDescription": "Cette application utilise la caméra pour vous permettre de prendre une photo de profil."
       }
     },
     "android": {
@@ -31,8 +29,8 @@
         "backgroundColor": "#ffffff"
       },
       "package": "app.rork.tablesmagiques",
+      "versionCode": 2,
       "permissions": [
-        "RECORD_AUDIO",
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE"
@@ -46,12 +44,6 @@
         "expo-router",
         {
           "origin": "https://rork.com/"
-        }
-      ],
-      [
-        "expo-av",
-        {
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone"
         }
       ],
       [

@@ -64,6 +64,9 @@ export const useChallengeGame = () => {
     const { playSound } = useAudio();
     const { vibrate } = useHaptics();
 
+    // Define Zen Mode early for use in effects
+    const zenMode = (currentUser?.zenMode ?? settings.zenMode) || false;
+
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
     const [userAnswer, setUserAnswer] = useState<string>('');
     const [attempts, setAttempts] = useState<number>(0);
@@ -217,7 +220,8 @@ export const useChallengeGame = () => {
             clearInterval(timerRef.current);
         }
 
-        if (timerEnabled && timerDuration > 0 && !showFeedback && !showCelebration && !showMidBoost && currentQuestion) {
+        // Force disable timer in Zen Mode
+        if (!zenMode && timerEnabled && timerDuration > 0 && !showFeedback && !showCelebration && !showMidBoost && currentQuestion) {
             timerRef.current = setInterval(() => {
                 setTimeRemaining(prev => {
                     if (prev <= 1) {
@@ -242,7 +246,7 @@ export const useChallengeGame = () => {
                 }
             };
         }
-    }, [currentQuestion, showFeedback, showCelebration, showMidBoost, settings.timerEnabled, settings.timerDuration, currentUser, handleTimeOut, generateNewQuestion]);
+    }, [zenMode, currentQuestion, showFeedback, showCelebration, showMidBoost, settings.timerEnabled, settings.timerDuration, currentUser, handleTimeOut, generateNewQuestion]);
 
     const [completedChallengeCount, setCompletedChallengeCount] = useState<number>(0);
 
@@ -467,7 +471,7 @@ export const useChallengeGame = () => {
         ]).start();
 
         if (correct) {
-            playSound('challenge');
+            if (!zenMode) playSound('challenge');
             vibrate('success');
             setCorrectCount(prev => prev + 1);
             setTotalQuestions(prev => prev + 1);
@@ -602,7 +606,7 @@ export const useChallengeGame = () => {
                 }
             }
         }
-    }, [currentQuestion, userAnswer, showFeedback, attempts, correctCount, totalQuestions, consecutiveCorrect, bestStreak, isReviewMode, reviewQuestions, maxQuestions, showCelebration, wrongAnswers, handleChallengeEnd, generateNewQuestion, updateBestStreak, playSound, vibrate]);
+    }, [zenMode, currentQuestion, userAnswer, showFeedback, attempts, correctCount, totalQuestions, consecutiveCorrect, bestStreak, isReviewMode, reviewQuestions, maxQuestions, showCelebration, wrongAnswers, handleChallengeEnd, generateNewQuestion, updateBestStreak, playSound, vibrate]);
 
     const restartGame = useCallback(() => {
         setIsFinished(false);

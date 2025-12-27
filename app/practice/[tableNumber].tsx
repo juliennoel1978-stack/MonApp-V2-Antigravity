@@ -323,6 +323,8 @@ export default function PracticeScreen() {
   /* Moved helper functions to top to avoid ReferenceErrors */
 
   const finishLevel = (finalCorrectCount: number) => {
+    stopSpeech(); // Ensure no voice over is talking
+
     if (isReviewMode) {
       setIsReviewMode(false);
 
@@ -356,6 +358,7 @@ export default function PracticeScreen() {
         updateTableProgress(table.number, finalCorrectCount, questions.length, finalCorrectCount === 10 ? 2 : 1, 1, averageTime);
         if (finalCorrectCount === 10) setQuestionsToReview([]);
         vibrate('heavy');
+        playSound('finish');
         setLevel1Highscore(finalCorrectCount);
         setShowLevelTransition(true);
       } else {
@@ -363,13 +366,30 @@ export default function PracticeScreen() {
       }
     } else {
       const totalCorrectLevel2 = finalCorrectCount;
+      // Fix: Calculate stars dynamically based on score (Matching UI logic)
       let stars = 1;
+      if (totalCorrectLevel2 === 10) {
+        stars = 4;
+      } else if (totalCorrectLevel2 >= 8) {
+        stars = 3;
+      } else if (totalCorrectLevel2 >= 5) {
+        stars = 2;
+      }
+
       updateTableProgress(table.number, totalCorrectLevel2, questions.length, stars, 2, averageTime);
+
+      if (stars >= 3) {
+        // ALWAYS play the finish music for success (3 or 4 stars) to ensure audio feedback
+        // 'finish' maps to 'challenge_finish.mp3' which is the main completion music
+        playSound('finish');
+        vibrate('heavy');
+      }
+
       if (stars >= 4) {
         unlockBadge('perfect_score');
-        playSound('mastery');
+        // Optional: Play a secondary magic sound or just rely on the 'finish' music
       }
-      if (stars >= 3) vibrate('heavy');
+
       if (currentQuestionIndex === 0) unlockBadge('first_table');
       setShowResult(true);
     }
@@ -555,9 +575,11 @@ export default function PracticeScreen() {
 
   const triggerCoachSuccess = async () => {
     // 1. Play Sound (Web Audio API or Native)
-    // Zen Mode: Always default sound
-    const soundVar = isZenMode ? 'default' : (level === 2 ? 'magic' : 'default');
-    playSound(soundVar);
+    // Zen Mode: SILENCE for correct answers (User Request)
+    if (!isZenMode) {
+      const soundVar = level === 2 ? 'magic' : 'default';
+      playSound(soundVar);
+    }
 
     // 2. Select Message
     const isGendered = Math.random() > 0.5;

@@ -66,8 +66,9 @@ export default function SettingsScreen() {
     const p = user.progress.find((tp: any) => tp.tableNumber === tableNum);
 
     // 1. Not Started -> GREY
-    // If no progress entry exists OR totalAttempts is 0.
-    if (!p || (p.totalAttempts || 0) === 0) return '#F0F0F0';
+    // If no progress entry exists OR totalAttempts is 0 OR it hasn't been practiced recently (date check)
+    // The date check (lastPracticed) ensures we don't count "phantom" attempts from legacy/dirty data initiation.
+    if (!p || (p.totalAttempts || 0) === 0 || !p.lastPracticed) return '#F0F0F0';
 
     // 2. Mastered -> GREEN
     // "niveau un et niveau 2 fait" -> level1Completed AND level2Completed
@@ -77,7 +78,7 @@ export default function SettingsScreen() {
     }
 
     // 3. In Progress -> YELLOW (Warning)
-    // "un seul niveau validé jaune" -> Matches here if not fully mastered.
+    // Matches here if started but not mastered.
     return AppColors.warning;
   };
 
