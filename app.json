@@ -20,7 +20,8 @@
       "infoPlist": {
         "UIBackgroundModes": [],
         "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
-        "NSCameraUsageDescription": "Cette application utilise la caméra pour vous permettre de prendre une photo de profil."
+        "NSCameraUsageDescription": "Cette application utilise la caméra pour vous permettre de prendre une photo de profil.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -31,9 +32,10 @@
       "package": "app.rork.tablesmagiques",
       "versionCode": 2,
       "permissions": [
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -55,6 +57,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": "https://rork.com/"
+      },
+      "eas": {
+        "projectId": "8da41d50-3129-4573-8712-782041b63120"
+      }
     }
   }
 }
