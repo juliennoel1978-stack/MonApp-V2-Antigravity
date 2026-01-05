@@ -63,6 +63,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const [anonymousPlayDates, setAnonymousPlayDates] = useState<string[]>([]);
   const [anonymousPersistenceBadges, setAnonymousPersistenceBadges] = useState<PersistenceBadge[]>([]);
   const [anonymousBestStreak, setAnonymousBestStreak] = useState(0);
+  const [hasSelectedAnonymousMode, setHasSelectedAnonymousMode] = useState(false);
 
   const usersRef = useRef(users);
   const currentUserRef = useRef(currentUser);
@@ -774,5 +775,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     getBestStreak,
     updateBestStreak,
     updateStrongestTable,
+    hasSelectedAnonymousMode,
+    setHasSelectedAnonymousMode,
   };
 });

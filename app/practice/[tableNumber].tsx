@@ -24,6 +24,7 @@ import type { Question } from '@/types';
 
 import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
+import i18n from '@/utils/i18n';
 
 // Short "Ding" sound (Base64 MP3)
 
@@ -36,16 +37,12 @@ const COACH_THEMES = {
   heroes: '🤖',
 };
 
-const COACH_MESSAGES = {
-  neutral: ["Bravo !", "Super !", "Génial !", "Top !", "Bien joué !", "Excellent !", "C'est ça !"],
-  boy: ["Tu es un Champion !", "T'es le meilleur !", "Quel talent !", "Fort !"],
-  girl: ["Tu es une Championne !", "T'es la meilleure !", "Quel talent !", "Forte !"],
-};
+// COACH_MESSAGES removed, accessed dynamically via i18n.translations
 
 const CHECKPOINT_THEMES = {
-  animals: { image: '🐒', item: '🍌', title: 'Miam !', subtitle: 'Déjà la moitié de la table !' },
-  space: { image: '👽', item: '💎', title: 'Énergie 50% !', subtitle: 'Tu as fait la moitié du voyage.' },
-  heroes: { image: '🤖', item: '🔋', title: 'Recharge OK !', subtitle: 'Puissance à 50%.' },
+  animals: { image: '🐒', item: '🍌', title: 'practice.checkpoints.animals.title', subtitle: 'practice.checkpoints.animals.subtitle' },
+  space: { image: '👽', item: '💎', title: 'practice.checkpoints.space.title', subtitle: 'practice.checkpoints.space.subtitle' },
+  heroes: { image: '🤖', item: '🔋', title: 'practice.checkpoints.heroes.title', subtitle: 'practice.checkpoints.heroes.subtitle' },
 };
 
 const CheckpointModal = ({
@@ -97,12 +94,12 @@ const CheckpointModal = ({
   return (
     <View style={styles.checkpointOverlay}>
       <Animated.View style={[styles.checkpointCard, { transform: [{ scale: scaleAnim }] }]}>
-        <ThemedText style={styles.checkpointTitle}>{data.title}</ThemedText>
+        <ThemedText style={styles.checkpointTitle}>{i18n.t(data.title)}</ThemedText>
         <View style={styles.checkpointImageContainer}>
           <ThemedText style={styles.checkpointEmojiMain}>{data.image}</ThemedText>
           <ThemedText style={styles.checkpointEmojiItem}>{data.item}</ThemedText>
         </View>
-        <ThemedText style={styles.checkpointSubtitle}>{data.subtitle}</ThemedText>
+        <ThemedText style={styles.checkpointSubtitle}>{i18n.t(data.subtitle)}</ThemedText>
       </Animated.View>
     </View>
   );
@@ -290,7 +287,7 @@ export default function PracticeScreen() {
       // Small delay to ensure UI is ready and previous sounds are finished
       const timer = setTimeout(() => {
         if (isMounted.current && localVoiceEnabled) {
-          speak(`${safeCurrentQuestion.multiplicand} fois ${safeCurrentQuestion.multiplier} ?`);
+          speak(i18n.t('practice.question_speak', { a: safeCurrentQuestion.multiplicand, b: safeCurrentQuestion.multiplier }));
         }
       }, 600);
       return () => clearTimeout(timer);
@@ -311,7 +308,7 @@ export default function PracticeScreen() {
   if (!table || questions.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
-        <ThemedText style={styles.errorText}>Chargement...</ThemedText>
+        <ThemedText style={styles.errorText}>{i18n.t('practice.loading')}</ThemedText>
       </SafeAreaView>
     );
   }
@@ -412,17 +409,20 @@ export default function PracticeScreen() {
     // We also respect local toggle for correction
     if (localVoiceEnabled) {
       const tip = TIPS_BY_TABLE[table.number];
-      let errorText = tip?.erreur || '';
+      // Get the localized error text (which might be "1 x X = ...")
+      let errorText = i18n.t(tip?.erreur || '');
 
-      // Improve speech for the error tip to be more natural
-      // Replaces "5 × X =" with "5 fois quelque chose égale"
+      // Replace mathematical symbols with spoken words from locale
       errorText = errorText
-        .replace(/(\d+)\s*[×]\s*X\s*=/g, "$1 fois quelque chose égale")
-        .replace(/×/g, "fois")
-        .replace(/=/g, "égale")
-        .replace(/\bX\b/g, "quelque chose");
+        .replace(/(\d+)\s*[×]\s*X\s*=/g, `$1 ${i18n.t('practice.speech_correction.times')} ${i18n.t('practice.speech_correction.something')} ${i18n.t('practice.speech_correction.equals')}`)
+        .replace(/×/g, i18n.t('practice.speech_correction.times'))
+        .replace(/=/g, i18n.t('practice.speech_correction.equals'))
+        .replace(/\bX\b/g, i18n.t('practice.speech_correction.something'));
 
-      const speechText = `${question.multiplicand} fois ${question.multiplier} égale ${question.correctAnswer}. ${errorText}`;
+      // Construct the full speech
+      const speechText = i18n.t('practice.question_speak', { a: question.multiplicand, b: question.multiplier }).replace('?', '') +
+        ` ${i18n.t('practice.speech_correction.equals')} ${question.correctAnswer}. ${errorText}`;
+
       speak(speechText);
     }
   };
@@ -582,14 +582,27 @@ export default function PracticeScreen() {
     }
 
     // 2. Select Message
+    // 2. Select Message
     const isGendered = Math.random() > 0.5;
     let msg = "";
+
+    // Access raw translation arrays
+    const practiceStrings = (i18n.translations[i18n.locale]?.practice?.coach || {}) as any;
+    let list: string[] = [];
+
     if (isGendered && currentUser?.gender) {
-      const list = currentUser.gender === 'boy' ? COACH_MESSAGES.boy : COACH_MESSAGES.girl;
-      msg = list[Math.floor(Math.random() * list.length)];
-    } else {
-      msg = COACH_MESSAGES.neutral[Math.floor(Math.random() * COACH_MESSAGES.neutral.length)];
+      list = currentUser.gender === 'boy' ? (practiceStrings.boy || []) : (practiceStrings.girl || []);
     }
+
+    // Fallback if gendered list is empty or not chosen
+    if (!list.length) {
+      list = practiceStrings.neutral || [];
+    }
+
+    // Safety fallback
+    if (!list.length) list = [i18n.t('practice.results.bravo_simple')];
+
+    msg = list[Math.floor(Math.random() * list.length)];
     setCoachMessage(msg);
     setShowCoachFeedback(true);
   };
@@ -703,11 +716,11 @@ export default function PracticeScreen() {
       <View style={styles.backgroundContainer}>
         <SafeAreaView style={styles.container}>
           <View style={styles.resultContainer}>
-            <ThemedText style={styles.resultTitle}>Bravo {userName ? `${userName} ` : ''}! 🎉</ThemedText>
+            <ThemedText style={styles.resultTitle}>{i18n.t('practice.bravo_name', { name: userName })}</ThemedText>
             <ThemedText style={styles.resultSubtitle}>
               {correctCount === 10
-                ? 'Tu maîtrises cette table !'
-                : 'Tu as débloqué le niveau 2 !'}
+                ? i18n.t('practice.mastered')
+                : i18n.t('practice.unlocked_lvl2')}
             </ThemedText>
 
             <View style={[styles.resultCard, { borderColor: tableColor }]}>
@@ -721,10 +734,10 @@ export default function PracticeScreen() {
                   />
                 ))}
               </View>
-              <ThemedText style={styles.intermediateStarsText}>{starsEarnedLevel1} étoile{starsEarnedLevel1 > 1 ? 's' : ''} sur 4</ThemedText>
-              <ThemedText style={styles.transitionDescriptionFirst}>Maintenant, allons plus loin !</ThemedText>
+              <ThemedText style={styles.intermediateStarsText}>{i18n.t('practice.stars_count', { count: starsEarnedLevel1, s: starsEarnedLevel1 > 1 ? 's' : '' })}</ThemedText>
+              <ThemedText style={styles.transitionDescriptionFirst}>{i18n.t('practice.level2_intro')}</ThemedText>
               <ThemedText style={styles.transitionDescriptionSecond}>
-                Tape les réponses pour obtenir{'\n'}les {4 - starsEarnedLevel1} étoile{4 - starsEarnedLevel1 > 1 ? 's' : ''} restante{4 - starsEarnedLevel1 > 1 ? 's' : ''}.
+                {i18n.t('practice.level2_desc', { count: 4 - starsEarnedLevel1, s: (4 - starsEarnedLevel1) > 1 ? 's' : '' })}
               </ThemedText>
             </View>
 
@@ -733,17 +746,21 @@ export default function PracticeScreen() {
                 style={[styles.primaryButton, { backgroundColor: tableColor }]}
                 onPress={startLevel2}
               >
-                <ThemedText style={styles.primaryButtonText}>Passer au niveau 2 🚀</ThemedText>
+                <ThemedText style={styles.primaryButtonText}>{i18n.t('practice.go_level2')}</ThemedText>
               </TouchableOpacity>
 
               {questionsToReview.length > 0 && (
                 <View style={styles.reviewSectionContainer}>
-                  <ThemedText style={styles.reviewSectionTitle}>Tu veux d&apos;abord revoir tes erreurs ?</ThemedText>
+                  <ThemedText style={styles.reviewSectionTitle}>{i18n.t('practice.review_errors_q')}</ThemedText>
                   <TouchableOpacity
                     style={styles.reviewButtonSecondary}
                     onPress={startReview}
                   >
-                    <ThemedText style={styles.reviewButtonSecondaryText}>Oui, réviser {questionsToReview.length === 1 ? 'mon' : `mes ${questionsToReview.length}`} erreur{questionsToReview.length > 1 ? 's' : ''}</ThemedText>
+                    <ThemedText style={styles.reviewButtonSecondaryText}>
+                      {questionsToReview.length === 1
+                        ? i18n.t('practice.review_btn_one')
+                        : i18n.t('practice.review_btn_many', { count: questionsToReview.length })}
+                    </ThemedText>
                   </TouchableOpacity>
                 </View>
               )}
@@ -752,7 +769,7 @@ export default function PracticeScreen() {
                 style={styles.backToMenuButton}
                 onPress={() => router.push('/tables' as any)}
               >
-                <ThemedText style={styles.backToMenuButtonText}>Retour au menu</ThemedText>
+                <ThemedText style={styles.backToMenuButtonText}>{i18n.t('common.back_to_menu')}</ThemedText>
               </TouchableOpacity>
             </View>
           </View>
@@ -773,9 +790,9 @@ export default function PracticeScreen() {
           <View style={styles.backgroundContainer}>
             <SafeAreaView style={styles.container}>
               <View style={styles.resultContainer}>
-                <ThemedText style={styles.resultTitle}>Bravo {userName ? `${userName} ` : ''}! 🎉</ThemedText>
+                <ThemedText style={styles.resultTitle}>{i18n.t('practice.bravo_name', { name: userName })}</ThemedText>
                 <ThemedText style={styles.resultSubtitle}>
-                  Tu as réussi toutes les questions de révision !
+                  {i18n.t('practice.review_success')}
                 </ThemedText>
 
                 <View style={styles.resultButtonsColumn}>
@@ -784,7 +801,7 @@ export default function PracticeScreen() {
                     onPress={retry}
                     testID="retry-button"
                   >
-                    <ThemedText style={styles.primaryButtonText}>Recommencer le quiz complet</ThemedText>
+                    <ThemedText style={styles.primaryButtonText}>{i18n.t('practice.results.retry_full_nl')}</ThemedText>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -792,7 +809,7 @@ export default function PracticeScreen() {
                     onPress={() => router.push('/tables' as any)}
                     testID="back-button-result"
                   >
-                    <ThemedText style={[styles.primaryButtonText, { color: tableColor }]}>Aller à une autre table</ThemedText>
+                    <ThemedText style={[styles.primaryButtonText, { color: tableColor }]}>{i18n.t('practice.results.other_table_full')}</ThemedText>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -806,19 +823,19 @@ export default function PracticeScreen() {
         <View style={styles.backgroundContainer}>
           <SafeAreaView style={styles.container}>
             <View style={styles.resultContainer}>
-              <ThemedText style={styles.resultTitle}>Presque !</ThemedText>
+              <ThemedText style={styles.resultTitle}>{i18n.t('practice.results.almost')}</ThemedText>
 
               <View style={[styles.resultCardCompact, { borderColor: tableColor }]}>
                 <ThemedText style={styles.resultScore}>
                   {correctCount}/{questions.length}
                 </ThemedText>
-                <ThemedText style={styles.resultLabel}>Bonnes réponses</ThemedText>
+                <ThemedText style={styles.resultLabel}>{i18n.t('practice.results.correct_answers')}</ThemedText>
 
                 <ThemedText style={styles.encouragementLarge}>
-                  💪 Continue à t&apos;entraîner, tu vas y arriver !
+                  {i18n.t('practice.results.encouragement_muscle')}
                 </ThemedText>
                 <ThemedText style={styles.encouragementSmall}>
-                  Il te faut au moins 8/10 pour passer au niveau suivant.
+                  {i18n.t('practice.results.encouragement_min')}
                 </ThemedText>
               </View>
 
@@ -826,13 +843,13 @@ export default function PracticeScreen() {
                 {questionsToReview.length > 0 && (
                   <View style={styles.reviewContainer}>
                     <ThemedText style={styles.reviewText}>
-                      Tu veux revoir uniquement les questions qui t&apos;ont posé problème ?
+                      {i18n.t('practice.results.review_only_errors')}
                     </ThemedText>
                     <TouchableOpacity
                       style={styles.reviewConfirmButton}
                       onPress={startReview}
                     >
-                      <ThemedText style={styles.reviewConfirmButtonText}>Oui</ThemedText>
+                      <ThemedText style={styles.reviewConfirmButtonText}>{i18n.t('practice.results.yes')}</ThemedText>
                     </TouchableOpacity>
                   </View>
                 )}
@@ -843,7 +860,7 @@ export default function PracticeScreen() {
                     onPress={() => router.push(`/discovery/${table.number}?step=2` as any)}
                     testID="review-lesson-button"
                   >
-                    <ThemedText style={styles.resultButtonText}>Réviser la table</ThemedText>
+                    <ThemedText style={styles.resultButtonText}>{i18n.t('practice.results.review_table')}</ThemedText>
                   </TouchableOpacity>
                 </View>
 
@@ -853,7 +870,7 @@ export default function PracticeScreen() {
                     onPress={retry}
                     testID="retry-button"
                   >
-                    <ThemedText style={styles.secondaryButtonText}>Réessayer{"\n"}le quiz</ThemedText>
+                    <ThemedText style={styles.secondaryButtonText}>{i18n.t('practice.results.retry_quiz')}</ThemedText>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -861,7 +878,7 @@ export default function PracticeScreen() {
                     onPress={() => router.push('/tables' as any)}
                     testID="back-button-result"
                   >
-                    <ThemedText style={[styles.outlineButtonText, { color: tableColor }]}>Autre{"\n"}table</ThemedText>
+                    <ThemedText style={[styles.outlineButtonText, { color: tableColor }]}>{i18n.t('practice.results.other_table_nl')}</ThemedText>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -880,9 +897,9 @@ export default function PracticeScreen() {
         <View style={styles.backgroundContainer}>
           <SafeAreaView style={styles.container}>
             <View style={styles.resultContainer}>
-              <ThemedText style={styles.resultTitle}>Bravo {userName ? `${userName} ` : ''}! 🎉</ThemedText>
+              <ThemedText style={styles.resultTitle}>{i18n.t('practice.results.bravo_simple')} {userName ? `${userName} ` : ''}! 🎉</ThemedText>
               <ThemedText style={styles.resultSubtitle}>
-                Tu as réussi toutes les questions de révision !
+                {i18n.t('practice.review_success')}
               </ThemedText>
 
               <View style={styles.resultButtonsColumn}>
@@ -891,7 +908,7 @@ export default function PracticeScreen() {
                   onPress={retry}
                   testID="retry-button"
                 >
-                  <ThemedText style={styles.primaryButtonText}>Recommencer le quiz complet</ThemedText>
+                  <ThemedText style={styles.primaryButtonText}>{i18n.t('practice.results.retry_full_nl')}</ThemedText>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -899,7 +916,7 @@ export default function PracticeScreen() {
                   onPress={() => router.push('/tables' as any)}
                   testID="back-button-result"
                 >
-                  <ThemedText style={[styles.primaryButtonText, { color: tableColor }]}>Aller à une autre table</ThemedText>
+                  <ThemedText style={[styles.primaryButtonText, { color: tableColor }]}>{i18n.t('practice.results.other_table_full')}</ThemedText>
                 </TouchableOpacity>
               </View>
             </View>
@@ -922,18 +939,18 @@ export default function PracticeScreen() {
           <View style={styles.resultContainer}>
             <ThemedText style={styles.resultTitle}>
               {passed
-                ? `Bravo ${userName ? `${userName} ` : ''}! 🎉`
-                : `Presque ${userName ? `${userName} ` : ''}! 😕`}
+                ? `${i18n.t('practice.results.bravo_simple')} ${userName ? `${userName} ` : ''}! 🎉`
+                : `${i18n.t('practice.results.almost_simple')} ${userName ? `${userName} ` : ''}! 😕`}
             </ThemedText>
             <ThemedText style={styles.resultSubtitle}>
-              {passed ? 'Tu as terminé l\'entraînement' : 'Entraîne-toi encore un peu'}
+              {passed ? i18n.t('practice.results.finished') : i18n.t('practice.results.keep_training')}
             </ThemedText>
 
             <View style={[styles.resultCard, { borderColor: tableColor }]}>
               <ThemedText style={styles.resultScore}>
                 {correctCount}/{questions.length}
               </ThemedText>
-              <ThemedText style={styles.resultLabel}>Bonnes réponses</ThemedText>
+              <ThemedText style={styles.resultLabel}>{i18n.t('practice.results.correct_answers')}</ThemedText>
 
               <View style={styles.starsContainer}>
                 {[1, 2, 3, 4].map(starIndex => (
@@ -947,10 +964,10 @@ export default function PracticeScreen() {
               </View>
 
               <ThemedText style={styles.encouragement}>
-                {stars === 4 ? `Super ! Tu maîtrises parfaitement la table de ${table.number} !` :
-                  stars === 3 ? 'Très bien ! Continue comme ça !' :
-                    stars === 2 ? 'Bon début ! Entraîne-toi encore !' :
-                      'Continue à t\'entraîner, tu vas y arriver !'}
+                {stars === 4 ? i18n.t('practice.results.encouragement_perfect', { number: table.number }) :
+                  stars === 3 ? i18n.t('practice.results.encouragement_great') :
+                    stars === 2 ? i18n.t('practice.results.encouragement_good') :
+                      i18n.t('practice.results.encouragement_fail')}
               </ThemedText>
             </View>
 
@@ -958,13 +975,13 @@ export default function PracticeScreen() {
               {questionsToReview.length > 0 && (
                 <View style={styles.reviewSectionContainer}>
                   <ThemedText style={styles.reviewSectionTitle}>
-                    Tu veux revoir tes erreurs avant de continuer ?
+                    {i18n.t('practice.results.review_only_errors')}
                   </ThemedText>
                   <TouchableOpacity
                     style={styles.reviewButtonSecondary}
                     onPress={startReview}
                   >
-                    <ThemedText style={styles.reviewButtonSecondaryText}>Oui, réviser {questionsToReview.length === 1 ? 'mon' : `mes ${questionsToReview.length}`} erreur{questionsToReview.length > 1 ? 's' : ''}</ThemedText>
+                    <ThemedText style={styles.reviewButtonSecondaryText}>{i18n.t('practice.results.yes')}, {questionsToReview.length === 1 ? i18n.t('practice.review_btn_one') : i18n.t('practice.review_btn_many', { count: questionsToReview.length })}</ThemedText>
                   </TouchableOpacity>
                 </View>
               )}
@@ -981,7 +998,7 @@ export default function PracticeScreen() {
                     styles.actionButtonText,
                     passed && { color: AppColors.text }
                   ]}>
-                    {passed ? 'Refaire le niveau' : 'Refaire le niveau'}
+                    {passed ? i18n.t('practice.retry_level1') : i18n.t('practice.retry_level1')}
                   </ThemedText>
                 </TouchableOpacity>
 
@@ -997,7 +1014,7 @@ export default function PracticeScreen() {
                     styles.actionButtonText,
                     !passed && { color: tableColor }
                   ]}>
-                    {passed ? 'Non, autre table' : 'Non, autre table'}
+                    {passed ? i18n.t('practice.results.other_table_full') : i18n.t('practice.results.other_table_full')}
                   </ThemedText>
                 </TouchableOpacity>
               </View>
@@ -1074,7 +1091,7 @@ export default function PracticeScreen() {
               >
                 {level === 1 ? (
                   <>
-                    <ThemedText style={styles.questionLabel}>Combien font :</ThemedText>
+                    <ThemedText style={styles.questionLabel}>{i18n.t('practice.question_label')}</ThemedText>
                     <TouchableOpacity
                       onPress={() => {
                         if (localVoiceEnabled) {
@@ -1158,7 +1175,7 @@ export default function PracticeScreen() {
                       {userInput ? (
                         <ThemedText style={styles.level2InputText}>{userInput}</ThemedText>
                       ) : (
-                        <ThemedText style={styles.level2Placeholder}>Ta réponse</ThemedText>
+                        <ThemedText style={styles.level2Placeholder}>{i18n.t('practice.your_answer')}</ThemedText>
                       )}
                       <View style={styles.cursor} />
                     </View>
@@ -1171,7 +1188,7 @@ export default function PracticeScreen() {
                       <View style={styles.level2FeedbackBox}>
                         <Check size={48} color={AppColors.success} />
                         <ThemedText style={[styles.level2FeedbackText, { color: AppColors.success }]}>
-                          Correct !
+                          {i18n.t('practice.correct_excl')}
                         </ThemedText>
                       </View>
                     </View>
@@ -1218,14 +1235,14 @@ export default function PracticeScreen() {
         {showErrorFeedback && (
           <View style={styles.fullScreenOverlay}>
             <View style={[styles.errorCard, { borderColor: AppColors.warning }]}>
-              <ThemedText style={styles.errorTitle}>On corrige ensemble ✨</ThemedText>
+              <ThemedText style={styles.errorTitle}>{i18n.t('practice.correction.title')}</ThemedText>
 
               <View style={styles.correctionContainer}>
                 <ThemedText style={styles.correctionText}>
                   {currentQuestion.multiplicand} × {currentQuestion.multiplier} = {currentQuestion.correctAnswer}
                 </ThemedText>
                 <ThemedText style={styles.errorTipText}>
-                  {TIPS_BY_TABLE[table.number]?.erreur || ''}
+                  {TIPS_BY_TABLE[table.number]?.erreur ? i18n.t(TIPS_BY_TABLE[table.number].erreur) : ''}
                 </ThemedText>
               </View>
 
@@ -1236,7 +1253,7 @@ export default function PracticeScreen() {
                     onPress={handleRetryQuestion}
                   >
                     <RefreshCw size={20} color={AppColors.text} />
-                    <ThemedText style={styles.errorButtonText}>Réessayer cette question</ThemedText>
+                    <ThemedText style={styles.errorButtonText}>{i18n.t('practice.correction.retry_question')}</ThemedText>
                   </TouchableOpacity>
                 )}
 
@@ -1244,7 +1261,7 @@ export default function PracticeScreen() {
                   style={[styles.errorButton, styles.continueButton]}
                   onPress={handleContinueAfterError}
                 >
-                  <ThemedText style={[styles.errorButtonText, { color: '#FFF' }]}>Continuer</ThemedText>
+                  <ThemedText style={[styles.errorButtonText, { color: '#FFF' }]}>{i18n.t('practice.correction.continue')}</ThemedText>
                   <ArrowRight size={20} color="#FFF" />
                 </TouchableOpacity>
               </View>

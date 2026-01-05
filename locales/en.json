@@ -1,0 +1,663 @@
+{
+    "home": {
+        "loading": "Loading...",
+        "updating": "Updating...",
+        "title": "Magic Tables",
+        "greeting": "Hello {{name}}!",
+        "zen": "Zen",
+        "dys": "Dys",
+        "muted": "Muted",
+        "subtitle_main": "Become a Math Whiz ✨",
+        "subtitle_secondary": "Learn while having fun!",
+        "progression_title": "Your Progress",
+        "stars": "Stars",
+        "tables": "Tables",
+        "mission": "Mission: Table of {{number}}",
+        "start": "Start",
+        "challenge": "Challenge"
+    },
+    "tables_modal": {
+        "title": "My Tables",
+        "not_seen": "Not seen",
+        "mastered": "Mastered",
+        "legend_not_seen": "Not seen",
+        "legend_mastered": "Mastered"
+    },
+    "user_modal": {
+        "title": "Who are you?",
+        "subtitle": "Choose your profile",
+        "available_users": "({{count}} users available)",
+        "no_users": "No users found",
+        "create_profile": "Create a profile to start!",
+        "add": "Add"
+    },
+    "parent_gate": {
+        "title": "Parents Area & Settings",
+        "subtitle": "Solve to access:",
+        "placeholder_answer": "Answer",
+        "error_wrong_answer": "Wrong answer",
+        "disclaimer": "Settings protection"
+    },
+    "common": {
+        "grade_cp": "1st Grade (Age 6-7)",
+        "grade_ce1": "2nd Grade (Age 7-8)",
+        "grade_ce2": "3rd Grade (Age 8-9)",
+        "grade_cm1": "4th Grade (Age 9-10)",
+        "grade_cm2": "5th Grade (Age 10-11)",
+        "grade_6eme": "6th Grade (Age 11-12)",
+        "validate": "Validate",
+        "cancel": "Cancel",
+        "close": "Close",
+        "years": "years",
+        "table": "Table",
+        "back_to_menu": "Back to menu",
+        "next_badge": "Next badge",
+        "repeatable": "Can be obtained again",
+        "tap_to_continue": "Tap to continue"
+    },
+    "dashboard": {
+        "mission_s": "mission",
+        "mission_p": "missions",
+        "exploit_s": "feat",
+        "exploit_p": "feats",
+        "defi_s": "challenge",
+        "defi_p": "challenges",
+        "challenge_s": "challenge",
+        "challenge_p": "challenges",
+        "start_mission": "Start your first mission!",
+        "start_exploit": "Achieve your first feat!",
+        "start_defi": "Take your first challenge!",
+        "start_challenge": "Start your first challenge!",
+        "max_level": "🎉 Max level reached!",
+        "more_to_go": "{{count}} more {{label}} to\n{{icon}} {{title}}",
+        "more_to_go_simple": "{{count}} more {{label}}!",
+        "current_level": "Current Level: {{level}}",
+        "beginner": "Beginner",
+        "view_collection": "View my collection ›",
+        "ready": "Ready?",
+        "max_streak": "Max Streak: {{streak}}",
+        "max_streak_desc": "Your record of correct answers in a row!",
+        "mystery": "Mystery...",
+        "strongest_table": "Table of {{table}}",
+        "strongest_table_desc": "This is your best table!"
+    },
+    "badges": {
+        "locked_badge": "Mystery... Try harder! 🔒",
+        "new_level": "New Level!",
+        "new_achievement": "New Achievement!",
+        "space": {
+            "1": {
+                "title": "Passenger",
+                "message": "Welcome aboard!"
+            },
+            "4": {
+                "title": "Student Pilot",
+                "message": "Ready for takeoff?"
+            },
+            "7": {
+                "title": "Pilot",
+                "message": "You have control."
+            },
+            "10": {
+                "title": "Astronaut",
+                "message": "On your way to the stars."
+            },
+            "15": {
+                "title": "Moon Explorer",
+                "message": "One small step for man..."
+            },
+            "20": {
+                "title": "Solar Traveler",
+                "message": "You shine like the sun."
+            },
+            "25": {
+                "title": "Captain",
+                "message": "The crew is listening."
+            },
+            "30": {
+                "title": "Galactic Commander",
+                "message": "The universe is yours."
+            },
+            "45": {
+                "title": "Guardian of the Universe",
+                "message": "Protector of galaxies."
+            }
+        },
+        "animals": {
+            "1": {
+                "title": "Little Ant",
+                "message": "Small but mighty!"
+            },
+            "4": {
+                "title": "Smart Squirrel",
+                "message": "Stocking up on knowledge."
+            },
+            "7": {
+                "title": "Cunning Fox",
+                "message": "You never get trapped."
+            },
+            "10": {
+                "title": "Fast Cheetah",
+                "message": "You calculate at full speed!"
+            },
+            "15": {
+                "title": "Agile Dolphin",
+                "message": "Navigating the tables."
+            },
+            "20": {
+                "title": "Golden Eagle",
+                "message": "You spot errors from afar."
+            },
+            "25": {
+                "title": "Mighty Bear",
+                "message": "Nothing can stop you."
+            },
+            "30": {
+                "title": "King of the Jungle",
+                "message": "You are the boss!"
+            },
+            "45": {
+                "title": "Legendary Dragon",
+                "message": "You are a living myth!"
+            }
+        },
+        "heroes": {
+            "1": {
+                "title": "Apprentice",
+                "message": "Your training begins."
+            },
+            "4": {
+                "title": "Scout",
+                "message": "Lead the way!"
+            },
+            "7": {
+                "title": "Vigilante",
+                "message": "Defending correct answers."
+            },
+            "10": {
+                "title": "Super Speed",
+                "message": "Faster than lightning."
+            },
+            "15": {
+                "title": "Shadow Ninja",
+                "message": "Discreet and effective."
+            },
+            "20": {
+                "title": "Mega Brain",
+                "message": "Your mind is your weapon."
+            },
+            "25": {
+                "title": "Titan",
+                "message": "A force of nature."
+            },
+            "30": {
+                "title": "Invincible",
+                "message": "Zero flaws, zero damage."
+            },
+            "45": {
+                "title": "Superhero",
+                "message": "You saved the world!",
+                "title_female": "Superheroine"
+            }
+        }
+    },
+    "achievements": {
+        "time_master": {
+            "title": "Time Master",
+            "message": "Time is under control.",
+            "back_title": "Flash!"
+        },
+        "strategist": {
+            "title": "Grand Strategist",
+            "message": "You learn fast!",
+            "back_title": "Genius!"
+        },
+        "regular_player": {
+            "title": "Regular",
+            "message": "You are very consistent.",
+            "back_title": "Loyal!"
+        },
+        "early_bird": {
+            "title": "Early Bird",
+            "message": "Already at work!",
+            "back_title": "Wake up!"
+        },
+        "night_owl": {
+            "title": "Insomnia",
+            "message": "Working even at night!",
+            "back_title": "Night Owl"
+        },
+        "perfect_score": {
+            "title": "Eagle Eye",
+            "message": "Flawless victory.",
+            "back_title": "What talent!"
+        },
+        "streak_max": {
+            "title": "Max Streak",
+            "message": "What a streak!",
+            "back_title": "Invincible!"
+        }
+    },
+    "endurance": {
+        "20": {
+            "title": "Focus Mind",
+            "message": "Stay focused.",
+            "back_title": "Focused!"
+        },
+        "30": {
+            "title": "Marathoner",
+            "message": "What a race!",
+            "back_title": "Endurance!"
+        },
+        "50": {
+            "title": "The Everest",
+            "message": "50 questions!",
+            "back_title": "Summit!"
+        }
+    },
+    "collection": {
+        "adventure_section": "MY ADVENTURE",
+        "achievements_section": "MY FEATS",
+        "endurance_section": "ENDURANCE",
+        "challenges_suffix": "Challenges"
+    },
+    "settings": {
+        "title": "Settings",
+        "never": "Never",
+        "parents_zone": "Parents Area & Profiles",
+        "manage_profiles": "Manage profiles and track progress.",
+        "add_profile": "+ Add a profile",
+        "badges": "Badges",
+        "challenges": "Challenges",
+        "avg_speed": "Avg speed",
+        "strongest_table": "Best Table",
+        "weakest_table": "Review",
+        "none": "None",
+        "last_activity": "Last activity: {{date}}",
+        "tables_mastery": "Tables Mastery",
+        "edit_profile": "Edit profile",
+        "reset_progress": "Reset progress",
+        "delete_profile": "Delete profile",
+        "select_profile": "Select this profile",
+        "active": "Active",
+        "general_prefs": "General Preferences (All)",
+        "applied_to_all": "Applied to all profiles.",
+        "music_sounds": "Music & Sounds",
+        "vibrations": "Haptics",
+        "tts": "Voice Synthesis",
+        "assistant_voice": "Assistant Voice",
+        "male_female": "Male or Female",
+        "zen_mode": "Zen Mode",
+        "less_animations": "Less animations",
+        "font": "Font Style",
+        "choose_style": "Choose the most comfortable text style",
+        "font_standard": "Standard",
+        "font_rounded": "Rounded (Default)",
+        "font_modern": "Modern",
+        "font_fluid": "Fluid (Lexend)",
+        "font_dys": "Dyslexia Friendly",
+        "font_opendys": "OpenDyslexic",
+        "reset_guest": "Reset Guest Mode",
+        "game_settings": "Game Settings",
+        "questions_per_challenge": "Questions per Challenge",
+        "badge_theme": "Badge Theme",
+        "timer": "Timer",
+        "enable_timer": "Enable timer in challenge",
+        "display_mode": "Display Mode",
+        "chrono": "⏱️ Chrono",
+        "bar": "📊 Bar",
+        "duration_per_question": "Duration per question (Bar)",
+        "themes": {
+            "space": "Space",
+            "animals": "Animals",
+            "heroes": "Heroes"
+        },
+        "badge_levels": {
+            "beginner": "Beginner",
+            "expert": "Expert",
+            "master": "Master",
+            "streak_3": "Streak 3",
+            "streak_5": "Streak 5",
+            "streak_10": "Streak 10",
+            "lighting": "Flash",
+            "perfect": "Perfect"
+        },
+        "alerts": {
+            "reset_title": "Reset?",
+            "reset_msg": "This will erase ALL progress (badges, scores, times).",
+            "reset_confirm": "Reset",
+            "reset_cancel": "Cancel",
+            "select_title": "Select this profile",
+            "select_msg": "Switch to {{name}}?",
+            "select_confirm": "Yes",
+            "delete_title": "Delete?",
+            "delete_msg": "Irreversible action.",
+            "delete_confirm": "Delete",
+            "reset_guest_title": "Reset Guest Mode?",
+            "reset_guest_msg": "Erase all anonymous progress (unsaved)?",
+            "reset_guest_confirm": "Erase"
+        }
+    },
+    "tables": {
+        "1": {
+            "story": "Table of 1 is easy! Everything stays the same.",
+            "tip": "Any number × 1 = that number",
+            "astuce": "When multiplying by 1, the result never changes.",
+            "indice": "It's the same number: we don't really multiply.",
+            "erreur": "1 × X = X. Use the exact same number."
+        },
+        "2": {
+            "story": "Table of 2 is doubling! Like twins.",
+            "tip": "Count by 2s: 2, 4, 6, 8, 10...",
+            "astuce": "Double the number: 2, 4, 6, 8...",
+            "indice": "If you know +2, you know table of 2.",
+            "erreur": "2 × X = X + X. Just double the number."
+        },
+        "3": {
+            "story": "Table of 3, count by jumps of 3!",
+            "tip": "Count by 3s: 3, 6, 9, 12, 15...",
+            "astuce": "Add 3 each time, like 3, 6, 9, 12...",
+            "indice": "Think of multiples of 3: 3, 6, 9, 12, 15...",
+            "erreur": "3 × X = X + X + X. Add 3 each time."
+        },
+        "4": {
+            "story": "Table of 4 is doubling twice!",
+            "tip": "Double the number, then double again",
+            "astuce": "4, 8, 12, 16... always add 4.",
+            "indice": "You can do ×2 then ×2 again: double twice!",
+            "erreur": "4 × X = (2 × X) × 2. Double twice to find the result."
+        },
+        "5": {
+            "story": "Table of 5, look at your fingers! Ends in 0 or 5.",
+            "tip": "Results always end with 0 or 5",
+            "astuce": "Results always end in 0 or 5.",
+            "indice": "Count by 5s: 5, 10, 15, 20...",
+            "erreur": "5 × X = number ending in 0 or 5. Count by 5s to check."
+        },
+        "6": {
+            "story": "Table of 6 is 5 + 1 more!",
+            "tip": "Use table of 5 and add the number",
+            "astuce": "If you know ×3, double the result: 6 = 3+3.",
+            "indice": "Do 3 × X, then double it.",
+            "erreur": "6 × X = 3 × X + 3 × X. Double the result of table of 3."
+        },
+        "7": {
+            "story": "Table of 7, the hardest! Use stories.",
+            "tip": "Learn with images and stories",
+            "astuce": "Harder table: think of decomposition (5 × X + 2 × X).",
+            "indice": "Do 5 × X, then add 2 × X.",
+            "erreur": "7 × X = 5 × X + 2 × X. Split it to find easier."
+        },
+        "8": {
+            "story": "Table of 8, double table of 4!",
+            "tip": "Use table of 4 and double the result",
+            "astuce": "8 is 2 × 2 × 2: double three times!",
+            "indice": "Double, then double, then double again.",
+            "erreur": "8 × X = double 3 times: X → 2X → 4X → 8X."
+        },
+        "9": {
+            "story": "Table of 9, the magic fingers trick!",
+            "tip": "Digits of result always sum to 9",
+            "astuce": "The sum of digits often equals 9.",
+            "indice": "Ex: 9 × 4 = 36 → 3 + 6 = 9.",
+            "erreur": "Check digit sum: must often be 9 for ×9."
+        },
+        "10": {
+            "story": "Table of 10, just add a zero!",
+            "tip": "Add a 0 at the end of the number",
+            "astuce": "Add a 0 at the end.",
+            "indice": "10 × X = X with a zero behind.",
+            "erreur": "10 × X = X0. Just write a zero at the end."
+        }
+    },
+    "practice": {
+        "loading": "Loading...",
+        "coach": {
+            "neutral": [
+                "Well done!",
+                "Super!",
+                "Great!",
+                "Top!",
+                "Good job!",
+                "Excellent!",
+                "That's it!"
+            ],
+            "boy": [
+                "You are a Champion!",
+                "You're the best!",
+                "What talent!",
+                "Strong!"
+            ],
+            "girl": [
+                "You are a Champion!",
+                "You're the best!",
+                "What talent!",
+                "Strong!"
+            ]
+        },
+        "checkpoints": {
+            "animals": {
+                "title": "Yum!",
+                "subtitle": "Already halfway through!"
+            },
+            "space": {
+                "title": "Energy 50%!",
+                "subtitle": "You're halfway there."
+            },
+            "heroes": {
+                "title": "Recharge OK!",
+                "subtitle": "Power at 50%."
+            }
+        },
+        "bravo_name": "Well done {{name}}! 🎉",
+        "mastered": "You mastered this table!",
+        "unlocked_lvl2": "You unlocked Level 2!",
+        "stars_count": "{{count}} star{{s}} out of 4",
+        "level2_intro": "Now, let's go further!",
+        "level2_desc": "Type the answers to get\nthe remaining {{count}} star{{s}}.",
+        "go_level2": "Go to Level 2 🚀",
+        "review_errors_q": "Want to review your mistakes first?",
+        "review_btn_one": "Yes, review my mistake",
+        "review_btn_many": "Yes, review my {{count}} mistakes",
+        "review_success": "You passed all review questions!",
+        "retry_full": "Retry full quiz",
+        "other_table": "Go to another table",
+        "fail_title": "Oh no!",
+        "fail_subtitle": "Don't give up, you can do it!",
+        "retry_level1": "Retry",
+        "intro": {
+            "title": "Let's go!",
+            "subtitle": "Now, test your knowledge with the quiz!",
+            "card_title": "Let's go!",
+            "card_message": "You're going to rock like a champion!",
+            "ready": "Ready to win stars?",
+            "start": "Start the quiz",
+            "back": "Back"
+        },
+        "discovery": {
+            "title": "Discover the table of {{number}}",
+            "magic_tip": "Magic tip",
+            "count_with_me": "Count with me!",
+            "count_instructions": "Click on the multiplications to hear how they are read!",
+            "table_of": "Table of {{number}}",
+            "listen_again": "Listen again",
+            "next": "Next",
+            "previous": "Previous",
+            "intro_title": "Let's go!",
+            "intro_subtitle": "Now, test your knowledge with the quiz!",
+            "intro_card_message": "You're going to rock like a champion! \n Ready to win stars?",
+            "start_quiz": "Start the quiz"
+        },
+        "correction": {
+            "title": "Let's correct together ✨",
+            "retry_question": "Retry this question",
+            "continue": "Continue"
+        },
+        "results": {
+            "almost": "Almost!",
+            "bravo_simple": "Well done",
+            "almost_simple": "Almost",
+            "continue_training": "Continue training",
+            "finished": "You finished the training",
+            "keep_training": "Train a bit more",
+            "correct_answers": "Correct answers",
+            "encouragement_muscle": "💪 Keep training, you can do it!",
+            "encouragement_min": "You need at least 8/10 to pass to the next level.",
+            "encouragement_perfect": "Super! You perfectly master the table of {{number}}!",
+            "encouragement_great": "Very good! Keep it up!",
+            "encouragement_good": "Good start! Train some more!",
+            "encouragement_fail": "Keep training, you'll get there!",
+            "review_only_errors": "Do you want to review only the questions you missed?",
+            "yes": "Yes",
+            "review_table": "Review table",
+            "retry_quiz": "Retry\nthe quiz",
+            "other_table_nl": "Other\ntable",
+            "retry_full_nl": "Retry full quiz",
+            "other_table_full": "Go to another table"
+        },
+        "question_label": "How much is:",
+        "your_answer": "Your answer",
+        "correct_excl": "Correct !",
+        "speech_correction": {
+            "times": "times",
+            "equals": "equals",
+            "something": "something"
+        },
+        "question_speak": "{{a}} times {{b}}?"
+    },
+    "challenge": {
+        "title": "Challenge",
+        "boost": {
+            "animals": {
+                "title": "Vitamin Break!",
+                "subtitle": "Halfway there! Take a sip!"
+            },
+            "space": {
+                "title": "Hyper Speed!",
+                "subtitle": "Finishing at light speed!"
+            },
+            "heroes": {
+                "title": "System Update...",
+                "subtitle": "You are getting faster!"
+            }
+        },
+        "stats": {
+            "correct": "Correct",
+            "incorrect": "Incorrect",
+            "total": "Total"
+        },
+        "feedback": {
+            "bravo": "Well done!",
+            "streak": "4 correct in a row!",
+            "correct": "Correct!",
+            "take_time": "Take your time,\nlet's check the answer.",
+            "timeout": "Time's up!",
+            "correct_answer": "The correct answer is:",
+            "retry": "Let's retry 😌",
+            "not_quite": "Not quite..."
+        },
+        "results": {
+            "well_done": "Well done",
+            "well_done_user": "Bravo {{name}}!",
+            "congrats": "Congratulations!",
+            "challenge_finished": "Challenge finished! (n°{{count}})",
+            "corrected_errors": "You corrected your mistakes",
+            "precision": "Precision",
+            "best_streak": "Your best streak",
+            "streak_val": "{{count}} correct in a row ✨",
+            "strongest_table": "Strongest table",
+            "weakest_table": "Table to watch",
+            "review_errors": "Review my mistakes",
+            "retry_challenge": "Play again",
+            "back_home": "Back to home",
+            "correction_msgs": [
+                "One less mistake, bravo. The Pro is settling in.",
+                "Every correction counts. You are really improving.",
+                "Well done! You understood everything this time 🎯",
+                "Great! That's how we progress 💪"
+            ]
+        },
+        "phrases": {
+            "correct": [
+                "Bravo, that's exactly it!",
+                "Super, your table is solid 💪",
+                "Perfect, you're getting faster ✨",
+                "Nice, keep it up!",
+                "Great! You mastered it! 🔥",
+                "Top! You are becoming very strong with this table 🚀"
+            ],
+            "error": [
+                "It's okay, we'll review this table 😉 if needed",
+                "Almost! We'll see it again later.",
+                "You'll improve by seeing it multiple times, it's normal.",
+                "Let's correct together and move on.",
+                "The important thing is to stay in the game, not to be perfect."
+            ]
+        },
+        "question_speak_result": "{{a}} times {{b}}?",
+        "question_speak_multiplier": "{{a}} times something equals {{r}}?",
+        "question_speak_multiplicand": "Something times {{b}} equals {{r}}?"
+    },
+    "user_form": {
+        "edit_title": "Edit user",
+        "new_title": "New user",
+        "photo_gallery": "Gallery",
+        "photo_camera": "Camera",
+        "first_name": "First name *",
+        "first_name_placeholder": "Ex: Marie",
+        "gender": "Gender *",
+        "boy": "Boy",
+        "girl": "Girl",
+        "age": "Age *",
+        "age_placeholder": "Ex: 8",
+        "grade": "Grade *",
+        "grade_placeholder": "Ex: 3rd Grade",
+        "challenge_questions": "Challenge - Number of questions",
+        "challenge_questions_sub": "Define how many questions will be asked in the challenge (12-50 questions)",
+        "questions_count": "Questions : {{count}}",
+        "badge_theme": "Badge theme",
+        "badge_theme_sub": "Choose the style of badges won during challenges",
+        "theme_space": "Space",
+        "theme_heroes": "Heroes",
+        "theme_animals": "Animals",
+        "audio": "Audio",
+        "audio_sub": "Customize the sound experience for this user",
+        "voice_enabled": "Voice on",
+        "voice_disabled": "Voice off",
+        "voice_female": "Female",
+        "voice_male": "Male",
+        "sound_enabled": "Sound effects on",
+        "sound_disabled": "Sound effects off",
+        "haptics_enabled": "Vibrations on",
+        "haptics_disabled": "Vibrations off",
+        "accessibility": "Accessibility",
+        "font": "Font",
+        "font_sub": "Choice of font for this user",
+        "font_standard": "Standard (Rounded)",
+        "font_modern": "Modern (Lexend)",
+        "font_dys": "Special Dys (OpenDyslexic)",
+        "zen_mode_on": "Zen Mode on",
+        "zen_mode_off": "Zen Mode off",
+        "timer": "Timer",
+        "timer_on": "On",
+        "timer_off": "Off",
+        "display_mode": "Display mode",
+        "bar": "Bar",
+        "chronometer": "Stopwatch",
+        "duration": "Duration : {{count}} sec",
+        "save": "Save",
+        "error_firstname": "First name is required",
+        "error_age": "Age must be a valid number",
+        "error_grade": "Grade is required",
+        "error_save": "Error saving user",
+        "permission_gallery": "Gallery access permission required",
+        "permission_camera": "Camera access permission required",
+        "permission_title": "Permission required",
+        "error_title": "Error"
+    },
+    "difficulty": {
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard"
+    }
+}

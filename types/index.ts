@@ -119,6 +119,7 @@ export interface UnlockedAchievement {
 export type RewardType = 'level_badge' | 'achievement';
 
 export interface QueuedReward {
+  id?: string;
   type: RewardType;
   priority: number;
   icon: string;

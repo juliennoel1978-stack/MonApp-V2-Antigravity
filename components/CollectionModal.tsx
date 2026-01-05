@@ -16,6 +16,7 @@ import { PERSISTENCE_BADGES, getBadgeIcon, getBadgeTitle, ENDURANCE_BADGES } fro
 import { ACHIEVEMENTS } from '@/constants/achievements';
 import { useApp } from '@/contexts/AppContext';
 import { BadgeTheme, User } from '@/types';
+import i18n from '@/utils/i18n';
 
 const { width, height } = Dimensions.get('window');
 
@@ -101,7 +102,7 @@ function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlip
           styles.achievementTitle,
           !isUnlocked && styles.achievementTitleLocked
         ]} numberOfLines={2}>
-          {achievement.title}
+          {i18n.t(achievement.title)}
         </ThemedText>
         {count > 1 && (
           <View style={styles.countBadgeBottom}>
@@ -121,10 +122,10 @@ function AchievementFlipCard({ achievement, isUnlocked, count }: AchievementFlip
       >
         <View style={styles.achievementBackContent}>
           <ThemedText style={styles.achievementBackTitle}>
-            {achievement.backTitle}
+            {i18n.t(achievement.backTitle || '')}
           </ThemedText>
           <ThemedText style={styles.achievementDescriptionText}>
-            {achievement.message}
+            {i18n.t(achievement.message)}
           </ThemedText>
         </View>
       </Animated.View>
@@ -209,7 +210,7 @@ function EnduranceFlipCard({ threshold, isUnlocked, title, icon, backTitle, back
           styles.achievementTitle,
           !isUnlocked && styles.achievementTitleLocked
         ]} numberOfLines={2}>
-          {title}
+          {i18n.t(title)}
         </ThemedText>
       </Animated.View>
 
@@ -224,14 +225,14 @@ function EnduranceFlipCard({ threshold, isUnlocked, title, icon, backTitle, back
       >
         <View style={styles.achievementBackContent}>
           <ThemedText style={styles.enduranceBackTitle}>
-            {backTitle}
+            {i18n.t(backTitle)}
           </ThemedText>
           <ThemedText style={styles.enduranceBackMessage}>
-            {backMessage}
+            {i18n.t(backMessage)}
           </ThemedText>
         </View>
       </Animated.View>
-    </TouchableOpacity>
+    </TouchableOpacity >
 
   );
 }
@@ -316,10 +317,10 @@ function AdventureFlipCard({ badge, isUnlocked, gender }: AdventureFlipCardProps
             styles.badgeTitle,
             !isUnlocked && styles.badgeTitleLocked
           ]}>
-            {getBadgeTitle(badge, gender)}
+            {i18n.t(getBadgeTitle(badge, gender))}
           </ThemedText>
           <ThemedText style={styles.badgeThreshold}>
-            {isUnlocked ? `${badge.threshold} Challenges` : `${badge.threshold} Challenges`}
+            {`${badge.threshold} ${i18n.t('collection.challenges_suffix')}`}
           </ThemedText>
         </View>
 
@@ -335,7 +336,7 @@ function AdventureFlipCard({ badge, isUnlocked, gender }: AdventureFlipCardProps
         pointerEvents={isFlipped ? 'auto' : 'none'}
       >
         <ThemedText style={styles.adventureBackText}>
-          {isUnlocked ? badge.message : "Mystère... Encore un peu d'entraînement ! 🔒"}
+          {isUnlocked ? i18n.t(badge.message) : i18n.t('badges.locked_badge')}
         </ThemedText>
       </Animated.View>
     </TouchableOpacity>
@@ -411,7 +412,7 @@ export default function CollectionModal({
           >
             {/* ZONE 1: MON AVENTURE */}
             <View style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>MON AVENTURE</ThemedText>
+              <ThemedText style={styles.sectionTitle}>{i18n.t('collection.adventure_section')}</ThemedText>
               <View style={styles.adventureList}>
                 {badges.map((badge, index) => {
                   const isUnlocked = challengesCompleted >= badge.threshold;
@@ -432,7 +433,7 @@ export default function CollectionModal({
 
             {/* ZONE 2: MES EXPLOITS */}
             <View style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>MES EXPLOITS</ThemedText>
+              <ThemedText style={styles.sectionTitle}>{i18n.t('collection.achievements_section')}</ThemedText>
               <View style={styles.achievementsGrid}>
                 {sortedAchievements.map((achievement) => {
                   const unlocked = unlockedAchievements.find(ua => ua.id === achievement.id);
@@ -455,7 +456,7 @@ export default function CollectionModal({
 
             {/* ZONE 3: ENDURANCE */}
             <View style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>ENDURANCE</ThemedText>
+              <ThemedText style={styles.sectionTitle}>{i18n.t('collection.endurance_section')}</ThemedText>
               <View style={styles.achievementsGrid}>
                 {ENDURANCE_BADGES.map((badge) => {
                   const isUnlocked = hasEnduranceBadge(badge.threshold);

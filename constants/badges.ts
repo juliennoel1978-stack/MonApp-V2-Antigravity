@@ -30,37 +30,37 @@ export const isGenderedBadge = (badge: BadgeConfig): badge is GenderedBadgeDefin
 
 export const PERSISTENCE_BADGES: Record<BadgeTheme, BadgeConfig[]> = {
   space: [
-    { threshold: 1, title: 'Passager', message: "Bienvenue à bord !", icon: '✨' },
-    { threshold: 4, title: 'Élève Pilote', message: 'Prêt au décollage ?', icon: '🌙' },
-    { threshold: 7, title: 'Pilote', message: 'Tu as les commandes.', icon: '🚀' },
-    { threshold: 10, title: 'Astronaute', message: 'En route vers les étoiles.', icon: { male: '👨‍🚀', female: '👩‍🚀', default: '🧑‍🚀' } },
-    { threshold: 15, title: 'Explorateur Lunaire', message: "Un petit pas pour l'homme...", icon: '🛰️' },
-    { threshold: 20, title: 'Voyageur Solaire', message: "Tu brilles comme le soleil.", icon: '☀️' },
-    { threshold: 25, title: 'Capitaine', message: "L'équipage t'écoute.", icon: '🌠' },
-    { threshold: 30, title: 'Commandant Galactique', message: "L'univers est à toi.", icon: '🪐' },
-    { threshold: 45, title: "Gardien de l'Univers", message: 'Protecteur des galaxies.', icon: '🌌' },
+    { threshold: 1, title: 'badges.space.1.title', message: 'badges.space.1.message', icon: '✨' },
+    { threshold: 4, title: 'badges.space.4.title', message: 'badges.space.4.message', icon: '🌙' },
+    { threshold: 7, title: 'badges.space.7.title', message: 'badges.space.7.message', icon: '🚀' },
+    { threshold: 10, title: 'badges.space.10.title', message: 'badges.space.10.message', icon: { male: '👨‍🚀', female: '👩‍🚀', default: '🧑‍🚀' } },
+    { threshold: 15, title: 'badges.space.15.title', message: 'badges.space.15.message', icon: '🛰️' },
+    { threshold: 20, title: 'badges.space.20.title', message: 'badges.space.20.message', icon: '☀️' },
+    { threshold: 25, title: 'badges.space.25.title', message: 'badges.space.25.message', icon: '🌠' },
+    { threshold: 30, title: 'badges.space.30.title', message: 'badges.space.30.message', icon: '🪐' },
+    { threshold: 45, title: 'badges.space.45.title', message: 'badges.space.45.message', icon: '🌌' },
   ],
   animals: [
-    { threshold: 1, title: 'Petite Fourmi', message: 'Petite mais très costaud !', icon: '🐜' },
-    { threshold: 4, title: 'Écureuil Malin', message: 'Tu fais des réserves de savoir.', icon: '🐿️' },
-    { threshold: 7, title: 'Renard Rusé', message: 'Tu ne te fais jamais piéger.', icon: '🦊' },
-    { threshold: 10, title: 'Guépard Rapide', message: 'Tu calcules à toute vitesse !', icon: '🐆' },
-    { threshold: 15, title: 'Dauphin Agile', message: 'Tu navigues dans les tables.', icon: '🐬' },
-    { threshold: 20, title: 'Aigle Royal', message: "Tu vois les erreurs de loin.", icon: '🦅' },
-    { threshold: 25, title: 'Ours Puissant', message: "Rien ne peut t'arrêter.", icon: '🐻' },
-    { threshold: 30, title: 'Roi de la Jungle', message: "C'est toi le patron !", icon: '🦁' },
-    { threshold: 45, title: 'Dragon Légendaire', message: 'Tu es un mythe vivant !', icon: '🐉' },
+    { threshold: 1, title: 'badges.animals.1.title', message: 'badges.animals.1.message', icon: '🐜' },
+    { threshold: 4, title: 'badges.animals.4.title', message: 'badges.animals.4.message', icon: '🐿️' },
+    { threshold: 7, title: 'badges.animals.7.title', message: 'badges.animals.7.message', icon: '🦊' },
+    { threshold: 10, title: 'badges.animals.10.title', message: 'badges.animals.10.message', icon: '🐆' },
+    { threshold: 15, title: 'badges.animals.15.title', message: 'badges.animals.15.message', icon: '🐬' },
+    { threshold: 20, title: 'badges.animals.20.title', message: 'badges.animals.20.message', icon: '🦅' },
+    { threshold: 25, title: 'badges.animals.25.title', message: 'badges.animals.25.message', icon: '🐻' },
+    { threshold: 30, title: 'badges.animals.30.title', message: 'badges.animals.30.message', icon: '🦁' },
+    { threshold: 45, title: 'badges.animals.45.title', message: 'badges.animals.45.message', icon: '🐉' },
   ],
   heroes: [
-    { threshold: 1, title: 'Apprenti', message: 'Ton entraînement commence.', icon: '🎒' },
-    { threshold: 4, title: 'Éclaireur', message: 'Ouvre la voie !', icon: '🔦' },
-    { threshold: 7, title: 'Justicier', message: 'Tu défends les bonnes réponses.', icon: '🛡️' },
-    { threshold: 10, title: 'Super-Vitesse', message: "Plus rapide que l'éclair.", icon: '⚡' },
-    { threshold: 15, title: "Ninja de l'Ombre", message: 'Discret et efficace.', icon: '🥷' },
-    { threshold: 20, title: 'Mega-Cerveau', message: "Ton esprit est ton arme.", icon: '🧠' },
-    { threshold: 25, title: 'Titan', message: "Une force de la nature.", icon: '🦾' },
-    { threshold: 30, title: 'Invincible', message: 'Zéro défaut, zéro dégât.', icon: '💥' },
-    { threshold: 45, title: { male: 'Super-Héros', female: 'Super-Héroïne', default: 'Super-Héros' }, message: 'Tu as sauvé le monde !', icon: { male: '🦸‍♂️', female: '🦸‍♀️', default: '🦸' } },
+    { threshold: 1, title: 'badges.heroes.1.title', message: 'badges.heroes.1.message', icon: '🎒' },
+    { threshold: 4, title: 'badges.heroes.4.title', message: 'badges.heroes.4.message', icon: '🔦' },
+    { threshold: 7, title: 'badges.heroes.7.title', message: 'badges.heroes.7.message', icon: '🛡️' },
+    { threshold: 10, title: 'badges.heroes.10.title', message: 'badges.heroes.10.message', icon: '⚡' },
+    { threshold: 15, title: 'badges.heroes.15.title', message: 'badges.heroes.15.message', icon: '🥷' },
+    { threshold: 20, title: 'badges.heroes.20.title', message: 'badges.heroes.20.message', icon: '🧠' },
+    { threshold: 25, title: 'badges.heroes.25.title', message: 'badges.heroes.25.message', icon: '🦾' },
+    { threshold: 30, title: 'badges.heroes.30.title', message: 'badges.heroes.30.message', icon: '💥' },
+    { threshold: 45, title: { male: 'badges.heroes.45.title', female: 'badges.heroes.45.title_female', default: 'badges.heroes.45.title' }, message: 'badges.heroes.45.message', icon: { male: '🦸‍♂️', female: '🦸‍♀️', default: '🦸' } },
   ],
 };
 
@@ -124,7 +124,7 @@ export const checkForNewBadge = (
         const newBadge: UnlockedBadge = {
           id: `${theme}_${badge.threshold}`,
           threshold: badge.threshold,
-          title,
+          title, // This now stores the translation key
           icon,
           unlockedAt: new Date().toISOString(),
         };
@@ -155,7 +155,7 @@ export const getNextBadgeInfo = (
       const icon = getBadgeIcon(badge, gender);
       const title = getBadgeTitle(badge, gender);
       return {
-        title,
+        title, // This now returns a key
         icon,
         threshold: badge.threshold,
         challengesRemaining: badge.threshold - totalChallengesCompleted,
@@ -177,23 +177,23 @@ export interface EnduranceBadgeDefinition {
 export const ENDURANCE_BADGES: EnduranceBadgeDefinition[] = [
   {
     threshold: 20,
-    title: 'Esprit Focus',
+    title: 'endurance.20.title',
     icon: '🧠',
-    backTitle: 'Concentré !',
-    backMessage: 'Tu restes focus.'
+    backTitle: 'endurance.20.back_title',
+    backMessage: 'endurance.20.message'
   },
   {
     threshold: 30,
-    title: 'Marathonien',
+    title: 'endurance.30.title',
     icon: '🏃',
-    backTitle: 'Endurance !',
-    backMessage: 'Quelle course !'
+    backTitle: 'endurance.30.back_title',
+    backMessage: 'endurance.30.message'
   },
   {
     threshold: 50,
-    title: 'L\'Everest',
+    title: 'endurance.50.title',
     icon: '🏔️',
-    backTitle: 'Sommet !',
-    backMessage: '50 questions !'
+    backTitle: 'endurance.50.back_title',
+    backMessage: 'endurance.50.message'
   }
 ];

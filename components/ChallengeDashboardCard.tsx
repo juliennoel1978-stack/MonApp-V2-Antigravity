@@ -1,4 +1,6 @@
 import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react';
+import i18n from '@/utils/i18n';
+
 
 import { View, StyleSheet, useWindowDimensions, TouchableOpacity, Animated } from 'react-native';
 import { AppColors } from '@/constants/colors';
@@ -23,28 +25,29 @@ interface ChallengeDashboardCardProps {
 }
 
 const getProgressLabel = (theme: BadgeTheme, plural: boolean = true): string => {
+  const suffix = plural ? '_p' : '_s';
   switch (theme) {
     case 'space':
-      return plural ? 'missions' : 'mission';
+      return i18n.t(`dashboard.mission${suffix}`);
     case 'heroes':
-      return plural ? 'exploits' : 'exploit';
+      return i18n.t(`dashboard.exploit${suffix}`);
     case 'animals':
-      return plural ? 'défis' : 'défi';
+      return i18n.t(`dashboard.defi${suffix}`);
     default:
-      return plural ? 'challenges' : 'challenge';
+      return i18n.t(`dashboard.challenge${suffix}`);
   }
 };
 
 const getZeroStateMessage = (theme: BadgeTheme): string => {
   switch (theme) {
     case 'space':
-      return 'Lance ta première mission !';
+      return i18n.t('dashboard.start_mission');
     case 'heroes':
-      return 'Accomplis ton 1er exploit !';
+      return i18n.t('dashboard.start_exploit');
     case 'animals':
-      return 'Relève ton premier défi !';
+      return i18n.t('dashboard.start_defi');
     default:
-      return 'Lance ton premier challenge !';
+      return i18n.t('dashboard.start_challenge');
   }
 };
 
@@ -197,16 +200,16 @@ export default function ChallengeDashboardCard({
 
   const getProgressMessage = (): string => {
     if (hasMaxBadge) {
-      return '🎉 Niveau maximum atteint !';
+      return i18n.t('dashboard.max_level');
     }
     if (isZeroState) {
       return getZeroStateMessage(theme);
     }
     const nextBadge = getNextBadgeInfo(totalChallengesCompleted, theme, gender);
     if (nextBadge) {
-      return `Plus que ${remaining} ${progressLabel} pour\n${nextBadge.icon} ${nextBadge.title}`;
+      return i18n.t('dashboard.more_to_go', { count: remaining, label: progressLabel, icon: nextBadge.icon, title: i18n.t(nextBadge.title) });
     }
-    return `Plus que ${remaining} ${progressLabel} !`;
+    return i18n.t('dashboard.more_to_go_simple', { count: remaining, label: progressLabel });
   };
 
   return (
@@ -225,10 +228,10 @@ export default function ChallengeDashboardCard({
           </ThemedText>
           <View style={{ flex: 1 }}>
             <ThemedText style={[styles.levelTitle, isSmallScreen && styles.levelTitleSmall]}>
-              Niveau Actuel : {currentBadge?.title || 'Débutant'}
+              {i18n.t('dashboard.current_level', { level: currentBadge ? i18n.t(currentBadge.title) : i18n.t('dashboard.beginner') })}
             </ThemedText>
             <ThemedText style={{ fontSize: 11, color: AppColors.textSecondary, marginTop: 2 }}>
-              Voir ma collection ›
+              {i18n.t('dashboard.view_collection')}
             </ThemedText>
           </View>
         </View>
@@ -256,8 +259,8 @@ export default function ChallengeDashboardCard({
         {/* Flip Card A: Streak */}
         <FlipCard
           icon="🔥"
-          frontText={isZeroState ? 'Prêt ?' : `Série Max : ${bestStreak}`}
-          backText="Ton record de réponses justes à la suite !"
+          frontText={isZeroState ? i18n.t('dashboard.ready') : i18n.t('dashboard.max_streak', { streak: bestStreak })}
+          backText={i18n.t('dashboard.max_streak_desc')}
           isZeroState={isZeroState}
           isSmallScreen={isSmallScreen}
         />
@@ -265,8 +268,8 @@ export default function ChallengeDashboardCard({
         {/* Flip Card B: Strength */}
         <FlipCard
           icon="💪"
-          frontText={isZeroState ? 'Mystère...' : (strongestTable !== null ? `Table de ${strongestTable}` : '—')}
-          backText="C'est la table que tu connais le mieux !"
+          frontText={isZeroState ? i18n.t('dashboard.mystery') : (strongestTable !== null ? i18n.t('dashboard.strongest_table', { table: strongestTable }) : '—')}
+          backText={i18n.t('dashboard.strongest_table_desc')}
           isZeroState={isZeroState}
           isSmallScreen={isSmallScreen}
         />

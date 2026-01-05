@@ -4,6 +4,7 @@ import { Check, X, Clock } from 'lucide-react-native';
 import { ThemedText } from '../ThemedText';
 import { AppColors } from '@/constants/colors';
 import type { User } from '@/types';
+import i18n from '@/utils/i18n';
 
 type QuestionType = 'result' | 'multiplier' | 'multiplicand';
 
@@ -65,9 +66,9 @@ export const ChallengeFeedback = ({
                 ]}
             >
                 <ThemedText style={styles.celebrationEmoji}>🎉</ThemedText>
-                <ThemedText style={styles.celebrationText}>Bravo !</ThemedText>
+                <ThemedText style={styles.celebrationText}>{i18n.t('challenge.feedback.bravo')}</ThemedText>
                 <ThemedText style={styles.celebrationSubtext}>
-                    4 bonnes réponses d&apos;affilée !
+                    {i18n.t('challenge.feedback.streak')}
                 </ThemedText>
             </Animated.View>
         );
@@ -85,7 +86,7 @@ export const ChallengeFeedback = ({
                     <View style={styles.feedbackBox}>
                         <Check size={48} color={AppColors.success} />
                         <ThemedText style={[styles.feedbackText, { color: AppColors.success }]}>
-                            Correct !
+                            {i18n.t('challenge.feedback.correct')}
                         </ThemedText>
                         <ThemedText style={styles.encouragementText}>
                             {currentCorrectPhrase}
@@ -96,13 +97,13 @@ export const ChallengeFeedback = ({
                         <Clock size={48} color={AppColors.timerMiddle} />
                         <ThemedText style={[styles.feedbackText, { color: AppColors.timerMiddle, textAlign: 'center' }]}>
                             {timerDisplayMode === 'bar'
-                                ? "Prends ton temps,\non regarde la réponse ensemble."
-                                : "Temps écoulé !"}
+                                ? i18n.t('challenge.feedback.take_time')
+                                : i18n.t('challenge.feedback.timeout')}
                         </ThemedText>
                         {showCorrectAnswer && currentQuestion && (
                             <View style={styles.answerContainer}>
                                 <ThemedText style={styles.correctAnswerLabel}>
-                                    La bonne réponse est : <ThemedText style={styles.correctAnswerValue}>{currentQuestion.answer}</ThemedText>
+                                    {i18n.t('challenge.feedback.correct_answer')} <ThemedText style={styles.correctAnswerValue}>{currentQuestion.answer}</ThemedText>
                                 </ThemedText>
                                 <View style={styles.equationContainer}>
                                     <ThemedText style={styles.equationText}>
@@ -129,12 +130,12 @@ export const ChallengeFeedback = ({
                     <View style={styles.feedbackBox}>
                         <X size={48} color={attempts === 1 ? AppColors.timerMiddle : AppColors.timerEnd} />
                         <ThemedText style={[styles.feedbackText, { color: attempts === 1 ? AppColors.timerMiddle : AppColors.timerEnd }]}>
-                            {attempts === 1 ? 'On réessaie 😌' : 'Pas tout à fait...'}
+                            {attempts === 1 ? i18n.t('challenge.feedback.retry') : i18n.t('challenge.feedback.not_quite')}
                         </ThemedText>
                         {showCorrectAnswer && currentQuestion && (
                             <View style={styles.answerContainer}>
                                 <ThemedText style={styles.correctAnswerLabel}>
-                                    La bonne réponse est : <ThemedText style={styles.correctAnswerValue}>{currentQuestion.answer}</ThemedText>
+                                    {i18n.t('challenge.feedback.correct_answer')} <ThemedText style={styles.correctAnswerValue}>{currentQuestion.answer}</ThemedText>
                                 </ThemedText>
                                 <View style={styles.equationContainer}>
                                     <ThemedText style={styles.equationText}>

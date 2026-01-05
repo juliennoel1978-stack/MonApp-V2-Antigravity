@@ -10,23 +10,25 @@ type ChallengeStatsProps = {
     max: number;
 };
 
+import i18n from '@/utils/i18n';
+
 export const ChallengeStats = ({ correct, incorrect, total, max }: ChallengeStatsProps) => {
     return (
         <View style={styles.statsBar}>
             <View style={styles.statBox}>
-                <ThemedText style={styles.statLabel}>Bonnes</ThemedText>
+                <ThemedText style={styles.statLabel}>{i18n.t('challenge.stats.correct')}</ThemedText>
                 <ThemedText style={[styles.statValue, { color: AppColors.success }]}>
                     {correct}
                 </ThemedText>
             </View>
             <View style={styles.statBox}>
-                <ThemedText style={styles.statLabel}>Mauvaises</ThemedText>
+                <ThemedText style={styles.statLabel}>{i18n.t('challenge.stats.incorrect')}</ThemedText>
                 <ThemedText style={[styles.statValue, { color: AppColors.error }]}>
                     {incorrect}
                 </ThemedText>
             </View>
             <View style={styles.statBox}>
-                <ThemedText style={styles.statLabel}>Total</ThemedText>
+                <ThemedText style={styles.statLabel}>{i18n.t('challenge.stats.total')}</ThemedText>
                 <ThemedText style={[styles.statValue, { color: AppColors.primary }]}>
                     {total}/{max}
                 </ThemedText>

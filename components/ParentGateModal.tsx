@@ -3,6 +3,7 @@ import { View, Modal, TouchableOpacity, StyleSheet, TextInput, KeyboardAvoidingV
 import { ThemedText } from './ThemedText';
 import { AppColors } from '@/constants/colors';
 import { Lock, X, RefreshCw } from 'lucide-react-native';
+import i18n from '@/utils/i18n';
 
 const { width } = Dimensions.get('window');
 
@@ -92,10 +93,10 @@ export const ParentGateModal = ({ visible, onClose, onSuccess }: ParentGateModal
                             <Lock color={AppColors.primary} size={32} />
                         </View>
 
-                        <ThemedText style={styles.title}>Zone Parents & Réglages</ThemedText>
+                        <ThemedText style={styles.title}>{i18n.t('parent_gate.title')}</ThemedText>
 
                         <ThemedText style={styles.subtitle}>
-                            Résolvez pour accéder :
+                            {i18n.t('parent_gate.subtitle')}
                         </ThemedText>
 
                         <TouchableOpacity onPress={generateChallenge} activeOpacity={0.7} style={{ marginBottom: 16 }}>
@@ -112,7 +113,7 @@ export const ParentGateModal = ({ visible, onClose, onSuccess }: ParentGateModal
                                 setInput(text.replace(/[^0-9]/g, ''));
                                 setError(false);
                             }}
-                            placeholder="Réponse"
+                            placeholder={i18n.t('parent_gate.placeholder_answer')}
                             placeholderTextColor={AppColors.textLight}
                             keyboardType="number-pad"
                             maxLength={3}
@@ -120,18 +121,18 @@ export const ParentGateModal = ({ visible, onClose, onSuccess }: ParentGateModal
                         />
 
                         {error && (
-                            <ThemedText style={styles.errorText}>Mauvaise réponse</ThemedText>
+                            <ThemedText style={styles.errorText}>{i18n.t('parent_gate.error_wrong_answer')}</ThemedText>
                         )}
 
                         <TouchableOpacity
                             style={styles.verifyButton}
                             onPress={handleVerify}
                         >
-                            <ThemedText style={styles.verifyButtonText}>Valider</ThemedText>
+                            <ThemedText style={styles.verifyButtonText}>{i18n.t('common.validate')}</ThemedText>
                         </TouchableOpacity>
 
                         <ThemedText style={styles.disclaimer}>
-                            Protection des réglages
+                            {i18n.t('parent_gate.disclaimer')}
                         </ThemedText>
                     </ScrollView>
                 </View>

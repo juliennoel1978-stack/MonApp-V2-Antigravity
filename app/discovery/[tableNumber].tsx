@@ -19,6 +19,7 @@ import { AppColors, NumberColors } from '@/constants/colors';
 import { getTableByNumber } from '@/constants/tables';
 import { ThemedText } from '@/components/ThemedText';
 import { useAudio } from '@/hooks/useAudio';
+import i18n from '@/utils/i18n';
 
 // Keep this for static styles usage, while component uses hook for dynamic updates
 const { width } = Dimensions.get('window');
@@ -249,8 +250,8 @@ export default function DiscoveryScreen() {
 
   const steps = [
     {
-      title: `Découvre la table de ${table.number}`,
-      content: table.story,
+      title: i18n.t('practice.discovery.title', { number: table.number }),
+      content: i18n.t(table.story),
       visual: (
         <TouchableOpacity
           style={[styles.visualContainer, { backgroundColor: tableColor + '20', padding: 28, marginTop: 12 }]}
@@ -260,17 +261,17 @@ export default function DiscoveryScreen() {
           <ThemedText style={[styles.bigNumber, { color: tableColor }]}>
             {table.number}
           </ThemedText>
-          <ThemedText style={styles.visualText}>Table de {table.number}</ThemedText>
+          <ThemedText style={styles.visualText}>{i18n.t('practice.discovery.table_of', { number: table.number })}</ThemedText>
         </TouchableOpacity>
       ),
     },
     {
-      title: 'Astuce magique',
-      content: table.tip,
+      title: i18n.t('practice.discovery.magic_tip'),
+      content: i18n.t(table.tip),
       visual: (
         <View style={styles.tipContainer}>
           <ThemedText style={styles.tipEmoji}>💡</ThemedText>
-          <ThemedText style={styles.tipText}>{table.tip}</ThemedText>
+          <ThemedText style={styles.tipText}>{i18n.t(table.tip)}</ThemedText>
           <View style={styles.tipExamplesContainer}>
             {getTipExamples(table.number).map((example, idx) => (
               <View key={idx} style={[styles.tipExampleCard, { borderColor: tableColor }]}>
@@ -288,8 +289,8 @@ export default function DiscoveryScreen() {
       ),
     },
     {
-      title: 'Compte avec moi !',
-      content: 'Clique sur les multiplications pour entendre comment elles se lisent !',
+      title: i18n.t('practice.discovery.count_with_me'),
+      content: i18n.t('practice.discovery.count_instructions'),
       visual: (
         <ScrollView
           style={{ width: '100%', maxHeight: 400 }}
@@ -338,18 +339,18 @@ export default function DiscoveryScreen() {
       ),
     },
     {
-      title: 'C\'est parti !',
-      content: 'Maintenant, teste tes connaissances avec le quiz !',
+      title: i18n.t('practice.discovery.intro_title'),
+      content: i18n.t('practice.discovery.intro_subtitle'),
       visual: (
         <View style={styles.readyContainer}>
           <ThemedText style={styles.readyEmoji}>🚀 🌟</ThemedText>
-          <ThemedText style={styles.readyTitle}>C&apos;est parti !</ThemedText>
-          <ThemedText style={styles.encouragementText}>Tu vas assurer comme un champion ! {"\n"} Prêt à gagner des étoiles ?</ThemedText>
+          <ThemedText style={styles.readyTitle}>{i18n.t('practice.discovery.intro_title')}</ThemedText>
+          <ThemedText style={styles.encouragementText}>{i18n.t('practice.discovery.intro_card_message')}</ThemedText>
           <TouchableOpacity
             style={[styles.practiceButton, { backgroundColor: tableColor }]}
             onPress={() => router.push(`/practice/${table.number}` as any)}
           >
-            <ThemedText style={styles.practiceButtonText}>Commencer le quiz</ThemedText>
+            <ThemedText style={styles.practiceButtonText}>{i18n.t('practice.discovery.start_quiz')}</ThemedText>
             <ArrowRight size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
@@ -415,7 +416,7 @@ export default function DiscoveryScreen() {
                   onPress={() => speakMultiplication(table.number, selectedMultiplication.multiplier, selectedMultiplication.result)}
                 >
                   <Volume2 size={24} color="#FFFFFF" />
-                  <ThemedText style={styles.repeatButtonText}>Réécouter</ThemedText>
+                  <ThemedText style={styles.repeatButtonText}>{i18n.t('practice.discovery.listen_again')}</ThemedText>
                 </TouchableOpacity>
               </View>
             )}
@@ -498,7 +499,7 @@ export default function DiscoveryScreen() {
               testID="prev-button"
             >
               <ArrowLeft size={20} color={AppColors.text} />
-              <ThemedText style={styles.navButtonText}>Précédent</ThemedText>
+              <ThemedText style={styles.navButtonText}>{i18n.t('practice.discovery.previous')}</ThemedText>
             </TouchableOpacity>
           )}
 
@@ -513,7 +514,7 @@ export default function DiscoveryScreen() {
               onPress={() => setCurrentStep(currentStep + 1)}
               testID="next-button"
             >
-              <ThemedText style={styles.nextButtonText}>Suivant</ThemedText>
+              <ThemedText style={styles.nextButtonText}>{i18n.t('practice.discovery.next')}</ThemedText>
               <ArrowRight size={20} color="#FFFFFF" />
             </TouchableOpacity>
           )}

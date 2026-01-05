@@ -15,6 +15,8 @@ import {
   Image,
   Pressable,
 } from 'react-native';
+import i18n from '@/utils/i18n';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors, NumberColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
@@ -28,7 +30,7 @@ const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData, settings, anonymousChallengesCompleted, getPersistenceBadges, getBestStreak } = useApp();
+  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData, settings, anonymousChallengesCompleted, getPersistenceBadges, getBestStreak, hasSelectedAnonymousMode, setHasSelectedAnonymousMode } = useApp();
   const [showTablesModal, setShowTablesModal] = React.useState(false);
   const [showCollectionModal, setShowCollectionModal] = React.useState(false);
   const [showParentGate, setShowParentGate] = React.useState(false);
@@ -72,15 +74,15 @@ export default function HomeScreen() {
           setShowFirstLaunchModal(true);
         }, 600);
         return () => clearTimeout(timer);
-      } else if (users.length > 0 && !currentUser) {
-
+      } else if (users.length > 0 && !currentUser && !hasSelectedAnonymousMode) {
+        // Only show if not already in explicit anonymous mode
         const timer = setTimeout(() => {
           setShowUserModal(true);
         }, 600);
         return () => clearTimeout(timer);
       }
     }
-  }, [users, currentUser, isReady]);
+  }, [users, currentUser, isReady, hasSelectedAnonymousMode]);
 
   useEffect(() => {
     if (isReady) {
@@ -159,6 +161,9 @@ export default function HomeScreen() {
   };
 
   const closeModal = () => {
+    // If closing without selecting checks out as anonymous intention
+    setHasSelectedAnonymousMode(true);
+
     Animated.parallel([
       Animated.timing(modalOpacity, {
         toValue: 0,
@@ -405,7 +410,7 @@ export default function HomeScreen() {
   if (!isReady) {
     return (
       <View style={{ flex: 1, backgroundColor: AppColors.background, justifyContent: 'center', alignItems: 'center' }}>
-        <ThemedText style={{ fontSize: 24, color: AppColors.text }}>Chargement...</ThemedText>
+        <ThemedText style={{ fontSize: 24, color: AppColors.text }}>{i18n.t('home.loading')}</ThemedText>
       </View>
     );
   }
@@ -424,7 +429,7 @@ export default function HomeScreen() {
           alignItems: 'center',
           zIndex: 1000,
         }}>
-          <ThemedText style={{ fontSize: 18, color: AppColors.text }}>Mise à jour...</ThemedText>
+          <ThemedText style={{ fontSize: 18, color: AppColors.text }}>{i18n.t('home.updating')}</ThemedText>
         </View>
       )}
       <SafeAreaView style={styles.container} edges={['top']}>
@@ -473,9 +478,9 @@ export default function HomeScreen() {
                 </View>
               )}
               <View style={styles.titleContent}>
-                <ThemedText style={styles.title}>Tables Magiques</ThemedText>
+                <ThemedText style={styles.title}>{i18n.t('home.title')}</ThemedText>
                 {currentUser && (
-                  <ThemedText style={styles.userName}>Bonjour {currentUser.firstName} !</ThemedText>
+                  <ThemedText style={styles.userName}>{i18n.t('home.greeting', { name: currentUser.firstName })}</ThemedText>
                 )}
 
                 {(zenMode || isDyslexic || isMuted) && (
@@ -483,19 +488,19 @@ export default function HomeScreen() {
                     {zenMode && (
                       <View style={[styles.statusBadge, { backgroundColor: '#E8F5E9', borderColor: '#C8E6C9' }]}>
                         <Leaf size={14} color="#2E7D32" />
-                        <ThemedText style={[styles.statusText, { color: '#2E7D32' }]}>Zen</ThemedText>
+                        <ThemedText style={[styles.statusText, { color: '#2E7D32' }]}>{i18n.t('home.zen')}</ThemedText>
                       </View>
                     )}
                     {isDyslexic && (
                       <View style={[styles.statusBadge, { backgroundColor: '#E3F2FD', borderColor: '#BBDEFB' }]}>
                         <Eye size={14} color="#1565C0" />
-                        <ThemedText style={[styles.statusText, { color: '#1565C0' }]}>Dys</ThemedText>
+                        <ThemedText style={[styles.statusText, { color: '#1565C0' }]}>{i18n.t('home.dys')}</ThemedText>
                       </View>
                     )}
                     {isMuted && (
                       <View style={[styles.statusBadge, { backgroundColor: '#FFEBEE', borderColor: '#FFCDD2' }]}>
                         <VolumeX size={14} color="#C62828" />
-                        <ThemedText style={[styles.statusText, { color: '#C62828' }]}>Muet</ThemedText>
+                        <ThemedText style={[styles.statusText, { color: '#C62828' }]}>{i18n.t('home.muted')}</ThemedText>
                       </View>
                     )}
                   </View>
@@ -509,20 +514,20 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.subtitleContainer}>
-              <ThemedText style={styles.subtitleMain}>Deviens un as du calcul ✨</ThemedText>
-              <ThemedText style={styles.subtitleSecondary}>Apprends en t{"'"}amusant !</ThemedText>
+              <ThemedText style={styles.subtitleMain}>{i18n.t('home.subtitle_main')}</ThemedText>
+              <ThemedText style={styles.subtitleSecondary}>{i18n.t('home.subtitle_secondary')}</ThemedText>
             </View>
 
             <View style={styles.progressCard}>
               <View style={styles.progressHeader}>
                 <Trophy size={20} color={AppColors.warning} />
-                <ThemedText style={styles.progressTitle}>Ta Progression</ThemedText>
+                <ThemedText style={styles.progressTitle}>{i18n.t('home.progression_title')}</ThemedText>
               </View>
 
               <View style={styles.statsContainer}>
                 <View style={styles.statItem}>
                   <ThemedText style={styles.statValue}>{totalStars}</ThemedText>
-                  <ThemedText style={styles.statLabel}>⭐ Étoiles</ThemedText>
+                  <ThemedText style={styles.statLabel}>⭐ {i18n.t('home.stars')}</ThemedText>
                 </View>
 
                 <View style={styles.statDivider} />
@@ -536,7 +541,7 @@ export default function HomeScreen() {
                   <ThemedText style={styles.statValue}>
                     {completedTables}/{totalTables}
                   </ThemedText>
-                  <ThemedText style={styles.statLabel}>Tables</ThemedText>
+                  <ThemedText style={styles.statLabel}>{i18n.t('home.tables')}</ThemedText>
                 </TouchableOpacity>
               </View>
 
@@ -561,7 +566,7 @@ export default function HomeScreen() {
                   activeOpacity={0.8}
                 >
                   <ThemedText style={styles.missionIcon}>🎯</ThemedText>
-                  <ThemedText style={styles.missionButtonText}>Mission : Table de {missionTable}</ThemedText>
+                  <ThemedText style={styles.missionButtonText}>{i18n.t('home.mission', { number: missionTable })}</ThemedText>
                   <ThemedText style={styles.missionChevron}>➔</ThemedText>
                 </TouchableOpacity>
               )}
@@ -572,7 +577,7 @@ export default function HomeScreen() {
               onPress={() => router.push('/tables' as any)}
               testID="start-button"
             >
-              <ThemedText style={styles.startButtonText}>Commencer</ThemedText>
+              <ThemedText style={styles.startButtonText}>{i18n.t('home.start')}</ThemedText>
               <Sparkles size={24} color="#FFFFFF" />
             </TouchableOpacity>
 
@@ -581,7 +586,7 @@ export default function HomeScreen() {
               onPress={() => router.push('/challenge' as any)}
               testID="challenge-button"
             >
-              <ThemedText style={styles.challengeButtonText}>Challenge</ThemedText>
+              <ThemedText style={styles.challengeButtonText}>{i18n.t('home.challenge')}</ThemedText>
               <Zap size={24} color="#FFFFFF" />
             </TouchableOpacity>
 
@@ -640,7 +645,7 @@ export default function HomeScreen() {
               >
                 <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
                   <View style={styles.tablesModalHeader}>
-                    <ThemedText style={styles.tablesModalTitle}>Mes Tables</ThemedText>
+                    <ThemedText style={styles.tablesModalTitle}>{i18n.t('tables_modal.title')}</ThemedText>
                     <TouchableOpacity
                       style={styles.tablesModalCloseButton}
                       onPress={closeTablesModal}
@@ -693,13 +698,13 @@ export default function HomeScreen() {
                   <View style={styles.tablesModalLegend}>
                     <View style={styles.legendItem}>
                       <View style={[styles.legendBox, styles.legendBoxNotSeen]} />
-                      <ThemedText style={styles.legendText}>Non vue</ThemedText>
+                      <ThemedText style={styles.legendText}>{i18n.t('tables_modal.legend_not_seen')}</ThemedText>
                     </View>
                     <View style={styles.legendItem}>
                       <View style={[styles.legendBox, styles.legendBoxCompleted]}>
                         <ThemedText style={styles.legendStarSmall}>⭐</ThemedText>
                       </View>
-                      <ThemedText style={styles.legendText}>Maîtrisée</ThemedText>
+                      <ThemedText style={styles.legendText}>{i18n.t('tables_modal.legend_mastered')}</ThemedText>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -734,11 +739,11 @@ export default function HomeScreen() {
                     <X size={24} color={AppColors.text} />
                   </TouchableOpacity>
                   <View style={styles.modalHeaderContent}>
-                    <ThemedText style={styles.modalTitle}>Qui es-tu ?</ThemedText>
-                    <ThemedText style={styles.modalSubtitle}>Choisis ton profil</ThemedText>
+                    <ThemedText style={styles.modalTitle}>{i18n.t('user_modal.title')}</ThemedText>
+                    <ThemedText style={styles.modalSubtitle}>{i18n.t('user_modal.subtitle')}</ThemedText>
                     {users.length > 0 && (
                       <ThemedText style={{ fontSize: 10, color: AppColors.textSecondary, marginTop: 4 }}>
-                        ({users.length} utilisateurs disponibles)
+                        {i18n.t('user_modal.available_users', { count: users.length })}
                       </ThemedText>
                     )}
                   </View>
@@ -752,10 +757,10 @@ export default function HomeScreen() {
                     {users.length === 0 && (
                       <View style={{ width: '100%', padding: 20, alignItems: 'center' }}>
                         <ThemedText style={{ fontSize: 16, color: AppColors.textSecondary, textAlign: 'center' }}>
-                          Aucun utilisateur trouvé
+                          {i18n.t('user_modal.no_users')}
                         </ThemedText>
                         <ThemedText style={{ fontSize: 14, color: AppColors.textSecondary, marginTop: 10, textAlign: 'center' }}>
-                          Crée un profil pour commencer !
+                          {i18n.t('user_modal.create_profile')}
                         </ThemedText>
                       </View>
                     )}
@@ -795,7 +800,7 @@ export default function HomeScreen() {
                           <Plus size={48} color={AppColors.primary} />
                         </View>
                       </View>
-                      <ThemedText style={styles.addUserName}>Ajouter</ThemedText>
+                      <ThemedText style={styles.addUserName}>{i18n.t('user_modal.add')}</ThemedText>
                     </TouchableOpacity>
 
                     {users.length > 0 && (

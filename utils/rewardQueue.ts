@@ -58,12 +58,13 @@ export const checkForRewards = (context: ChallengeContext): RewardCheckResult =>
     );
 
     queue.push({
+      id: 'level_badge', // Special ID for level badges, though logical handling differs
       type: 'level_badge',
       priority: PRIORITY.LEVEL_BADGE,
       icon: levelBadge.icon,
       title: levelBadge.title,
       message: badgeConfig.message,
-      headerText: 'Nouveau Niveau !',
+      headerText: 'badges.new_level',
       nextBadgeInfo: nextBadge,
     });
   }
@@ -78,12 +79,13 @@ export const checkForRewards = (context: ChallengeContext): RewardCheckResult =>
       };
       newAchievements.push(achievement);
       queue.push({
+        id: 'time_master',
         type: 'achievement',
         priority: PRIORITY.ONE_SHOT_ACHIEVEMENT,
         icon: timeMasterAchievement.emoji,
         title: timeMasterAchievement.title,
         message: timeMasterAchievement.message,
-        headerText: 'Nouveau Succès !',
+        headerText: 'badges.new_achievement',
         achievementType: 'ONE_SHOT',
       });
     }
@@ -99,12 +101,13 @@ export const checkForRewards = (context: ChallengeContext): RewardCheckResult =>
       };
       newAchievements.push(achievement);
       queue.push({
+        id: 'perfect_score',
         type: 'achievement',
         priority: PRIORITY.RECURRING_ACHIEVEMENT,
         icon: perfectScoreAchievement.emoji,
         title: perfectScoreAchievement.title,
         message: perfectScoreAchievement.message,
-        headerText: 'Nouveau Succès !',
+        headerText: 'badges.new_achievement',
         achievementType: 'RECURRING',
       });
     }
@@ -123,12 +126,13 @@ export const checkForRewards = (context: ChallengeContext): RewardCheckResult =>
       };
       newAchievements.push(achievement);
       queue.push({
+        id: 'early_bird',
         type: 'achievement',
         priority: PRIORITY.RECURRING_ACHIEVEMENT,
         icon: earlyBirdAchievement.emoji,
         title: earlyBirdAchievement.title,
         message: earlyBirdAchievement.message,
-        headerText: 'Nouveau Succès !',
+        headerText: 'badges.new_achievement',
         achievementType: 'RECURRING',
       });
     }
@@ -144,12 +148,13 @@ export const checkForRewards = (context: ChallengeContext): RewardCheckResult =>
       };
       newAchievements.push(achievement);
       queue.push({
+        id: 'night_owl',
         type: 'achievement',
         priority: PRIORITY.RECURRING_ACHIEVEMENT,
         icon: nightOwlAchievement.emoji,
         title: nightOwlAchievement.title,
         message: nightOwlAchievement.message,
-        headerText: 'Nouveau Succès !',
+        headerText: 'badges.new_achievement',
         achievementType: 'RECURRING',
       });
     }
@@ -183,12 +188,13 @@ export const checkForRewards = (context: ChallengeContext): RewardCheckResult =>
         };
         newAchievements.push(achievement);
         queue.push({
+          id: 'regular_player',
           type: 'achievement',
           priority: PRIORITY.RECURRING_ACHIEVEMENT,
           icon: regularPlayerAchievement.emoji,
           title: regularPlayerAchievement.title,
           message: regularPlayerAchievement.message,
-          headerText: 'Nouveau Succès !',
+          headerText: 'badges.new_achievement',
           achievementType: 'RECURRING',
         });
       }
@@ -210,12 +216,13 @@ export const checkStrategistAchievement = (
   const strategistAchievement = getAchievementById('strategist');
   if (strategistAchievement && !isAchievementUnlocked('strategist', existingAchievements)) {
     return {
+      id: 'strategist',
       type: 'achievement',
       priority: PRIORITY.ONE_SHOT_ACHIEVEMENT,
       icon: strategistAchievement.emoji,
       title: strategistAchievement.title,
       message: strategistAchievement.message,
-      headerText: 'Nouveau Succès !',
+      headerText: 'badges.new_achievement',
       achievementType: 'ONE_SHOT',
     };
   }

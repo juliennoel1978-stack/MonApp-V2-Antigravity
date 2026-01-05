@@ -17,13 +17,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
 import CollectionModal from '@/components/CollectionModal';
+import i18n from '@/utils/i18n';
 
 
 
 // Helper to format date
+// Helper to format date
 const formatDate = (dateString?: string) => {
-  if (!dateString) return 'Jamais';
-  return new Date(dateString).toLocaleDateString('fr-FR', {
+  if (!dateString) return i18n.t('settings.never');
+  return new Date(dateString).toLocaleDateString(i18n.locale, {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
@@ -31,15 +33,15 @@ const formatDate = (dateString?: string) => {
   });
 };
 
-const BADGE_NAMES: Record<string, string> = {
-  '10_correct': 'Débutant',
-  '50_correct': 'Expert',
-  '100_correct': 'Maître',
-  'streak_3': 'Série 3',
-  'streak_5': 'Série 5',
-  'streak_10': 'Série 10',
-  'fast_answer': 'Éclair',
-  'perfect_score': 'Parfait',
+const BADGE_KEYS: Record<string, string> = {
+  '10_correct': 'settings.badge_levels.beginner',
+  '50_correct': 'settings.badge_levels.expert',
+  '100_correct': 'settings.badge_levels.master',
+  'streak_3': 'settings.badge_levels.streak_3',
+  'streak_5': 'settings.badge_levels.streak_5',
+  'streak_10': 'settings.badge_levels.streak_10',
+  'fast_answer': 'settings.badge_levels.lighting',
+  'perfect_score': 'settings.badge_levels.perfect',
 };
 
 const BADGE_ICONS: Record<string, string> = {
@@ -143,7 +145,7 @@ export default function SettingsScreen() {
       return sortedByDate[0].tableNumber;
     }
 
-    return "Aucune";
+    return i18n.t('settings.none');
   };
 
   const getAverageTime = (user: any) => {
@@ -166,9 +168,9 @@ export default function SettingsScreen() {
   };
 
   const badgeThemes = [
-    { value: 'space', label: 'Espace', icon: '🚀' },
-    { value: 'animals', label: 'Animaux', icon: '🦁' },
-    { value: 'heroes', label: 'Héros', icon: '🦸' },
+    { value: 'space', label: i18n.t('settings.themes.space'), icon: '🚀' },
+    { value: 'animals', label: i18n.t('settings.themes.animals'), icon: '🦁' },
+    { value: 'heroes', label: i18n.t('settings.themes.heroes'), icon: '🦸' },
   ];
 
   const handleResetUser = (user: any) => {
@@ -199,12 +201,12 @@ export default function SettingsScreen() {
 
     if (Platform.OS === 'web') {
       // @ts-ignore
-      if (confirm(`Réinitialiser ${user.firstName} ?`)) resetAction();
+      if (confirm(i18n.t('settings.alerts.reset_confirm') + ` ${user.firstName} ?`)) resetAction();
     } else {
       Alert.alert(
-        "Réinitialiser ?",
-        "Ceci effacera TOUS les progrès (badges, scores, temps).",
-        [{ text: "Annuler" }, { text: "Réinitialiser", style: 'destructive', onPress: resetAction }]
+        i18n.t('settings.alerts.reset_title'),
+        i18n.t('settings.alerts.reset_msg'),
+        [{ text: i18n.t('settings.alerts.reset_cancel') }, { text: i18n.t('settings.alerts.reset_confirm'), style: 'destructive', onPress: resetAction }]
       );
     }
   };
@@ -214,7 +216,7 @@ export default function SettingsScreen() {
     // If persistenceBadges contains IDs
     return user.persistenceBadges.map((id: string) => ({
       id,
-      name: BADGE_NAMES[id] || 'Badge',
+      name: i18n.t(BADGE_KEYS[id] || 'settings.badges'),
       icon: BADGE_ICONS[id] || '🏅'
     }));
   };
@@ -231,7 +233,7 @@ export default function SettingsScreen() {
           <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>
             <ThemedText style={styles.headerButtonText}>✕</ThemedText>
           </TouchableOpacity>
-          <ThemedText style={styles.headerTitle}>Paramètres</ThemedText>
+          <ThemedText style={styles.headerTitle}>{i18n.t('settings.title')}</ThemedText>
         </View>
 
         <ScrollView
@@ -242,10 +244,10 @@ export default function SettingsScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeaderRow}>
               <Users size={20} color={AppColors.primary} style={{ marginRight: 8 }} />
-              <Text style={styles.sectionTitle}>Espace Parents & Profils</Text>
+              <Text style={styles.sectionTitle}>{i18n.t('settings.parents_zone')}</Text>
             </View>
             <Text style={[styles.sectionNote, { marginBottom: 16 }]}>
-              Gérez les profils et suivez la progression.
+              {i18n.t('settings.manage_profiles')}
             </Text>
 
             {users.filter(u => u && u.firstName).map(user => {
@@ -273,11 +275,11 @@ export default function SettingsScreen() {
                       </View>
                       <View style={{ flex: 1 }}>
                         <ThemedText style={[styles.userName, isCurrent && { color: AppColors.primary }]}>{user.firstName}</ThemedText>
-                        <ThemedText style={styles.userDetails}>{user.age} ans • {user.grade}</ThemedText>
+                        <ThemedText style={styles.userDetails}>{user.age} {i18n.t('common.years')} • {user.grade}</ThemedText>
                       </View>
                     </View>
                     <View style={styles.userHeaderRight}>
-                      {isCurrent && <View style={styles.badgeCurrent}><Text style={styles.badgeCurrentText}>Actif</Text></View>}
+                      {isCurrent && <View style={styles.badgeCurrent}><Text style={styles.badgeCurrentText}>{i18n.t('settings.active')}</Text></View>}
                       {isExpanded ? <ChevronUp size={20} color={AppColors.textSecondary} /> : <ChevronDown size={20} color={AppColors.textSecondary} />}
                     </View>
                   </TouchableOpacity>
@@ -293,17 +295,17 @@ export default function SettingsScreen() {
                           onPress={() => {
                             if (Platform.OS === 'web') {
                               // @ts-ignore
-                              if (confirm(`Choisir ${user.firstName} ?`)) { selectUser(user.id); router.back(); }
+                              if (confirm(i18n.t('settings.alerts.select_msg', { name: user.firstName }))) { selectUser(user.id); router.back(); }
                             } else {
-                              Alert.alert("Choisir ce profil", `Basculer sur ${user.firstName} ?`, [
-                                { text: "Annuler", style: "cancel" },
-                                { text: "Oui", onPress: () => { selectUser(user.id); router.back(); } }
+                              Alert.alert(i18n.t('settings.alerts.select_title'), i18n.t('settings.alerts.select_msg', { name: user.firstName }), [
+                                { text: i18n.t('settings.alerts.reset_cancel'), style: "cancel" },
+                                { text: i18n.t('settings.alerts.select_confirm'), onPress: () => { selectUser(user.id); router.back(); } }
                               ]);
                             }
                           }}
                         >
                           <Play size={20} fill="#FFF" color="#FFF" />
-                          <Text style={styles.selectProfileButtonText}>Choisir ce profil</Text>
+                          <Text style={styles.selectProfileButtonText}>{i18n.t('settings.select_profile')}</Text>
                         </TouchableOpacity>
                       )}
 
@@ -318,21 +320,21 @@ export default function SettingsScreen() {
                             {userBadges.length}
                             {/* Note: This counts persistence badges array, logic matches CollectionModal */}
                           </Text>
-                          <Text style={styles.kpiLabel}>Badges</Text>
+                          <Text style={styles.kpiLabel} numberOfLines={1} adjustsFontSizeToFit>{i18n.t('settings.badges')}</Text>
                         </TouchableOpacity>
                         <View style={styles.kpiItem}>
                           <RefreshCw size={20} color={AppColors.primary} />
                           <Text style={styles.kpiValue}>
                             {user.challengesCompleted || 0}
                           </Text>
-                          <Text style={styles.kpiLabel}>Défis</Text>
+                          <Text style={styles.kpiLabel} numberOfLines={1} adjustsFontSizeToFit>{i18n.t('settings.challenges')}</Text>
                         </View>
                         <View style={styles.kpiItem}>
                           <Timer size={20} color={AppColors.secondary} />
                           <Text style={styles.kpiValue}>
                             {getAverageTime(user)}
                           </Text>
-                          <Text style={styles.kpiLabel}>Vitesse moy.</Text>
+                          <Text style={styles.kpiLabel} numberOfLines={1} adjustsFontSizeToFit>{i18n.t('settings.avg_speed')}</Text>
                         </View>
                       </View>
 
@@ -345,15 +347,15 @@ export default function SettingsScreen() {
                       <View style={[styles.kpiRow, { marginTop: 0 }]}>
                         <View style={styles.kpiItem}>
                           <Text style={[styles.kpiValue, { color: AppColors.success }]}>
-                            Table {getStrongestTable(user)}
+                            {i18n.t('common.table')} {getStrongestTable(user)}
                           </Text>
-                          <Text style={styles.kpiLabel}>Table Forte</Text>
+                          <Text style={styles.kpiLabel} numberOfLines={1} adjustsFontSizeToFit>{i18n.t('settings.strongest_table')}</Text>
                         </View>
                         <View style={styles.kpiItem}>
                           <Text style={[styles.kpiValue, { color: AppColors.error }]}>
-                            Table {getWeakestTable(user)}
+                            {i18n.t('common.table')} {getWeakestTable(user)}
                           </Text>
-                          <Text style={styles.kpiLabel}>À revoir</Text>
+                          <Text style={styles.kpiLabel} numberOfLines={1} adjustsFontSizeToFit>{i18n.t('settings.weakest_table')}</Text>
                         </View>
                       </View>
 
@@ -361,15 +363,17 @@ export default function SettingsScreen() {
                       <View style={styles.activityRow}>
                         <Calendar size={14} color={AppColors.textSecondary} />
                         <Text style={styles.activityText}>
-                          Dernière activité : {formatDate(user.progress.reduce((latest: string, p: any) => {
-                            if (!p.lastPracticed) return latest;
-                            return (!latest || new Date(p.lastPracticed) > new Date(latest)) ? p.lastPracticed : latest;
-                          }, user.createdAt))}
+                          {i18n.t('settings.last_activity', {
+                            date: formatDate(user.progress.reduce((latest: string, p: any) => {
+                              if (!p.lastPracticed) return latest;
+                              return (!latest || new Date(p.lastPracticed) > new Date(latest)) ? p.lastPracticed : latest;
+                            }, user.createdAt))
+                          })}
                         </Text>
                       </View>
 
                       {/* RADAR */}
-                      <Text style={styles.radarTitle}>Maîtrise des Tables</Text>
+                      <Text style={styles.radarTitle}>{i18n.t('settings.tables_mastery')}</Text>
                       <View style={styles.radarGrid}>
                         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => {
                           const color = getTableStatusColor(user, num);
@@ -390,7 +394,7 @@ export default function SettingsScreen() {
                           onPress={() => router.push(`/user-form?userId=${user.id}` as any)}
                         >
                           <Edit size={18} color={AppColors.text} />
-                          <Text style={styles.actionButtonText}>Modifier le profil</Text>
+                          <Text style={styles.actionButtonText}>{i18n.t('settings.edit_profile')}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -398,7 +402,7 @@ export default function SettingsScreen() {
                           onPress={() => handleResetUser(user)}
                         >
                           <RotateCcw size={18} color={AppColors.text} />
-                          <Text style={styles.actionButtonText}>Réinitialiser la progression</Text>
+                          <Text style={styles.actionButtonText}>{i18n.t('settings.reset_progress')}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -406,14 +410,14 @@ export default function SettingsScreen() {
                           onPress={() => {
                             if (Platform.OS === 'web') {
                               // @ts-ignore
-                              if (window.confirm("Supprimer ?")) deleteUser(user.id);
+                              if (window.confirm(i18n.t('settings.alerts.delete_title'))) deleteUser(user.id);
                             } else {
-                              Alert.alert("Supprimer ?", "Action irréversible.", [{ text: "Annuler" }, { text: "Supprimer", style: 'destructive', onPress: () => deleteUser(user.id) }]);
+                              Alert.alert(i18n.t('settings.alerts.delete_title'), i18n.t('settings.alerts.delete_msg'), [{ text: i18n.t('settings.alerts.reset_cancel') }, { text: i18n.t('settings.alerts.delete_confirm'), style: 'destructive', onPress: () => deleteUser(user.id) }]);
                             }
                           }}
                         >
                           <Trash2 size={18} color={AppColors.error} />
-                          <Text style={[styles.actionButtonText, { color: AppColors.error }]}>Supprimer le profil</Text>
+                          <Text style={[styles.actionButtonText, { color: AppColors.error }]}>{i18n.t('settings.delete_profile')}</Text>
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -426,7 +430,7 @@ export default function SettingsScreen() {
               style={styles.addUserButton}
               onPress={() => router.push('/user-form' as any)}
             >
-              <Text style={styles.addUserButtonText}>+ Ajouter un profil</Text>
+              <Text style={styles.addUserButtonText}>{i18n.t('settings.add_profile')}</Text>
             </TouchableOpacity>
 
           </View>
@@ -435,15 +439,15 @@ export default function SettingsScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeaderRow}>
               <Zap size={20} color={AppColors.primary} style={{ marginRight: 8 }} />
-              <Text style={styles.sectionTitle}>Préférences Générales (Tous)</Text>
+              <Text style={styles.sectionTitle}>{i18n.t('settings.general_prefs')}</Text>
             </View>
             <Text style={[styles.sectionNote, { marginBottom: 16 }]}>
-              Appliqué à tous les profils.
+              {i18n.t('settings.applied_to_all')}
             </Text>
 
             <View style={styles.settingItem}>
               <View style={styles.settingLeft}>
-                <ThemedText style={styles.settingTitle}>Musique & Sons</ThemedText>
+                <ThemedText style={styles.settingTitle}>{i18n.t('settings.music_sounds')}</ThemedText>
               </View>
               <Switch
                 value={settings.soundEnabled}
@@ -454,7 +458,7 @@ export default function SettingsScreen() {
 
             <View style={styles.settingItem}>
               <View style={styles.settingLeft}>
-                <ThemedText style={styles.settingTitle}>Vibrations</ThemedText>
+                <ThemedText style={styles.settingTitle}>{i18n.t('settings.vibrations')}</ThemedText>
               </View>
               <Switch
                 value={settings.hapticsEnabled}
@@ -465,7 +469,7 @@ export default function SettingsScreen() {
 
             <View style={styles.settingItem}>
               <View style={styles.settingLeft}>
-                <ThemedText style={styles.settingTitle}>Synthèse Vocale</ThemedText>
+                <ThemedText style={styles.settingTitle}>{i18n.t('settings.tts')}</ThemedText>
               </View>
               <Switch
                 value={settings.voiceEnabled}
@@ -477,8 +481,8 @@ export default function SettingsScreen() {
             {settings.voiceEnabled && (
               <View style={styles.settingItem}>
                 <View style={styles.settingLeft}>
-                  <ThemedText style={styles.settingTitle}>Voix de l&apos;Assistant</ThemedText>
-                  <Text style={styles.settingSubTitle}>Masculine ou Féminine</Text>
+                  <ThemedText style={styles.settingTitle}>{i18n.t('settings.assistant_voice')}</ThemedText>
+                  <Text style={styles.settingSubTitle}>{i18n.t('settings.male_female')}</Text>
                 </View>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   <TouchableOpacity
@@ -509,8 +513,8 @@ export default function SettingsScreen() {
 
             <View style={styles.settingItem}>
               <View style={styles.settingLeft}>
-                <ThemedText style={styles.settingTitle}>Mode Zen</ThemedText>
-                <Text style={styles.settingSubTitle}>Moins d&apos;animations</Text>
+                <ThemedText style={styles.settingTitle}>{i18n.t('settings.zen_mode')}</ThemedText>
+                <Text style={styles.settingSubTitle}>{i18n.t('settings.less_animations')}</Text>
               </View>
               <Switch
                 value={settings.zenMode}
@@ -520,8 +524,8 @@ export default function SettingsScreen() {
             </View>
 
             <View style={[styles.settingItem, { flexDirection: 'column', alignItems: 'flex-start' }]}>
-              <Text style={[styles.settingTitle, { marginBottom: 12 }]}>Police d&apos;écriture</Text>
-              <Text style={[styles.settingSubTitle, { marginBottom: 16 }]}>Choisissez le style de texte le plus confortable</Text>
+              <Text style={[styles.settingTitle, { marginBottom: 12 }]}>{i18n.t('settings.font')}</Text>
+              <Text style={[styles.settingSubTitle, { marginBottom: 16 }]}>{i18n.t('settings.choose_style')}</Text>
 
               <View style={[styles.challengeQuestionsButtons, { flexDirection: 'column', width: '100%', gap: 8 }]}>
                 {/* Standard */}
@@ -533,8 +537,8 @@ export default function SettingsScreen() {
                   ]}
                   onPress={() => updateSettings({ fontPreference: 'standard', dyslexiaFontEnabled: false })}
                 >
-                  <Text style={{ fontSize: 16, color: '#333' }}>Standard</Text>
-                  <Text style={{ fontSize: 14, color: '#666' }}>Arrondie (Défaut)</Text>
+                  <Text style={{ fontSize: 16, color: '#333' }}>{i18n.t('settings.font_standard')}</Text>
+                  <Text style={{ fontSize: 14, color: '#666' }}>{i18n.t('settings.font_rounded')}</Text>
                 </TouchableOpacity>
 
                 {/* Lexend */}
@@ -546,8 +550,8 @@ export default function SettingsScreen() {
                   ]}
                   onPress={() => updateSettings({ fontPreference: 'lexend', dyslexiaFontEnabled: true })}
                 >
-                  <Text style={{ fontSize: 16, fontFamily: 'Lexend', color: '#333' }}>Moderne</Text>
-                  <Text style={{ fontSize: 14, color: '#666' }}>Fluide (Lexend)</Text>
+                  <Text style={{ fontSize: 16, fontFamily: 'Lexend', color: '#333' }}>{i18n.t('settings.font_modern')}</Text>
+                  <Text style={{ fontSize: 14, color: '#666' }}>{i18n.t('settings.font_fluid')}</Text>
                 </TouchableOpacity>
 
                 {/* OpenDyslexic */}
@@ -567,9 +571,9 @@ export default function SettingsScreen() {
                   onPress={() => updateSettings({ fontPreference: 'opendyslexic', dyslexiaFontEnabled: false })}
                 >
                   <View style={{ flex: 1, marginRight: 8 }}>
-                    <Text style={{ fontSize: 16, fontFamily: 'OpenDyslexic', color: '#333' }}>Spéciale Dys</Text>
+                    <Text style={{ fontSize: 16, fontFamily: 'OpenDyslexic', color: '#333' }}>{i18n.t('settings.font_dys')}</Text>
                   </View>
-                  <Text style={{ fontSize: 14, color: '#666' }}>OpenDyslexic</Text>
+                  <Text style={{ fontSize: 14, color: '#666' }}>{i18n.t('settings.font_opendys')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -581,14 +585,14 @@ export default function SettingsScreen() {
               style={styles.actionButtonWide}
               onPress={() => {
                 Alert.alert(
-                  "Réinitialiser le mode invité ?",
-                  "Effacer toute la progression anonyme (non sauvegardée) ?",
-                  [{ text: "Annuler" }, { text: "Effacer", style: "destructive", onPress: resetProgress }]
+                  i18n.t('settings.alerts.reset_guest_title'),
+                  i18n.t('settings.alerts.reset_guest_msg'),
+                  [{ text: i18n.t('settings.alerts.reset_cancel') }, { text: i18n.t('settings.alerts.reset_guest_confirm'), style: "destructive", onPress: resetProgress }]
                 )
               }}
             >
               <RotateCcw size={18} color={AppColors.textSecondary} />
-              <Text style={[styles.actionButtonText, { color: AppColors.textSecondary }]}>Réinitialiser mode Invité</Text>
+              <Text style={[styles.actionButtonText, { color: AppColors.textSecondary }]}>{i18n.t('settings.reset_guest')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -596,12 +600,12 @@ export default function SettingsScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeaderRow}>
               <Clock size={20} color={AppColors.primary} style={{ marginRight: 8 }} />
-              <Text style={styles.sectionTitle}>Paramètres de Jeu</Text>
+              <Text style={styles.sectionTitle}>{i18n.t('settings.game_settings')}</Text>
             </View>
 
             {/* Question Count */}
             <View style={[styles.settingItem, { flexDirection: 'column', alignItems: 'flex-start' }]}>
-              <Text style={[styles.settingTitle, { marginBottom: 12 }]}>Questions par Challenge</Text>
+              <Text style={[styles.settingTitle, { marginBottom: 12 }]}>{i18n.t('settings.questions_per_challenge')}</Text>
               <View style={styles.challengeQuestionsButtons}>
                 {[10, 15, 20, 30].map((num) => (
                   <TouchableOpacity
@@ -627,7 +631,7 @@ export default function SettingsScreen() {
 
             {/* Badge Theme */}
             <View style={[styles.settingItem, { flexDirection: 'column', alignItems: 'flex-start' }]}>
-              <Text style={[styles.settingTitle, { marginBottom: 12 }]}>Thème des Badges</Text>
+              <Text style={[styles.settingTitle, { marginBottom: 12 }]}>{i18n.t('settings.badge_theme')}</Text>
               <View style={styles.challengeQuestionsButtons}>
                 {badgeThemes.map((theme) => (
                   <TouchableOpacity
@@ -652,8 +656,8 @@ export default function SettingsScreen() {
             {/* Timer Toggle */}
             <View style={styles.settingItem}>
               <View style={styles.settingLeft}>
-                <ThemedText style={styles.settingTitle}>Chronomètre</ThemedText>
-                <Text style={styles.settingSubTitle}>Activer le temps en challenge</Text>
+                <ThemedText style={styles.settingTitle}>{i18n.t('settings.timer')}</ThemedText>
+                <Text style={styles.settingSubTitle}>{i18n.t('settings.enable_timer')}</Text>
               </View>
               <Switch
                 value={settings.timerEnabled}
@@ -667,11 +671,11 @@ export default function SettingsScreen() {
               <View style={{ marginTop: -12, marginBottom: 20, paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: AppColors.borderLight }}>
 
                 {/* Timer Mode */}
-                <Text style={[styles.settingTitle, { fontSize: 14, marginBottom: 8, marginTop: 8 }]}>Mode d&apos;affichage</Text>
+                <Text style={[styles.settingTitle, { fontSize: 14, marginBottom: 8, marginTop: 8 }]}>{i18n.t('settings.display_mode')}</Text>
                 <View style={styles.challengeQuestionsButtons}>
                   {[
-                    { id: 'chronometer', label: '⏱️ Chrono' },
-                    { id: 'bar', label: '📊 Barre' }
+                    { id: 'chronometer', label: i18n.t('settings.chrono') },
+                    { id: 'bar', label: i18n.t('settings.bar') }
                   ].map((mode) => (
                     <TouchableOpacity
                       key={mode.id}
@@ -692,7 +696,7 @@ export default function SettingsScreen() {
                 </View>
 
                 {/* Timer Duration (Only if Bar? Or both? Assuming Bar usually needs duration, but user asked for "duration" generally) */}
-                <Text style={[styles.settingTitle, { fontSize: 14, marginBottom: 8, marginTop: 16 }]}>Durée par question (Barre)</Text>
+                <Text style={[styles.settingTitle, { fontSize: 14, marginBottom: 8, marginTop: 16 }]}>{i18n.t('settings.duration_per_question')}</Text>
                 <View style={styles.challengeQuestionsButtons}>
                   {[10, 20, 30, 60].map((dur) => (
                     <TouchableOpacity
@@ -723,7 +727,7 @@ export default function SettingsScreen() {
             style={styles.closeButton}
             onPress={() => router.back()}
           >
-            <Text style={styles.closeButtonText}>Fermer</Text>
+            <Text style={styles.closeButtonText}>{i18n.t('common.close')}</Text>
           </TouchableOpacity>
 
           <View style={{ height: 40 }} />

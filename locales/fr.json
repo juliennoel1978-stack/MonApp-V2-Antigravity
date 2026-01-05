@@ -1,0 +1,663 @@
+{
+    "home": {
+        "loading": "Chargement...",
+        "updating": "Mise à jour...",
+        "title": "Tables Magiques",
+        "greeting": "Bonjour {{name}} !",
+        "zen": "Zen",
+        "dys": "Dys",
+        "muted": "Muet",
+        "subtitle_main": "Deviens un as du calcul ✨",
+        "subtitle_secondary": "Apprends en t'amusant !",
+        "progression_title": "Ta Progression",
+        "stars": "Étoiles",
+        "tables": "Tables",
+        "mission": "Mission : Table de {{number}}",
+        "start": "Commencer",
+        "challenge": "Challenge"
+    },
+    "tables_modal": {
+        "title": "Mes Tables",
+        "not_seen": "Non vue",
+        "mastered": "Maîtrisée",
+        "legend_not_seen": "Non vue",
+        "legend_mastered": "Maîtrisée"
+    },
+    "user_modal": {
+        "title": "Qui es-tu ?",
+        "subtitle": "Choisis ton profil",
+        "available_users": "({{count}} utilisateurs disponibles)",
+        "no_users": "Aucun utilisateur trouvé",
+        "create_profile": "Crée un profil pour commencer !",
+        "add": "Ajouter"
+    },
+    "parent_gate": {
+        "title": "Zone Parents & Réglages",
+        "subtitle": "Résolvez pour accéder :",
+        "placeholder_answer": "Réponse",
+        "error_wrong_answer": "Mauvaise réponse",
+        "disclaimer": "Protection des réglages"
+    },
+    "common": {
+        "grade_cp": "CP (6-7 ans)",
+        "grade_ce1": "CE1 (7-8 ans)",
+        "grade_ce2": "CE2 (8-9 ans)",
+        "grade_cm1": "CM1 (9-10 ans)",
+        "grade_cm2": "CM2 (10-11 ans)",
+        "grade_6eme": "6ème (11-12 ans)",
+        "validate": "Valider",
+        "cancel": "Annuler",
+        "close": "Fermer",
+        "years": "ans",
+        "table": "Table",
+        "back_to_menu": "Retour au menu",
+        "next_badge": "Prochain badge",
+        "repeatable": "Peut être obtenu à nouveau",
+        "tap_to_continue": "Touche pour continuer"
+    },
+    "dashboard": {
+        "mission_s": "mission",
+        "mission_p": "missions",
+        "exploit_s": "exploit",
+        "exploit_p": "exploits",
+        "defi_s": "défi",
+        "defi_p": "défis",
+        "challenge_s": "challenge",
+        "challenge_p": "challenges",
+        "start_mission": "Lance ta première mission !",
+        "start_exploit": "Accomplis ton 1er exploit !",
+        "start_defi": "Relève ton premier défi !",
+        "start_challenge": "Lance ton premier challenge !",
+        "max_level": "🎉 Niveau maximum atteint !",
+        "more_to_go": "Plus que {{count}} {{label}} pour\n{{icon}} {{title}}",
+        "more_to_go_simple": "Plus que {{count}} {{label}} !",
+        "current_level": "Niveau Actuel : {{level}}",
+        "beginner": "Débutant",
+        "view_collection": "Voir ma collection ›",
+        "ready": "Prêt ?",
+        "max_streak": "Série Max : {{streak}}",
+        "max_streak_desc": "Ton record de réponses justes à la suite !",
+        "mystery": "Mystère...",
+        "strongest_table": "Table de {{table}}",
+        "strongest_table_desc": "C'est la table que tu connais le mieux !"
+    },
+    "badges": {
+        "locked_badge": "Mystère... Encore un peu d'entraînement ! 🔒",
+        "new_level": "Nouveau Niveau !",
+        "new_achievement": "Nouveau Succès !",
+        "space": {
+            "1": {
+                "title": "Passager",
+                "message": "Bienvenue à bord !"
+            },
+            "4": {
+                "title": "Élève Pilote",
+                "message": "Prêt au décollage ?"
+            },
+            "7": {
+                "title": "Pilote",
+                "message": "Tu as les commandes."
+            },
+            "10": {
+                "title": "Astronaute",
+                "message": "En route vers les étoiles."
+            },
+            "15": {
+                "title": "Explorateur Lunaire",
+                "message": "Un petit pas pour l'homme..."
+            },
+            "20": {
+                "title": "Voyageur Solaire",
+                "message": "Tu brilles comme le soleil."
+            },
+            "25": {
+                "title": "Capitaine",
+                "message": "L'équipage t'écoute."
+            },
+            "30": {
+                "title": "Commandant Galactique",
+                "message": "L'univers est à toi."
+            },
+            "45": {
+                "title": "Gardien de l'Univers",
+                "message": "Protecteur des galaxies."
+            }
+        },
+        "animals": {
+            "1": {
+                "title": "Petite Fourmi",
+                "message": "Petite mais très costaud !"
+            },
+            "4": {
+                "title": "Écureuil Malin",
+                "message": "Tu fais des réserves de savoir."
+            },
+            "7": {
+                "title": "Renard Rusé",
+                "message": "Tu ne te fais jamais piéger."
+            },
+            "10": {
+                "title": "Guépard Rapide",
+                "message": "Tu calcules à toute vitesse !"
+            },
+            "15": {
+                "title": "Dauphin Agile",
+                "message": "Tu navigues dans les tables."
+            },
+            "20": {
+                "title": "Aigle Royal",
+                "message": "Tu vois les erreurs de loin."
+            },
+            "25": {
+                "title": "Ours Puissant",
+                "message": "Rien ne peut t'arrêter."
+            },
+            "30": {
+                "title": "Roi de la Jungle",
+                "message": "C'est toi le patron !"
+            },
+            "45": {
+                "title": "Dragon Légendaire",
+                "message": "Tu es un mythe vivant !"
+            }
+        },
+        "heroes": {
+            "1": {
+                "title": "Apprenti",
+                "message": "Ton entraînement commence."
+            },
+            "4": {
+                "title": "Éclaireur",
+                "message": "Ouvre la voie !"
+            },
+            "7": {
+                "title": "Justicier",
+                "message": "Tu défends les bonnes réponses."
+            },
+            "10": {
+                "title": "Super-Vitesse",
+                "message": "Plus rapide que l'éclair."
+            },
+            "15": {
+                "title": "Ninja de l'Ombre",
+                "message": "Discret et efficace."
+            },
+            "20": {
+                "title": "Mega-Cerveau",
+                "message": "Ton esprit est ton arme."
+            },
+            "25": {
+                "title": "Titan",
+                "message": "Une force de la nature."
+            },
+            "30": {
+                "title": "Invincible",
+                "message": "Zéro défaut, zéro dégât."
+            },
+            "45": {
+                "title": "Super-Héros",
+                "message": "Tu as sauvé le monde !",
+                "title_female": "Super-Héroïne"
+            }
+        }
+    },
+    "achievements": {
+        "time_master": {
+            "title": "Maître du Temps",
+            "message": "Le temps est maîtrisé.",
+            "back_title": "Flash !"
+        },
+        "strategist": {
+            "title": "Grand Stratège",
+            "message": "Tu apprends vite !",
+            "back_title": "Génie !"
+        },
+        "regular_player": {
+            "title": "Habitué",
+            "message": "Tu es très régulier.",
+            "back_title": "Fidèle !"
+        },
+        "early_bird": {
+            "title": "Lève-tôt",
+            "message": "Déjà au travail !",
+            "back_title": "Debout !"
+        },
+        "night_owl": {
+            "title": "Insomnie",
+            "message": "Tu travailles même le soir !",
+            "back_title": "Oiseau de nuit"
+        },
+        "perfect_score": {
+            "title": "Oeil de Lynx",
+            "message": "Un sans faute.",
+            "back_title": "Quel talent !"
+        },
+        "streak_max": {
+            "title": "Série Max",
+            "message": "Quelle belle série !",
+            "back_title": "Invincible !"
+        }
+    },
+    "endurance": {
+        "20": {
+            "title": "Esprit Focus",
+            "message": "Tu restes focus.",
+            "back_title": "Concentré !"
+        },
+        "30": {
+            "title": "Marathonien",
+            "message": "Quelle course !",
+            "back_title": "Endurance !"
+        },
+        "50": {
+            "title": "L'Everest",
+            "message": "50 questions !",
+            "back_title": "Sommet !"
+        }
+    },
+    "collection": {
+        "adventure_section": "MON AVENTURE",
+        "achievements_section": "MES EXPLOITS",
+        "endurance_section": "ENDURANCE",
+        "challenges_suffix": "Challenges"
+    },
+    "settings": {
+        "title": "Paramètres",
+        "never": "Jamais",
+        "parents_zone": "Espace Parents & Profils",
+        "manage_profiles": "Gérez les profils et suivez la progression.",
+        "add_profile": "+ Ajouter un profil",
+        "badges": "Badges",
+        "challenges": "Défis",
+        "avg_speed": "Vitesse moy.",
+        "strongest_table": "Table Forte",
+        "weakest_table": "À revoir",
+        "none": "Aucune",
+        "last_activity": "Dernière activité : {{date}}",
+        "tables_mastery": "Maîtrise des Tables",
+        "edit_profile": "Modifier le profil",
+        "reset_progress": "Réinitialiser la progression",
+        "delete_profile": "Supprimer le profil",
+        "select_profile": "Choisir ce profil",
+        "active": "Actif",
+        "general_prefs": "Préférences Générales (Tous)",
+        "applied_to_all": "Appliqué à tous les profils.",
+        "music_sounds": "Musique & Sons",
+        "vibrations": "Vibrations",
+        "tts": "Synthèse Vocale",
+        "assistant_voice": "Voix de l'Assistant",
+        "male_female": "Masculine ou Féminine",
+        "zen_mode": "Mode Zen",
+        "less_animations": "Moins d'animations",
+        "font": "Police d'écriture",
+        "choose_style": "Choisissez le style de texte le plus confortable",
+        "font_standard": "Standard",
+        "font_rounded": "Arrondie (Défaut)",
+        "font_modern": "Moderne",
+        "font_fluid": "Fluide (Lexend)",
+        "font_dys": "Spéciale Dys",
+        "font_opendys": "OpenDyslexic",
+        "reset_guest": "Réinitialiser mode Invité",
+        "game_settings": "Paramètres de Jeu",
+        "questions_per_challenge": "Questions par Challenge",
+        "badge_theme": "Thème des Badges",
+        "timer": "Chronomètre",
+        "enable_timer": "Activer le temps en challenge",
+        "display_mode": "Mode d'affichage",
+        "chrono": "⏱️ Chrono",
+        "bar": "📊 Barre",
+        "duration_per_question": "Durée par question (Barre)",
+        "themes": {
+            "space": "Espace",
+            "animals": "Animaux",
+            "heroes": "Héros"
+        },
+        "badge_levels": {
+            "beginner": "Débutant",
+            "expert": "Expert",
+            "master": "Maître",
+            "streak_3": "Série 3",
+            "streak_5": "Série 5",
+            "streak_10": "Série 10",
+            "lighting": "Éclair",
+            "perfect": "Parfait"
+        },
+        "alerts": {
+            "reset_title": "Réinitialiser ?",
+            "reset_msg": "Ceci effacera TOUS les progrès (badges, scores, temps).",
+            "reset_confirm": "Réinitialiser",
+            "reset_cancel": "Annuler",
+            "select_title": "Choisir ce profil",
+            "select_msg": "Basculer sur {{name}} ?",
+            "select_confirm": "Oui",
+            "delete_title": "Supprimer ?",
+            "delete_msg": "Action irréversible.",
+            "delete_confirm": "Supprimer",
+            "reset_guest_title": "Réinitialiser le mode invité ?",
+            "reset_guest_msg": "Effacer toute la progression anonyme (non sauvegardée) ?",
+            "reset_guest_confirm": "Effacer"
+        }
+    },
+    "tables": {
+        "1": {
+            "story": "La table de 1, c'est facile ! Tout reste pareil.",
+            "tip": "N'importe quel nombre × 1 = ce nombre",
+            "astuce": "Quand on multiplie par 1, le résultat ne change jamais.",
+            "indice": "C'est le même nombre : on ne le multiplie pas vraiment.",
+            "erreur": "1 × X = X. On garde exactement le même nombre."
+        },
+        "2": {
+            "story": "La table de 2, c'est doubler ! Comme des jumeaux.",
+            "tip": "Compte de 2 en 2 : 2, 4, 6, 8, 10...",
+            "astuce": "On double le nombre : 2, 4, 6, 8...",
+            "indice": "Si tu connais +2, tu connais la table de 2.",
+            "erreur": "2 × X = X + X. On double le nombre."
+        },
+        "3": {
+            "story": "La table de 3, compte par bonds de 3 !",
+            "tip": "Compte de 3 en 3 : 3, 6, 9, 12, 15...",
+            "astuce": "On ajoute 3 à chaque fois, comme 3, 6, 9, 12...",
+            "indice": "Pense aux multiples de 3 : 3, 6, 9, 12, 15...",
+            "erreur": "3 × X = X + X + X. On ajoute 3 à chaque fois."
+        },
+        "4": {
+            "story": "La table de 4, c'est doubler deux fois !",
+            "tip": "Double le nombre, puis double encore",
+            "astuce": "4, 8, 12, 16... on ajoute toujours 4.",
+            "indice": "Tu peux faire ×2 puis encore ×2 : on double deux fois !",
+            "erreur": "4 × X = (2 × X) × 2. On double deux fois pour trouver le résultat."
+        },
+        "5": {
+            "story": "La table de 5, regarde tes doigts ! Ça finit toujours par 0 ou 5.",
+            "tip": "Les résultats finissent par 0 ou 5",
+            "astuce": "Les résultats finissent toujours par 0 ou 5.",
+            "indice": "Compte de 5 en 5 : 5, 10, 15, 20...",
+            "erreur": "5 × X = un nombre qui finit par 0 ou 5. Compte de 5 en 5 pour vérifier."
+        },
+        "6": {
+            "story": "La table de 6, c'est 5 + 1 de plus !",
+            "tip": "Utilise la table de 5 et ajoute le nombre",
+            "astuce": "Si tu connais ×3, double le résultat : 6 = 3+3.",
+            "indice": "Pense à faire 3 × X, puis tu doubles.",
+            "erreur": "6 × X = 3 × X + 3 × X. On double le résultat de la table de 3."
+        },
+        "7": {
+            "story": "La table de 7, la plus difficile ! Utilise des histoires.",
+            "tip": "Apprends avec des images et des histoires",
+            "astuce": "Table plus difficile : pense à la décomposition (5 × X + 2 × X).",
+            "indice": "Fais 5 × X, puis ajoute encore 2 × X.",
+            "erreur": "7 × X = 5 × X + 2 × X. On peut la découper pour trouver plus facilement."
+        },
+        "8": {
+            "story": "La table de 8, double la table de 4 !",
+            "tip": "Utilise la table de 4 et double le résultat",
+            "astuce": "8, c'est 2 × 2 × 2 : on double trois fois !",
+            "indice": "Double, puis redouble, puis redouble encore.",
+            "erreur": "8 × X = on double 3 fois : X → 2X → 4X → 8X."
+        },
+        "9": {
+            "story": "La table de 9, le truc des doigts magiques !",
+            "tip": "Les chiffres des résultats font toujours 9",
+            "astuce": "La somme des chiffres du résultat fait souvent 9.",
+            "indice": "Ex : 9 × 4 = 36 → 3 + 6 = 9.",
+            "erreur": "Vérifie la somme des chiffres : elle doit souvent faire 9 pour ×9."
+        },
+        "10": {
+            "story": "La table de 10, ajoute juste un zéro !",
+            "tip": "Ajoute un 0 à la fin du nombre",
+            "astuce": "On ajoute un 0 à la fin du nombre.",
+            "indice": "10 × X = X avec un zéro derrière.",
+            "erreur": "10 × X = X0. Il suffit d'écrire un zéro à la fin."
+        }
+    },
+    "practice": {
+        "loading": "Chargement...",
+        "coach": {
+            "neutral": [
+                "Bravo !",
+                "Super !",
+                "Génial !",
+                "Top !",
+                "Bien joué !",
+                "Excellent !",
+                "C'est ça !"
+            ],
+            "boy": [
+                "Tu es un Champion !",
+                "T'es le meilleur !",
+                "Quel talent !",
+                "Fort !"
+            ],
+            "girl": [
+                "Tu es une Championne !",
+                "T'es la meilleure !",
+                "Quel talent !",
+                "Forte !"
+            ]
+        },
+        "checkpoints": {
+            "animals": {
+                "title": "Miam !",
+                "subtitle": "Déjà la moitié de la table !"
+            },
+            "space": {
+                "title": "Énergie 50% !",
+                "subtitle": "Tu as fait la moitié du voyage."
+            },
+            "heroes": {
+                "title": "Recharge OK !",
+                "subtitle": "Puissance à 50%."
+            }
+        },
+        "bravo_name": "Bravo {{name}} ! 🎉",
+        "mastered": "Tu maîtrises cette table !",
+        "unlocked_lvl2": "Tu as débloqué le niveau 2 !",
+        "stars_count": "{{count}} étoile{{s}} sur 4",
+        "level2_intro": "Maintenant, allons plus loin !",
+        "level2_desc": "Tape les réponses pour obtenir\nles {{count}} étoile{{s}} restante{{s}}.",
+        "go_level2": "Passer au niveau 2 🚀",
+        "review_errors_q": "Tu veux d'abord revoir tes erreurs ?",
+        "review_btn_one": "Oui, réviser mon erreur",
+        "review_btn_many": "Oui, réviser mes {{count}} erreurs",
+        "review_success": "Tu as réussi toutes les questions de révision !",
+        "retry_full": "Recommencer le quiz complet",
+        "other_table": "Aller à une autre table",
+        "fail_title": "Mince !",
+        "fail_subtitle": "Ne lâche rien, tu vas y arriver !",
+        "retry_level1": "Réessayer",
+        "intro": {
+            "title": "C'est parti !",
+            "subtitle": "Maintenant, teste tes connaissances avec le quiz !",
+            "card_title": "C'est parti !",
+            "card_message": "Tu vas assurer comme un champion !",
+            "ready": "Prêt à gagner des étoiles ?",
+            "start": "Commencer le quiz",
+            "back": "Précédent"
+        },
+        "discovery": {
+            "title": "Découvre la table de {{number}}",
+            "magic_tip": "Astuce magique",
+            "count_with_me": "Compte avec moi !",
+            "count_instructions": "Clique sur les multiplications pour entendre comment elles se lisent !",
+            "table_of": "Table de {{number}}",
+            "listen_again": "Réécouter",
+            "next": "Suivant",
+            "previous": "Précédent",
+            "intro_title": "C'est parti !",
+            "intro_subtitle": "Maintenant, teste tes connaissances avec le quiz !",
+            "intro_card_message": "Tu vas assurer comme un champion ! \n Prêt à gagner des étoiles ?",
+            "start_quiz": "Commencer le quiz"
+        },
+        "correction": {
+            "title": "On corrige ensemble ✨",
+            "retry_question": "Réessayer cette question",
+            "continue": "Continuer"
+        },
+        "results": {
+            "almost": "Presque !",
+            "bravo_simple": "Bravo",
+            "almost_simple": "Presque",
+            "continue_training": "Entraîne-toi encore un peu",
+            "finished": "Tu as terminé l'entraînement",
+            "keep_training": "Entraîne-toi encore un peu",
+            "correct_answers": "Bonnes réponses",
+            "encouragement_muscle": "💪 Continue à t'entraîner, tu vas y arriver !",
+            "encouragement_min": "Il te faut au moins 8/10 pour passer au niveau suivant.",
+            "encouragement_perfect": "Super ! Tu maîtrises parfaitement la table de {{number}} !",
+            "encouragement_great": "Très bien ! Continue comme ça !",
+            "encouragement_good": "Bon début ! Entraîne-toi encore !",
+            "encouragement_fail": "Continue à t'entraîner, tu vas y arriver !",
+            "review_only_errors": "Tu veux revoir uniquement les questions qui t'ont posé problème ?",
+            "yes": "Oui",
+            "review_table": "Réviser la table",
+            "retry_quiz": "Réessayer\nle quiz",
+            "other_table_nl": "Autre\ntable",
+            "retry_full_nl": "Recommencer le quiz complet",
+            "other_table_full": "Aller à une autre table"
+        },
+        "question_label": "Combien font :",
+        "your_answer": "Ta réponse",
+        "correct_excl": "Correct !",
+        "speech_correction": {
+            "times": "fois",
+            "equals": "égale",
+            "something": "quelque chose"
+        },
+        "question_speak": "{{a}} fois {{b}} ?"
+    },
+    "challenge": {
+        "title": "Challenge",
+        "boost": {
+            "animals": {
+                "title": "Pause Vitaminée !",
+                "subtitle": "La moitié est faite ! Bois un coup !"
+            },
+            "space": {
+                "title": "Hyper-Vitesse !",
+                "subtitle": "On finit à la vitesse de la lumière !"
+            },
+            "heroes": {
+                "title": "Mise à jour système...",
+                "subtitle": "Tu deviens plus rapide !"
+            }
+        },
+        "stats": {
+            "correct": "Bonnes",
+            "incorrect": "Mauvaises",
+            "total": "Total"
+        },
+        "feedback": {
+            "bravo": "Bravo !",
+            "streak": "4 bonnes réponses d'affilée !",
+            "correct": "Correct !",
+            "take_time": "Prends ton temps,\non regarde la réponse ensemble.",
+            "timeout": "Temps écoulé !",
+            "correct_answer": "La bonne réponse est :",
+            "retry": "On réessaie 😌",
+            "not_quite": "Pas tout à fait..."
+        },
+        "results": {
+            "well_done": "Bien joué",
+            "well_done_user": "Bravo {{name}} !",
+            "congrats": "Félicitations !",
+            "challenge_finished": "Challenge terminé ! (n°{{count}})",
+            "corrected_errors": "Tu as corrigé tes erreurs",
+            "precision": "Précision",
+            "best_streak": "Ta meilleure série",
+            "streak_val": "{{count}} bonne{{s}} d'affilée ✨",
+            "strongest_table": "Table la plus solide",
+            "weakest_table": "Table à surveiller",
+            "review_errors": "Revoir mes erreurs",
+            "retry_challenge": "Refaire un Challenge",
+            "back_home": "Retour à l'accueil",
+            "correction_msgs": [
+                "Une erreur de moins, bravo. Le Pro s'installe.",
+                "Chaque correction compte. Tu t'améliores vraiment.",
+                "Bien joué ! Tu as tout compris cette fois-ci 🎯",
+                "Super ! C'est comme ça qu'on progresse 💪"
+            ]
+        },
+        "phrases": {
+            "correct": [
+                "Bravo, c'est exactement ça !",
+                "Super, ta table est bien en place 💪",
+                "Parfait, tu vas de plus en plus vite ✨",
+                "Nickel, on continue sur cette lancée !",
+                "Génial ! On sent que tu maîtrises ! 🔥",
+                "Top ! Tu deviens vraiment fort(e) avec cette table 🚀"
+            ],
+            "error": [
+                "Ce n'est pas grave, On révisera cette table 😉, si besoin",
+                "Presque ! On la reverra un peu plus tard.",
+                "Tu progresseras en la revoyant plusieurs fois, c'est normal.",
+                "On corrige ensemble, et on continue tranquillement.",
+                "L'important, c'est de rester dans le jeu, pas d'être parfait."
+            ]
+        },
+        "question_speak_result": "{{a}} fois {{b}} ?",
+        "question_speak_multiplier": "{{a}} fois quelque chose égale {{r}} ?",
+        "question_speak_multiplicand": "Quelque chose fois {{b}} égale {{r}} ?"
+    },
+    "user_form": {
+        "edit_title": "Modifier utilisateur",
+        "new_title": "Nouvel utilisateur",
+        "photo_gallery": "Galerie",
+        "photo_camera": "Photo",
+        "first_name": "Prénom *",
+        "first_name_placeholder": "Ex: Marie",
+        "gender": "Genre *",
+        "boy": "Garçon",
+        "girl": "Fille",
+        "age": "Âge *",
+        "age_placeholder": "Ex: 8",
+        "grade": "Classe *",
+        "grade_placeholder": "Ex: CE2",
+        "challenge_questions": "Challenge - Nombre de questions",
+        "challenge_questions_sub": "Définir combien de questions seront posées dans le challenge (12-50 questions)",
+        "questions_count": "Questions : {{count}}",
+        "badge_theme": "Thème des badges",
+        "badge_theme_sub": "Choisis le style des badges gagnés pendant les challenges",
+        "theme_space": "Espace",
+        "theme_heroes": "Héros",
+        "theme_animals": "Animaux",
+        "audio": "Audio",
+        "audio_sub": "Personnaliser l'expérience sonore pour cet utilisateur",
+        "voice_enabled": "Voix activée",
+        "voice_disabled": "Voix désactivée",
+        "voice_female": "Femme",
+        "voice_male": "Homme",
+        "sound_enabled": "Bruitages activés",
+        "sound_disabled": "Bruitages désactivés",
+        "haptics_enabled": "Vibrations activées",
+        "haptics_disabled": "Vibrations désactivées",
+        "accessibility": "Accessibilité",
+        "font": "Police d'écriture",
+        "font_sub": "Choix de la police pour cet utilisateur",
+        "font_standard": "Standard (Arrondie)",
+        "font_modern": "Moderne (Lexend)",
+        "font_dys": "Spéciale Dys (OpenDyslexic)",
+        "zen_mode_on": "Mode Zen activé",
+        "zen_mode_off": "Mode Zen désactivé",
+        "timer": "Chronomètre",
+        "timer_on": "Activé",
+        "timer_off": "Désactivé",
+        "display_mode": "Mode d'affichage",
+        "bar": "Barre",
+        "chronometer": "Chrono",
+        "duration": "Durée : {{count}} sec",
+        "save": "Enregistrer",
+        "error_firstname": "Le prénom est requis",
+        "error_age": "L'âge doit être un nombre valide",
+        "error_grade": "La classe est requise",
+        "error_save": "Erreur lors de l'ajout de l'utilisateur",
+        "permission_gallery": "Permission d'accès à la galerie requise",
+        "permission_camera": "Permission d'accès à la caméra requise",
+        "permission_title": "Permission requise",
+        "error_title": "Erreur"
+    },
+    "difficulty": {
+        "easy": "Facile",
+        "medium": "Moyen",
+        "hard": "Difficile"
+    }
+}

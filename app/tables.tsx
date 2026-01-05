@@ -12,6 +12,7 @@ import { AppColors, NumberColors } from '@/constants/colors';
 import { MULTIPLICATION_TABLES } from '@/constants/tables';
 import { useApp } from '@/contexts/AppContext';
 import { ThemedText } from '@/components/ThemedText';
+import i18n from '@/utils/i18n';
 
 export default function TablesScreen() {
   const router = useRouter();
@@ -58,16 +59,7 @@ export default function TablesScreen() {
   };
 
   const getDifficultyLabel = (difficulty: string) => {
-    switch (difficulty) {
-      case 'easy':
-        return 'Facile';
-      case 'medium':
-        return 'Moyen';
-      case 'hard':
-        return 'Difficile';
-      default:
-        return '';
-    }
+    return i18n.t(`difficulty.${difficulty}`);
   };
 
   return (

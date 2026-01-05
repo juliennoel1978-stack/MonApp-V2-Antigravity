@@ -8,29 +8,16 @@ import { Audio } from 'expo-av';
 
 import { useAudio } from '@/hooks/useAudio';
 import { useHaptics } from '@/hooks/useHaptics';
+import i18n from '@/utils/i18n';
 
 
-
-const CORRECT_PHRASES = [
-    "Bravo, c'est exactement ça !",
-    "Super, ta table est bien en place 💪",
-    "Parfait, tu vas de plus en plus vite ✨",
-    "Nickel, on continue sur cette lancée !",
-    "Génial ! On sent que tu maîtrises ! 🔥",
-    "Top ! Tu deviens vraiment fort(e) avec cette table 🚀",
-];
-
-const ERROR_PHRASES = [
-    "Ce n'est pas grave, On révisera cette table 😉, si besoin",
-    "Presque ! On la reverra un peu plus tard.",
-    "Tu progresseras en la revoyant plusieurs fois, c'est normal.",
-    "On corrige ensemble, et on continue tranquillement.",
-    "L'important, c'est de rester dans le jeu, pas d'être parfait.",
-];
 
 const getRandomPhrase = (phrases: string[]) => {
+    if (!phrases || phrases.length === 0) return "";
     return phrases[Math.floor(Math.random() * phrases.length)];
 };
+
+// getRandomPhrase definition removed (was duplicate)
 
 type QuestionType = 'result' | 'multiplier' | 'multiplicand';
 
@@ -108,6 +95,12 @@ export const useChallengeGame = () => {
     // Animations
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const celebrationAnim = useRef(new Animated.Value(0)).current;
+
+    // Challenge Voice Toggle (Default: OFF)
+    const [isChallengeVoiceEnabled, setIsChallengeVoiceEnabled] = useState<boolean>(false);
+    const toggleChallengeVoice = useCallback(() => {
+        setIsChallengeVoiceEnabled(prev => !prev);
+    }, []);
 
     // Initial config
     useEffect(() => {
@@ -248,6 +241,55 @@ export const useChallengeGame = () => {
         }
     }, [zenMode, currentQuestion, showFeedback, showCelebration, showMidBoost, settings.timerEnabled, settings.timerDuration, currentUser, handleTimeOut, generateNewQuestion]);
 
+    // TTS Logic for Challenge Questions
+    const { speak, stopSpeech, isVoiceEnabled } = useAudio();
+    // User preference overrides global setting - re-derived locally to be sure (though hook handles it)
+    // Actually useAudio hook already handles this logic "currentUser?.voiceEnabled ?? settings.voiceEnabled",
+    // but useAudio hook returns isVoiceEnabled.
+
+    useEffect(() => {
+        if (!currentQuestion || showFeedback || showCelebration || showMidBoost || !isMounted.current) {
+            // Don't speak if we are showing feedback, celebration, boost, or unmounted
+            return;
+        }
+
+        // Feature: Toggleable Challenge Voice.
+        // Logic: specific toggle MUST be ON, AND global/user voice setting MUST be ON.
+        if (isVoiceEnabled && isChallengeVoiceEnabled) {
+            // Small delay to ensure transitions are done
+            const timer = setTimeout(() => {
+                if (!isMounted.current) return;
+
+                let textToSpeak = '';
+                const { num1, num2, answer, type } = currentQuestion;
+                const product = num1 * num2; // Calculate product correctly
+
+                switch (type) {
+                    case 'result':
+                        textToSpeak = i18n.t('challenge.question_speak_result', { a: num1, b: num2 });
+                        break;
+                    case 'multiplier':
+                        // 3 x ? = 15
+                        textToSpeak = i18n.t('challenge.question_speak_multiplier', { a: num1, r: product });
+                        break;
+                    case 'multiplicand':
+                        // ? x 5 = 15
+                        textToSpeak = i18n.t('challenge.question_speak_multiplicand', { b: num2, r: product });
+                        break;
+                }
+
+                if (textToSpeak) {
+                    speak(textToSpeak);
+                }
+            }, 500); // 500ms delay for smooth transition
+
+            return () => {
+                clearTimeout(timer);
+                stopSpeech();
+            };
+        }
+    }, [currentQuestion, showFeedback, showCelebration, showMidBoost, isVoiceEnabled, speak, stopSpeech, isChallengeVoiceEnabled]);
+
     const [completedChallengeCount, setCompletedChallengeCount] = useState<number>(0);
 
     const handleChallengeEnd = useCallback(async () => {
@@ -377,17 +419,7 @@ export const useChallengeGame = () => {
 
     }, [currentUser, settings]);
 
-    const getAchievementIdFromTitle = (title: string): string => {
-        const mapping: Record<string, string> = {
-            'Maître du Temps': 'time_master',
-            'Grand Stratège': 'strategist',
-            'Habitué': 'regular_player',
-            'Lève-tôt': 'early_bird',
-            'Insomnie': 'night_owl',
-            'Oeil de Lynx': 'perfect_score',
-        };
-        return mapping[title] || '';
-    };
+
 
 
     const handleBadgeDismiss = useCallback(async () => {
@@ -398,9 +430,9 @@ export const useChallengeGame = () => {
             if (currentReward.type === 'level_badge' && pendingBadge) {
                 await addPersistenceBadge(pendingBadge);
                 setPendingBadge(null);
-            } else if (currentReward.type === 'achievement') {
+            } else if (currentReward.type === 'achievement' && currentReward.id) {
                 const achievementToSave = pendingAchievements.find(
-                    a => a.id === getAchievementIdFromTitle(currentReward.title)
+                    a => a.id === currentReward.id
                 );
                 if (achievementToSave) {
                     await addAchievement(achievementToSave);
@@ -475,7 +507,9 @@ export const useChallengeGame = () => {
             vibrate('success');
             setCorrectCount(prev => prev + 1);
             setTotalQuestions(prev => prev + 1);
-            setCurrentCorrectPhrase(getRandomPhrase(CORRECT_PHRASES));
+
+            const correctPhrases = (i18n.translations[i18n.locale]?.challenge?.phrases?.correct as string[]) || ["Bravo !"];
+            setCurrentCorrectPhrase(getRandomPhrase(correctPhrases));
 
             setConsecutiveCorrect(prev => {
                 const newStreak = prev + 1;
@@ -529,7 +563,7 @@ export const useChallengeGame = () => {
 
             // MID-COURSE BOOST TRIGGER
             // Check if we hit exactly 50%
-            const zenMode = (currentUser?.zenMode ?? settings.zenMode) || false;
+            // Use outer zenMode
 
             if (!zenMode && totalQuestions + 1 === Math.floor(maxQuestions / 2)) {
                 playBoostSound();
@@ -565,7 +599,9 @@ export const useChallengeGame = () => {
                 setIncorrectCount(prev => prev + 1);
                 setTotalQuestions(prev => prev + 1);
                 setShowCorrectAnswer(true);
-                setCurrentErrorPhrase(getRandomPhrase(ERROR_PHRASES));
+
+                const errorPhrases = (i18n.translations[i18n.locale]?.challenge?.phrases?.error as string[]) || ["Pas grave !"];
+                setCurrentErrorPhrase(getRandomPhrase(errorPhrases));
 
                 const alreadyInWrongAnswers = wrongAnswers.some(
                     q => q.num1 === currentQuestion.num1 &&
@@ -675,5 +711,7 @@ export const useChallengeGame = () => {
         currentUser,
         settings,
         zenMode: (currentUser?.zenMode ?? settings.zenMode) || false,
+        isChallengeVoiceEnabled,
+        toggleChallengeVoice,
     };
 };

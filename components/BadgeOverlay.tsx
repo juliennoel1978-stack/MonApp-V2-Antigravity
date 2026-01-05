@@ -10,6 +10,7 @@ import {
 import { AppColors } from '@/constants/colors';
 import { ThemedText } from './ThemedText';
 import type { QueuedReward } from '@/types';
+import i18n from '@/utils/i18n';
 
 const { width } = Dimensions.get('window');
 
@@ -113,26 +114,26 @@ export default function BadgeOverlay({
           </View>
 
           <ThemedText style={[styles.headerLabel, { color: headerColor }]}>
-            {currentReward.headerText}
+            {i18n.t(currentReward.headerText)}
           </ThemedText>
 
           <View style={[styles.emojiContainer, { borderColor }]}>
             <ThemedText style={styles.badgeEmoji}>{currentReward.icon}</ThemedText>
           </View>
 
-          <ThemedText style={styles.badgeTitle}>{currentReward.title}</ThemedText>
-          <ThemedText style={styles.badgeMessage}>{currentReward.message}</ThemedText>
+          <ThemedText style={styles.badgeTitle}>{i18n.t(currentReward.title)}</ThemedText>
+          <ThemedText style={styles.badgeMessage}>{i18n.t(currentReward.message)}</ThemedText>
 
           {isLevelBadge && currentReward.nextBadgeInfo && (
             <View style={styles.nextBadgeContainer}>
               <View style={styles.nextBadgeDivider} />
-              <ThemedText style={styles.nextBadgeLabel}>Prochain badge</ThemedText>
+              <ThemedText style={styles.nextBadgeLabel}>{i18n.t('common.next_badge')}</ThemedText>
               <View style={styles.nextBadgeRow}>
                 <ThemedText style={styles.nextBadgeIcon}>{currentReward.nextBadgeInfo.icon}</ThemedText>
                 <View style={styles.nextBadgeInfo}>
-                  <ThemedText style={styles.nextBadgeTitle}>{currentReward.nextBadgeInfo.title}</ThemedText>
+                  <ThemedText style={styles.nextBadgeTitle}>{i18n.t(currentReward.nextBadgeInfo.title)}</ThemedText>
                   <ThemedText style={styles.nextBadgeProgress}>
-                    Plus que {currentReward.nextBadgeInfo.challengesRemaining} challenge{currentReward.nextBadgeInfo.challengesRemaining > 1 ? 's' : ''} !
+                    {i18n.t('dashboard.more_to_go_simple', { count: currentReward.nextBadgeInfo.challengesRemaining, label: i18n.t('dashboard.challenge_p') })}
                   </ThemedText>
                 </View>
               </View>
@@ -142,17 +143,17 @@ export default function BadgeOverlay({
           {isLevelBadge && !currentReward.nextBadgeInfo && (
             <View style={styles.maxBadgeContainer}>
               <View style={styles.nextBadgeDivider} />
-              <ThemedText style={styles.maxBadgeText}>🏆 Tu as tous les badges !</ThemedText>
+              <ThemedText style={styles.maxBadgeText}>{i18n.t('dashboard.max_level')}</ThemedText>
             </View>
           )}
 
           {!isLevelBadge && currentReward.achievementType === 'RECURRING' && (
             <View style={styles.recurringBadge}>
-              <ThemedText style={styles.recurringText}>🔄 Peut être obtenu à nouveau</ThemedText>
+              <ThemedText style={styles.recurringText}>🔄 {i18n.t('common.repeatable')}</ThemedText>
             </View>
           )}
 
-          <ThemedText style={styles.tapHint}>Touche pour continuer</ThemedText>
+          <ThemedText style={styles.tapHint}>{i18n.t('common.tap_to_continue')}</ThemedText>
         </Animated.View>
       </Animated.View>
     </TouchableWithoutFeedback>

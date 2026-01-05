@@ -13,6 +13,7 @@ import { AppColors } from '@/constants/colors';
 import BadgeOverlay from '@/components/BadgeOverlay';
 import { ThemedText } from '@/components/ThemedText';
 import { ChallengeHeader } from '@/components/challenge/ChallengeHeader';
+import i18n from '@/utils/i18n';
 import { ChallengeStats } from '@/components/challenge/ChallengeStats';
 import { ChallengeTimer } from '@/components/challenge/ChallengeTimer';
 import { ChallengeResults } from '@/components/challenge/ChallengeResults';
@@ -24,9 +25,9 @@ import { Keypad } from '@/components/Keypad';
 const { width } = Dimensions.get('window');
 
 const BOOST_THEMES = {
-  animals: { image: '🐒', item: '🧃', title: 'Pause Vitaminée !', subtitle: 'La moitié est faite ! Bois un coup !' },
-  space: { image: '👽', item: '🛸', title: 'Hyper-Vitesse !', subtitle: 'On finit à la vitesse de la lumière !' },
-  heroes: { image: '🤖', item: '💾', title: 'Mise à jour système...', subtitle: 'Tu deviens plus rapide !' },
+  animals: { image: '🐒', item: '🧃', title: 'challenge.boost.animals.title', subtitle: 'challenge.boost.animals.subtitle' },
+  space: { image: '👽', item: '🛸', title: 'challenge.boost.space.title', subtitle: 'challenge.boost.space.subtitle' },
+  heroes: { image: '🤖', item: '💾', title: 'challenge.boost.heroes.title', subtitle: 'challenge.boost.heroes.subtitle' },
 };
 
 const MidChallengeBoostModal = ({
@@ -58,12 +59,12 @@ const MidChallengeBoostModal = ({
   return (
     <View style={styles.boostOverlay}>
       <Animated.View style={[styles.boostCard, { transform: [{ scale: scaleAnim }] }]}>
-        <ThemedText style={styles.boostTitle}>{data.title}</ThemedText>
+        <ThemedText style={styles.boostTitle}>{i18n.t(data.title)}</ThemedText>
         <View style={styles.boostImageContainer}>
           <ThemedText style={styles.boostEmojiMain}>{data.image}</ThemedText>
           <ThemedText style={styles.boostEmojiItem}>{data.item}</ThemedText>
         </View>
-        <ThemedText style={styles.boostSubtitle}>{data.subtitle}</ThemedText>
+        <ThemedText style={styles.boostSubtitle}>{i18n.t(data.subtitle)}</ThemedText>
       </Animated.View>
     </View>
   );
@@ -116,6 +117,8 @@ export default function ChallengeScreen() {
     // Context
     currentUser,
     settings,
+    isChallengeVoiceEnabled,
+    toggleChallengeVoice,
   } = useChallengeGame();
 
   if (isFinished) {
@@ -167,7 +170,9 @@ export default function ChallengeScreen() {
 
         <ChallengeHeader
           onHomePress={() => router.replace('/')}
-          title="Challenge"
+          title={i18n.t('challenge.title')}
+          onToggleVoice={toggleChallengeVoice}
+          isVoiceEnabled={isChallengeVoiceEnabled}
         />
 
         <ChallengeStats

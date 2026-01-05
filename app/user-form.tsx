@@ -20,6 +20,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { AppColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
 import type { BadgeTheme } from '@/types';
+import i18n from '@/utils/i18n';
 
 export default function UserFormScreen() {
   const router = useRouter();
@@ -90,9 +91,9 @@ export default function UserFormScreen() {
     if (permissionResult.granted === false) {
       if (Platform.OS === 'web') {
         // @ts-ignore
-        window.alert('Permission d\'accès à la galerie requise');
+        window.alert(i18n.t('user_form.permission_gallery'));
       } else {
-        Alert.alert('Permission requise', 'Permission d\'accès à la galerie requise');
+        Alert.alert(i18n.t('user_form.permission_title'), i18n.t('user_form.permission_gallery'));
       }
       return;
     }
@@ -115,9 +116,9 @@ export default function UserFormScreen() {
     if (permissionResult.granted === false) {
       if (Platform.OS === 'web') {
         // @ts-ignore
-        window.alert('Permission d\'accès à la caméra requise');
+        window.alert(i18n.t('user_form.permission_camera'));
       } else {
-        Alert.alert('Permission requise', 'Permission d\'accès à la caméra requise');
+        Alert.alert(i18n.t('user_form.permission_title'), i18n.t('user_form.permission_camera'));
       }
       return;
     }
@@ -137,9 +138,9 @@ export default function UserFormScreen() {
     if (!firstName.trim()) {
       if (Platform.OS === 'web') {
         // @ts-ignore
-        window.alert('Le prénom est requis');
+        window.alert(i18n.t('user_form.error_firstname'));
       } else {
-        Alert.alert('Erreur', 'Le prénom est requis');
+        Alert.alert(i18n.t('user_form.error_title'), i18n.t('user_form.error_firstname'));
       }
       return;
     }
@@ -147,9 +148,9 @@ export default function UserFormScreen() {
     if (!age || isNaN(Number(age)) || Number(age) <= 0) {
       if (Platform.OS === 'web') {
         // @ts-ignore
-        window.alert('L\'âge doit être un nombre valide');
+        window.alert(i18n.t('user_form.error_age'));
       } else {
-        Alert.alert('Erreur', 'L\'âge doit être un nombre valide');
+        Alert.alert(i18n.t('user_form.error_title'), i18n.t('user_form.error_age'));
       }
       return;
     }
@@ -157,9 +158,9 @@ export default function UserFormScreen() {
     if (!grade.trim()) {
       if (Platform.OS === 'web') {
         // @ts-ignore
-        window.alert('La classe est requise');
+        window.alert(i18n.t('user_form.error_grade'));
       } else {
-        Alert.alert('Erreur', 'La classe est requise');
+        Alert.alert(i18n.t('user_form.error_title'), i18n.t('user_form.error_grade'));
       }
       return;
     }
@@ -215,9 +216,9 @@ export default function UserFormScreen() {
       console.error('Error adding user:', error);
       if (Platform.OS === 'web') {
         // @ts-ignore
-        window.alert('Erreur lors de l\'ajout de l\'utilisateur');
+        window.alert(i18n.t('user_form.error_save'));
       } else {
-        Alert.alert('Erreur', 'Erreur lors de l\'ajout de l\'utilisateur');
+        Alert.alert(i18n.t('user_form.error_title'), i18n.t('user_form.error_save'));
       }
     }
   };
@@ -232,7 +233,7 @@ export default function UserFormScreen() {
           >
             <X size={24} color={AppColors.text} />
           </TouchableOpacity>
-          <Text style={styles.title}>{isEditing ? 'Modifier utilisateur' : 'Nouvel utilisateur'}</Text>
+          <Text style={styles.title}>{isEditing ? i18n.t('user_form.edit_title') : i18n.t('user_form.new_title')}</Text>
           <View style={styles.placeholder} />
         </View>
 
@@ -269,7 +270,7 @@ export default function UserFormScreen() {
                   onPress={pickImage}
                 >
                   <ImageIcon size={20} color={AppColors.primary} />
-                  <Text style={styles.photoButtonText}>Galerie</Text>
+                  <Text style={styles.photoButtonText}>{i18n.t('user_form.photo_gallery')}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -277,19 +278,19 @@ export default function UserFormScreen() {
                   onPress={takePhoto}
                 >
                   <Camera size={20} color={AppColors.primary} />
-                  <Text style={styles.photoButtonText}>Photo</Text>
+                  <Text style={styles.photoButtonText}>{i18n.t('user_form.photo_camera')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.label}>Prénom *</Text>
+              <Text style={styles.label}>{i18n.t('user_form.first_name')}</Text>
               <TextInput
                 ref={firstNameRef}
                 style={styles.input}
                 value={firstName}
                 onChangeText={setFirstName}
-                placeholder="Ex: Marie"
+                placeholder={i18n.t('user_form.first_name_placeholder')}
                 placeholderTextColor={AppColors.textSecondary}
                 returnKeyType="next"
                 onSubmitEditing={() => ageRef.current?.focus()}
@@ -297,7 +298,7 @@ export default function UserFormScreen() {
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.label}>Genre *</Text>
+              <Text style={styles.label}>{i18n.t('user_form.gender')}</Text>
               <View style={styles.genderButtons}>
                 <TouchableOpacity
                   style={[
@@ -312,7 +313,7 @@ export default function UserFormScreen() {
                       gender === 'boy' && styles.genderButtonTextActive,
                     ]}
                   >
-                    👦 Garçon
+                    👦 {i18n.t('user_form.boy')}
                   </Text>
                 </TouchableOpacity>
 
@@ -329,20 +330,20 @@ export default function UserFormScreen() {
                       gender === 'girl' && styles.genderButtonTextActive,
                     ]}
                   >
-                    👧 Fille
+                    👧 {i18n.t('user_form.girl')}
                   </Text>
                 </TouchableOpacity>
               </View>
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.label}>Âge *</Text>
+              <Text style={styles.label}>{i18n.t('user_form.age')}</Text>
               <TextInput
                 ref={ageRef}
                 style={styles.input}
                 value={age}
                 onChangeText={setAge}
-                placeholder="Ex: 8"
+                placeholder={i18n.t('user_form.age_placeholder')}
                 placeholderTextColor={AppColors.textSecondary}
                 keyboardType="number-pad"
                 returnKeyType="next"
@@ -351,13 +352,13 @@ export default function UserFormScreen() {
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.label}>Classe *</Text>
+              <Text style={styles.label}>{i18n.t('user_form.grade')}</Text>
               <TextInput
                 ref={gradeRef}
                 style={styles.input}
                 value={grade}
                 onChangeText={setGrade}
-                placeholder="Ex: CE2"
+                placeholder={i18n.t('user_form.grade_placeholder')}
                 placeholderTextColor={AppColors.textSecondary}
                 returnKeyType="done"
                 onSubmitEditing={() => {
@@ -368,12 +369,12 @@ export default function UserFormScreen() {
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.label}>Challenge - Nombre de questions</Text>
+              <Text style={styles.label}>{i18n.t('user_form.challenge_questions')}</Text>
               <Text style={styles.challengeSubLabel}>
-                Définir combien de questions seront posées dans le challenge (12-50 questions)
+                {i18n.t('user_form.challenge_questions_sub')}
               </Text>
               <Text style={styles.challengeCurrentValue}>
-                Questions : {challengeQuestions}
+                {i18n.t('user_form.questions_count', { count: challengeQuestions })}
               </Text>
               <View style={styles.challengeQuestionsButtons}>
                 {[12, 15, 20, 25, 30, 40, 50].map((num) => (
@@ -399,9 +400,9 @@ export default function UserFormScreen() {
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.label}>Thème des badges</Text>
+              <Text style={styles.label}>{i18n.t('user_form.badge_theme')}</Text>
               <Text style={styles.badgeThemeSubLabel}>
-                Choisis le style des badges gagnés pendant les challenges
+                {i18n.t('user_form.badge_theme_sub')}
               </Text>
               <View style={styles.badgeThemeButtons}>
                 <TouchableOpacity
@@ -418,7 +419,7 @@ export default function UserFormScreen() {
                       badgeTheme === 'space' && styles.badgeThemeButtonTextActive,
                     ]}
                   >
-                    Espace
+                    {i18n.t('user_form.theme_space')}
                   </Text>
                 </TouchableOpacity>
 
@@ -436,7 +437,7 @@ export default function UserFormScreen() {
                       badgeTheme === 'heroes' && styles.badgeThemeButtonTextActive,
                     ]}
                   >
-                    Héros
+                    {i18n.t('user_form.theme_heroes')}
                   </Text>
                 </TouchableOpacity>
 
@@ -454,7 +455,7 @@ export default function UserFormScreen() {
                       badgeTheme === 'animals' && styles.badgeThemeButtonTextActive,
                     ]}
                   >
-                    Animaux
+                    {i18n.t('user_form.theme_animals')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -465,9 +466,9 @@ export default function UserFormScreen() {
 
 
             <View style={styles.section}>
-              <Text style={styles.label}>Audio</Text>
+              <Text style={styles.label}>{i18n.t('user_form.audio')}</Text>
               <Text style={styles.challengeSubLabel}>
-                Personnaliser l&apos;expérience sonore pour cet utilisateur
+                {i18n.t('user_form.audio_sub')}
               </Text>
 
               <TouchableOpacity
@@ -489,7 +490,7 @@ export default function UserFormScreen() {
                     voiceEnabled && styles.timerToggleTextActive,
                   ]}
                 >
-                  {voiceEnabled ? 'Voix activée' : 'Voix désactivée'}
+                  {voiceEnabled ? i18n.t('user_form.voice_enabled') : i18n.t('user_form.voice_disabled')}
                 </Text>
               </TouchableOpacity>
 
@@ -505,7 +506,7 @@ export default function UserFormScreen() {
                     onPress={() => setVoiceGender('female')}
                   >
                     <Text style={{ fontSize: 20 }}>👩</Text>
-                    <Text style={[styles.challengeQuestionButtonText, voiceGender === 'female' && styles.challengeQuestionButtonTextActive]}>Femme</Text>
+                    <Text style={[styles.challengeQuestionButtonText, voiceGender === 'female' && styles.challengeQuestionButtonTextActive]}>{i18n.t('user_form.voice_female')}</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -518,7 +519,7 @@ export default function UserFormScreen() {
                     onPress={() => setVoiceGender('male')}
                   >
                     <Text style={{ fontSize: 20 }}>👨</Text>
-                    <Text style={[styles.challengeQuestionButtonText, voiceGender === 'male' && styles.challengeQuestionButtonTextActive]}>Homme</Text>
+                    <Text style={[styles.challengeQuestionButtonText, voiceGender === 'male' && styles.challengeQuestionButtonTextActive]}>{i18n.t('user_form.voice_male')}</Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -541,7 +542,7 @@ export default function UserFormScreen() {
                     soundEnabled && styles.timerToggleTextActive,
                   ]}
                 >
-                  {soundEnabled ? 'Bruitages activés' : 'Bruitages désactivés'}
+                  {soundEnabled ? i18n.t('user_form.sound_enabled') : i18n.t('user_form.sound_disabled')}
                 </Text>
               </TouchableOpacity>
 
@@ -564,17 +565,17 @@ export default function UserFormScreen() {
                     hapticsEnabled && styles.timerToggleTextActive,
                   ]}
                 >
-                  {hapticsEnabled ? 'Vibrations activées' : 'Vibrations désactivées'}
+                  {hapticsEnabled ? i18n.t('user_form.haptics_enabled') : i18n.t('user_form.haptics_disabled')}
                 </Text>
               </TouchableOpacity>
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.label}>Accessibilité</Text>
+              <Text style={styles.label}>{i18n.t('user_form.accessibility')}</Text>
               <View style={{ marginBottom: 20 }}>
-                <Text style={styles.label}>Police d&apos;écriture</Text>
+                <Text style={styles.label}>{i18n.t('user_form.font')}</Text>
                 <Text style={styles.challengeSubLabel}>
-                  Choix de la police pour cet utilisateur
+                  {i18n.t('user_form.font_sub')}
                 </Text>
 
                 <View style={{ flexDirection: 'column', gap: 8, marginTop: 8 }}>
@@ -588,7 +589,7 @@ export default function UserFormScreen() {
                   >
                     <View style={{ flex: 1 }}>
                       <Text style={[styles.timerToggleText, fontPreference === 'standard' && styles.timerToggleTextActive]}>
-                        Standard (Arrondie)
+                        {i18n.t('user_form.font_standard')}
                       </Text>
                     </View>
                     {fontPreference === 'standard' && <Text style={{ fontSize: 12 }}>✓</Text>}
@@ -605,7 +606,7 @@ export default function UserFormScreen() {
                     <Text style={{ fontSize: 16, fontFamily: 'Lexend', color: fontPreference === 'lexend' ? AppColors.primary : AppColors.textSecondary, marginRight: 10 }}>Abc</Text>
                     <View style={{ flex: 1 }}>
                       <Text style={[styles.timerToggleText, fontPreference === 'lexend' && styles.timerToggleTextActive]}>
-                        Moderne (Lexend)
+                        {i18n.t('user_form.font_modern')}
                       </Text>
                     </View>
                     {fontPreference === 'lexend' && <Text style={{ fontSize: 12 }}>✓</Text>}
@@ -622,7 +623,7 @@ export default function UserFormScreen() {
                     <Text style={{ fontSize: 16, fontFamily: 'OpenDyslexic', color: fontPreference === 'opendyslexic' ? AppColors.primary : AppColors.textSecondary, marginRight: 10 }}>Abc</Text>
                     <View style={{ flex: 1 }}>
                       <Text style={[styles.timerToggleText, fontPreference === 'opendyslexic' && styles.timerToggleTextActive]}>
-                        Spéciale Dys (OpenDyslexic)
+                        {i18n.t('user_form.font_dys')}
                       </Text>
                     </View>
                     {fontPreference === 'opendyslexic' && <Text style={{ fontSize: 12 }}>✓</Text>}
@@ -645,7 +646,7 @@ export default function UserFormScreen() {
                     zenMode && styles.timerToggleTextActive,
                   ]}
                 >
-                  {zenMode ? 'Mode Zen activé' : 'Mode Zen désactivé'}
+                  {zenMode ? i18n.t('user_form.zen_mode_on') : i18n.t('user_form.zen_mode_off')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -653,7 +654,7 @@ export default function UserFormScreen() {
 
 
             <View style={styles.section}>
-              <Text style={styles.label}>Chronomètre</Text>
+              <Text style={styles.label}>{i18n.t('user_form.timer')}</Text>
               <TouchableOpacity
                 style={[
                   styles.timerToggle,
@@ -668,14 +669,14 @@ export default function UserFormScreen() {
                     timerEnabled && styles.timerToggleTextActive,
                   ]}
                 >
-                  {timerEnabled ? 'Activé' : 'Désactivé'}
+                  {timerEnabled ? i18n.t('user_form.timer_on') : i18n.t('user_form.timer_off')}
                 </Text>
               </TouchableOpacity>
 
               {timerEnabled && (
                 <View style={styles.timerConfig}>
                   <View style={styles.timerModeSection}>
-                    <Text style={styles.timerSubLabel}>Mode d&apos;affichage</Text>
+                    <Text style={styles.timerSubLabel}>{i18n.t('user_form.display_mode')}</Text>
                     <View style={styles.timerModeButtons}>
                       <TouchableOpacity
                         style={[
@@ -690,7 +691,7 @@ export default function UserFormScreen() {
                             timerDisplayMode === 'bar' && styles.timerModeButtonTextActive,
                           ]}
                         >
-                          📊 Barre
+                          {i18n.t('user_form.bar')}
                         </Text>
                       </TouchableOpacity>
                       <TouchableOpacity
@@ -706,7 +707,7 @@ export default function UserFormScreen() {
                             timerDisplayMode === 'chronometer' && styles.timerModeButtonTextActive,
                           ]}
                         >
-                          ⏱️ Chrono
+                          {i18n.t('user_form.chronometer')}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -714,7 +715,7 @@ export default function UserFormScreen() {
 
                   <View style={styles.timerDurationSection}>
                     <Text style={styles.timerSubLabel}>
-                      Durée : {timerDuration} sec
+                      {i18n.t('user_form.duration', { count: timerDuration })}
                     </Text>
                     <View style={styles.timerDurationButtons}>
                       {[5, 10, 15, 20, 30].map((duration) => (
@@ -747,7 +748,7 @@ export default function UserFormScreen() {
               onPress={handleSave}
             >
               <Save size={24} color="#FFFFFF" />
-              <Text style={styles.saveButtonText}>Enregistrer</Text>
+              <Text style={styles.saveButtonText}>{i18n.t('user_form.save')}</Text>
             </TouchableOpacity>
           </ScrollView>
         </KeyboardAvoidingView>

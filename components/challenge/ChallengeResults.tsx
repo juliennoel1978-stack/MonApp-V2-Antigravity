@@ -7,6 +7,7 @@ import { useApp } from '@/contexts/AppContext';
 import { ThemedText } from '../ThemedText';
 import { useAudio } from '@/hooks/useAudio';
 import { useHaptics } from '@/hooks/useHaptics';
+import i18n from '@/utils/i18n';
 
 type ChallengeResultsProps = {
     isReviewMode: boolean;
@@ -84,12 +85,7 @@ export const ChallengeResults = ({
 
     // 4. RENDER LOGIC
     if (isReviewMode) {
-        const correctionMessages = [
-            "Une erreur de moins, bravo. Le Pro s'installe.",
-            "Chaque correction compte. Tu t'améliores vraiment.",
-            "Bien joué ! Tu as tout compris cette fois-ci 🎯",
-            "Super ! C'est comme ça qu'on progresse 💪",
-        ];
+        const correctionMessages = (i18n.translations[i18n.locale]?.challenge?.results?.correction_msgs as string[]) || ["Bravo !"];
         const randomMessage = correctionMessages[Math.floor(Math.random() * correctionMessages.length)];
 
         return (
@@ -102,9 +98,9 @@ export const ChallengeResults = ({
                         <View style={styles.finishedContainer}>
                             <ThemedText style={styles.finishedEmoji}>✅</ThemedText>
                             <ThemedText style={styles.finishedTitle}>
-                                Bien joué{currentUser ? ` ${currentUser.firstName}` : ''} !
+                                {i18n.t('challenge.results.well_done_user', { name: currentUser ? currentUser.firstName : '' }).trim()}
                             </ThemedText>
-                            <ThemedText style={styles.finishedSubtitle}>Tu as corrigé tes erreurs</ThemedText>
+                            <ThemedText style={styles.finishedSubtitle}>{i18n.t('challenge.results.corrected_errors')}</ThemedText>
 
                             <View style={styles.finishedStats}>
                                 <ThemedText style={styles.correctionMessage}>
@@ -117,14 +113,14 @@ export const ChallengeResults = ({
                                     style={styles.finishedButton}
                                     onPress={onRestart}
                                 >
-                                    <ThemedText style={styles.finishedButtonText} numberOfLines={1}>Refaire un Challenge</ThemedText>
+                                    <ThemedText style={styles.finishedButtonText} numberOfLines={1}>{i18n.t('challenge.results.retry_challenge')}</ThemedText>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
                                     style={[styles.finishedButton, styles.finishedButtonOutline]}
                                     onPress={onHome}
                                 >
-                                    <ThemedText style={[styles.finishedButtonText, styles.finishedButtonOutlineText]} numberOfLines={1}>Retour à l&apos;accueil</ThemedText>
+                                    <ThemedText style={[styles.finishedButtonText, styles.finishedButtonOutlineText]} numberOfLines={1}>{i18n.t('challenge.results.back_home')}</ThemedText>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -144,15 +140,17 @@ export const ChallengeResults = ({
                     <View style={styles.finishedContainer}>
                         <ThemedText style={styles.finishedEmoji}>🎉</ThemedText>
                         <ThemedText style={styles.finishedTitle}>
-                            {currentUser ? `Bravo ${currentUser.firstName} !` : 'Félicitations !'}
+                            {currentUser
+                                ? i18n.t('challenge.results.well_done_user', { name: currentUser.firstName })
+                                : i18n.t('challenge.results.congrats')}
                         </ThemedText>
                         <ThemedText style={styles.finishedSubtitle}>
-                            Challenge terminé ! (n°{completedChallengeCount > 0 ? completedChallengeCount : (currentUser ? (currentUser.challengesCompleted || 0) : anonymousChallengesCompleted)})
+                            {i18n.t('challenge.results.challenge_finished', { count: completedChallengeCount > 0 ? completedChallengeCount : (currentUser ? (currentUser.challengesCompleted || 0) : anonymousChallengesCompleted) })}
                         </ThemedText>
 
                         <View style={styles.finishedStats}>
                             <View style={styles.finishedStatRow}>
-                                <ThemedText style={styles.finishedStatLabel}>Précision</ThemedText>
+                                <ThemedText style={styles.finishedStatLabel}>{i18n.t('challenge.results.precision')}</ThemedText>
                                 <ThemedText style={[styles.finishedStatValue, { color: AppColors.primary }]} numberOfLines={1}>
                                     {correctCount} / {maxQuestions} 👍
                                 </ThemedText>
@@ -160,16 +158,16 @@ export const ChallengeResults = ({
 
                             {bestStreak > 0 && (
                                 <View style={styles.finishedStatRow}>
-                                    <ThemedText style={styles.finishedStatLabel}>Ta meilleure série</ThemedText>
+                                    <ThemedText style={styles.finishedStatLabel}>{i18n.t('challenge.results.best_streak')}</ThemedText>
                                     <ThemedText style={[styles.finishedStatValue, { color: AppColors.success }]} numberOfLines={1}>
-                                        {bestStreak} {bestStreak === 1 ? 'bonne' : 'bonnes'} d&apos;affilée ✨
+                                        {i18n.t('challenge.results.streak_val', { count: bestStreak, s: bestStreak > 1 ? 's' : '' })}
                                     </ThemedText>
                                 </View>
                             )}
 
                             {bestTable > 0 && (
                                 <View style={styles.finishedStatRow}>
-                                    <ThemedText style={styles.finishedStatLabel}>Table la plus solide</ThemedText>
+                                    <ThemedText style={styles.finishedStatLabel}>{i18n.t('challenge.results.strongest_table')}</ThemedText>
                                     <ThemedText style={[styles.finishedStatValue, { color: AppColors.success }]} numberOfLines={1}>
                                         {bestTable} 💪
                                     </ThemedText>
@@ -178,7 +176,7 @@ export const ChallengeResults = ({
 
                             {worstTable > 0 && (
                                 <View style={styles.finishedStatRow}>
-                                    <ThemedText style={styles.finishedStatLabel}>Table à surveiller</ThemedText>
+                                    <ThemedText style={styles.finishedStatLabel}>{i18n.t('challenge.results.weakest_table')}</ThemedText>
                                     <ThemedText style={[styles.finishedStatValue, { color: AppColors.timerMiddle }]} numberOfLines={1}>
                                         {worstTable} 🚸
                                     </ThemedText>
@@ -192,7 +190,7 @@ export const ChallengeResults = ({
                                     style={[styles.finishedButton, styles.finishedButtonSecondary]}
                                     onPress={onReviewErrors}
                                 >
-                                    <ThemedText style={styles.finishedButtonText} numberOfLines={1}>Revoir mes erreurs</ThemedText>
+                                    <ThemedText style={styles.finishedButtonText} numberOfLines={1}>{i18n.t('challenge.results.review_errors')}</ThemedText>
                                 </TouchableOpacity>
                             )}
 
@@ -200,14 +198,14 @@ export const ChallengeResults = ({
                                 style={styles.finishedButton}
                                 onPress={onRestart}
                             >
-                                <ThemedText style={styles.finishedButtonText} numberOfLines={1}>Refaire un Challenge</ThemedText>
+                                <ThemedText style={styles.finishedButtonText} numberOfLines={1}>{i18n.t('challenge.results.retry_challenge')}</ThemedText>
                             </TouchableOpacity>
 
                             <TouchableOpacity
                                 style={[styles.finishedButton, styles.finishedButtonOutline]}
                                 onPress={onHome}
                             >
-                                <ThemedText style={[styles.finishedButtonText, styles.finishedButtonOutlineText]} numberOfLines={1}>Retour à l&apos;accueil</ThemedText>
+                                <ThemedText style={[styles.finishedButtonText, styles.finishedButtonOutlineText]} numberOfLines={1}>{i18n.t('challenge.results.back_home')}</ThemedText>
                             </TouchableOpacity>
                         </View>
                     </View>

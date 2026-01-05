@@ -1,5 +1,6 @@
 import * as Speech from 'expo-speech';
 import { Platform } from 'react-native';
+import i18n from '@/utils/i18n';
 
 export async function speak(text: string, gender: 'male' | 'female' = 'female', callbacks?: { onDone?: () => void; onStopped?: () => void }) {
   // Always stop before speaking to prevent overlap and ensure zero latency feeling
@@ -10,9 +11,14 @@ export async function speak(text: string, gender: 'male' | 'female' = 'female', 
       await Speech.stop();
     }
 
+    const currentLocale = i18n.locale;
+    const isFrench = currentLocale.startsWith('fr');
+    // Default language based on i18n context (simplifying to fr or en for now)
+    const language = isFrench ? 'fr-FR' : 'en-US';
+
     // Default options for natural, pedagogical voice
     const options: Speech.SpeechOptions = {
-      language: 'fr-FR',
+      language: language,
       pitch: 1.0,
       rate: 0.9, // Slightly slower for clarity (kids/dyslexia)
       onDone: callbacks?.onDone,
@@ -23,26 +29,42 @@ export async function speak(text: string, gender: 'male' | 'female' = 'female', 
     if (Platform.OS !== 'web') {
       try {
         const voices = await Speech.getAvailableVoicesAsync();
-        const frenchVoices = voices.filter(v => v.language.includes('fr-FR') || v.language.includes('fr_FR'));
+        // Filter voices by currently active language (loose match on the first part 'fr' or 'en')
+        const targetLangPrefix = currentLocale.split('-')[0];
+        const availableVoices = voices.filter(v => v.language.startsWith(targetLangPrefix));
 
-        if (frenchVoices.length > 0) {
+        if (availableVoices.length > 0) {
           let selectedVoice = null;
+          let maleNames: string[] = [];
+          let femaleNames: string[] = [];
+          let maleSiriName = '';
+          let femaleSiriName = '';
 
-          // Heuristics for Male/Female names
-          const maleNames = ['Thomas', 'Martin', 'Daniel', 'Nicolas', 'Arthur', 'Paul', 'Louis', 'Fred'];
-          const femaleNames = ['Marie', 'Audrey', 'Aurélie', 'Aurelie', 'Sara', 'Céline', 'Celine', 'Alice', 'Amelie', 'Amélie', 'Sophie'];
+          if (isFrench) {
+            maleNames = ['Thomas', 'Martin', 'Daniel', 'Nicolas', 'Arthur', 'Paul', 'Louis', 'Fred'];
+            femaleNames = ['Marie', 'Audrey', 'Aurélie', 'Aurelie', 'Sara', 'Céline', 'Celine', 'Alice', 'Amelie', 'Amélie', 'Sophie'];
+            maleSiriName = 'Voice 2';
+            femaleSiriName = 'Voice 1';
+          } else {
+            // English Names Heuristics
+            maleNames = ['Daniel', 'Arthur', 'Fred', 'Aaron', 'Grandpa', 'Rocko', 'Shelley', 'Flo', 'Eddy', 'Reed'];
+            femaleNames = ['Samantha', 'Karen', 'Tessa', 'Moira', 'Rishi', 'Google US English', 'Sandy', 'Grandma', 'Shelley'];
+            // iOS Siri voices vary, but often vaguely named. defaulting to heuristics or just first available.
+            maleSiriName = 'Voice 2'; // Not reliable everywhere, but fallback
+            femaleSiriName = 'Voice 1';
+          }
 
           if (gender === 'male') {
-            selectedVoice = frenchVoices.find(v => maleNames.some(name => v.name.includes(name)));
+            selectedVoice = availableVoices.find(v => maleNames.some(name => v.name.includes(name)));
             if (!selectedVoice) {
-              // Fallback to any voice that doesn't sound explicitly female if possible, 
-              // or just picking a known male identifier if available on the system
-              selectedVoice = frenchVoices.find(v => v.name.includes('Siri') && v.name.includes('Voice 2')); // iOS often Male
+              // Fallback
+              selectedVoice = availableVoices.find(v => v.name.includes('Siri') && v.name.includes(maleSiriName));
             }
           } else {
-            selectedVoice = frenchVoices.find(v => femaleNames.some(name => v.name.includes(name)));
+            selectedVoice = availableVoices.find(v => femaleNames.some(name => v.name.includes(name)));
             if (!selectedVoice) {
-              selectedVoice = frenchVoices.find(v => v.name.includes('Siri') && v.name.includes('Voice 1')); // iOS often Female
+              // Fallback
+              selectedVoice = availableVoices.find(v => v.name.includes('Siri') && v.name.includes(femaleSiriName));
             }
           }
 
@@ -65,8 +87,6 @@ export async function speak(text: string, gender: 'male' | 'female' = 'female', 
     if (Platform.OS === 'web') {
       // On some browsers, 0.9 might be too slow or fast depending on the implementation
       // standard is 1.0. 0.9 is safe.
-      // We can try to pick a better voice on Web if desired, but expo-speech
-      // selects the default OS voice usually.
     }
 
     Speech.speak(text, options);
