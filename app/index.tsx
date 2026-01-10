@@ -814,8 +814,7 @@ export default function HomeScreen() {
                             <UserX size={40} color={AppColors.textSecondary} />
                           </View>
                         </View>
-                        <ThemedText style={styles.anonymousUserName}>Mode
-                          Anonyme</ThemedText>
+                        <ThemedText style={styles.anonymousUserName}>{i18n.t('user_modal.anonymous_mode')}</ThemedText>
                       </TouchableOpacity>
                     )}
                   </View>
@@ -835,9 +834,9 @@ export default function HomeScreen() {
             <View style={styles.firstLaunchOverlay}>
               <View style={styles.firstLaunchContent}>
                 <ThemedText style={styles.firstLaunchEmoji}>👋</ThemedText>
-                <ThemedText style={styles.firstLaunchTitle}>Qui es-tu ?</ThemedText>
+                <ThemedText style={styles.firstLaunchTitle}>{i18n.t('user_modal.title')}</ThemedText>
                 <ThemedText style={styles.firstLaunchSubtitle}>
-                  Bienvenue dans Tables Magiques !{"\n"}Crée ton profil pour sauvegarder ta progression.
+                  {i18n.t('user_modal.first_launch_subtitle')}
                 </ThemedText>
 
                 <TouchableOpacity
@@ -849,7 +848,7 @@ export default function HomeScreen() {
                   testID="first-launch-create"
                 >
                   <Plus size={24} color="#FFFFFF" />
-                  <ThemedText style={styles.firstLaunchCreateButtonText}>Créer un profil</ThemedText>
+                  <ThemedText style={styles.firstLaunchCreateButtonText}>{i18n.t('user_modal.create_profile_btn')}</ThemedText>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -861,7 +860,7 @@ export default function HomeScreen() {
                   testID="first-launch-anonymous"
                 >
                   <UserX size={20} color={AppColors.textSecondary} />
-                  <ThemedText style={styles.firstLaunchAnonymousButtonText}>Mode Anonyme</ThemedText>
+                  <ThemedText style={styles.firstLaunchAnonymousButtonText}>{i18n.t('user_modal.anonymous_mode')}</ThemedText>
                 </TouchableOpacity>
               </View>
             </View>

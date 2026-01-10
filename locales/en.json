@@ -23,13 +23,23 @@
         "legend_not_seen": "Not seen",
         "legend_mastered": "Mastered"
     },
+    "tables_selection": {
+        "title": "Choose your table"
+    },
+    "discovery": {
+        "table_not_found": "Table not found"
+    },
     "user_modal": {
         "title": "Who are you?",
         "subtitle": "Choose your profile",
         "available_users": "({{count}} users available)",
         "no_users": "No users found",
         "create_profile": "Create a profile to start!",
-        "add": "Add"
+        "add": "Add",
+        "guest_mode": "Guest Mode",
+        "anonymous_mode": "Anonymous Mode",
+        "first_launch_subtitle": "Welcome to Magic Tables!\nCreate a profile to save your progress.",
+        "create_profile_btn": "Create a profile"
     },
     "parent_gate": {
         "title": "Parents Area & Settings",
@@ -253,6 +263,60 @@
             "title": "The Everest",
             "message": "50 questions!",
             "back_title": "Summit!"
+        }
+    },
+    "streak_messages": {
+        "4": {
+            "msg1": "Awesome, 4 in a row! You're on fire 💪",
+            "msg2": "Great! 4 perfect answers, your brain is heating up 🔥",
+            "msg3": "4 out of 4, that's a magical streak ✨"
+        },
+        "8": {
+            "msg1": "Incredible! 8 correct in a row, you're mastering the tables 👑",
+            "msg2": "8 in a row, that's champion level 🏆"
+        },
+        "12": {
+            "msg1": "Magic record! 12 in a row, you're a tables master ✨",
+            "msg2": "12 consecutive, that's top level. Respect! 👏"
+        },
+        "20": {
+            "msg1": "20 in a row! You're entering expert zone 🚀",
+            "msg2": "A streak of 20, confirmed multiplication level 🔥"
+        },
+        "30": {
+            "msg1": "30 in a row… that's historic 🎯",
+            "msg2": "You just broke through a mental barrier: 30 perfect answers 👑"
+        },
+        "max": {
+            "msg1": "Maximum performance! You answered all questions correctly 🌟",
+            "msg2": "Perfect streak: you crushed your daily record 🎉",
+            "msg3": "Flawless from start to finish 💫"
+        }
+    },
+    "streak_badges": {
+        "space": {
+            "4": "Liftoff 🚀",
+            "8": "Space Pilot 🛰",
+            "12": "Astro-Expert ⭐️",
+            "20": "Galactic Commander 🪐",
+            "30": "Master of the Universe 👾",
+            "max": "Interstellar Elite 🌌"
+        },
+        "heroes": {
+            "4": "Super Start ⚡️",
+            "8": "Tables Hero 🛡",
+            "12": "Multiplication Pro 💥",
+            "20": "Super Champion ⭐️",
+            "30": "Mega Genius 🔥",
+            "max": "Tables Invincible 🏅"
+        },
+        "animals": {
+            "4": "Fast Tiger 🐯",
+            "8": "Lightning Falcon 🦅",
+            "12": "Turbo Cheetah ⚡️",
+            "20": "Clever Fox 🦊",
+            "30": "Tables Dragon 🐉",
+            "max": "Ultimate Phoenix 🔥"
         }
     },
     "collection": {

@@ -85,7 +85,7 @@ const CheckpointModal = ({
     } else {
       scaleAnim.setValue(0);
     }
-  }, [visible]);
+  }, [visible, isZenMode, onClose, scaleAnim]);
 
   if (!visible) return null;
 

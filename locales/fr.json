@@ -23,13 +23,23 @@
         "legend_not_seen": "Non vue",
         "legend_mastered": "Maîtrisée"
     },
+    "tables_selection": {
+        "title": "Choisis ta table"
+    },
+    "discovery": {
+        "table_not_found": "Table non trouvée"
+    },
     "user_modal": {
         "title": "Qui es-tu ?",
         "subtitle": "Choisis ton profil",
         "available_users": "({{count}} utilisateurs disponibles)",
         "no_users": "Aucun utilisateur trouvé",
         "create_profile": "Crée un profil pour commencer !",
-        "add": "Ajouter"
+        "add": "Ajouter",
+        "guest_mode": "Mode Invité",
+        "anonymous_mode": "Mode Anonyme",
+        "first_launch_subtitle": "Bienvenue dans Tables Magiques !\nCrée ton profil pour sauvegarder ta progression.",
+        "create_profile_btn": "Créer un profil"
     },
     "parent_gate": {
         "title": "Zone Parents & Réglages",
@@ -253,6 +263,60 @@
             "title": "L'Everest",
             "message": "50 questions !",
             "back_title": "Sommet !"
+        }
+    },
+    "streak_messages": {
+        "4": {
+            "msg1": "Bravo, 4 bonnes d'affilée ! Tu tiens un super rythme 💪",
+            "msg2": "Top ! 4 réponses parfaites, ton cerveau chauffe 🔥",
+            "msg3": "4 sur 4, c'est une vraie série magique ✨"
+        },
+        "8": {
+            "msg1": "Incroyable ! 8 bonnes réponses de suite, tu domptes les tables 👑",
+            "msg2": "8 d'affilée, c'est le niveau champion 🏆"
+        },
+        "12": {
+            "msg1": "Record magique ! 12 réponses de suite, tu es un maître des tables ✨",
+            "msg2": "12 enchaînées, c'est du très haut niveau. Respect ! 👏"
+        },
+        "20": {
+            "msg1": "20 d'affilée ! Tu bascules dans la zone expert 🚀",
+            "msg2": "Série de 20, c'est un niveau confirmé de multiplication 🔥"
+        },
+        "30": {
+            "msg1": "30 d'affilée… c'est historique 🎯",
+            "msg2": "Tu viens de franchir un mur mental : 30 réponses parfaites 👑"
+        },
+        "max": {
+            "msg1": "Perf maximale du jour ! Tu as répondu juste à toutes les questions 🌟",
+            "msg2": "Série parfaite : tu as explosé ton record du jour 🎉",
+            "msg3": "Tout bon du début à la fin, un vrai sans-faute 💫"
+        }
+    },
+    "streak_badges": {
+        "space": {
+            "4": "Décollage 🚀",
+            "8": "Pilote Spatial 🛰",
+            "12": "Astro-Expert ⭐️",
+            "20": "Commandant Galactique 🪐",
+            "30": "Maître de l'Univers 👾",
+            "max": "Élite Interstellaire 🌌"
+        },
+        "heroes": {
+            "4": "Super Départ ⚡️",
+            "8": "Héros des Tables 🛡",
+            "12": "Pro des Multiplications 💥",
+            "20": "Super Champion ⭐️",
+            "30": "Méga Surdoué 🔥",
+            "max": "Invincible des Tables 🏅"
+        },
+        "animals": {
+            "4": "Tigre Rapide 🐯",
+            "8": "Faucon Fulgurant 🦅",
+            "12": "Guépard Turbo ⚡️",
+            "20": "Renard Ingénieux 🦊",
+            "30": "Dragon des Tables 🐉",
+            "max": "Phénix Ultime 🔥"
         }
     },
     "collection": {

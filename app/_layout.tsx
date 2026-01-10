@@ -13,7 +13,7 @@ import { AppProvider } from "@/contexts/AppContext";
 try {
   SplashScreen.preventAutoHideAsync();
 } catch (e) {
-  console.log('SplashScreen warning:', e);
+  // console.log('SplashScreen warning:', e);
 }
 
 const queryClient = new QueryClient();

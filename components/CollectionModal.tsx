@@ -350,7 +350,7 @@ export default function CollectionModal({
   gender,
   targetUser,
 }: CollectionModalProps) {
-  const { currentUser, anonymousChallengesCompleted, anonymousAchievements, anonymousPersistenceBadges } = useApp();
+  const { currentUser, anonymousChallengesCompleted, anonymousAchievements } = useApp();
 
   // Determine source of truth: targetUser -> currentUser -> Anonymous
   const effectiveUser = targetUser || currentUser;

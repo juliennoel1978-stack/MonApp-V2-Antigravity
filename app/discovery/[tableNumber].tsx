@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Animated,
   Dimensions, // Restored for StyleSheet use
-  Platform, // Restored
   Modal, // Restored
   PanResponder, // Restored
   useWindowDimensions,
@@ -174,10 +173,10 @@ export default function DiscoveryScreen() {
     };
   }, []);
 
-  const speakMultiplication = async (tableNum: number, multiplier: number, result: number) => {
+  const speakMultiplication = useCallback(async (tableNum: number, multiplier: number, result: number) => {
     const text = `${tableNum} fois ${multiplier} égale ${result}`;
     speak(text);
-  };
+  }, [speak]);
 
   const closeModal = useCallback(() => {
     Animated.timing(modalScaleAnim, {
@@ -208,7 +207,7 @@ export default function DiscoveryScreen() {
     if (table) {
       speakMultiplication(table.number, multiplier, result);
     }
-  }, [table, modalScaleAnim]);
+  }, [table, modalScaleAnim, speakMultiplication]);
 
 
 
@@ -240,7 +239,7 @@ export default function DiscoveryScreen() {
   if (!table) {
     return (
       <SafeAreaView style={styles.container}>
-        <ThemedText style={styles.errorText}>Table non trouvée</ThemedText>
+        <ThemedText style={styles.errorText}>{i18n.t('discovery.table_not_found')}</ThemedText>
       </SafeAreaView>
     );
   }

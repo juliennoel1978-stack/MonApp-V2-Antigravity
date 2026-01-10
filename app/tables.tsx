@@ -73,7 +73,7 @@ export default function TablesScreen() {
           >
             <Home size={24} color={AppColors.text} />
           </TouchableOpacity>
-          <ThemedText style={styles.headerTitle}>Choisis ta table</ThemedText>
+          <ThemedText style={styles.headerTitle}>{i18n.t('tables_selection.title')}</ThemedText>
           <View style={styles.placeholder} />
         </View>
 

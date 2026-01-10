@@ -10,8 +10,8 @@ try {
     // @ts-ignore
     window.__workletSpec = true;
     // @ts-ignore
-    window.__reanimatedWorkletInit = function() {};
+    window.__reanimatedWorkletInit = function () { };
   }
 } catch (e) {
-  console.log('Polyfill setup warning:', e);
+  // console.log('Polyfill setup warning:', e);
 }

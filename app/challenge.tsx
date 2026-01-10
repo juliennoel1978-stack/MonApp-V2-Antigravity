@@ -3,9 +3,7 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
-  TouchableOpacity,
   Dimensions,
-  ScrollView,
   Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -50,7 +48,7 @@ const MidChallengeBoostModal = ({
     } else {
       scaleAnim.setValue(0);
     }
-  }, [visible]);
+  }, [visible, scaleAnim]);
 
   if (!visible) return null;
 
@@ -81,7 +79,6 @@ export default function ChallengeScreen() {
     correctCount,
     incorrectCount,
     totalQuestions,
-    consecutiveCorrect,
     showFeedback,
     isCorrect,
     showCelebration,

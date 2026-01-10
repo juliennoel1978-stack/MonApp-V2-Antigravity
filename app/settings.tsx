@@ -18,6 +18,7 @@ import { AppColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
 import CollectionModal from '@/components/CollectionModal';
 import i18n from '@/utils/i18n';
+import type { BadgeTheme, User, PersistenceBadge, UserProgress } from '@/types';
 
 
 
@@ -62,10 +63,10 @@ export default function SettingsScreen() {
 
   // Badge Modal State
   const [showBadgeModal, setShowBadgeModal] = useState(false);
-  const [badgeModalUser, setBadgeModalUser] = useState<any>(null);
+  const [badgeModalUser, setBadgeModalUser] = useState<User | null>(null);
 
-  const getTableStatusColor = (user: any, tableNum: number) => {
-    const p = user.progress.find((tp: any) => tp.tableNumber === tableNum);
+  const getTableStatusColor = (user: User, tableNum: number) => {
+    const p = user.progress.find((tp) => tp.tableNumber === tableNum);
 
     // 1. Not Started -> GREY
     // If no progress entry exists OR totalAttempts is 0 OR it hasn't been practiced recently (date check)
@@ -84,7 +85,7 @@ export default function SettingsScreen() {
     return AppColors.warning;
   };
 
-  const getStrongestTable = (user: any) => {
+  const getStrongestTable = (user: User) => {
     // Use explicit strongestTable or lastSessionBestTable if available
     if (user.strongestTable) return user.strongestTable;
 
@@ -92,7 +93,7 @@ export default function SettingsScreen() {
     let bestTable = 0;
     let bestRate = -1;
 
-    user.progress.forEach((p: any) => {
+    user.progress.forEach((p) => {
       if (p.totalAttempts > 5) { // Minimum attempts to be significant
         const rate = p.correctAnswers / p.totalAttempts;
         if (rate > bestRate) {
@@ -104,22 +105,23 @@ export default function SettingsScreen() {
     return bestRate > 0.7 ? bestTable : '-';
   };
 
-  const getWeakestTable = (user: any) => {
+  const getWeakestTable = (user: User) => {
     // SMART RECOMMENDATION LOGIC (Mission Button Logic)
     // 1. PROGRESSION: Find first table (1-10) not mastered.
     // Definition of 'not mastered' must match Green status above.
-    const isMastered = (p: any) => (p.level1Completed && p.level2Completed) || p.completed || (p.starsEarned >= 3);
+    const isMastered = (p: UserProgress) => (p.level1Completed && p.level2Completed) || p.completed || (p.starsEarned >= 3);
 
     for (let i = 1; i <= 10; i++) {
-      const p = user.progress.find((prog: any) => prog.tableNumber === i);
+      const p = user.progress.find((prog) => prog.tableNumber === i);
       // If not started (no p) or not mastered -> Recommend it
       if (!p || !isMastered(p)) {
         return i;
       }
     }
 
+
     // 2. WEAKNESS/CONSOLIDATION: If all 1-10 mastered, check for poor success rate
-    const tablesWithAttempts = user.progress.filter((p: any) => p.tableNumber >= 1 && p.tableNumber <= 10 && p.totalAttempts > 0);
+    const tablesWithAttempts = user.progress.filter((p) => p.tableNumber >= 1 && p.tableNumber <= 10 && p.totalAttempts > 0);
     let worstTable = 0;
     let worstRate = 1.0;
 
@@ -135,7 +137,7 @@ export default function SettingsScreen() {
     if (worstTable !== 0) return worstTable;
 
     // 3. MAINTENANCE: If all good, pick least recently practiced
-    const sortedByDate = [...tablesWithAttempts].sort((a: any, b: any) => {
+    const sortedByDate = [...tablesWithAttempts].sort((a, b) => {
       if (!a.lastPracticed) return -1;
       if (!b.lastPracticed) return 1;
       return new Date(a.lastPracticed).getTime() - new Date(b.lastPracticed).getTime();
@@ -148,11 +150,11 @@ export default function SettingsScreen() {
     return i18n.t('settings.none');
   };
 
-  const getAverageTime = (user: any) => {
+  const getAverageTime = (user: User) => {
     let totalWeightedTime = 0;
     let totalAttempts = 0;
 
-    user.progress.forEach((p: any) => {
+    user.progress.forEach((p) => {
       if (p.averageTime && p.totalAttempts) {
         totalWeightedTime += (p.averageTime * p.totalAttempts);
         totalAttempts += p.totalAttempts;
@@ -173,11 +175,11 @@ export default function SettingsScreen() {
     { value: 'heroes', label: i18n.t('settings.themes.heroes'), icon: '🦸' },
   ];
 
-  const handleResetUser = (user: any) => {
+  const handleResetUser = (user: User) => {
     const resetAction = () => {
-      const resetUser = {
+      const resetUser: User = {
         ...user,
-        progress: user.progress.map((p: any) => ({
+        progress: user.progress.map((p) => ({
           ...p,
           starsEarned: 0,
           completed: false,
@@ -191,10 +193,8 @@ export default function SettingsScreen() {
         bestStreak: 0,
         persistenceBadges: [],
         achievements: [],
-        badgesCompleted: 0,
         strongestTable: 0,
-        lastSessionBestTable: 0,
-        totalStars: 0
+        lastSessionBestTable: 0
       };
       updateUser(user.id, resetUser);
     };
@@ -211,17 +211,17 @@ export default function SettingsScreen() {
     }
   };
 
-  const getUserBadges = (user: any) => {
+  const getUserBadges = (user: User) => {
     if (!user.persistenceBadges) return [];
-    // If persistenceBadges contains IDs
-    return user.persistenceBadges.map((id: string) => ({
-      id,
-      name: i18n.t(BADGE_KEYS[id] || 'settings.badges'),
-      icon: BADGE_ICONS[id] || '🏅'
+    // If persistenceBadges contains PersistenceBadge objects
+    return user.persistenceBadges.map((badge: PersistenceBadge) => ({
+      id: badge.id,
+      name: i18n.t(BADGE_KEYS[badge.id] || 'settings.badges'),
+      icon: BADGE_ICONS[badge.id] || '🏅'
     }));
   };
 
-  const handleOpenBadges = (user: any) => {
+  const handleOpenBadges = (user: User) => {
     setBadgeModalUser(user);
     setShowBadgeModal(true);
   };
@@ -364,7 +364,7 @@ export default function SettingsScreen() {
                         <Calendar size={14} color={AppColors.textSecondary} />
                         <Text style={styles.activityText}>
                           {i18n.t('settings.last_activity', {
-                            date: formatDate(user.progress.reduce((latest: string, p: any) => {
+                            date: formatDate(user.progress.reduce((latest: string, p: UserProgress) => {
                               if (!p.lastPracticed) return latest;
                               return (!latest || new Date(p.lastPracticed) > new Date(latest)) ? p.lastPracticed : latest;
                             }, user.createdAt))
@@ -391,7 +391,7 @@ export default function SettingsScreen() {
                       <View style={styles.userActionsStack}>
                         <TouchableOpacity
                           style={styles.actionButtonWide}
-                          onPress={() => router.push(`/user-form?userId=${user.id}` as any)}
+                          onPress={() => router.push({ pathname: '/user-form', params: { userId: user.id } })}
                         >
                           <Edit size={18} color={AppColors.text} />
                           <Text style={styles.actionButtonText}>{i18n.t('settings.edit_profile')}</Text>
@@ -428,7 +428,7 @@ export default function SettingsScreen() {
 
             <TouchableOpacity
               style={styles.addUserButton}
-              onPress={() => router.push('/user-form' as any)}
+              onPress={() => router.push('/user-form')}
             >
               <Text style={styles.addUserButtonText}>{i18n.t('settings.add_profile')}</Text>
             </TouchableOpacity>
@@ -640,7 +640,7 @@ export default function SettingsScreen() {
                       styles.challengeQuestionButton,
                       (settings.badgeTheme || 'space') === theme.value && styles.challengeQuestionButtonActive
                     ]}
-                    onPress={() => updateSettings({ badgeTheme: theme.value as any })}
+                    onPress={() => updateSettings({ badgeTheme: theme.value as BadgeTheme })}
                   >
                     <Text style={[
                       styles.challengeQuestionButtonText,
@@ -683,7 +683,7 @@ export default function SettingsScreen() {
                         styles.challengeQuestionButton,
                         (settings.timerDisplayMode || 'chronometer') === mode.id && styles.challengeQuestionButtonActive
                       ]}
-                      onPress={() => updateSettings({ timerDisplayMode: mode.id as any })}
+                      onPress={() => updateSettings({ timerDisplayMode: mode.id as 'bar' | 'chronometer' })}
                     >
                       <Text style={[
                         styles.challengeQuestionButtonText,

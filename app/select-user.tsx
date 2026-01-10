@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
 import { ThemedText } from '@/components/ThemedText';
+import i18n from '@/utils/i18n';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 60) / 2;
@@ -46,8 +47,8 @@ export default function SelectUserScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.header}>
-          <ThemedText style={styles.title}>Qui es-tu ?</ThemedText>
-          <ThemedText style={styles.subtitle}>Choisis ton profil</ThemedText>
+          <ThemedText style={styles.title}>{i18n.t('user_modal.title')}</ThemedText>
+          <ThemedText style={styles.subtitle}>{i18n.t('user_modal.subtitle')}</ThemedText>
         </View>
 
         <ScrollView
@@ -93,7 +94,7 @@ export default function SelectUserScreen() {
               <View style={styles.addIconContainer}>
                 <Plus size={40} color={AppColors.primary} />
               </View>
-              <ThemedText style={styles.addText}>Ajouter</ThemedText>
+              <ThemedText style={styles.addText}>{i18n.t('user_modal.add')}</ThemedText>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -104,7 +105,7 @@ export default function SelectUserScreen() {
               <View style={[styles.addIconContainer, styles.guestIconContainer]}>
                 <ThemedText style={{ fontSize: 32 }}>🕵️</ThemedText>
               </View>
-              <ThemedText style={[styles.addText, styles.guestText]}>Mode Invité</ThemedText>
+              <ThemedText style={[styles.addText, styles.guestText]}>{i18n.t('user_modal.guest_mode')}</ThemedText>
             </TouchableOpacity>
           </View>
         </ScrollView>
