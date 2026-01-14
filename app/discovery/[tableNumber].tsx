@@ -37,8 +37,8 @@ function getTipExamples(tableNumber: number): string[] {
       ];
     case 3:
       return [
-        '3 + 3 + 3 = 9',
-        '6 + 6 = 12 (2 × 6)'
+        '3 × 3 = 9 (3 + 3 + 3)',
+        '4 × 3 = 12 (3 + 3 + 3 + 3)'
       ];
     case 4:
       return [
