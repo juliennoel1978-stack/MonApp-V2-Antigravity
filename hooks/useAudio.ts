@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useApp } from '@/contexts/AppContext';
-import { playSuccessSound as playSoundAsset } from '@/utils/soundPlayer';
+import { playSuccessSound as playSoundAsset, SoundVariant } from '@/utils/soundPlayer';
 import { speak as speakTextUtil, stop as stopSpeechUtil } from '@/utils/speech';
 
 export const useAudio = () => {
@@ -12,9 +12,16 @@ export const useAudio = () => {
     const voiceGender = currentUser?.voiceGender ?? settings.voiceGender ?? 'female';
     const isSoundEnabled = currentUser?.soundEnabled ?? settings.soundEnabled ?? true;
 
-    const playSound = useCallback(async (variant: 'default' | 'magic' | 'boost' | 'challenge' | 'finish' | 'mastery' | 'checkpoint' = 'default') => {
+    const playSound = useCallback(async (variant: SoundVariant = 'default') => {
         if (isSoundEnabled) {
             await playSoundAsset(variant);
+        }
+    }, [isSoundEnabled]);
+
+    // Son d'erreur doux - cohérence globale (Entraînement + Challenge)
+    const playErrorSound = useCallback(async () => {
+        if (isSoundEnabled) {
+            await playSoundAsset('error');
         }
     }, [isSoundEnabled]);
 
@@ -32,6 +39,7 @@ export const useAudio = () => {
         isVoiceEnabled,
         isSoundEnabled,
         playSound,
+        playErrorSound,
         speak,
         stopSpeech
     };

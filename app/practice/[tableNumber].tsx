@@ -10,7 +10,6 @@ import {
   TouchableOpacity,
   Animated,
   Dimensions,
-  Platform,
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,13 +22,11 @@ import { generateQuestions } from '@/utils/questionGenerator';
 import type { Question } from '@/types';
 
 import { Audio } from 'expo-av';
-import * as Haptics from 'expo-haptics';
+
 import i18n from '@/utils/i18n';
+import { useResponsive } from '@/hooks/useResponsive';
 
-// Short "Ding" sound (Base64 MP3)
 
-
-// Short "Ding" sound (Base64 MP3) - Moved to utils/soundPlayer.ts
 
 const COACH_THEMES = {
   animals: '🐒',
@@ -37,7 +34,7 @@ const COACH_THEMES = {
   heroes: '🤖',
 };
 
-// COACH_MESSAGES removed, accessed dynamically via i18n.translations
+
 
 const CHECKPOINT_THEMES = {
   animals: { image: '🐒', item: '🍌', title: 'practice.checkpoints.animals.title', subtitle: 'practice.checkpoints.animals.subtitle' },
@@ -189,8 +186,9 @@ export default function PracticeScreen() {
   const { tableNumber } = useLocalSearchParams();
   const table = getTableByNumber(Number(tableNumber));
   const { updateTableProgress, unlockBadge, getTableProgress, settings, currentUser } = useApp();
-  const { playSound, speak, stopSpeech, isVoiceEnabled } = useAudio();
+  const { playSound, playErrorSound, speak, stopSpeech, isVoiceEnabled } = useAudio();
   const { vibrate } = useHaptics();
+  const { isSmallScreen, isTablet, spacing, fontSize, containerMaxWidth } = useResponsive();
 
   const tableProgress = getTableProgress(Number(tableNumber));
   const initialLevel = tableProgress?.level1Completed ? 2 : 1;
@@ -351,14 +349,22 @@ export default function PracticeScreen() {
     const averageTime = questions.length > 0 ? Math.round(totalTimeRef.current / questions.length) : 0;
 
     if (level === 1) {
-      if (finalCorrectCount >= 8) {
-        updateTableProgress(table.number, finalCorrectCount, questions.length, finalCorrectCount === 10 ? 2 : 1, 1, averageTime);
+      // Option C: Seuil 70% pour débloquer Level 2, étoile encouragement dès 3/10
+      if (finalCorrectCount >= 7) {
+        // 7/10 ou plus = débloque Level 2
+        const stars = finalCorrectCount === 10 ? 2 : 1;
+        updateTableProgress(table.number, finalCorrectCount, questions.length, stars, 1, averageTime);
         if (finalCorrectCount === 10) setQuestionsToReview([]);
         vibrate('heavy');
         playSound('finish');
         setLevel1Highscore(finalCorrectCount);
         setShowLevelTransition(true);
+      } else if (finalCorrectCount >= 3) {
+        // 3-6/10 = 1 étoile d'encouragement mais pas de Level 2
+        updateTableProgress(table.number, finalCorrectCount, questions.length, 1, 1, averageTime);
+        setShowResult(true);
       } else {
+        // <3/10 = pas d'étoile
         setShowResult(true);
       }
     } else {
@@ -445,14 +451,17 @@ export default function PracticeScreen() {
       // Level 1: Just regular loop, no streak/checkpoint logic needed as per request
       vibrate('success');
       triggerCoachSuccess();
+      // Délai cognitif de 800ms : cohérence avec Challenge
       setTimeout(() => {
         if (isMounted.current) {
           nextQuestion(newCorrectCount);
           setShowCoachFeedback(false);
         }
-      }, 1200);
+      }, 800);
     } else {
       setStreak(0); // Reset streak on error even in Level 1 for consistency
+      // Son d'erreur doux global (cohérence Entraînement + Challenge)
+      if (!isZenMode) playErrorSound();
       vibrate('error');
       animateError();
       if (isReviewMode) {
@@ -509,16 +518,19 @@ export default function PracticeScreen() {
         // Standard Success
         vibrate('success');
         triggerCoachSuccess();
+        // Délai cognitif de 800ms : cohérence avec Challenge
         setTimeout(() => {
           if (isMounted.current) {
             nextQuestion(newCorrectCount);
             setShowCoachFeedback(false);
           }
-        }, 1200);
+        }, 800);
       }
 
     } else {
       setStreak(0); // Reset streak on error
+      // Son d'erreur doux global (cohérence Entraînement + Challenge)
+      if (!isZenMode) playErrorSound();
       vibrate('error');
       animateError();
       if (isReviewMode) {
@@ -607,24 +619,7 @@ export default function PracticeScreen() {
     setShowCoachFeedback(true);
   };
 
-  const animateSuccess = () => {
-    if (isZenMode) return; // Disable animation in Zen Mode (USER REQUEST)
 
-    Animated.sequence([
-      Animated.spring(scaleAnim, {
-        toValue: 1.1,
-        tension: 100,
-        friction: 3,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        tension: 100,
-        friction: 3,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
 
   const animateError = () => {
     if (isZenMode) return; // Disable visual shake in Zen Mode
@@ -715,7 +710,11 @@ export default function PracticeScreen() {
     return (
       <View style={styles.backgroundContainer}>
         <SafeAreaView style={styles.container}>
-          <View style={styles.resultContainer}>
+          <ScrollView
+            contentContainerStyle={styles.resultScrollContent}
+            showsVerticalScrollIndicator={false}
+            bounces={true}
+          >
             <ThemedText style={styles.resultTitle}>{i18n.t('practice.bravo_name', { name: userName })}</ThemedText>
             <ThemedText style={styles.resultSubtitle}>
               {correctCount === 10
@@ -728,7 +727,7 @@ export default function PracticeScreen() {
                 {[1, 2, 3, 4].map(starIndex => (
                   <Star
                     key={starIndex}
-                    size={40}
+                    size={32}
                     color={starIndex <= starsEarnedLevel1 ? AppColors.warning : AppColors.borderLight}
                     fill={starIndex <= starsEarnedLevel1 ? AppColors.warning : 'transparent'}
                   />
@@ -772,7 +771,7 @@ export default function PracticeScreen() {
                 <ThemedText style={styles.backToMenuButtonText}>{i18n.t('common.back_to_menu')}</ThemedText>
               </TouchableOpacity>
             </View>
-          </View>
+          </ScrollView>
         </SafeAreaView>
       </View>
     );
@@ -818,11 +817,16 @@ export default function PracticeScreen() {
         );
       }
 
-      // Level 1 Failed (Score <= 6)
+      // Level 1 - Score insuffisant pour Level 2 (< 7/10)
+      const earnedEncouragementStar = correctCount >= 3;
       return (
         <View style={styles.backgroundContainer}>
           <SafeAreaView style={styles.container}>
-            <View style={styles.resultContainer}>
+            <ScrollView
+              contentContainerStyle={styles.resultScrollContent}
+              showsVerticalScrollIndicator={false}
+              bounces={true}
+            >
               <ThemedText style={styles.resultTitle}>{i18n.t('practice.results.almost')}</ThemedText>
 
               <View style={[styles.resultCardCompact, { borderColor: tableColor }]}>
@@ -831,8 +835,17 @@ export default function PracticeScreen() {
                 </ThemedText>
                 <ThemedText style={styles.resultLabel}>{i18n.t('practice.results.correct_answers')}</ThemedText>
 
+                {/* Afficher l'étoile d'encouragement si score >= 3 */}
+                {earnedEncouragementStar && (
+                  <View style={styles.starsContainer}>
+                    <Star size={24} color={AppColors.warning} fill={AppColors.warning} />
+                  </View>
+                )}
+
                 <ThemedText style={styles.encouragementLarge}>
-                  {i18n.t('practice.results.encouragement_muscle')}
+                  {earnedEncouragementStar
+                    ? i18n.t('practice.results.encouragement_star_earned')
+                    : i18n.t('practice.results.encouragement_muscle')}
                 </ThemedText>
                 <ThemedText style={styles.encouragementSmall}>
                   {i18n.t('practice.results.encouragement_min')}
@@ -882,7 +895,7 @@ export default function PracticeScreen() {
                   </TouchableOpacity>
                 </View>
               </View>
-            </View>
+            </ScrollView>
           </SafeAreaView>
         </View>
       );
@@ -936,7 +949,11 @@ export default function PracticeScreen() {
     return (
       <View style={styles.backgroundContainer}>
         <SafeAreaView style={styles.container}>
-          <View style={styles.resultContainer}>
+          <ScrollView
+            contentContainerStyle={styles.resultScrollContent}
+            showsVerticalScrollIndicator={false}
+            bounces={true}
+          >
             <ThemedText style={styles.resultTitle}>
               {passed
                 ? `${i18n.t('practice.results.bravo_simple')} ${userName ? `${userName} ` : ''}! 🎉`
@@ -956,7 +973,7 @@ export default function PracticeScreen() {
                 {[1, 2, 3, 4].map(starIndex => (
                   <Star
                     key={starIndex}
-                    size={40}
+                    size={32}
                     color={starIndex <= stars ? AppColors.warning : AppColors.borderLight}
                     fill={starIndex <= stars ? AppColors.warning : 'transparent'}
                   />
@@ -1019,7 +1036,7 @@ export default function PracticeScreen() {
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
+          </ScrollView>
         </SafeAreaView>
       </View>
     );
@@ -1101,11 +1118,21 @@ export default function PracticeScreen() {
                       activeOpacity={localVoiceEnabled ? 0.7 : 1}
                     >
                       <View style={styles.questionRow}>
-                        <ThemedText style={[styles.questionNumber, { color: tableColor }]}>
+                        <ThemedText
+                          style={[styles.questionNumber, { color: tableColor }, isTablet && { fontSize: fontSize(52) }]}
+                          adjustsFontSizeToFit
+                          numberOfLines={1}
+                          minimumFontScale={0.6}
+                        >
                           {currentQuestion.multiplicand}
                         </ThemedText>
                         <ThemedText style={styles.questionOperator}>×</ThemedText>
-                        <ThemedText style={[styles.questionNumber, { color: tableColor }]}>
+                        <ThemedText
+                          style={[styles.questionNumber, { color: tableColor }, isTablet && { fontSize: fontSize(52) }]}
+                          adjustsFontSizeToFit
+                          numberOfLines={1}
+                          minimumFontScale={0.6}
+                        >
                           {currentQuestion.multiplier}
                         </ThemedText>
                         {localVoiceEnabled && <Volume2 size={24} color={AppColors.textSecondary} style={{ marginLeft: 16, opacity: 0.5 }} />}
@@ -1122,7 +1149,12 @@ export default function PracticeScreen() {
                     activeOpacity={localVoiceEnabled ? 0.7 : 1}
                     style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}
                   >
-                    <ThemedText style={styles.level2QuestionText}>
+                    <ThemedText
+                      style={[styles.level2QuestionText, isTablet && { fontSize: fontSize(42) }]}
+                      adjustsFontSizeToFit
+                      numberOfLines={1}
+                      minimumFontScale={0.6}
+                    >
                       {currentQuestion.multiplicand} × {currentQuestion.multiplier} = ?
                     </ThemedText>
                     {localVoiceEnabled && <Volume2 size={28} color={AppColors.textSecondary} style={{ opacity: 0.5 }} />}
@@ -1145,6 +1177,7 @@ export default function PracticeScreen() {
                           styles.optionButton,
                           showCorrect && styles.optionCorrect,
                           showWrong && styles.optionWrong,
+                          { paddingVertical: spacing(16) },
                         ]}
                         onPress={() => handleAnswerSelect(option)}
                         disabled={selectedAnswer !== null}
@@ -1154,7 +1187,10 @@ export default function PracticeScreen() {
                           style={[
                             styles.optionText,
                             (showCorrect || showWrong) && styles.optionTextSelected,
+                            isTablet && { fontSize: fontSize(32) },
                           ]}
+                          adjustsFontSizeToFit
+                          numberOfLines={1}
                         >
                           {option}
                         </ThemedText>
@@ -1207,6 +1243,7 @@ export default function PracticeScreen() {
             onDelete={onDelete}
             onSubmit={handleInputSubmit}
             color={tableColor}
+            isSubmitDisabled={userInput.length === 0}
           />
         )}
 
@@ -1485,17 +1522,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  resultScrollContent: {
+    flexGrow: 1,
+    padding: 16,
+    paddingTop: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 20,
+  },
   resultTitle: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: 'bold',
     color: AppColors.text,
-    marginBottom: 8,
+    marginBottom: 4,
     textAlign: 'center',
   },
   resultSubtitle: {
-    fontSize: 18,
+    fontSize: 16,
     color: AppColors.textSecondary,
-    marginBottom: 40,
+    marginBottom: 16,
     textAlign: 'center',
   },
   resultCard: {
@@ -1516,28 +1561,28 @@ const styles = StyleSheet.create({
   },
   resultCardCompact: {
     backgroundColor: AppColors.surface,
-    padding: 20,
-    borderRadius: 20,
+    padding: 14,
+    borderRadius: 16,
     alignItems: 'center',
     width: '100%',
-    borderWidth: 3,
+    borderWidth: 2,
     shadowColor: AppColors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 5,
-    marginBottom: 20,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    marginBottom: 12,
   },
   resultScore: {
-    fontSize: 56,
+    fontSize: 48,
     fontWeight: 'bold',
     color: AppColors.primary,
-    marginBottom: 6,
+    marginBottom: 2,
   },
   resultLabel: {
-    fontSize: 16,
+    fontSize: 14,
     color: AppColors.textSecondary,
-    marginBottom: 16,
+    marginBottom: 8,
     fontWeight: '600',
   },
   starsContainer: {
@@ -1556,24 +1601,24 @@ const styles = StyleSheet.create({
   },
   resultButtonsColumn: {
     flexDirection: 'column',
-    gap: 16,
+    gap: 10,
     width: '100%',
   },
   resultButtonsRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 8,
     width: '100%',
   },
   resultButton: {
     flex: 1,
-    paddingVertical: 16,
-    borderRadius: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
     alignItems: 'center',
     shadowColor: AppColors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
     width: '100%',
   },
   retryButton: {
@@ -1728,19 +1773,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   encouragementLarge: {
-    fontSize: 16,
+    fontSize: 14,
     color: AppColors.text,
     textAlign: 'center',
     fontWeight: '600',
-    marginTop: 20,
-    lineHeight: 24,
+    marginTop: 8,
+    lineHeight: 20,
   },
   encouragementSmall: {
-    fontSize: 13,
+    fontSize: 12,
     color: AppColors.textSecondary,
     textAlign: 'center',
-    marginTop: 8,
-    lineHeight: 18,
+    marginTop: 4,
+    lineHeight: 16,
   },
   resultButtonTextLarge: {
     fontSize: 26,
@@ -1757,30 +1802,30 @@ const styles = StyleSheet.create({
   },
   reviewContainer: {
     backgroundColor: AppColors.warning + '20',
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 16,
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 10,
     alignItems: 'center',
   },
   reviewText: {
-    fontSize: 15,
+    fontSize: 13,
     color: AppColors.text,
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
     fontWeight: '600',
-    lineHeight: 22,
+    lineHeight: 18,
   },
   reviewConfirmButton: {
     backgroundColor: AppColors.warning,
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 10,
     alignItems: 'center',
     shadowColor: AppColors.shadow,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 2,
   },
   reviewConfirmButtonText: {
     fontSize: 16,

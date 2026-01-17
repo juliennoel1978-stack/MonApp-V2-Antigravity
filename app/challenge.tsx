@@ -1,5 +1,5 @@
-import { useRouter } from 'expo-router';
-import React, { useState, useEffect } from 'react';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -19,6 +19,7 @@ import { ChallengeQuestion } from '@/components/challenge/ChallengeQuestion';
 import { ChallengeFeedback } from '@/components/challenge/ChallengeFeedback';
 import { useChallengeGame } from '@/hooks/useChallengeGame';
 import { Keypad } from '@/components/Keypad';
+import { BreathPauseModal } from '@/components/BreathPauseModal';
 
 const { width } = Dimensions.get('window');
 
@@ -70,6 +71,18 @@ const MidChallengeBoostModal = ({
 
 export default function ChallengeScreen() {
   const router = useRouter();
+  const { tables } = useLocalSearchParams();
+
+  // Parse selected tables from query params
+  const selectedTables = useMemo(() => {
+    if (!tables) return undefined;
+    const parsed = String(tables)
+      .split(',')
+      .map(Number)
+      .filter(n => n >= 1 && n <= 10);
+    return parsed.length > 0 ? parsed : undefined;
+  }, [tables]);
+
   const {
     // State
     currentQuestion,
@@ -110,13 +123,16 @@ export default function ChallengeScreen() {
     restartGame,
     handleBadgeDismiss,
     handleReviewErrors,
+    pauseChallenge,
+    resumeChallenge,
 
     // Context
     currentUser,
     settings,
     isChallengeVoiceEnabled,
     toggleChallengeVoice,
-  } = useChallengeGame();
+    isPaused,
+  } = useChallengeGame(selectedTables);
 
   if (isFinished) {
     return (
@@ -165,11 +181,19 @@ export default function ChallengeScreen() {
           theme={currentUser?.badgeTheme || settings?.badgeTheme || 'space'}
         />
 
+        <BreathPauseModal
+          visible={isPaused}
+          theme={(currentUser?.badgeTheme || settings?.badgeTheme || 'space') as 'animals' | 'space' | 'heroes'}
+          onResume={resumeChallenge}
+        />
+
         <ChallengeHeader
           onHomePress={() => router.replace('/')}
           title={i18n.t('challenge.title')}
           onToggleVoice={toggleChallengeVoice}
           isVoiceEnabled={isChallengeVoiceEnabled}
+          onPausePress={pauseChallenge}
+          isTimerEnabled={currentUser ? (currentUser.timerSettings?.enabled || false) : settings.timerEnabled}
         />
 
         <ChallengeStats
@@ -242,6 +266,7 @@ export default function ChallengeScreen() {
             onDelete={onDelete}
             onSubmit={checkAnswer}
             color={AppColors.primary}
+            isSubmitDisabled={userAnswer.length === 0}
           />
         )}
       </SafeAreaView>

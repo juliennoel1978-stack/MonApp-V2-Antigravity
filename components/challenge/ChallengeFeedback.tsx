@@ -188,6 +188,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 4,
         fontWeight: '500',
+        paddingHorizontal: 20,
     },
     kindPhraseText: {
         fontSize: 15,

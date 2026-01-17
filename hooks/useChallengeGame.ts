@@ -17,7 +17,6 @@ const getRandomPhrase = (phrases: string[]) => {
     return phrases[Math.floor(Math.random() * phrases.length)];
 };
 
-// getRandomPhrase definition removed (was duplicate)
 
 type QuestionType = 'result' | 'multiplier' | 'multiplicand';
 
@@ -29,7 +28,7 @@ export type Question = {
     displayText: string;
 };
 
-export const useChallengeGame = () => {
+export const useChallengeGame = (selectedTables?: number[]) => {
     const router = useRouter();
     const {
         settings,
@@ -48,7 +47,7 @@ export const useChallengeGame = () => {
         updateUser,
     } = useApp();
 
-    const { playSound } = useAudio();
+    const { playSound, playErrorSound } = useAudio();
     const { vibrate } = useHaptics();
 
     // Define Zen Mode early for use in effects
@@ -70,7 +69,6 @@ export const useChallengeGame = () => {
     const [currentCorrectPhrase, setCurrentCorrectPhrase] = useState<string>('');
     const [currentErrorPhrase, setCurrentErrorPhrase] = useState<string>('');
     const [maxQuestions, setMaxQuestions] = useState<number>(15);
-    const [isEnduranceUnlock, setIsEnduranceUnlock] = useState<boolean>(false); // New State to track if an endurance badge was just unlocked (optional, for effects)
     const [isFinished, setIsFinished] = useState<boolean>(false);
     const [bestStreak, setBestStreak] = useState<number>(0);
     const [wrongAnswers, setWrongAnswers] = useState<{ num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]>([]);
@@ -78,6 +76,9 @@ export const useChallengeGame = () => {
     const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
     const [reviewQuestions, setReviewQuestions] = useState<{ num1: number; num2: number; answer: number; type: QuestionType; displayText: string }[]>([]);
     const [showMidBoost, setShowMidBoost] = useState<boolean>(false);
+
+    // Pause state
+    const [isPaused, setIsPaused] = useState<boolean>(false);
 
     // Rewards state
     const [showBadgeOverlay, setShowBadgeOverlay] = useState<boolean>(false);
@@ -100,6 +101,20 @@ export const useChallengeGame = () => {
     const [isChallengeVoiceEnabled, setIsChallengeVoiceEnabled] = useState<boolean>(false);
     const toggleChallengeVoice = useCallback(() => {
         setIsChallengeVoiceEnabled(prev => !prev);
+    }, []);
+
+    // Pause functions
+    const pauseChallenge = useCallback(() => {
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+        }
+        setIsPaused(true);
+    }, []);
+
+    const resumeChallenge = useCallback(() => {
+        setIsPaused(false);
+        // Timer will restart via useEffect
     }, []);
 
     // Initial config
@@ -144,7 +159,26 @@ export const useChallengeGame = () => {
             const index = totalQuestions % reviewQuestions.length;
             question = reviewQuestions[index];
         } else {
-            const num1 = Math.floor(Math.random() * 10) + 1;
+            // Use selectedTables to filter which tables to use for questions
+            const tablesToUse = selectedTables && selectedTables.length > 0
+                ? selectedTables
+                : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+            // Weighted selection: tables 1 and 10 appear less often when 4+ tables selected
+            // Weight 1 for tables 1 & 10, Weight 3 for other tables
+            let num1: number;
+            if (tablesToUse.length >= 4) {
+                const weightedTables: number[] = [];
+                for (const table of tablesToUse) {
+                    const weight = (table === 1 || table === 10) ? 1 : 3;
+                    for (let i = 0; i < weight; i++) {
+                        weightedTables.push(table);
+                    }
+                }
+                num1 = weightedTables[Math.floor(Math.random() * weightedTables.length)];
+            } else {
+                num1 = tablesToUse[Math.floor(Math.random() * tablesToUse.length)];
+            }
             const num2 = Math.floor(Math.random() * 10) + 1;
             const result = num1 * num2;
 
@@ -191,7 +225,7 @@ export const useChallengeGame = () => {
             : (settings.timerEnabled ? settings.timerDuration : 0);
         setTimeRemaining(duration);
 
-    }, [settings.timerDuration, settings.timerEnabled, currentUser, isReviewMode, reviewQuestions, totalQuestions]);
+    }, [selectedTables, settings.timerDuration, settings.timerEnabled, currentUser, isReviewMode, reviewQuestions, totalQuestions]);
 
     // Initial question generation
     useEffect(() => {
@@ -213,8 +247,8 @@ export const useChallengeGame = () => {
             clearInterval(timerRef.current);
         }
 
-        // Force disable timer in Zen Mode
-        if (!zenMode && timerEnabled && timerDuration > 0 && !showFeedback && !showCelebration && !showMidBoost && currentQuestion) {
+        // Force disable timer in Zen Mode or when Paused
+        if (!zenMode && !isPaused && timerEnabled && timerDuration > 0 && !showFeedback && !showCelebration && !showMidBoost && currentQuestion) {
             timerRef.current = setInterval(() => {
                 setTimeRemaining(prev => {
                     if (prev <= 1) {
@@ -239,7 +273,7 @@ export const useChallengeGame = () => {
                 }
             };
         }
-    }, [zenMode, currentQuestion, showFeedback, showCelebration, showMidBoost, settings.timerEnabled, settings.timerDuration, currentUser, handleTimeOut, generateNewQuestion]);
+    }, [zenMode, isPaused, currentQuestion, showFeedback, showCelebration, showMidBoost, settings.timerEnabled, settings.timerDuration, currentUser, handleTimeOut, generateNewQuestion]);
 
     // TTS Logic for Challenge Questions
     const { speak, stopSpeech, isVoiceEnabled } = useAudio();
@@ -311,16 +345,6 @@ export const useChallengeGame = () => {
             total: stats.total
         }));
 
-        // Calculate Strongest Table for this session/overall
-        let bestTableReq = -1;
-        let bestTableRate = -1; // Scores (number of correct answers) are stored here for ranking
-
-
-
-
-        // NOTE: Strongest Table calculation and saving is now handled by the ChallengeResults component
-        // to ensure that the value displayed to the user is exactly the one that is persisted.
-        // This prevents logic mismatch bugs.
 
         if (tableUpdates.length > 0) {
             await batchUpdateTableProgress(tableUpdates);
@@ -464,7 +488,6 @@ export const useChallengeGame = () => {
         }
 
         // Unconditionally start review mode as requested
-        // Unconditionally start review mode as requested
         startReviewMode([...wrongAnswers]);
     }, [wrongAnswers, startReviewMode]);
 
@@ -579,12 +602,15 @@ export const useChallengeGame = () => {
                 return; // SKIP standard generation
             }
 
+            // Délai cognitif de 1200ms : laisser le temps au cerveau de lire la phrase d'encouragement
             setTimeout(() => {
-                if (isMounted.current && !showCelebration) { // Note: showCelebration logic is tricky here if calculated inside component
+                if (isMounted.current && !showCelebration) {
                     generateNewQuestion();
                 }
-            }, 1500);
+            }, 1200);
         } else {
+            // Son d'erreur doux global (cohérence Entraînement + Challenge)
+            if (!zenMode) playErrorSound();
             vibrate('error');
             setConsecutiveCorrect(0);
 
@@ -642,7 +668,7 @@ export const useChallengeGame = () => {
                 }
             }
         }
-    }, [zenMode, currentQuestion, userAnswer, showFeedback, attempts, correctCount, totalQuestions, consecutiveCorrect, bestStreak, isReviewMode, reviewQuestions, maxQuestions, showCelebration, wrongAnswers, handleChallengeEnd, generateNewQuestion, updateBestStreak, playSound, vibrate]);
+    }, [zenMode, currentQuestion, userAnswer, showFeedback, attempts, correctCount, totalQuestions, consecutiveCorrect, bestStreak, isReviewMode, reviewQuestions, maxQuestions, showCelebration, wrongAnswers, handleChallengeEnd, generateNewQuestion, updateBestStreak, playSound, playErrorSound, vibrate]);
 
     const restartGame = useCallback(() => {
         setIsFinished(false);
@@ -696,6 +722,7 @@ export const useChallengeGame = () => {
         currentReward,
         completedChallengeCount,
         anonymousChallengesCompleted,
+        isPaused,
 
         // Refs & Anims
         scaleAnim,
@@ -706,6 +733,8 @@ export const useChallengeGame = () => {
         restartGame,
         handleBadgeDismiss,
         handleReviewErrors,
+        pauseChallenge,
+        resumeChallenge,
 
         // Context
         currentUser,

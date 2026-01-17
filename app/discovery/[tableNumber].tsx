@@ -1,6 +1,6 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Home, ArrowRight, ArrowLeft, Volume2, X, Check } from 'lucide-react-native';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Home, ArrowRight, ArrowLeft, Volume2, X, Check, Eye } from 'lucide-react-native';
+import React, { useState, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
 
 import {
   View,
@@ -20,60 +20,64 @@ import { ThemedText } from '@/components/ThemedText';
 import { useAudio } from '@/hooks/useAudio';
 import i18n from '@/utils/i18n';
 
+// Lazy load modal pour réduire le bundle initial
+const TableDetailModal = lazy(() => import('@/components/TableDetailModal'));
+
 // Keep this for static styles usage, while component uses hook for dynamic updates
 const { width } = Dimensions.get('window');
 
 function getTipExamples(tableNumber: number): string[] {
+  // All examples use consistent ORDER: [Table] × [Multiplier]
   switch (tableNumber) {
     case 1:
       return [
-        '5 × 1 = 5',
-        '9 × 1 = 9'
+        '1 × 5 = 5',
+        '1 × 9 = 9'
       ];
     case 2:
       return [
-        '3 × 2 = 6 (3 + 3)',
-        '5 × 2 = 10 (5 + 5)'
+        '2 × 3 = 6 (3 + 3)',
+        '2 × 5 = 10 (5 + 5)'
       ];
     case 3:
       return [
-        '3 + 3 + 3 = 9',
-        '6 + 6 = 12 (2 × 6)'
+        '3 × 3 = 9 (3 + 3 + 3)',
+        '3 × 4 = 12 (4 + 4 + 4)'
       ];
     case 4:
       return [
-        '3 × 4 = 12 (double de 6)',
-        '5 × 4 = 20 (double de 10)'
+        '4 × 3 = 12 (double de 6)',
+        '4 × 5 = 20 (double de 10)'
       ];
     case 5:
       return [
-        '3 × 5 = 15 ✨',
-        '6 × 5 = 30 ✨'
+        '5 × 3 = 15 ✨',
+        '5 × 6 = 30 ✨'
       ];
     case 6:
       return [
-        '4 × 6 = 24 (20 + 4)',
-        '7 × 6 = 42 (35 + 7)'
+        '6 × 4 = 24 (20 + 4)',
+        '6 × 7 = 42 (35 + 7)'
       ];
     case 7:
       return [
-        '3 × 7 = 21 🎯',
-        '5 × 7 = 35 🎯'
+        '7 × 3 = 21 🎯',
+        '7 × 5 = 35 🎯'
       ];
     case 8:
       return [
-        '3 × 8 = 24 (double de 12)',
-        '5 × 8 = 40 (double de 20)'
+        '8 × 3 = 24 (double de 12)',
+        '8 × 5 = 40 (double de 20)'
       ];
     case 9:
       return [
-        '2 × 9 = 18 (2+8=10→1+8=9)',
-        '5 × 9 = 45 (4+5=9)'
+        '9 × 2 = 18 (2+8=10→1+8=9)',
+        '9 × 5 = 45 (4+5=9)'
       ];
     case 10:
       return [
-        '4 × 10 = 40 (4 + 0)',
-        '7 × 10 = 70 (7 + 0)'
+        '10 × 4 = 40 (4 + 0)',
+        '10 × 7 = 70 (7 + 0)'
       ];
     default:
       return [
@@ -93,6 +97,7 @@ export default function DiscoveryScreen() {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [selectedMultiplication, setSelectedMultiplication] = useState<{ multiplier: number; result: number } | null>(null);
   const [clickedMultiplications, setClickedMultiplications] = useState<Set<number>>(new Set());
+  const [showTableDetail, setShowTableDetail] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const modalScaleAnim = useRef(new Animated.Value(0)).current;
@@ -101,17 +106,27 @@ export default function DiscoveryScreen() {
 
   const { speak, stopSpeech } = useAudio();
 
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const isTablet = width > 600;
 
-  // Dynamic columns calculation
+  // Dynamic columns calculation (legacy, not used for counting grid anymore)
   const numColumns = isTablet ? 5 : 3;
   const gap = 8;
-  const containerPadding = 8; // matched with styles.countingContainer padding
-  // Calculate width: (Total Width - Container Padding - Total Gap) / Number of Columns
-  // We also cap the total width used for calculation to 800px to avoid huge items
+  const containerPadding = 8;
   const effectiveWidth = Math.min(width, 800);
   const itemWidth = (effectiveWidth - (containerPadding * 2) - (gap * (numColumns - 1))) / numColumns;
+
+  // Dynamic card height calculation for "Compte avec moi" grid
+  // We need all 10 cards (5 rows × 2 columns) to fit without scrolling
+  // Layout: Header(60) + Title(50) + Grid + Footer(70) + SafeArea(60)
+  const headerHeight = 60;
+  const footerHeight = 70;
+  const titleHeight = 50; // Just title, no subtitle for counting step
+  const safeAreaPadding = 60;
+  const gridGaps = 4 * 4; // 4px gap × 4 gaps (between 5 rows)
+  const gridPadding = 16; // Horizontal padding
+  const availableGridHeight = height - headerHeight - footerHeight - titleHeight - safeAreaPadding - gridGaps - gridPadding;
+  const dynamicCardHeight = Math.max(45, Math.floor(availableGridHeight / 5)); // 5 rows, min 45px
 
   const panResponder = useRef(
     PanResponder.create({
@@ -250,91 +265,116 @@ export default function DiscoveryScreen() {
   const steps = [
     {
       title: i18n.t('practice.discovery.title', { number: table.number }),
-      content: i18n.t(table.story),
+      content: i18n.t(`tables.${table.number}.story`),
       visual: (
         <TouchableOpacity
-          style={[styles.visualContainer, { backgroundColor: tableColor + '20', padding: 28, marginTop: 12 }]}
+          style={[styles.visualContainer, { backgroundColor: tableColor + '20' }]}
           onPress={() => setCurrentStep(1)}
           activeOpacity={0.8}
         >
+          <ThemedText style={styles.themeEmoji}>
+            {i18n.t(`tables.${table.number}.theme_emoji`)}
+          </ThemedText>
           <ThemedText style={[styles.bigNumber, { color: tableColor }]}>
             {table.number}
           </ThemedText>
-          <ThemedText style={styles.visualText}>{i18n.t('practice.discovery.table_of', { number: table.number })}</ThemedText>
+          <ThemedText style={styles.visualText}>
+            {i18n.t(`tables.${table.number}.theme_name`)}
+          </ThemedText>
         </TouchableOpacity>
       ),
     },
     {
-      title: i18n.t('practice.discovery.magic_tip'),
-      content: i18n.t(table.tip),
+      title: i18n.t(`tables.${table.number}.tip_title`),
+      content: '', // Content is shown in the visual to avoid duplication
       visual: (
         <View style={styles.tipContainer}>
-          <ThemedText style={styles.tipEmoji}>💡</ThemedText>
-          <ThemedText style={styles.tipText}>{i18n.t(table.tip)}</ThemedText>
+          <ThemedText style={styles.tipEmoji}>
+            {i18n.t(`tables.${table.number}.theme_emoji`)} 💡
+          </ThemedText>
+          <ThemedText style={styles.tipText}>
+            {i18n.t(`tables.${table.number}.tip`)}
+          </ThemedText>
           <View style={styles.tipExamplesContainer}>
-            {getTipExamples(table.number).map((example, idx) => (
-              <View key={idx} style={[styles.tipExampleCard, { borderColor: tableColor }]}>
-                <ThemedText
-                  style={[styles.tipExampleText, { color: tableColor }]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  {example}
-                </ThemedText>
-              </View>
-            ))}
+            <View style={[styles.tipExampleCard, { borderColor: tableColor }]}>
+              <ThemedText
+                style={[styles.tipExampleText, { color: tableColor }]}
+                numberOfLines={3}
+                adjustsFontSizeToFit
+                minimumFontScale={0.7}
+              >
+                {i18n.t(`tables.${table.number}.example`)}
+              </ThemedText>
+            </View>
           </View>
+          <TouchableOpacity
+            style={[styles.viewTableButton, { borderColor: tableColor }]}
+            onPress={() => setShowTableDetail(true)}
+          >
+            <Eye size={16} color={tableColor} />
+            <ThemedText style={[styles.viewTableButtonText, { color: tableColor }]}>
+              {i18n.t('practice.discovery.view_full_table')}
+            </ThemedText>
+          </TouchableOpacity>
         </View>
       ),
     },
     {
       title: i18n.t('practice.discovery.count_with_me'),
-      content: i18n.t('practice.discovery.count_instructions'),
+      content: '', // No subtitle to maximize grid space
       visual: (
-        <ScrollView
-          style={{ width: '100%', maxHeight: 400 }}
-          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingBottom: 20 }}
-          showsVerticalScrollIndicator={true}
-          nestedScrollEnabled={true}
-        >
-          <View style={styles.countingContainer}>
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => {
-              const result = table.number * i;
-              const isClicked = clickedMultiplications.has(i);
-              return (
-                <TouchableOpacity
-                  key={i}
+        <View style={styles.countingContainer}>
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => {
+            const result = table.number * i;
+            const isClicked = clickedMultiplications.has(i);
+            // Dynamic font sizes based on card height
+            const numberFontSize = Math.max(18, Math.min(28, Math.floor(dynamicCardHeight * 0.35)));
+            const labelFontSize = Math.max(10, Math.min(14, Math.floor(dynamicCardHeight * 0.16)));
+            return (
+              <TouchableOpacity
+                key={i}
+                style={[
+                  styles.countingItem,
+                  {
+                    height: dynamicCardHeight,
+                    backgroundColor: isClicked ? tableColor : tableColor + '20',
+                    borderColor: isClicked ? tableColor : 'transparent',
+                  },
+                ]}
+                onPress={() => handleMultiplicationPress(i, result)}
+                activeOpacity={0.7}
+              >
+                <ThemedText
                   style={[
-                    styles.countingItem,
+                    styles.countingNumber,
                     {
-                      width: itemWidth,
-                      backgroundColor: isClicked ? tableColor : tableColor + '20',
-                      borderColor: isClicked ? tableColor : 'transparent',
-                    },
+                      color: isClicked ? '#FFFFFF' : tableColor,
+                      fontSize: numberFontSize,
+                    }
                   ]}
-                  onPress={() => handleMultiplicationPress(i, result)}
-                  activeOpacity={0.7}
                 >
-                  <ThemedText
-                    style={[styles.countingNumber, { color: isClicked ? '#FFFFFF' : tableColor }]}
-                  >
-                    {result}
-                  </ThemedText>
-                  <ThemedText
-                    style={[styles.countingLabel, { color: isClicked ? '#FFFFFF' : AppColors.textSecondary }]}
-                  >
-                    {table.number} × {i}
-                  </ThemedText>
-                  {isClicked && (
-                    <View style={styles.checkmarkBadge}>
-                      <Check size={10} color="#FFFFFF" />
-                    </View>
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </ScrollView>
+                  {result}
+                </ThemedText>
+                <ThemedText
+                  style={[
+                    styles.countingLabel,
+                    {
+                      color: isClicked ? '#FFFFFF' : AppColors.textSecondary,
+                      fontSize: labelFontSize,
+                    }
+                  ]}
+                >
+                  {table.number} × {i}
+                </ThemedText>
+                {isClicked && (
+                  <View style={styles.checkmarkBadge}>
+                    <Check size={10} color="#FFFFFF" />
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       ),
     },
     {
@@ -374,6 +414,12 @@ export default function DiscoveryScreen() {
 
   return (
     <View style={styles.backgroundContainer}>
+      <TableDetailModal
+        visible={showTableDetail}
+        tableNumber={table.number}
+        onClose={() => setShowTableDetail(false)}
+      />
+
       <Modal
         visible={selectedMultiplication !== null}
         transparent
@@ -465,8 +511,10 @@ export default function DiscoveryScreen() {
           </TouchableOpacity>
         </View>
 
-        <View
+        <ScrollView
           style={{ flex: 1 }}
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
           {...panResponder.panHandlers}
         >
           <Animated.View
@@ -475,20 +523,26 @@ export default function DiscoveryScreen() {
               {
                 opacity: fadeAnim,
                 transform: [{ scale: scaleAnim }],
-                maxWidth: 800, // Constraint for large screens
-                alignSelf: 'center', // Center content
+                maxWidth: 800,
+                alignSelf: 'center',
                 width: '100%',
               },
             ]}
           >
             <View style={styles.content}>
-              <ThemedText style={styles.stepTitle}>{currentStepData.title}</ThemedText>
-              <ThemedText style={styles.stepContent}>{currentStepData.content}</ThemedText>
+              <ThemedText style={styles.stepTitle} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.8}>
+                {currentStepData.title}
+              </ThemedText>
+              {currentStepData.content ? (
+                <ThemedText style={styles.stepContent} numberOfLines={4} adjustsFontSizeToFit minimumFontScale={0.8}>
+                  {currentStepData.content}
+                </ThemedText>
+              ) : null}
 
               {currentStepData.visual}
             </View>
           </Animated.View>
-        </View>
+        </ScrollView>
 
         <View style={styles.footer}>
           {currentStep > 0 && (
@@ -579,8 +633,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingTop: 4, // drastically reduced
+    paddingHorizontal: 16,
+    paddingTop: 4,
     paddingBottom: 4,
   },
   content: {
@@ -604,72 +658,93 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   visualContainer: {
-    width: width - 40,
-    padding: 24,
-    borderRadius: 24,
+    width: '100%',
+    padding: 20,
+    borderRadius: 20,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 12,
   },
   bigNumber: {
-    fontSize: 80,
+    fontSize: 64,
     fontWeight: 'bold' as const,
-    marginBottom: 16,
+    marginBottom: 8,
   },
   visualText: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '600' as const,
     color: AppColors.text,
+    textAlign: 'center',
   },
   tipContainer: {
     backgroundColor: AppColors.surface,
-    padding: 32,
-    borderRadius: 24,
+    padding: 16,
+    borderRadius: 20,
     alignItems: 'center',
-    width: width - 40,
+    width: '100%',
     shadowColor: AppColors.shadow,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowRadius: 6,
+    elevation: 3,
   },
   tipEmoji: {
-    fontSize: 48,
-    marginBottom: 12,
+    fontSize: 36,
+    marginBottom: 8,
   },
   tipText: {
-    fontSize: 18,
+    fontSize: 15,
     color: AppColors.text,
     textAlign: 'center',
     fontWeight: '600' as const,
-    lineHeight: 26,
-    marginBottom: 16,
+    lineHeight: 22,
+    marginBottom: 12,
   },
   tipExamplesContainer: {
     width: '100%',
-    gap: 8,
+    gap: 6,
   },
   tipExampleCard: {
     backgroundColor: AppColors.background,
-    paddingHorizontal: 8,
-    paddingVertical: 12,
-    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderRadius: 12,
     borderWidth: 2,
     alignItems: 'center',
     width: '100%',
   },
   tipExampleText: {
-    fontSize: 16, // Reduced slightly to fit
+    fontSize: 14,
     fontWeight: '700' as const,
     textAlign: 'center',
     width: '100%',
   },
+  themeEmoji: {
+    fontSize: 36,
+    marginBottom: 4,
+  },
+  viewTableButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    borderWidth: 2,
+    backgroundColor: 'transparent',
+  },
+  viewTableButtonText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+  },
   countingContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between', // Changed to space-between
+    justifyContent: 'space-between',
+    alignContent: 'flex-start',
     width: '100%',
     paddingHorizontal: 4,
-    flex: 1, // Added flex: 1
+    gap: 4,
   },
   readyTitle: {
     fontSize: 24,
@@ -679,24 +754,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   countingItem: {
-    // Width is set dynamically in the component based on screen size
-    // width set dynamically
-    flexGrow: 1, // Added flexGrow
-    margin: 2, // Added margin instead of gap handling
-    minHeight: 60, // Minimum height but flexible
-    padding: 2,
-    borderRadius: 8,
+    // Width: 48% for 2 columns, height is set dynamically in the component
+    width: '48.5%',
+    padding: 4,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
   },
   countingNumber: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold' as const,
-    marginBottom: 2,
+    marginBottom: 0,
   },
   countingLabel: {
-    fontSize: 11,
+    fontSize: 10,
     color: AppColors.textSecondary,
     fontWeight: '600' as const,
   },
@@ -849,9 +921,9 @@ const styles = StyleSheet.create({
     top: 2,
     right: 2,
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 8,
-    width: 16,
-    height: 16,
+    borderRadius: 6,
+    width: 14,
+    height: 14,
     justifyContent: 'center',
     alignItems: 'center',
   },

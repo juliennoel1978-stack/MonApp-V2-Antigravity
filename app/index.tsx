@@ -1,14 +1,13 @@
 
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X, Shield, Leaf, Eye, VolumeX } from 'lucide-react-native';
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, Suspense, lazy } from 'react';
 
 import {
   View,
   StyleSheet,
   TouchableOpacity,
   Animated,
-  Dimensions,
   Platform,
   Modal,
   ScrollView,
@@ -22,15 +21,17 @@ import { AppColors, NumberColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
 import { BADGE_THRESHOLDS, getBadgeForThreshold, getBadgeIcon, getBadgeTitle } from '@/constants/badges';
 import ChallengeDashboardCard from '@/components/ChallengeDashboardCard';
-import CollectionModal from '@/components/CollectionModal';
 import { ParentGateModal } from '@/components/ParentGateModal';
 import { ThemedText } from '@/components/ThemedText';
+import { useResponsive } from '@/hooks/useResponsive';
 
-const { width } = Dimensions.get('window');
+// Lazy load modal pour réduire le bundle initial
+const CollectionModal = lazy(() => import('@/components/CollectionModal'));
 
 export default function HomeScreen() {
   const router = useRouter();
   const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData, settings, anonymousChallengesCompleted, getPersistenceBadges, getBestStreak, hasSelectedAnonymousMode, setHasSelectedAnonymousMode } = useApp();
+  const { isSmallScreen, isTablet, width, spacing, fontSize, containerMaxWidth } = useResponsive();
   const [showTablesModal, setShowTablesModal] = React.useState(false);
   const [showCollectionModal, setShowCollectionModal] = React.useState(false);
   const [showParentGate, setShowParentGate] = React.useState(false);
@@ -478,7 +479,13 @@ export default function HomeScreen() {
                 </View>
               )}
               <View style={styles.titleContent}>
-                <ThemedText style={styles.title}>{i18n.t('home.title')}</ThemedText>
+                <ThemedText
+                  style={[styles.title, isTablet && { fontSize: fontSize(28) }]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {i18n.t('home.title')}
+                </ThemedText>
                 {currentUser && (
                   <ThemedText style={styles.userName}>{i18n.t('home.greeting', { name: currentUser.firstName })}</ThemedText>
                 )}
@@ -513,9 +520,21 @@ export default function HomeScreen() {
               )}
             </View>
 
-            <View style={styles.subtitleContainer}>
-              <ThemedText style={styles.subtitleMain}>{i18n.t('home.subtitle_main')}</ThemedText>
-              <ThemedText style={styles.subtitleSecondary}>{i18n.t('home.subtitle_secondary')}</ThemedText>
+            <View style={[styles.subtitleContainer, { gap: spacing(4) }]}>
+              <ThemedText
+                style={[styles.subtitleMain, isTablet && { fontSize: fontSize(16) }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {i18n.t('home.subtitle_main')}
+              </ThemedText>
+              <ThemedText
+                style={[styles.subtitleSecondary, isTablet && { fontSize: fontSize(14) }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {i18n.t('home.subtitle_secondary')}
+              </ThemedText>
             </View>
 
             <View style={styles.progressCard}>
@@ -573,20 +592,32 @@ export default function HomeScreen() {
             </View>
 
             <TouchableOpacity
-              style={styles.startButton}
+              style={[styles.startButton, { paddingVertical: spacing(15) }]}
               onPress={() => router.push('/tables' as any)}
               testID="start-button"
             >
-              <ThemedText style={styles.startButtonText}>{i18n.t('home.start')}</ThemedText>
+              <ThemedText
+                style={[styles.startButtonText, isTablet && { fontSize: fontSize(22) }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {i18n.t('home.start')}
+              </ThemedText>
               <Sparkles size={24} color="#FFFFFF" />
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.challengeButton}
-              onPress={() => router.push('/challenge' as any)}
+              style={[styles.challengeButton, { paddingVertical: spacing(15), marginBottom: spacing(20) }]}
+              onPress={() => router.push('/challenge-setup' as any)}
               testID="challenge-button"
             >
-              <ThemedText style={styles.challengeButtonText}>{i18n.t('home.challenge')}</ThemedText>
+              <ThemedText
+                style={[styles.challengeButtonText, isTablet && { fontSize: fontSize(22) }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {i18n.t('home.challenge')}
+              </ThemedText>
               <Zap size={24} color="#FFFFFF" />
             </TouchableOpacity>
 
@@ -645,7 +676,13 @@ export default function HomeScreen() {
               >
                 <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
                   <View style={styles.tablesModalHeader}>
-                    <ThemedText style={styles.tablesModalTitle}>{i18n.t('tables_modal.title')}</ThemedText>
+                    <ThemedText
+                      style={[styles.tablesModalTitle, isTablet && { fontSize: fontSize(22) }]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                    >
+                      {i18n.t('tables_modal.title')}
+                    </ThemedText>
                     <TouchableOpacity
                       style={styles.tablesModalCloseButton}
                       onPress={closeTablesModal}
@@ -782,7 +819,7 @@ export default function HomeScreen() {
                             </View>
                           )}
                         </View>
-                        <ThemedText style={styles.modalUserName} numberOfLines={1} adjustsFontSizeToFit>{user.firstName}</ThemedText>
+                        <ThemedText style={styles.modalUserName} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{user.firstName}</ThemedText>
                         <ThemedText style={styles.modalUserInfo}>{user.age} ans</ThemedText>
                       </TouchableOpacity>
                     ))}
@@ -1142,7 +1179,8 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    width: width - 40,
+    width: '90%',
+    maxWidth: 500,
     maxHeight: '80%',
     backgroundColor: AppColors.background,
     borderRadius: 24,
@@ -1194,7 +1232,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modalUserCard: {
-    width: (width - 100) / 2,
+    width: '42%',
+    minWidth: 120,
+    maxWidth: 180,
     backgroundColor: AppColors.surface,
     borderRadius: 20,
     padding: 12,
@@ -1365,7 +1405,8 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   tablesModalContent: {
-    width: width * 0.85,
+    width: '85%',
+    maxWidth: 500,
     backgroundColor: AppColors.background,
     borderRadius: 20,
     padding: 20,
@@ -1410,7 +1451,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   tablesGridCard: {
-    width: (width * 0.85 - 80) / 5,
+    width: '17%',
+    minWidth: 45,
+    maxWidth: 60,
     aspectRatio: 1,
     backgroundColor: AppColors.surface,
     borderRadius: 12,

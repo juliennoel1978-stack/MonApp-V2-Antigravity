@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { Clock, Users, Trash2, Edit, RotateCcw, Award, Zap, RefreshCw, Calendar, ChevronDown, ChevronUp, Play, Timer } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import {
   View,
   Text,
@@ -16,9 +16,11 @@ import { ThemedText } from '@/components/ThemedText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
-import CollectionModal from '@/components/CollectionModal';
 import i18n from '@/utils/i18n';
 import type { BadgeTheme, User, PersistenceBadge, UserProgress } from '@/types';
+
+// Lazy load modal pour réduire le bundle initial
+const CollectionModal = lazy(() => import('@/components/CollectionModal'));
 
 
 
@@ -522,6 +524,11 @@ export default function SettingsScreen() {
                 trackColor={{ false: AppColors.borderLight, true: AppColors.primary }}
               />
             </View>
+            {settings.zenMode && (
+              <Text style={[styles.settingSubTitle, { marginTop: -8, marginBottom: 12, fontStyle: 'italic', color: AppColors.success }]}>
+                {i18n.t('settings.zen_timer_note')}
+              </Text>
+            )}
 
             <View style={[styles.settingItem, { flexDirection: 'column', alignItems: 'flex-start' }]}>
               <Text style={[styles.settingTitle, { marginBottom: 12 }]}>{i18n.t('settings.font')}</Text>

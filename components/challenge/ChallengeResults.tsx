@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
@@ -8,6 +8,9 @@ import { ThemedText } from '../ThemedText';
 import { useAudio } from '@/hooks/useAudio';
 import { useHaptics } from '@/hooks/useHaptics';
 import i18n from '@/utils/i18n';
+
+// Lazy load modal pour réduire le bundle initial
+const TableDetailModal = lazy(() => import('../TableDetailModal'));
 
 type ChallengeResultsProps = {
     isReviewMode: boolean;
@@ -43,6 +46,10 @@ export const ChallengeResults = ({
     const { updateStrongestTable } = useApp();
     const { playSound } = useAudio();
     const { vibrate } = useHaptics();
+
+    // State pour le modal Table à Surveiller
+    const [showTableDetailModal, setShowTableDetailModal] = useState(false);
+    const [selectedTableNumber, setSelectedTableNumber] = useState<number | null>(null);
 
     // 2. CALC STATS (Only needed for Results mode, but safe to calc always or memoize based on props)
     const { bestTable, worstTable, bestStreakValue } = React.useMemo(() => {
@@ -132,6 +139,14 @@ export const ChallengeResults = ({
 
     return (
         <View style={styles.backgroundContainer}>
+            {/* Modal Table à Surveiller */}
+            {selectedTableNumber && (
+                <TableDetailModal
+                    visible={showTableDetailModal}
+                    tableNumber={selectedTableNumber}
+                    onClose={() => setShowTableDetailModal(false)}
+                />
+            )}
             <SafeAreaView style={styles.container} edges={['top']}>
                 <ScrollView
                     contentContainerStyle={styles.finishedScrollContent}
@@ -175,12 +190,22 @@ export const ChallengeResults = ({
                             )}
 
                             {worstTable > 0 && (
-                                <View style={styles.finishedStatRow}>
-                                    <ThemedText style={styles.finishedStatLabel}>{i18n.t('challenge.results.weakest_table')}</ThemedText>
-                                    <ThemedText style={[styles.finishedStatValue, { color: AppColors.timerMiddle }]} numberOfLines={1}>
+                                <TouchableOpacity
+                                    style={styles.weakTableBox}
+                                    onPress={() => {
+                                        setSelectedTableNumber(worstTable);
+                                        setShowTableDetailModal(true);
+                                    }}
+                                    activeOpacity={0.7}
+                                >
+                                    <ThemedText style={styles.weakTableLabel}>{i18n.t('challenge.results.weakest_table')}</ThemedText>
+                                    <ThemedText style={styles.weakTableValue}>
                                         {worstTable} 🚸
                                     </ThemedText>
-                                </View>
+                                    <ThemedText style={styles.weakTableHint}>
+                                        {i18n.t('challenge.results.tap_to_review') || 'Touche pour réviser'}
+                                    </ThemedText>
+                                </TouchableOpacity>
                             )}
                         </View>
 
@@ -228,25 +253,26 @@ const styles = StyleSheet.create({
     },
     finishedContainer: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'center',
-        paddingHorizontal: 24,
+        paddingHorizontal: 20,
+        paddingTop: 8,
     },
     finishedEmoji: {
-        fontSize: 64,
-        marginBottom: 8,
+        fontSize: 48,
+        marginBottom: 4,
     },
     finishedTitle: {
-        fontSize: 26,
+        fontSize: 22,
         fontWeight: 'bold',
         color: AppColors.text,
-        marginBottom: 4,
+        marginBottom: 2,
         textAlign: 'center',
     },
     finishedSubtitle: {
-        fontSize: 16,
+        fontSize: 14,
         color: AppColors.textSecondary,
-        marginBottom: 16,
+        marginBottom: 10,
         textAlign: 'center',
     },
     finishedScrollContent: {
@@ -259,9 +285,9 @@ const styles = StyleSheet.create({
         width: '100%',
         backgroundColor: AppColors.surface,
         borderRadius: 16,
-        padding: 16,
-        marginBottom: 16,
-        gap: 8,
+        padding: 12,
+        marginBottom: 12,
+        gap: 6,
         shadowColor: AppColors.shadow,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -272,23 +298,23 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     finishedStatLabel: {
-        fontSize: 12,
+        fontSize: 11,
         color: AppColors.textSecondary,
         fontWeight: '600',
-        marginBottom: 2,
+        marginBottom: 1,
     },
     finishedStatValue: {
-        fontSize: 19,
+        fontSize: 17,
         fontWeight: 'bold',
     },
     finishedButtonsContainer: {
         width: '100%',
-        gap: 10,
+        gap: 8,
     },
     finishedButton: {
         backgroundColor: AppColors.primary,
-        paddingVertical: 14,
-        paddingHorizontal: 32,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
         borderRadius: 14,
         shadowColor: AppColors.primary,
         shadowOffset: { width: 0, height: 4 },
@@ -322,5 +348,43 @@ const styles = StyleSheet.create({
         lineHeight: 24,
         fontStyle: 'italic',
         paddingHorizontal: 8,
+    },
+    clickableValue: {
+        textDecorationLine: 'underline',
+        textDecorationStyle: 'dotted',
+    },
+    tapHint: {
+        fontSize: 12,
+        marginTop: 2,
+    },
+    // Box spéciale "Table à Surveiller" - bien visible et cliquable
+    weakTableBox: {
+        backgroundColor: AppColors.timerMiddle + '15',
+        borderRadius: 12,
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: AppColors.timerMiddle,
+        marginTop: 4,
+    },
+    weakTableLabel: {
+        fontSize: 11,
+        color: AppColors.timerMiddle,
+        fontWeight: '700',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    weakTableValue: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: AppColors.timerMiddle,
+        marginVertical: 2,
+    },
+    weakTableHint: {
+        fontSize: 11,
+        color: AppColors.timerMiddle,
+        fontWeight: '500',
+        opacity: 0.8,
     },
 });

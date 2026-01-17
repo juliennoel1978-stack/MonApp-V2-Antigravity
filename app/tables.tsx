@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   useWindowDimensions,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors, NumberColors } from '@/constants/colors';
@@ -17,7 +18,7 @@ import i18n from '@/utils/i18n';
 export default function TablesScreen() {
   const router = useRouter();
   const { progress } = useApp();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
 
   // Tablet Optimization: Dynamic columns
   const getNumColumns = () => {
@@ -27,10 +28,24 @@ export default function TablesScreen() {
   };
 
   const numColumns = getNumColumns();
-  const gap = 12; // Increased gap for better spacing
-  const padding = 16;
+  const gap = 10;
+  const padding = 12;
   const availableWidth = width - (padding * 2) - (gap * (numColumns - 1));
   const cardWidth = availableWidth / numColumns;
+
+  // Dynamic card height: fit 5 rows on screen (10 tables / 2 columns = 5 rows)
+  // Account for header (~72px), SafeArea (~50px top), padding
+  const headerHeight = 72;
+  const safeAreaTop = 50;
+  const totalPadding = padding * 2 + gap * 4; // 5 rows = 4 gaps
+  const availableHeight = height - headerHeight - safeAreaTop - totalPadding;
+  const numRows = Math.ceil(MULTIPLICATION_TABLES.length / numColumns);
+
+  // Calculate optimal card height to fit all cards without scrolling if possible
+  const minCardHeight = 85; // Minimum to show content properly
+  const maxCardHeight = 120;
+  const calculatedCardHeight = Math.floor(availableHeight / numRows);
+  const cardHeight = Math.max(minCardHeight, Math.min(maxCardHeight, calculatedCardHeight));
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -64,7 +79,7 @@ export default function TablesScreen() {
 
   return (
     <View style={styles.backgroundContainer}>
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.homeButton}
@@ -77,8 +92,15 @@ export default function TablesScreen() {
           <View style={styles.placeholder} />
         </View>
 
-        <View style={styles.contentContainer}>
-          <View style={styles.grid}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingHorizontal: padding }
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={[styles.grid, { gap }]}>
             {MULTIPLICATION_TABLES.map(table => {
               const tableProgress = progress.find(
                 p => p.tableNumber === table.number
@@ -93,6 +115,7 @@ export default function TablesScreen() {
                     styles.card,
                     {
                       width: cardWidth,
+                      height: cardHeight,
                       borderColor: isCompleted ? AppColors.success : NumberColors[
                         table.number as keyof typeof NumberColors
                       ],
@@ -104,7 +127,7 @@ export default function TablesScreen() {
                   }
                   testID={`table-${table.number}`}
                 >
-                  <View style={styles.cardContent}>
+                  <View style={[styles.cardContent, { height: cardHeight - 4 }]}>
                     <ThemedText
                       style={[
                         styles.tableNumber,
@@ -113,6 +136,7 @@ export default function TablesScreen() {
                             NumberColors[
                             table.number as keyof typeof NumberColors
                             ],
+                          fontSize: cardHeight < 95 ? 24 : cardHeight < 100 ? 28 : 32,
                         },
                       ]}
                     >
@@ -125,13 +149,17 @@ export default function TablesScreen() {
                         {
                           backgroundColor:
                             getDifficultyColor(table.difficulty) + '20',
+                          paddingVertical: cardHeight < 95 ? 1 : 2,
                         },
                       ]}
                     >
                       <ThemedText
                         style={[
                           styles.difficultyText,
-                          { color: getDifficultyTextColor(table.difficulty) },
+                          {
+                            color: getDifficultyTextColor(table.difficulty),
+                            fontSize: cardHeight < 95 ? 8 : 9,
+                          },
                         ]}
                       >
                         {getDifficultyLabel(table.difficulty)}
@@ -139,14 +167,14 @@ export default function TablesScreen() {
                     </View>
 
                     <View style={styles.starsContainer}>
-                      {[1, 2, 3].map(starIndex => (
+                      {[1, 2, 3, 4].map(starIndex => (
                         <Star
                           key={starIndex}
-                          size={12}
+                          size={cardHeight < 95 ? 9 : 11}
                           color={
                             starIndex <= stars
                               ? AppColors.warning
-                              : AppColors.borderLight
+                              : '#AAAAAA'
                           }
                           fill={
                             starIndex <= stars
@@ -167,11 +195,12 @@ export default function TablesScreen() {
               );
             })}
           </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   backgroundContainer: {
@@ -207,17 +236,16 @@ const styles = StyleSheet.create({
   placeholder: {
     width: 40,
   },
-  contentContainer: {
+  scrollView: {
     flex: 1,
-    paddingHorizontal: 16,
+  },
+  scrollContent: {
     paddingTop: 8,
-    paddingBottom: 8,
+    paddingBottom: 16,
   },
   grid: {
-    flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
     justifyContent: 'flex-start',
     alignContent: 'flex-start',
   },
@@ -249,10 +277,13 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   cardContent: {
-    padding: 8,
-    paddingTop: 8,
+    padding: 6,
+    paddingTop: 6,
+    paddingBottom: 18, // Space for absolutely positioned stars
     alignItems: 'center',
-    gap: 4,
+    justifyContent: 'flex-start',
+    gap: 2,
+    position: 'relative',
   },
   difficultyBadge: {
     paddingVertical: 2,
@@ -265,10 +296,13 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
   },
   starsContainer: {
+    position: 'absolute',
+    bottom: 4,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 2,
-    marginTop: 1,
+    gap: 1,
   },
   completedBadge: {
     position: 'absolute',

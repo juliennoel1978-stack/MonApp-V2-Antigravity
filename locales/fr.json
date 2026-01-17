@@ -353,6 +353,7 @@
         "male_female": "Masculine ou Féminine",
         "zen_mode": "Mode Zen",
         "less_animations": "Moins d'animations",
+        "zen_timer_note": "⏱️ Le chrono est automatiquement désactivé en mode Zen.",
         "font": "Police d'écriture",
         "choose_style": "Choisissez le style de texte le plus confortable",
         "font_standard": "Standard",
@@ -404,71 +405,111 @@
     },
     "tables": {
         "1": {
-            "story": "La table de 1, c'est facile ! Tout reste pareil.",
-            "tip": "N'importe quel nombre × 1 = ce nombre",
+            "theme_emoji": "🪞",
+            "theme_name": "Le Miroir",
+            "story": "La table de 1 est un miroir magique. Le chiffre se regarde dedans et reste lui-même. Tout reste pareil !",
+            "tip_title": "Le chiffre ne change pas",
+            "tip": "N'importe quel chiffre multiplié par 1 reste exactement le même.",
+            "example": "1 × 9 = 9 (Le 9 reste un 9)",
             "astuce": "Quand on multiplie par 1, le résultat ne change jamais.",
             "indice": "C'est le même nombre : on ne le multiplie pas vraiment.",
             "erreur": "1 × X = X. On garde exactement le même nombre."
         },
         "2": {
-            "story": "La table de 2, c'est doubler ! Comme des jumeaux.",
-            "tip": "Compte de 2 en 2 : 2, 4, 6, 8, 10...",
+            "theme_emoji": "👯",
+            "theme_name": "Les Jumeaux",
+            "story": "La table de 2, c'est calculer des doubles. C'est comme compter des paires de chaussures !",
+            "tip_title": "Additionne le chiffre avec lui-même",
+            "tip": "On prend le chiffre et on l'ajoute une deuxième fois.",
+            "example": "2 × 6 👉 6 + 6 = 12",
             "astuce": "On double le nombre : 2, 4, 6, 8...",
             "indice": "Si tu connais +2, tu connais la table de 2.",
             "erreur": "2 × X = X + X. On double le nombre."
         },
         "3": {
-            "story": "La table de 3, compte par bonds de 3 !",
-            "tip": "Compte de 3 en 3 : 3, 6, 9, 12, 15...",
+            "theme_emoji": "🦗",
+            "theme_name": "Les Sauts de Puce",
+            "story": "Ici, on fait des bonds ! Pour multiplier par 3, il faut additionner le chiffre 3 fois.",
+            "tip_title": "Additionne 3 fois de suite",
+            "tip": "Compte le chiffre, encore le chiffre, et encore le chiffre.",
+            "example": "3 × 3 = 9 👉 (3 sauts : 3 + 3 + 3)",
             "astuce": "On ajoute 3 à chaque fois, comme 3, 6, 9, 12...",
             "indice": "Pense aux multiples de 3 : 3, 6, 9, 12, 15...",
             "erreur": "3 × X = X + X + X. On ajoute 3 à chaque fois."
         },
         "4": {
-            "story": "La table de 4, c'est doubler deux fois !",
-            "tip": "Double le nombre, puis double encore",
+            "theme_emoji": "🐇",
+            "theme_name": "Le Double Saut",
+            "story": "Le 4 est le grand frère du 2. Pour multiplier par 4, on double le résultat deux fois !",
+            "tip_title": "Double, puis double encore !",
+            "tip": "Calcule le double, puis refais le double du résultat.",
+            "example": "4 × 5 👉 Double de 5 c'est 10 👉 Double de 10 c'est 20 !",
             "astuce": "4, 8, 12, 16... on ajoute toujours 4.",
             "indice": "Tu peux faire ×2 puis encore ×2 : on double deux fois !",
             "erreur": "4 × X = (2 × X) × 2. On double deux fois pour trouver le résultat."
         },
         "5": {
-            "story": "La table de 5, regarde tes doigts ! Ça finit toujours par 0 ou 5.",
-            "tip": "Les résultats finissent par 0 ou 5",
+            "theme_emoji": "✋",
+            "theme_name": "Le 'High Five'",
+            "story": "Regarde ta main ! On compte de 5 en 5. Ça finit toujours par un 0 ou un 5.",
+            "tip_title": "La règle du 0 ou 5",
+            "tip": "Si le chiffre est Pair (2, 4, 6...), ça finit par 0. Si le chiffre est Impair (1, 3, 5...), ça finit par 5.",
+            "example": "5 × 4 = 20 (Pair)\n5 × 7 = 35 (Impair)",
             "astuce": "Les résultats finissent toujours par 0 ou 5.",
             "indice": "Compte de 5 en 5 : 5, 10, 15, 20...",
             "erreur": "5 × X = un nombre qui finit par 0 ou 5. Compte de 5 en 5 pour vérifier."
         },
         "6": {
-            "story": "La table de 6, c'est 5 + 1 de plus !",
-            "tip": "Utilise la table de 5 et ajoute le nombre",
+            "theme_emoji": "🖐️☝️",
+            "theme_name": "La Technique '5 + 1'",
+            "story": "Le 6, c'est le 5 avec un bonus ! Utilise la table de 5 (qui est facile) et ajoute le nombre une fois.",
+            "tip_title": "Table de 5 + le chiffre",
+            "tip": "Pour multiplier par 6 : fais d'abord ×5, puis ajoute le nombre.",
+            "example": "6 × 4 = (5×4) + 4 = 20 + 4 = 24",
             "astuce": "Si tu connais ×3, double le résultat : 6 = 3+3.",
-            "indice": "Pense à faire 3 × X, puis tu doubles.",
-            "erreur": "6 × X = 3 × X + 3 × X. On double le résultat de la table de 3."
+            "indice": "Fais 3 × X, puis double-le.",
+            "erreur": "6 × X = 3 × X + 3 × X. Double le résultat de la table de 3."
         },
         "7": {
-            "story": "La table de 7, la plus difficile ! Utilise des histoires.",
-            "tip": "Apprends avec des images et des histoires",
+            "theme_emoji": "🏰",
+            "theme_name": "La Difficile",
+            "story": "C'est la plus difficile ! Il n'y a pas de truc magique simple. Le secret, c'est de s'entraîner souvent.",
+            "tip_title": "L'astuce '5, 6, 7, 8'",
+            "tip": "Il y a une astuce géniale pour le calcul le plus dur (7 × 8). Compte juste : 5, 6, 7, 8 !",
+            "example": "56 = 7 × 8 (Cinq, Six = Sept fois Huit)",
             "astuce": "Table plus difficile : pense à la décomposition (5 × X + 2 × X).",
             "indice": "Fais 5 × X, puis ajoute encore 2 × X.",
             "erreur": "7 × X = 5 × X + 2 × X. On peut la découper pour trouver plus facilement."
         },
         "8": {
-            "story": "La table de 8, double la table de 4 !",
-            "tip": "Utilise la table de 4 et double le résultat",
+            "theme_emoji": "🎱",
+            "theme_name": "Le Grand Frère du 4",
+            "story": "Le 8 est le grand frère du 4 (il est deux fois plus grand). Pour trouver la réponse, utilise la table de 4 et double le résultat.",
+            "tip_title": "Pense à la table de 4... et double !",
+            "tip": "Fais le calcul avec 4, puis additionne le résultat avec lui-même.",
+            "example": "8 × 3 👉 Pense à 4 × 3 = 12 👉 Double le 12 👉 12 + 12 = 24 !",
             "astuce": "8, c'est 2 × 2 × 2 : on double trois fois !",
             "indice": "Double, puis redouble, puis redouble encore.",
             "erreur": "8 × X = on double 3 fois : X → 2X → 4X → 8X."
         },
         "9": {
-            "story": "La table de 9, le truc des doigts magiques !",
-            "tip": "Les chiffres des résultats font toujours 9",
+            "theme_emoji": "👐",
+            "theme_name": "L'Astuce du 10",
+            "story": "Le 9 est presque un 10 ! L'astuce, c'est de faire comme si c'était un 10, puis d'enlever un petit peu.",
+            "tip_title": "Fais ×10... et enlève le nombre !",
+            "tip": "Multiplie par 10 (ajoute un 0), puis retire le chiffre une fois.",
+            "example": "9 × 7 👉 Fais 10 × 7 = 70 👉 Enlève 7 👉 70 - 7 = 63",
             "astuce": "La somme des chiffres du résultat fait souvent 9.",
             "indice": "Ex : 9 × 4 = 36 → 3 + 6 = 9.",
             "erreur": "Vérifie la somme des chiffres : elle doit souvent faire 9 pour ×9."
         },
         "10": {
-            "story": "La table de 10, ajoute juste un zéro !",
-            "tip": "Ajoute un 0 à la fin du nombre",
+            "theme_emoji": "🎩",
+            "theme_name": "Le Magicien",
+            "story": "C'est la plus facile ! Le magicien offre un zéro cadeau à tout le monde.",
+            "tip_title": "Ajoute juste un 0 à la fin",
+            "tip": "Prends le chiffre et colle un zéro derrière lui. C'est tout !",
+            "example": "10 × 7 = 70 (Le 7 gagne un 0)",
             "astuce": "On ajoute un 0 à la fin du nombre.",
             "indice": "10 × X = X avec un zéro derrière.",
             "erreur": "10 × X = X0. Il suffit d'écrire un zéro à la fin."
@@ -540,7 +581,7 @@
         },
         "discovery": {
             "title": "Découvre la table de {{number}}",
-            "magic_tip": "Astuce magique",
+            "magic_tip": "Astuce 💡",
             "count_with_me": "Compte avec moi !",
             "count_instructions": "Clique sur les multiplications pour entendre comment elles se lisent !",
             "table_of": "Table de {{number}}",
@@ -550,7 +591,8 @@
             "intro_title": "C'est parti !",
             "intro_subtitle": "Maintenant, teste tes connaissances avec le quiz !",
             "intro_card_message": "Tu vas assurer comme un champion ! \n Prêt à gagner des étoiles ?",
-            "start_quiz": "Commencer le quiz"
+            "start_quiz": "Commencer le quiz",
+            "view_full_table": "Voir toute la table en détail"
         },
         "correction": {
             "title": "On corrige ensemble ✨",
@@ -566,7 +608,8 @@
             "keep_training": "Entraîne-toi encore un peu",
             "correct_answers": "Bonnes réponses",
             "encouragement_muscle": "💪 Continue à t'entraîner, tu vas y arriver !",
-            "encouragement_min": "Il te faut au moins 8/10 pour passer au niveau suivant.",
+            "encouragement_star_earned": "⭐ Tu as gagné une étoile d'encouragement !",
+            "encouragement_min": "Il te faut au moins 7/10 pour passer au niveau suivant.",
             "encouragement_perfect": "Super ! Tu maîtrises parfaitement la table de {{number}} !",
             "encouragement_great": "Très bien ! Continue comme ça !",
             "encouragement_good": "Bon début ! Entraîne-toi encore !",
@@ -634,6 +677,7 @@
             "review_errors": "Revoir mes erreurs",
             "retry_challenge": "Refaire un Challenge",
             "back_home": "Retour à l'accueil",
+            "tap_to_review": "Touche pour réviser",
             "correction_msgs": [
                 "Une erreur de moins, bravo. Le Pro s'installe.",
                 "Chaque correction compte. Tu t'améliores vraiment.",
@@ -661,6 +705,19 @@
         "question_speak_result": "{{a}} fois {{b}} ?",
         "question_speak_multiplier": "{{a}} fois quelque chose égale {{r}} ?",
         "question_speak_multiplicand": "Quelque chose fois {{b}} égale {{r}} ?"
+    },
+    "pause": {
+        "title": "Pause Magique ✨",
+        "ready_button": "Je suis prêt !",
+        "animals_inhale": "Inspire... Gonfle ton ventre...",
+        "animals_exhale": "Souffle tout doucement comme un paresseux... 💤",
+        "animals_encouragement": "Prends ton temps, tu vas y arriver.",
+        "heroes_inhale": "Inspire le calme du maître...",
+        "heroes_exhale": "Chasse la colère par la bouche... 🌬️",
+        "heroes_encouragement": "Concentre ta force, jeune Padawan !",
+        "space_inhale": "Inspire l'air pur de l'espace...",
+        "space_exhale": "Flotte en apesanteur...",
+        "space_encouragement": "Tu es paré au décollage ! 🚀"
     },
     "user_form": {
         "edit_title": "Modifier utilisateur",
@@ -723,5 +780,15 @@
         "easy": "Facile",
         "medium": "Moyen",
         "hard": "Difficile"
+    },
+    "challenge_setup": {
+        "title": "Prépare ton Challenge !",
+        "subtitle": "Sélectionne les tables que tu veux réviser",
+        "select_all": "Tout cocher",
+        "my_level": "Mon Niveau",
+        "start": "C'est parti ! 🚀",
+        "tables_selected": "{{count}} table sélectionnée",
+        "tables_selected_plural": "{{count}} tables sélectionnées",
+        "no_table_warning": "Sélectionne au moins une table"
     }
 }

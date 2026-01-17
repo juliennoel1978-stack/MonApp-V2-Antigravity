@@ -11,9 +11,13 @@ const SOUNDS = {
     finish: require('../assets/sounds/challenge_finish.mp3'),
     mastery: require('../assets/sounds/mastery.mp3'),
     checkpoint: require('../assets/sounds/game-character-140506.mp3'),
+    // Son d'erreur doux - fichier dédié
+    error: require('../assets/sounds/error-mistake-sound-effect-incorrect-answer-437420.mp3'),
 };
 
-export const playSuccessSound = async (variant: 'default' | 'magic' | 'boost' | 'challenge' | 'finish' | 'mastery' | 'checkpoint' = 'default') => {
+export type SoundVariant = 'default' | 'magic' | 'boost' | 'challenge' | 'finish' | 'mastery' | 'checkpoint' | 'error';
+
+export const playSuccessSound = async (variant: SoundVariant = 'default') => {
     if (Platform.OS === 'web') {
         // ... (Web implementation remains minimal/unchanged for now or can be expanded later)
         try {
