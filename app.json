@@ -2,7 +2,7 @@
   "expo": {
     "name": "Tables Magiques – Apprendre les multiplications autrement",
     "slug": "tables-magiques-apprendre-les-multiplications-autrement",
-    "version": "1.1.1",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.rork.tables-magiques-apprendre-les-multiplications-autrement",
-      "buildNumber": "2",
+      "buildNumber": "3",
       "infoPlist": {
         "UIBackgroundModes": [],
         "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
@@ -30,7 +30,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "app.rork.tablesmagiques",
-      "versionCode": 2,
+      "versionCode": 3,
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
