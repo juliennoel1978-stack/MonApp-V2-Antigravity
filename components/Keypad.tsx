@@ -10,6 +10,7 @@ import { Delete } from 'lucide-react-native';
 import { AppColors } from '@/constants/colors';
 import { ThemedText } from './ThemedText';
 import * as Haptics from 'expo-haptics';
+import i18n from '@/utils/i18n';
 
 interface KeypadProps {
     onKeyPress: (key: string) => void;
@@ -139,7 +140,7 @@ export const Keypad = ({
                     onPress={onDelete}
                     style={styles.keyDelete}
                     hapticType="medium"
-                    accessibilityLabel="Effacer"
+                    accessibilityLabel={i18n.t('keypad.delete')}
                 >
                     <Delete size={32} color={AppColors.text} strokeWidth={2.5} />
                 </AnimatedKey>
@@ -156,7 +157,7 @@ export const Keypad = ({
                     ]}
                     hapticType={isSubmitDisabled ? 'none' : 'success'}
                     disabled={isSubmitDisabled}
-                    accessibilityLabel="Valider"
+                    accessibilityLabel={i18n.t('keypad.validate')}
                 >
                     <ThemedText style={styles.keySubmitText}>OK</ThemedText>
                 </AnimatedKey>

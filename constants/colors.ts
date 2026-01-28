@@ -2,11 +2,11 @@ export const NumberColors = {
   1: '#FF6B6B',
   2: '#4ECDC4',
   3: '#5CBFAE', // Darker teal for better contrast
-  4: '#E6B800', // Darker gold/yellow for better contrast
+  4: '#9C27B0', // Deep violet for better contrast (accessibility)
   5: '#5DC09B', // Darker green for better contrast
   6: '#9BA8D9', // Darker lavender for better contrast
-  7: '#E8A87C', // Darker peach/orange for better contrast
-  8: '#E86A75', // Darker coral/pink for better contrast
+  7: '#0097A7', // Dark cyan for better contrast (accessibility)
+  8: '#00796B', // Teal for better contrast (accessibility)
   9: '#9B8AC4', // Darker purple for better contrast
   10: '#E8A87C', // Darker peach for better contrast
 } as const;

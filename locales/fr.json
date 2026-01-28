@@ -790,5 +790,9 @@
         "tables_selected": "{{count}} table sélectionnée",
         "tables_selected_plural": "{{count}} tables sélectionnées",
         "no_table_warning": "Sélectionne au moins une table"
+    },
+    "keypad": {
+        "delete": "Effacer",
+        "validate": "Valider"
     }
 }

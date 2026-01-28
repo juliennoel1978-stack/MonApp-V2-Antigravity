@@ -18,6 +18,11 @@
       "bundleIdentifier": "app.rork.tables-magiques-apprendre-les-multiplications-autrement",
       "buildNumber": "3",
       "infoPlist": {
+        "CFBundleLocalizations": [
+          "fr",
+          "en"
+        ],
+        "CFBundleDevelopmentRegion": "fr",
         "UIBackgroundModes": [],
         "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
         "NSCameraUsageDescription": "Cette application utilise la caméra pour vous permettre de prendre une photo de profil.",
