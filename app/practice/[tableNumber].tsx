@@ -1,5 +1,5 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Home, Check, X, Star, RefreshCw, ArrowRight, Volume2, VolumeX } from 'lucide-react-native';
+import { Home, Check, X, Volume2, VolumeX } from 'lucide-react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { Keypad } from '@/components/Keypad';
@@ -11,172 +11,44 @@ import {
   Animated,
   Dimensions,
   ScrollView,
+  AppState,
+  AppStateStatus,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAudio } from '@/hooks/useAudio';
 import { useHaptics } from '@/hooks/useHaptics';
 import { AppColors, NumberColors } from '@/constants/colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { getTableByNumber, TIPS_BY_TABLE } from '@/constants/tables';
 import { useApp } from '@/contexts/AppContext';
 import { generateQuestions } from '@/utils/questionGenerator';
 import type { Question } from '@/types';
 
+
 import { Audio } from 'expo-av';
 
 import i18n from '@/utils/i18n';
 import { useResponsive } from '@/hooks/useResponsive';
+import { ReviewRequestModal } from '@/components/ReviewRequestModal';
+import {
+  CheckpointModal,
+  CoachFeedback,
+  LevelCompleteScreen,
+  ErrorFeedbackView,
+  ResultScreen
+} from '@/components/practice';
+import {
+  shouldRequestReview,
+  countMasteredTables,
+} from '@/utils/storeReviewHelper';
 
 
 
+// Coach theme constant for local use in triggerCoachSuccess
 const COACH_THEMES = {
   animals: '🐒',
   space: '👽',
   heroes: '🤖',
-};
-
-
-
-const CHECKPOINT_THEMES = {
-  animals: { image: '🐒', item: '🍌', title: 'practice.checkpoints.animals.title', subtitle: 'practice.checkpoints.animals.subtitle' },
-  space: { image: '👽', item: '💎', title: 'practice.checkpoints.space.title', subtitle: 'practice.checkpoints.space.subtitle' },
-  heroes: { image: '🤖', item: '🔋', title: 'practice.checkpoints.heroes.title', subtitle: 'practice.checkpoints.heroes.subtitle' },
-};
-
-const CheckpointModal = ({
-  visible,
-  theme,
-  isZenMode,
-  onClose,
-}: {
-  visible: boolean;
-  theme: string;
-  isZenMode?: boolean;
-  onClose: () => void;
-}) => {
-  const [scaleAnim] = useState(new Animated.Value(0));
-
-  useEffect(() => {
-    if (visible) {
-      if (isZenMode) {
-        // Zen Mode: Simple Fade
-        Animated.timing(scaleAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }).start();
-      } else {
-        // Normal Mode: Bounce
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          tension: 50,
-          friction: 5,
-          useNativeDriver: true,
-        }).start();
-      }
-
-      // Auto close after 2.5 seconds
-      const timer = setTimeout(() => {
-        onClose();
-      }, 2500);
-      return () => clearTimeout(timer);
-    } else {
-      scaleAnim.setValue(0);
-    }
-  }, [visible, isZenMode, onClose, scaleAnim]);
-
-  if (!visible) return null;
-
-  const data = CHECKPOINT_THEMES[theme as keyof typeof CHECKPOINT_THEMES] || CHECKPOINT_THEMES.animals;
-
-  return (
-    <View style={styles.checkpointOverlay}>
-      <Animated.View style={[styles.checkpointCard, { transform: [{ scale: scaleAnim }] }]}>
-        <ThemedText style={styles.checkpointTitle}>{i18n.t(data.title)}</ThemedText>
-        <View style={styles.checkpointImageContainer}>
-          <ThemedText style={styles.checkpointEmojiMain}>{data.image}</ThemedText>
-          <ThemedText style={styles.checkpointEmojiItem}>{data.item}</ThemedText>
-        </View>
-        <ThemedText style={styles.checkpointSubtitle}>{i18n.t(data.subtitle)}</ThemedText>
-      </Animated.View>
-    </View>
-  );
-};
-
-const CoachFeedback = ({
-  visible,
-  theme,
-  gender,
-  isZenMode,
-  message,
-}: {
-  visible: boolean;
-  theme: string;
-  gender?: 'boy' | 'girl';
-  isZenMode?: boolean;
-  message: string;
-}) => {
-  const [scaleAnim] = useState(new Animated.Value(0));
-  const [opacityAnim] = useState(new Animated.Value(0));
-
-  useEffect(() => {
-    if (visible) {
-      if (isZenMode) {
-        // Zen Mode: Simple Fade In, no movement
-        scaleAnim.setValue(1); // Immediate scale
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }).start();
-      } else {
-        // Normal Mode: Spring + Move + Fade
-        Animated.parallel([
-          Animated.spring(scaleAnim, {
-            toValue: 1,
-            tension: 50,
-            friction: 7,
-            useNativeDriver: true,
-          }),
-          Animated.timing(opacityAnim, {
-            toValue: 1,
-            duration: 200,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      }
-    } else {
-      if (!isZenMode) scaleAnim.setValue(0);
-      opacityAnim.setValue(0);
-    }
-  }, [visible, isZenMode]);
-
-  if (!visible) return null;
-
-  const coachEmoji = COACH_THEMES[theme as keyof typeof COACH_THEMES] || '🐒';
-
-  return (
-    <View style={styles.coachContainer} pointerEvents="none">
-      <Animated.View
-        style={[
-          styles.coachBubble,
-          {
-            opacity: opacityAnim,
-            // In Zen Mode, we remove the translateY movement and purely rely on static positioning
-            transform: isZenMode
-              ? []
-              : [{ scale: scaleAnim }, { translateY: -20 }],
-          },
-        ]}
-      >
-        <ThemedText style={styles.coachMessage}>
-          {message}
-          {!isZenMode && ['🎉', '🌟', '🔥', '🚀', '👏', '💪'][Math.floor(Math.random() * 6)]}
-        </ThemedText>
-        <View style={styles.coachBubbleArrow} />
-      </Animated.View>
-      {!isZenMode && <ThemedText style={styles.coachEmoji}>{coachEmoji}</ThemedText>}
-    </View>
-  );
 };
 
 const { width } = Dimensions.get('window');
@@ -185,10 +57,11 @@ export default function PracticeScreen() {
   const router = useRouter();
   const { tableNumber } = useLocalSearchParams();
   const table = getTableByNumber(Number(tableNumber));
-  const { updateTableProgress, unlockBadge, getTableProgress, settings, currentUser } = useApp();
+  const { updateTableProgress, unlockBadge, getTableProgress, settings, currentUser, progress: userProgress, updateDailyStreak } = useApp();
   const { playSound, playErrorSound, speak, stopSpeech, isVoiceEnabled } = useAudio();
   const { vibrate } = useHaptics();
   const { isSmallScreen, isTablet, spacing, fontSize, containerMaxWidth } = useResponsive();
+  const colors = useThemeColors();
 
   const tableProgress = getTableProgress(Number(tableNumber));
   const initialLevel = tableProgress?.level1Completed ? 2 : 1;
@@ -219,6 +92,12 @@ export default function PracticeScreen() {
   // Checkpoint State
   const [showCheckpoint, setShowCheckpoint] = useState(false);
   const [streak, setStreak] = useState(0);
+
+  // Store Review State
+  const [showReviewModal, setShowReviewModal] = useState(false);
+
+  // Pause State for AppState handling
+  const [isPaused, setIsPaused] = useState(false);
 
   const soundRef = useRef<Audio.Sound | null>(null);
 
@@ -254,6 +133,31 @@ export default function PracticeScreen() {
       }
     };
   }, []);
+
+  // FIX: AppState listener - Pause session when app goes to background
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'active') {
+        // App came back to foreground
+        if (isPaused) {
+          setIsPaused(false);
+          // Reset start time to now so we don't count background time
+          startTimeRef.current = Date.now();
+          console.log('Practice: App returned to foreground - Timer reset');
+        }
+      } else if (nextAppState === 'background' || nextAppState === 'inactive') {
+        // App went to background or inactive -> PAUSE time tracking
+        if (!isPaused && !showResult) {
+          setIsPaused(true);
+          console.log('Practice: App went to background -> Session Paused');
+        }
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [isPaused, showResult]);
 
 
 
@@ -354,6 +258,7 @@ export default function PracticeScreen() {
         // 7/10 ou plus = débloque Level 2
         const stars = finalCorrectCount === 10 ? 2 : 1;
         updateTableProgress(table.number, finalCorrectCount, questions.length, stars, 1, averageTime);
+        updateDailyStreak(); // Track daily practice streak
         if (finalCorrectCount === 10) setQuestionsToReview([]);
         vibrate('heavy');
         playSound('finish');
@@ -380,12 +285,35 @@ export default function PracticeScreen() {
       }
 
       updateTableProgress(table.number, totalCorrectLevel2, questions.length, stars, 2, averageTime);
+      updateDailyStreak(); // Track daily practice streak
 
       if (stars >= 3) {
         // ALWAYS play the finish music for success (3 or 4 stars) to ensure audio feedback
         // 'finish' maps to 'challenge_finish.mp3' which is the main completion music
         playSound('finish');
         vibrate('heavy');
+
+        // Check for store review trigger (mastery: 2+ tables with 3+ stars, excluding tables 1 and 10)
+        // Only check if this table is not 1 or 10
+        if (table.number !== 1 && table.number !== 10) {
+          const checkMasteryReview = async () => {
+            // Count current mastered tables (will include this one after updateTableProgress)
+            const currentMastered = countMasteredTables(userProgress);
+            // Check if this achievement triggered the threshold (was at 1, now at 2)
+            const wasAtThreshold = currentMastered === 1;
+
+            if (wasAtThreshold) {
+              const shouldShow = await shouldRequestReview('mastery');
+              if (shouldShow) {
+                // Delay to show after result screen is visible
+                setTimeout(() => {
+                  setShowReviewModal(true);
+                }, 3000);
+              }
+            }
+          };
+          checkMasteryReview();
+        }
       }
 
       if (stars >= 4) {
@@ -705,357 +633,54 @@ export default function PracticeScreen() {
   };
 
   if (showLevelTransition) {
-    const starsEarnedLevel1 = correctCount === 10 ? 2 : 1;
-    const userName = currentUser?.firstName || '';
     return (
-      <View style={styles.backgroundContainer}>
-        <SafeAreaView style={styles.container}>
-          <ScrollView
-            contentContainerStyle={styles.resultScrollContent}
-            showsVerticalScrollIndicator={false}
-            bounces={true}
-          >
-            <ThemedText style={styles.resultTitle}>{i18n.t('practice.bravo_name', { name: userName })}</ThemedText>
-            <ThemedText style={styles.resultSubtitle}>
-              {correctCount === 10
-                ? i18n.t('practice.mastered')
-                : i18n.t('practice.unlocked_lvl2')}
-            </ThemedText>
-
-            <View style={[styles.resultCard, { borderColor: tableColor }]}>
-              <View style={styles.starsContainer}>
-                {[1, 2, 3, 4].map(starIndex => (
-                  <Star
-                    key={starIndex}
-                    size={32}
-                    color={starIndex <= starsEarnedLevel1 ? AppColors.warning : AppColors.borderLight}
-                    fill={starIndex <= starsEarnedLevel1 ? AppColors.warning : 'transparent'}
-                  />
-                ))}
-              </View>
-              <ThemedText style={styles.intermediateStarsText}>{i18n.t('practice.stars_count', { count: starsEarnedLevel1, s: starsEarnedLevel1 > 1 ? 's' : '' })}</ThemedText>
-              <ThemedText style={styles.transitionDescriptionFirst}>{i18n.t('practice.level2_intro')}</ThemedText>
-              <ThemedText style={styles.transitionDescriptionSecond}>
-                {i18n.t('practice.level2_desc', { count: 4 - starsEarnedLevel1, s: (4 - starsEarnedLevel1) > 1 ? 's' : '' })}
-              </ThemedText>
-            </View>
-
-            <View style={styles.resultButtonsColumn}>
-              <TouchableOpacity
-                style={[styles.primaryButton, { backgroundColor: tableColor }]}
-                onPress={startLevel2}
-              >
-                <ThemedText style={styles.primaryButtonText}>{i18n.t('practice.go_level2')}</ThemedText>
-              </TouchableOpacity>
-
-              {questionsToReview.length > 0 && (
-                <View style={styles.reviewSectionContainer}>
-                  <ThemedText style={styles.reviewSectionTitle}>{i18n.t('practice.review_errors_q')}</ThemedText>
-                  <TouchableOpacity
-                    style={styles.reviewButtonSecondary}
-                    onPress={startReview}
-                  >
-                    <ThemedText style={styles.reviewButtonSecondaryText}>
-                      {questionsToReview.length === 1
-                        ? i18n.t('practice.review_btn_one')
-                        : i18n.t('practice.review_btn_many', { count: questionsToReview.length })}
-                    </ThemedText>
-                  </TouchableOpacity>
-                </View>
-              )}
-
-              <TouchableOpacity
-                style={styles.backToMenuButton}
-                onPress={() => router.push('/tables' as any)}
-              >
-                <ThemedText style={styles.backToMenuButtonText}>{i18n.t('common.back_to_menu')}</ThemedText>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </SafeAreaView>
-      </View>
+      <LevelCompleteScreen
+        correctCount={correctCount}
+        tableColor={tableColor}
+        userName={currentUser?.firstName || ''}
+        questionsToReview={questionsToReview}
+        onStartLevel2={startLevel2}
+        onStartReview={startReview}
+        onBackToMenu={() => router.push('/tables' as any)}
+      />
     );
   }
 
   if (showResult) {
-    // Logic for Final Result Screen (Level 1 Fail OR Level 2 End)
-    if (level === 1) {
-      // Check if we just finished a review session successfully
-      const justFinishedReview = questions.length < 10 && correctCount === questions.length && !isReviewMode;
-      const userName = currentUser?.firstName || '';
-
-      if (justFinishedReview) {
-        return (
-          <View style={styles.backgroundContainer}>
-            <SafeAreaView style={styles.container}>
-              <View style={styles.resultContainer}>
-                <ThemedText style={styles.resultTitle}>{i18n.t('practice.bravo_name', { name: userName })}</ThemedText>
-                <ThemedText style={styles.resultSubtitle}>
-                  {i18n.t('practice.review_success')}
-                </ThemedText>
-
-                <View style={styles.resultButtonsColumn}>
-                  <TouchableOpacity
-                    style={[styles.primaryButton, { backgroundColor: tableColor }]}
-                    onPress={retry}
-                    testID="retry-button"
-                  >
-                    <ThemedText style={styles.primaryButtonText}>{i18n.t('practice.results.retry_full_nl')}</ThemedText>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[styles.primaryButton, styles.outlineButton, { borderColor: tableColor, backgroundColor: 'transparent' }]}
-                    onPress={() => router.push('/tables' as any)}
-                    testID="back-button-result"
-                  >
-                    <ThemedText style={[styles.primaryButtonText, { color: tableColor }]}>{i18n.t('practice.results.other_table_full')}</ThemedText>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </SafeAreaView>
-          </View>
-        );
-      }
-
-      // Level 1 - Score insuffisant pour Level 2 (< 7/10)
-      const earnedEncouragementStar = correctCount >= 3;
-      return (
-        <View style={styles.backgroundContainer}>
-          <SafeAreaView style={styles.container}>
-            <ScrollView
-              contentContainerStyle={styles.resultScrollContent}
-              showsVerticalScrollIndicator={false}
-              bounces={true}
-            >
-              <ThemedText style={styles.resultTitle}>{i18n.t('practice.results.almost')}</ThemedText>
-
-              <View style={[styles.resultCardCompact, { borderColor: tableColor }]}>
-                <ThemedText style={styles.resultScore}>
-                  {correctCount}/{questions.length}
-                </ThemedText>
-                <ThemedText style={styles.resultLabel}>{i18n.t('practice.results.correct_answers')}</ThemedText>
-
-                {/* Afficher l'étoile d'encouragement si score >= 3 */}
-                {earnedEncouragementStar && (
-                  <View style={styles.starsContainer}>
-                    <Star size={24} color={AppColors.warning} fill={AppColors.warning} />
-                  </View>
-                )}
-
-                <ThemedText style={styles.encouragementLarge}>
-                  {earnedEncouragementStar
-                    ? i18n.t('practice.results.encouragement_star_earned')
-                    : i18n.t('practice.results.encouragement_muscle')}
-                </ThemedText>
-                <ThemedText style={styles.encouragementSmall}>
-                  {i18n.t('practice.results.encouragement_min')}
-                </ThemedText>
-              </View>
-
-              <View style={styles.resultButtonsColumn}>
-                {questionsToReview.length > 0 && (
-                  <View style={styles.reviewContainer}>
-                    <ThemedText style={styles.reviewText}>
-                      {i18n.t('practice.results.review_only_errors')}
-                    </ThemedText>
-                    <TouchableOpacity
-                      style={styles.reviewConfirmButton}
-                      onPress={startReview}
-                    >
-                      <ThemedText style={styles.reviewConfirmButtonText}>{i18n.t('practice.results.yes')}</ThemedText>
-                    </TouchableOpacity>
-                  </View>
-                )}
-
-                <View style={styles.resultButtonsRow}>
-                  <TouchableOpacity
-                    style={[styles.resultButton, { backgroundColor: tableColor }]}
-                    onPress={() => router.push(`/discovery/${table.number}?step=2` as any)}
-                    testID="review-lesson-button"
-                  >
-                    <ThemedText style={styles.resultButtonText}>{i18n.t('practice.results.review_table')}</ThemedText>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.resultButtonsRow}>
-                  <TouchableOpacity
-                    style={[styles.resultButton, styles.secondaryButton]}
-                    onPress={retry}
-                    testID="retry-button"
-                  >
-                    <ThemedText style={styles.secondaryButtonText}>{i18n.t('practice.results.retry_quiz')}</ThemedText>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[styles.resultButton, styles.outlineButton, { borderColor: tableColor }]}
-                    onPress={() => router.push('/tables' as any)}
-                    testID="back-button-result"
-                  >
-                    <ThemedText style={[styles.outlineButtonText, { color: tableColor }]}>{i18n.t('practice.results.other_table_nl')}</ThemedText>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </ScrollView>
-          </SafeAreaView>
-        </View>
-      );
-    }
-
-    // Check if we just finished a review session successfully for Level 2
-    const justFinishedReviewL2 = questions.length < 10 && correctCount === questions.length && !isReviewMode;
-    const userName = currentUser?.firstName || '';
-
-    if (justFinishedReviewL2) {
-      return (
-        <View style={styles.backgroundContainer}>
-          <SafeAreaView style={styles.container}>
-            <View style={styles.resultContainer}>
-              <ThemedText style={styles.resultTitle}>{i18n.t('practice.results.bravo_simple')} {userName ? `${userName} ` : ''}! 🎉</ThemedText>
-              <ThemedText style={styles.resultSubtitle}>
-                {i18n.t('practice.review_success')}
-              </ThemedText>
-
-              <View style={styles.resultButtonsColumn}>
-                <TouchableOpacity
-                  style={[styles.primaryButton, { backgroundColor: tableColor }]}
-                  onPress={retry}
-                  testID="retry-button"
-                >
-                  <ThemedText style={styles.primaryButtonText}>{i18n.t('practice.results.retry_full_nl')}</ThemedText>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[styles.primaryButton, styles.outlineButton, { borderColor: tableColor, backgroundColor: 'transparent' }]}
-                  onPress={() => router.push('/tables' as any)}
-                  testID="back-button-result"
-                >
-                  <ThemedText style={[styles.primaryButtonText, { color: tableColor }]}>{i18n.t('practice.results.other_table_full')}</ThemedText>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </SafeAreaView>
-        </View>
-      );
-    }
-
-    // Level 2 Finished
-    const totalCorrectLevel2 = correctCount;
-    let stars = 4;
-    if (totalCorrectLevel2 < 10) {
-      stars = totalCorrectLevel2 >= 8 ? 3 : totalCorrectLevel2 >= 5 ? 2 : 1;
-    }
-    const passed = stars >= 3;
+    // Check if we just finished a review session successfully 
+    const justFinishedReview = questions.length < 10 && correctCount === questions.length && !isReviewMode;
 
     return (
-      <View style={styles.backgroundContainer}>
-        <SafeAreaView style={styles.container}>
-          <ScrollView
-            contentContainerStyle={styles.resultScrollContent}
-            showsVerticalScrollIndicator={false}
-            bounces={true}
-          >
-            <ThemedText style={styles.resultTitle}>
-              {passed
-                ? `${i18n.t('practice.results.bravo_simple')} ${userName ? `${userName} ` : ''}! 🎉`
-                : `${i18n.t('practice.results.almost_simple')} ${userName ? `${userName} ` : ''}! 😕`}
-            </ThemedText>
-            <ThemedText style={styles.resultSubtitle}>
-              {passed ? i18n.t('practice.results.finished') : i18n.t('practice.results.keep_training')}
-            </ThemedText>
-
-            <View style={[styles.resultCard, { borderColor: tableColor }]}>
-              <ThemedText style={styles.resultScore}>
-                {correctCount}/{questions.length}
-              </ThemedText>
-              <ThemedText style={styles.resultLabel}>{i18n.t('practice.results.correct_answers')}</ThemedText>
-
-              <View style={styles.starsContainer}>
-                {[1, 2, 3, 4].map(starIndex => (
-                  <Star
-                    key={starIndex}
-                    size={32}
-                    color={starIndex <= stars ? AppColors.warning : AppColors.borderLight}
-                    fill={starIndex <= stars ? AppColors.warning : 'transparent'}
-                  />
-                ))}
-              </View>
-
-              <ThemedText style={styles.encouragement}>
-                {stars === 4 ? i18n.t('practice.results.encouragement_perfect', { number: table.number }) :
-                  stars === 3 ? i18n.t('practice.results.encouragement_great') :
-                    stars === 2 ? i18n.t('practice.results.encouragement_good') :
-                      i18n.t('practice.results.encouragement_fail')}
-              </ThemedText>
-            </View>
-
-            <View style={styles.resultButtonsColumn}>
-              {questionsToReview.length > 0 && (
-                <View style={styles.reviewSectionContainer}>
-                  <ThemedText style={styles.reviewSectionTitle}>
-                    {i18n.t('practice.results.review_only_errors')}
-                  </ThemedText>
-                  <TouchableOpacity
-                    style={styles.reviewButtonSecondary}
-                    onPress={startReview}
-                  >
-                    <ThemedText style={styles.reviewButtonSecondaryText}>{i18n.t('practice.results.yes')}, {questionsToReview.length === 1 ? i18n.t('practice.review_btn_one') : i18n.t('practice.review_btn_many', { count: questionsToReview.length })}</ThemedText>
-                  </TouchableOpacity>
-                </View>
-              )}
-
-              <View style={styles.resultButtonsRow}>
-                <TouchableOpacity
-                  style={[
-                    styles.actionButton,
-                    passed ? styles.retryButtonStyle : { backgroundColor: tableColor }
-                  ]}
-                  onPress={retry}
-                >
-                  <ThemedText style={[
-                    styles.actionButtonText,
-                    passed && { color: AppColors.text }
-                  ]}>
-                    {passed ? i18n.t('practice.retry_level1') : i18n.t('practice.retry_level1')}
-                  </ThemedText>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.actionButton,
-                    passed ? { backgroundColor: tableColor } : styles.actionButtonOutline,
-                    !passed && { borderColor: tableColor }
-                  ]}
-                  onPress={() => router.push('/tables')}
-                >
-                  <ThemedText style={[
-                    styles.actionButtonText,
-                    !passed && { color: tableColor }
-                  ]}>
-                    {passed ? i18n.t('practice.results.other_table_full') : i18n.t('practice.results.other_table_full')}
-                  </ThemedText>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </ScrollView>
-        </SafeAreaView>
-      </View>
+      <ResultScreen
+        level={level}
+        correctCount={correctCount}
+        totalQuestions={questions.length}
+        tableColor={tableColor}
+        tableNumber={table.number}
+        userName={currentUser?.firstName || ''}
+        questionsToReview={questionsToReview}
+        isReviewSession={justFinishedReview}
+        onRetry={retry}
+        onStartReview={startReview}
+        onBackToMenu={() => router.push('/tables' as any)}
+        onReviewTable={() => router.push(`/discovery/${table.number}?step=2` as any)}
+      />
     );
   }
 
 
-
   return (
-    <View style={styles.backgroundContainer}>
+    <View style={[styles.backgroundContainer, { backgroundColor: colors.background }]}>
       <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <View style={{ flex: 1 }}>
-          <View style={styles.header}>
+          <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
             <View style={styles.headerLeft}>
               <TouchableOpacity
                 style={styles.backButton}
                 onPress={handleHomePress}
                 testID="back-button"
               >
-                <Home size={24} color={AppColors.primary} />
+                <Home size={24} color={colors.primary} />
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -1063,9 +688,9 @@ export default function PracticeScreen() {
                 onPress={() => setLocalVoiceEnabled(!localVoiceEnabled)}
               >
                 {localVoiceEnabled ? (
-                  <Volume2 size={24} color={AppColors.primary} />
+                  <Volume2 size={24} color={colors.primary} />
                 ) : (
-                  <VolumeX size={24} color={AppColors.textSecondary} />
+                  <VolumeX size={24} color={colors.textSecondary} />
                 )}
               </TouchableOpacity>
             </View>
@@ -1086,7 +711,7 @@ export default function PracticeScreen() {
 
             <View style={styles.scoreContainer}>
               <ThemedText style={styles.scoreText}>{correctCount}/{questions.length}</ThemedText>
-              <Check size={20} color={AppColors.success} />
+              <Check size={20} color={colors.success} />
             </View>
           </View>
 
@@ -1135,7 +760,7 @@ export default function PracticeScreen() {
                         >
                           {currentQuestion.multiplier}
                         </ThemedText>
-                        {localVoiceEnabled && <Volume2 size={24} color={AppColors.textSecondary} style={{ marginLeft: 16, opacity: 0.5 }} />}
+                        {localVoiceEnabled && <Volume2 size={24} color={colors.textSecondary} style={{ marginLeft: 16, opacity: 0.5 }} />}
                       </View>
                     </TouchableOpacity>
                   </>
@@ -1157,7 +782,7 @@ export default function PracticeScreen() {
                     >
                       {currentQuestion.multiplicand} × {currentQuestion.multiplier} = ?
                     </ThemedText>
-                    {localVoiceEnabled && <Volume2 size={28} color={AppColors.textSecondary} style={{ opacity: 0.5 }} />}
+                    {localVoiceEnabled && <Volume2 size={28} color={colors.textSecondary} style={{ opacity: 0.5 }} />}
                   </TouchableOpacity>
                 )}
               </View>
@@ -1222,8 +847,8 @@ export default function PracticeScreen() {
                   {isCorrect && (
                     <View style={styles.level2FeedbackContainer}>
                       <View style={styles.level2FeedbackBox}>
-                        <Check size={48} color={AppColors.success} />
-                        <ThemedText style={[styles.level2FeedbackText, { color: AppColors.success }]}>
+                        <Check size={48} color={colors.success} />
+                        <ThemedText style={[styles.level2FeedbackText, { color: colors.success }]}>
                           {i18n.t('practice.correct_excl')}
                         </ThemedText>
                       </View>
@@ -1269,42 +894,19 @@ export default function PracticeScreen() {
 
 
         {/* Error Feedback Overlay / Card */}
-        {showErrorFeedback && (
-          <View style={styles.fullScreenOverlay}>
-            <View style={[styles.errorCard, { borderColor: AppColors.warning }]}>
-              <ThemedText style={styles.errorTitle}>{i18n.t('practice.correction.title')}</ThemedText>
+        <ErrorFeedbackView
+          visible={showErrorFeedback}
+          currentQuestion={currentQuestion}
+          tableNumber={table.number}
+          level={level}
+          onRetryQuestion={handleRetryQuestion}
+          onContinue={handleContinueAfterError}
+        />
 
-              <View style={styles.correctionContainer}>
-                <ThemedText style={styles.correctionText}>
-                  {currentQuestion.multiplicand} × {currentQuestion.multiplier} = {currentQuestion.correctAnswer}
-                </ThemedText>
-                <ThemedText style={styles.errorTipText}>
-                  {TIPS_BY_TABLE[table.number]?.erreur ? i18n.t(TIPS_BY_TABLE[table.number].erreur) : ''}
-                </ThemedText>
-              </View>
-
-              <View style={styles.errorButtons}>
-                {level === 2 && (
-                  <TouchableOpacity
-                    style={[styles.errorButton, styles.retryQuestionButton]}
-                    onPress={handleRetryQuestion}
-                  >
-                    <RefreshCw size={20} color={AppColors.text} />
-                    <ThemedText style={styles.errorButtonText}>{i18n.t('practice.correction.retry_question')}</ThemedText>
-                  </TouchableOpacity>
-                )}
-
-                <TouchableOpacity
-                  style={[styles.errorButton, styles.continueButton]}
-                  onPress={handleContinueAfterError}
-                >
-                  <ThemedText style={[styles.errorButtonText, { color: '#FFF' }]}>{i18n.t('practice.correction.continue')}</ThemedText>
-                  <ArrowRight size={20} color="#FFF" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        )}
+        <ReviewRequestModal
+          visible={showReviewModal}
+          onClose={() => setShowReviewModal(false)}
+        />
       </SafeAreaView>
     </View>
   );
@@ -1945,7 +1547,7 @@ const styles = StyleSheet.create({
   },
   errorCard: {
     backgroundColor: AppColors.surface,
-    padding: 24,
+    padding: 16,
     borderRadius: 24,
     borderWidth: 3,
     shadowColor: "#000",

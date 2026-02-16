@@ -2,6 +2,7 @@ import React, { useState, Suspense, lazy } from 'react';
 import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { User } from '@/types';
 import { useApp } from '@/contexts/AppContext';
 import { ThemedText } from '../ThemedText';
@@ -46,6 +47,7 @@ export const ChallengeResults = ({
     const { updateStrongestTable } = useApp();
     const { playSound } = useAudio();
     const { vibrate } = useHaptics();
+    const colors = useThemeColors();
 
     // State pour le modal Table à Surveiller
     const [showTableDetailModal, setShowTableDetailModal] = useState(false);
@@ -96,7 +98,7 @@ export const ChallengeResults = ({
         const randomMessage = correctionMessages[Math.floor(Math.random() * correctionMessages.length)];
 
         return (
-            <View style={styles.backgroundContainer}>
+            <View style={[styles.backgroundContainer, { backgroundColor: colors.background }]}>
                 <SafeAreaView style={styles.container} edges={['top']}>
                     <ScrollView
                         contentContainerStyle={styles.finishedScrollContent}
@@ -138,7 +140,7 @@ export const ChallengeResults = ({
     }
 
     return (
-        <View style={styles.backgroundContainer}>
+        <View style={[styles.backgroundContainer, { backgroundColor: colors.background }]}>
             {/* Modal Table à Surveiller */}
             {selectedTableNumber && (
                 <TableDetailModal
@@ -166,7 +168,7 @@ export const ChallengeResults = ({
                         <View style={styles.finishedStats}>
                             <View style={styles.finishedStatRow}>
                                 <ThemedText style={styles.finishedStatLabel}>{i18n.t('challenge.results.precision')}</ThemedText>
-                                <ThemedText style={[styles.finishedStatValue, { color: AppColors.primary }]} numberOfLines={1}>
+                                <ThemedText style={[styles.finishedStatValue, { color: colors.primary }]} numberOfLines={1}>
                                     {correctCount} / {maxQuestions} 👍
                                 </ThemedText>
                             </View>
@@ -174,7 +176,7 @@ export const ChallengeResults = ({
                             {bestStreak > 0 && (
                                 <View style={styles.finishedStatRow}>
                                     <ThemedText style={styles.finishedStatLabel}>{i18n.t('challenge.results.best_streak')}</ThemedText>
-                                    <ThemedText style={[styles.finishedStatValue, { color: AppColors.success }]} numberOfLines={1}>
+                                    <ThemedText style={[styles.finishedStatValue, { color: colors.success }]} numberOfLines={1}>
                                         {i18n.t('challenge.results.streak_val', { count: bestStreak, s: bestStreak > 1 ? 's' : '' })}
                                     </ThemedText>
                                 </View>
@@ -183,7 +185,7 @@ export const ChallengeResults = ({
                             {bestTable > 0 && (
                                 <View style={styles.finishedStatRow}>
                                     <ThemedText style={styles.finishedStatLabel}>{i18n.t('challenge.results.strongest_table')}</ThemedText>
-                                    <ThemedText style={[styles.finishedStatValue, { color: AppColors.success }]} numberOfLines={1}>
+                                    <ThemedText style={[styles.finishedStatValue, { color: colors.success }]} numberOfLines={1}>
                                         {bestTable} 💪
                                     </ThemedText>
                                 </View>

@@ -5,19 +5,23 @@ import {
     StyleSheet,
     TouchableOpacity,
     Animated,
+    Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Home, CheckCircle, RotateCcw, Rocket, Star } from 'lucide-react-native';
 import { AppColors, NumberColors } from '@/constants/colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { useApp } from '@/contexts/AppContext';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useResponsive } from '@/hooks/useResponsive';
 import { ThemedText } from '@/components/ThemedText';
+import { getAvatarIcon } from '@/constants/avatars';
 import i18n from '@/utils/i18n';
 
 export default function ChallengeSetupScreen() {
     const router = useRouter();
     const { progress, currentUser, settings } = useApp();
+    const colors = useThemeColors();
     const { vibrate } = useHaptics();
     const { isSmallScreen, isTablet, spacing, fontSize, containerMaxWidth } = useResponsive();
 
@@ -77,7 +81,7 @@ export default function ChallengeSetupScreen() {
         });
     }, [vibrate, scaleAnims]);
 
-    // Select all tables
+    // Select all tables (Badge Intrépide is now earned when COMPLETING a challenge with 10 tables)
     const selectAll = useCallback(() => {
         vibrate('impact');
         setSelectedTables([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -99,7 +103,34 @@ export default function ChallengeSetupScreen() {
 
     const canStart = selectedTables.length > 0;
 
-    // Render star indicators using SVG icons (fixes overflow with OpenDyslexic font)
+    // Ripple Animation for Start Button
+    const rippleScale = useRef(new Animated.Value(0)).current;
+    const rippleOpacity = useRef(new Animated.Value(0)).current;
+
+    const performRippleAndStart = useCallback(() => {
+        if (selectedTables.length === 0) return;
+
+        // Reset
+        rippleScale.setValue(0);
+        rippleOpacity.setValue(0.5);
+
+        // Animate
+        Animated.parallel([
+            Animated.timing(rippleScale, {
+                toValue: 1,
+                duration: 400,
+                useNativeDriver: true,
+            }),
+            Animated.timing(rippleOpacity, {
+                toValue: 0,
+                duration: 400,
+                useNativeDriver: true,
+            }),
+        ]).start(() => {
+            startChallenge();
+        });
+    }, [selectedTables, startChallenge, rippleScale, rippleOpacity]);
+
     const renderStars = useCallback((count: number) => {
         const stars = [];
         for (let i = 0; i < 4; i++) {
@@ -116,35 +147,87 @@ export default function ChallengeSetupScreen() {
         return stars;
     }, []);
 
+    // Get theme-specific greeting
+    const getThemeGreeting = useCallback(() => {
+        if (!currentUser) return '';
+        const badgeTheme = currentUser.badgeTheme || settings.badgeTheme || 'space';
+        const name = currentUser.firstName || '';
+
+        switch (badgeTheme) {
+            case 'space':
+                return i18n.t('challenge_setup.greeting_space', { name });
+            case 'heroes':
+                return i18n.t('challenge_setup.greeting_heroes', { name });
+            case 'animals':
+                return i18n.t('challenge_setup.greeting_animals', { name });
+            default:
+                return i18n.t('challenge_setup.greeting', { name });
+        }
+    }, [currentUser, settings.badgeTheme]);
+
+    // Get avatar display - supports photos and emojis
+    const renderAvatar = useCallback(() => {
+        if (!currentUser) return null;
+
+        // Priority: photoUri > avatarId > gender fallback
+        if (currentUser.photoUri) {
+            return (
+                <Image
+                    source={{ uri: currentUser.photoUri }}
+                    style={styles.avatarImage}
+                    resizeMode="cover"
+                />
+            );
+        } else if (currentUser.avatarId) {
+            return <ThemedText style={styles.avatarEmoji}>{getAvatarIcon(currentUser.avatarId)}</ThemedText>;
+        } else {
+            // Fallback to gender-based emoji
+            return <ThemedText style={styles.avatarEmoji}>{currentUser.gender === 'boy' ? '👦' : '👧'}</ThemedText>;
+        }
+    }, [currentUser]);
+
     return (
-        <View style={styles.backgroundContainer}>
+        <View style={[styles.backgroundContainer, { backgroundColor: colors.background }]}>
             <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
                 {/* Header */}
                 <View style={styles.header}>
                     <TouchableOpacity
-                        style={styles.homeButton}
+                        style={[styles.homeButton, { backgroundColor: colors.surface }]}
                         onPress={() => router.back()}
                         testID="back-button"
                     >
-                        <Home size={26} color={AppColors.text} />
+                        <Home size={26} color={colors.text} />
                     </TouchableOpacity>
-                    <View style={styles.headerTitleContainer}>
+
+                    <View style={styles.headerTitleWrapper}>
                         <ThemedText
-                            style={[styles.headerTitle, isTablet && { fontSize: fontSize(24) }]}
+                            style={[styles.headerTitle, isTablet && { fontSize: fontSize(32) }, { color: colors.text }]}
                             numberOfLines={1}
                             adjustsFontSizeToFit
                         >
                             {i18n.t('challenge_setup.title')}
                         </ThemedText>
-                        <ThemedText
-                            style={[styles.headerSubtitle, isTablet && { fontSize: fontSize(14) }]}
-                            numberOfLines={1}
-                            adjustsFontSizeToFit
-                        >
-                            {i18n.t('challenge_setup.subtitle')}
+                    </View>
+
+                    {/* Spacer to balance header */}
+                    <View style={{ width: 44 }} />
+                </View>
+
+                {/* Personalization Section - Only show if user is logged in */}
+                {currentUser && (
+                    <View style={styles.personalizationSection}>
+                        <View style={styles.avatarContainer}>
+                            {renderAvatar()}
+                        </View>
+                        <ThemedText style={[styles.greetingText, { color: colors.text }]}>
+                            {getThemeGreeting()}
                         </ThemedText>
                     </View>
-                </View>
+                )}
+
+                <ThemedText style={[styles.explanatoryText, { color: colors.textSecondary }]}>
+                    {i18n.t('challenge_setup.explanation_sub')}
+                </ThemedText>
 
                 {/* Tables Grid */}
                 <View style={styles.gridContainer}>
@@ -173,7 +256,7 @@ export default function ChallengeSetupScreen() {
                                             styles.tableButton,
                                             isSelected
                                                 ? { backgroundColor: tableColor, borderColor: tableColor }
-                                                : styles.tableButtonInactive,
+                                                : [styles.tableButtonInactive, { backgroundColor: colors.surface, borderColor: colors.border }],
                                         ]}
                                         onPress={() => toggleTable(tableNumber)}
                                         activeOpacity={0.7}
@@ -238,7 +321,7 @@ export default function ChallengeSetupScreen() {
                             activeOpacity={0.7}
                             testID="select-all-button"
                         >
-                            <CheckCircle size={20} color={AppColors.primary} />
+                            <CheckCircle size={20} color={colors.primary} />
                             <ThemedText style={styles.secondaryButtonText}>
                                 {i18n.t('challenge_setup.select_all')}
                             </ThemedText>
@@ -250,7 +333,7 @@ export default function ChallengeSetupScreen() {
                             activeOpacity={0.7}
                             testID="my-level-button"
                         >
-                            <RotateCcw size={20} color={AppColors.primary} />
+                            <RotateCcw size={20} color={colors.primary} />
                             <ThemedText style={styles.secondaryButtonText}>
                                 {i18n.t('challenge_setup.my_level')}
                             </ThemedText>
@@ -261,12 +344,35 @@ export default function ChallengeSetupScreen() {
                         style={[
                             styles.startButton,
                             !canStart && styles.startButtonDisabled,
+                            { overflow: 'hidden', position: 'relative' } // Needed for ripple
                         ]}
-                        onPress={startChallenge}
-                        activeOpacity={canStart ? 0.8 : 1}
+                        onPress={performRippleAndStart}
+                        activeOpacity={canStart ? 0.9 : 1}
                         disabled={!canStart}
                         testID="start-challenge-button"
                     >
+                        {/* Ripple Effect Layer */}
+                        <Animated.View
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                opacity: rippleOpacity,
+                                transform: [{
+                                    scale: rippleScale.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0.1, 4] // Expand to cover button
+                                    })
+                                }]
+                            }}
+                        >
+                            <View style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: 'rgba(255, 255, 255, 0.4)' }} />
+                        </Animated.View>
+
                         <ThemedText
                             style={[
                                 styles.startButtonText,
@@ -280,7 +386,7 @@ export default function ChallengeSetupScreen() {
                         </ThemedText>
                         <Rocket
                             size={24}
-                            color={canStart ? '#FFFFFF' : AppColors.textSecondary}
+                            color={canStart ? '#FFFFFF' : colors.textSecondary}
                         />
                     </TouchableOpacity>
 
@@ -464,5 +570,55 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: AppColors.error,
         marginTop: 4,
+    },
+    headerTitleWrapper: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    personalizationSection: {
+        alignItems: 'center',
+        marginTop: 8,
+        marginBottom: 4,
+    },
+    avatarContainer: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: AppColors.surface,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 3,
+        borderColor: AppColors.primary,
+        shadowColor: AppColors.shadow,
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.15,
+        shadowRadius: 6,
+        elevation: 4,
+        overflow: 'hidden',
+    },
+    avatarImage: {
+        width: 58,
+        height: 58,
+        borderRadius: 29,
+    },
+    avatarEmoji: {
+        fontSize: 36,
+    },
+    greetingText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: AppColors.text,
+        marginTop: 10,
+        textAlign: 'center',
+    },
+    explanatoryText: {
+        fontSize: 14,
+        color: AppColors.textSecondary,
+        textAlign: 'center',
+        marginTop: 4,
+        marginBottom: 8,
+        paddingHorizontal: 20,
+        fontStyle: 'italic',
     },
 });

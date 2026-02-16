@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Timer } from 'lucide-react-native';
 import { ThemedText } from '../ThemedText';
 import { AppColors } from '@/constants/colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 type ChallengeTimerProps = {
     timeRemaining: number;
@@ -11,6 +12,7 @@ type ChallengeTimerProps = {
 };
 
 export const ChallengeTimer = ({ timeRemaining, duration, displayMode = 'chronometer' }: ChallengeTimerProps) => {
+    const colors = useThemeColors();
     const timerColor = timeRemaining > duration * 0.66
         ? AppColors.timerStart
         : timeRemaining > duration * 0.33
@@ -18,7 +20,7 @@ export const ChallengeTimer = ({ timeRemaining, duration, displayMode = 'chronom
             : AppColors.timerEnd;
 
     return (
-        <View style={styles.timerContainer}>
+        <View style={[styles.timerContainer, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
             {displayMode === 'chronometer' ? (
                 <>
                     <Timer
@@ -35,7 +37,7 @@ export const ChallengeTimer = ({ timeRemaining, duration, displayMode = 'chronom
                     </ThemedText>
                 </>
             ) : (
-                <View style={styles.progressBarContainer}>
+                <View style={[styles.progressBarContainer, { backgroundColor: colors.border }]}>
                     <View
                         style={[
                             styles.progressBar,

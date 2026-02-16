@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
 import { ThemedText } from '@/components/ThemedText';
+import { getAvatarIcon } from '@/constants/avatars';
 import i18n from '@/utils/i18n';
 
 const { width } = Dimensions.get('window');
@@ -66,6 +67,12 @@ export default function SelectUserScreen() {
                 <View style={styles.avatarContainer}>
                   {user.photoUri ? (
                     <Image source={{ uri: user.photoUri }} style={styles.avatar} />
+                  ) : user.avatarId ? (
+                    <View style={styles.avatarPlaceholder}>
+                      <ThemedText style={styles.avatarEmoji}>
+                        {getAvatarIcon(user.avatarId)}
+                      </ThemedText>
+                    </View>
                   ) : (
                     <View style={styles.avatarPlaceholder}>
                       <ThemedText style={styles.avatarEmoji}>

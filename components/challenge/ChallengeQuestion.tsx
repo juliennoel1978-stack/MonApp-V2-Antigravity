@@ -2,6 +2,8 @@ import React from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { ThemedText } from '../ThemedText';
 import { AppColors } from '@/constants/colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
+import i18n from '@/utils/i18n';
 
 const { width } = Dimensions.get('window');
 
@@ -15,20 +17,21 @@ type ChallengeQuestionProps = {
 };
 
 export const ChallengeQuestion = ({ question, userAnswer, showCorrectAnswer }: ChallengeQuestionProps) => {
+    const colors = useThemeColors();
     return (
         <>
-            <View style={styles.questionCard}>
-                <ThemedText style={styles.questionText}>
+            <View style={[styles.questionCard, { backgroundColor: colors.surface, shadowColor: colors.shadow }]}>
+                <ThemedText style={[styles.questionText, { color: colors.text }]}>
                     {question.displayText}
                 </ThemedText>
             </View>
 
             <View style={styles.inputContainer}>
-                <View style={styles.inputLike}>
+                <View style={[styles.inputLike, { backgroundColor: colors.surface, borderColor: colors.primary, shadowColor: colors.shadow }]}>
                     {userAnswer ? (
                         <ThemedText style={styles.inputText}>{userAnswer}</ThemedText>
                     ) : (
-                        <ThemedText style={styles.placeholder}>Ta réponse</ThemedText>
+                        <ThemedText style={styles.placeholder}>{i18n.t('practice.your_answer')}</ThemedText>
                     )}
                     {!showCorrectAnswer && <View style={styles.cursor} />}
                 </View>

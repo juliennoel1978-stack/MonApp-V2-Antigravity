@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors, NumberColors } from '@/constants/colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { getTableByNumber } from '@/constants/tables';
 import { ThemedText } from '@/components/ThemedText';
 import { useAudio } from '@/hooks/useAudio';
@@ -105,6 +106,7 @@ export default function DiscoveryScreen() {
   const isMounted = useRef(true);
 
   const { speak, stopSpeech } = useAudio();
+  const colors = useThemeColors();
 
   const { width, height } = useWindowDimensions();
   const isTablet = width > 600;
@@ -278,7 +280,7 @@ export default function DiscoveryScreen() {
           <ThemedText style={[styles.bigNumber, { color: tableColor }]}>
             {table.number}
           </ThemedText>
-          <ThemedText style={styles.visualText}>
+          <ThemedText style={[styles.visualText, { color: colors.text }]}>
             {i18n.t(`tables.${table.number}.theme_name`)}
           </ThemedText>
         </TouchableOpacity>
@@ -288,15 +290,15 @@ export default function DiscoveryScreen() {
       title: i18n.t(`tables.${table.number}.tip_title`),
       content: '', // Content is shown in the visual to avoid duplication
       visual: (
-        <View style={styles.tipContainer}>
+        <View style={[styles.tipContainer, { backgroundColor: colors.surface }]}>
           <ThemedText style={styles.tipEmoji}>
             {i18n.t(`tables.${table.number}.theme_emoji`)} 💡
           </ThemedText>
-          <ThemedText style={styles.tipText}>
+          <ThemedText style={[styles.tipText, { color: colors.text }]}>
             {i18n.t(`tables.${table.number}.tip`)}
           </ThemedText>
           <View style={styles.tipExamplesContainer}>
-            <View style={[styles.tipExampleCard, { borderColor: tableColor }]}>
+            <View style={[styles.tipExampleCard, { borderColor: tableColor, backgroundColor: colors.background }]}>
               <ThemedText
                 style={[styles.tipExampleText, { color: tableColor }]}
                 numberOfLines={3}
@@ -359,7 +361,7 @@ export default function DiscoveryScreen() {
                   style={[
                     styles.countingLabel,
                     {
-                      color: isClicked ? '#FFFFFF' : AppColors.textSecondary,
+                      color: isClicked ? '#FFFFFF' : colors.textSecondary,
                       fontSize: labelFontSize,
                     }
                   ]}
@@ -413,7 +415,7 @@ export default function DiscoveryScreen() {
 
 
   return (
-    <View style={styles.backgroundContainer}>
+    <View style={[styles.backgroundContainer, { backgroundColor: colors.background }]}>
       <TableDetailModal
         visible={showTableDetail}
         tableNumber={table.number}
@@ -445,7 +447,7 @@ export default function DiscoveryScreen() {
               style={styles.closeButton}
               onPress={closeModal}
             >
-              <X size={28} color={AppColors.text} />
+              <X size={28} color={colors.text} />
             </TouchableOpacity>
 
             {selectedMultiplication && table && (
@@ -470,13 +472,13 @@ export default function DiscoveryScreen() {
       </Modal>
 
       <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           <TouchableOpacity
-            style={styles.backButton}
+            style={[styles.backButton, { backgroundColor: colors.surfaceLight }]}
             onPress={handleHomePress}
             testID="back-button"
           >
-            <Home size={24} color={AppColors.primary} />
+            <Home size={24} color={colors.primary} />
           </TouchableOpacity>
 
           <View style={styles.progressDots}>
@@ -487,7 +489,7 @@ export default function DiscoveryScreen() {
                   styles.dot,
                   {
                     backgroundColor:
-                      index === currentStep ? tableColor : AppColors.borderLight,
+                      index === currentStep ? tableColor : colors.border,
                     width: index === currentStep ? 24 : 8,
                   },
                 ]}
@@ -498,6 +500,7 @@ export default function DiscoveryScreen() {
           <TouchableOpacity
             style={[
               styles.audioButton,
+              { backgroundColor: colors.surfaceLight },
               isPlayingAudio && styles.audioButtonActive,
             ]}
             onPress={currentStep === 2 ? speakTable : undefined}
@@ -506,7 +509,7 @@ export default function DiscoveryScreen() {
           >
             <Volume2
               size={24}
-              color={currentStep === 2 ? (isPlayingAudio ? AppColors.primary : AppColors.text) : AppColors.textSecondary}
+              color={currentStep === 2 ? (isPlayingAudio ? colors.primary : colors.text) : colors.textSecondary}
             />
           </TouchableOpacity>
         </View>
@@ -530,11 +533,11 @@ export default function DiscoveryScreen() {
             ]}
           >
             <View style={styles.content}>
-              <ThemedText style={styles.stepTitle} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.8}>
+              <ThemedText style={[styles.stepTitle, { color: colors.text }]} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.8}>
                 {currentStepData.title}
               </ThemedText>
               {currentStepData.content ? (
-                <ThemedText style={styles.stepContent} numberOfLines={4} adjustsFontSizeToFit minimumFontScale={0.8}>
+                <ThemedText style={[styles.stepContent, { color: colors.textSecondary }]} numberOfLines={4} adjustsFontSizeToFit minimumFontScale={0.8}>
                   {currentStepData.content}
                 </ThemedText>
               ) : null}
@@ -544,15 +547,15 @@ export default function DiscoveryScreen() {
           </Animated.View>
         </ScrollView>
 
-        <View style={styles.footer}>
+        <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
           {currentStep > 0 && (
             <TouchableOpacity
-              style={[styles.navButton, styles.prevButton]}
+              style={[styles.navButton, styles.prevButton, { backgroundColor: colors.surfaceLight }]}
               onPress={() => setCurrentStep(currentStep - 1)}
               testID="prev-button"
             >
-              <ArrowLeft size={20} color={AppColors.text} />
-              <ThemedText style={styles.navButtonText}>{i18n.t('practice.discovery.previous')}</ThemedText>
+              <ArrowLeft size={20} color={colors.text} />
+              <ThemedText style={[styles.navButtonText, { color: colors.text }]}>{i18n.t('practice.discovery.previous')}</ThemedText>
             </TouchableOpacity>
           )}
 

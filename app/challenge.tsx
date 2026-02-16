@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import BadgeOverlay from '@/components/BadgeOverlay';
 import { ThemedText } from '@/components/ThemedText';
 import { ChallengeHeader } from '@/components/challenge/ChallengeHeader';
@@ -72,6 +73,7 @@ const MidChallengeBoostModal = ({
 export default function ChallengeScreen() {
   const router = useRouter();
   const { tables } = useLocalSearchParams();
+  const colors = useThemeColors();
 
   // Parse selected tables from query params
   const selectedTables = useMemo(() => {
@@ -168,7 +170,7 @@ export default function ChallengeScreen() {
   }
 
   return (
-    <View style={styles.backgroundContainer}>
+    <View style={[styles.backgroundContainer, { backgroundColor: colors.background }]}>
       <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <BadgeOverlay
           visible={showBadgeOverlay}
@@ -265,7 +267,7 @@ export default function ChallengeScreen() {
             onKeyPress={onKeyPress}
             onDelete={onDelete}
             onSubmit={checkAnswer}
-            color={AppColors.primary}
+            color={colors.primary}
             isSubmitDisabled={userAnswer.length === 0}
           />
         )}

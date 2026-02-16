@@ -2,6 +2,7 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Home, Volume2, VolumeX, Pause, Heart } from 'lucide-react-native';
 import { ThemedText } from '../ThemedText';
 import { AppColors } from '@/constants/colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 type ChallengeHeaderProps = {
     onHomePress: () => void;
@@ -20,15 +21,16 @@ export const ChallengeHeader = ({
     onPausePress,
     isTimerEnabled = false,
 }: ChallengeHeaderProps) => {
+    const colors = useThemeColors();
     return (
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
             <View style={styles.leftContainer}>
                 <TouchableOpacity
                     style={styles.iconButton}
                     onPress={onHomePress}
                     testID="home-button"
                 >
-                    <Home size={24} color={AppColors.text} />
+                    <Home size={24} color={colors.text} />
                 </TouchableOpacity>
 
                 {onToggleVoice && (
@@ -38,15 +40,15 @@ export const ChallengeHeader = ({
                         testID="voice-toggle-button"
                     >
                         {isVoiceEnabled ? (
-                            <Volume2 size={24} color={AppColors.primary} />
+                            <Volume2 size={24} color={colors.primary} />
                         ) : (
-                            <VolumeX size={24} color={AppColors.textSecondary} />
+                            <VolumeX size={24} color={colors.textSecondary} />
                         )}
                     </TouchableOpacity>
                 )}
             </View>
 
-            <ThemedText style={styles.headerTitle}>{title}</ThemedText>
+            <ThemedText style={[styles.headerTitle, { color: colors.text }]}>{title}</ThemedText>
 
             <View style={styles.rightContainer}>
                 {onPausePress && (
@@ -56,7 +58,7 @@ export const ChallengeHeader = ({
                         testID="pause-button"
                     >
                         {isTimerEnabled ? (
-                            <Pause size={24} color={AppColors.primary} />
+                            <Pause size={24} color={colors.primary} />
                         ) : (
                             <Heart size={24} color="#E91E63" fill="#E91E63" />
                         )}

@@ -171,7 +171,7 @@ export const ChallengeFeedback = ({
 
 const styles = StyleSheet.create({
     feedbackContainer: {
-        marginTop: 0,
+        marginTop: 40,
         marginBottom: 16,
     },
     feedbackBox: {

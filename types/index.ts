@@ -24,6 +24,7 @@ export interface UserSettings {
   challengeQuestions?: number;
   badgeTheme?: BadgeTheme;
   zenMode?: boolean;
+  darkMode?: boolean;
   fontPreference: 'standard' | 'lexend' | 'opendyslexic';
 }
 
@@ -68,6 +69,7 @@ export interface User {
   age: number;
   grade: string;
   photoUri?: string;
+  avatarId?: string;
   createdAt: string;
   progress: UserProgress[];
   timerSettings?: TimerSettings;
@@ -82,6 +84,7 @@ export interface User {
   dyslexiaFontEnabled?: boolean;
   fontPreference?: 'standard' | 'lexend' | 'opendyslexic';
   zenMode?: boolean;
+  darkMode?: boolean;
   challengesCompleted?: number;
   achievements?: UnlockedAchievement[];
   challengePlayDates?: string[];
@@ -93,7 +96,10 @@ export interface User {
     30?: boolean;
     50?: boolean;
   };
+  dailyStreak?: number;           // Current consecutive days of practice
+  lastActivityDate?: string;      // Format "YYYY-MM-DD"
 }
+
 
 export type StreakTier = '4' | '8' | '12' | '20' | '30' | 'max' | null;
 

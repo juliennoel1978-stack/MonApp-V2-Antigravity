@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors, NumberColors } from '@/constants/colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { MULTIPLICATION_TABLES } from '@/constants/tables';
 import { useApp } from '@/contexts/AppContext';
 import { ThemedText } from '@/components/ThemedText';
@@ -18,6 +19,7 @@ import i18n from '@/utils/i18n';
 export default function TablesScreen() {
   const router = useRouter();
   const { progress } = useApp();
+  const colors = useThemeColors();
   const { width, height } = useWindowDimensions();
 
   // Tablet Optimization: Dynamic columns
@@ -50,13 +52,13 @@ export default function TablesScreen() {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'easy':
-        return AppColors.easy;
+        return colors.easy;
       case 'medium':
-        return AppColors.medium;
+        return colors.medium;
       case 'hard':
-        return AppColors.hard;
+        return colors.hard;
       default:
-        return AppColors.primary;
+        return colors.primary;
     }
   };
 
@@ -78,17 +80,17 @@ export default function TablesScreen() {
   };
 
   return (
-    <View style={styles.backgroundContainer}>
+    <View style={[styles.backgroundContainer, { backgroundColor: colors.background }]}>
       <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           <TouchableOpacity
-            style={styles.homeButton}
+            style={[styles.homeButton, { backgroundColor: colors.surfaceLight }]}
             onPress={() => router.dismissAll()}
             testID="home-button"
           >
-            <Home size={24} color={AppColors.text} />
+            <Home size={24} color={colors.text} />
           </TouchableOpacity>
-          <ThemedText style={styles.headerTitle}>{i18n.t('tables_selection.title')}</ThemedText>
+          <ThemedText style={[styles.headerTitle, { color: colors.text }]}>{i18n.t('tables_selection.title')}</ThemedText>
           <View style={styles.placeholder} />
         </View>
 
@@ -116,11 +118,13 @@ export default function TablesScreen() {
                     {
                       width: cardWidth,
                       height: cardHeight,
-                      borderColor: isCompleted ? AppColors.success : NumberColors[
+                      backgroundColor: colors.surface,
+                      shadowColor: colors.shadow,
+                      borderColor: isCompleted ? colors.success : NumberColors[
                         table.number as keyof typeof NumberColors
                       ],
                     },
-                    isCompleted && styles.cardCompleted,
+                    isCompleted && [styles.cardCompleted, { borderColor: colors.success, shadowColor: colors.success }],
                   ]}
                   onPress={() =>
                     router.push(`/discovery/${table.number}` as any)
@@ -173,12 +177,12 @@ export default function TablesScreen() {
                           size={cardHeight < 95 ? 9 : 11}
                           color={
                             starIndex <= stars
-                              ? AppColors.warning
+                              ? colors.warning
                               : '#AAAAAA'
                           }
                           fill={
                             starIndex <= stars
-                              ? AppColors.warning
+                              ? colors.warning
                               : 'transparent'
                           }
                         />

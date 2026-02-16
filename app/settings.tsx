@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Clock, Users, Trash2, Edit, RotateCcw, Award, Zap, RefreshCw, Calendar, ChevronDown, ChevronUp, Play, Timer } from 'lucide-react-native';
+import { Clock, Users, Trash2, Edit, RotateCcw, Award, Zap, RefreshCw, Calendar, ChevronDown, ChevronUp, Play, Timer, UserPlus, Moon } from 'lucide-react-native';
 import React, { useState, Suspense, lazy } from 'react';
 import {
   View,
@@ -15,7 +15,9 @@ import {
 import { ThemedText } from '@/components/ThemedText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '@/constants/colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { useApp } from '@/contexts/AppContext';
+import { getAvatarIcon } from '@/constants/avatars';
 import i18n from '@/utils/i18n';
 import type { BadgeTheme, User, PersistenceBadge, UserProgress } from '@/types';
 
@@ -60,7 +62,20 @@ const BADGE_ICONS: Record<string, string> = {
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { settings, updateSettings, resetProgress, users, deleteUser, currentUser, selectUser, updateUser } = useApp();
+  const {
+    settings,
+    updateSettings,
+    resetProgress,
+    users,
+    deleteUser,
+    currentUser,
+    selectUser,
+    updateUser,
+    anonymousChallengesCompleted,
+    progress,
+    convertAnonymousToProfile,
+  } = useApp();
+  const colors = useThemeColors();
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 
   // Badge Modal State
@@ -229,13 +244,13 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View style={styles.backgroundContainer}>
+    <View style={[styles.backgroundContainer, { backgroundColor: colors.background }]}>
       <SafeAreaView style={styles.container} edges={['bottom']}>
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>
-            <ThemedText style={styles.headerButtonText}>✕</ThemedText>
+            <ThemedText style={[styles.headerButtonText, { color: colors.text }]}>✕</ThemedText>
           </TouchableOpacity>
-          <ThemedText style={styles.headerTitle}>{i18n.t('settings.title')}</ThemedText>
+          <ThemedText style={[styles.headerTitle, { color: colors.text }]}>{i18n.t('settings.title')}</ThemedText>
         </View>
 
         <ScrollView
@@ -243,7 +258,7 @@ export default function SettingsScreen() {
           contentContainerStyle={styles.scrollContent}
         >
           {/* PARENT ZONE / USERS SECTION */}
-          <View style={styles.section}>
+          <View style={[styles.section, { backgroundColor: colors.surface }]}>
             <View style={styles.sectionHeaderRow}>
               <Users size={20} color={AppColors.primary} style={{ marginRight: 8 }} />
               <Text style={styles.sectionTitle}>{i18n.t('settings.parents_zone')}</Text>
@@ -269,6 +284,10 @@ export default function SettingsScreen() {
                       <View style={styles.avatarContainer}>
                         {user.photoUri ? (
                           <Image source={{ uri: user.photoUri }} style={{ width: 44, height: 44, borderRadius: 22 }} />
+                        ) : user.avatarId ? (
+                          <ThemedText style={{ fontSize: 24 }}>
+                            {getAvatarIcon(user.avatarId)}
+                          </ThemedText>
                         ) : (
                           <ThemedText style={{ fontSize: 24 }}>
                             {user.gender === 'boy' ? '👦' : '👧'}
@@ -387,6 +406,20 @@ export default function SettingsScreen() {
                         })}
                       </View>
 
+                      {/* PER-USER DARK MODE TOGGLE */}
+                      <View style={styles.userToggleRow}>
+                        <View style={styles.userToggleLeft}>
+                          <Moon size={18} color={AppColors.primary} />
+                          <Text style={styles.userToggleLabel}>{i18n.t('settings.dark_mode')}</Text>
+                        </View>
+                        <Switch
+                          value={user.darkMode || false}
+                          onValueChange={(v) => updateUser(user.id, { darkMode: v })}
+                          trackColor={{ false: '#E0E0E0', true: AppColors.primary + '60' }}
+                          thumbColor={user.darkMode ? AppColors.primary : '#FFF'}
+                        />
+                      </View>
+
                       <View style={styles.divider} />
 
                       {/* MANAGEMENT ACTIONS (STACKED) */}
@@ -428,6 +461,29 @@ export default function SettingsScreen() {
               );
             })}
 
+            {/* ANONYMOUS CONVERSION CARD - Show when not logged in and has progress */}
+            {!currentUser && (anonymousChallengesCompleted > 0 || progress.some(p => p.totalAttempts > 0)) && (
+              <View style={styles.anonymousConvertCard}>
+                <View style={styles.anonymousConvertHeader}>
+                  <UserPlus size={24} color={AppColors.primary} />
+                  <ThemedText style={styles.anonymousConvertTitle}>
+                    {i18n.t('settings.convert_to_profile')}
+                  </ThemedText>
+                </View>
+                <ThemedText style={styles.anonymousConvertDesc}>
+                  {i18n.t('settings.convert_desc', { challenges: anonymousChallengesCompleted })}
+                </ThemedText>
+                <TouchableOpacity
+                  style={styles.convertButton}
+                  onPress={() => router.push({ pathname: '/user-form', params: { convertAnonymous: 'true' } })}
+                >
+                  <Text style={styles.convertButtonText}>
+                    {i18n.t('settings.convert_now')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
             <TouchableOpacity
               style={styles.addUserButton}
               onPress={() => router.push('/user-form')}
@@ -438,7 +494,7 @@ export default function SettingsScreen() {
           </View>
 
           {/* GENERAL SETTINGS + ANONYMOUS RESET */}
-          <View style={styles.section}>
+          <View style={[styles.section, { backgroundColor: colors.surface }]}>
             <View style={styles.sectionHeaderRow}>
               <Zap size={20} color={AppColors.primary} style={{ marginRight: 8 }} />
               <Text style={styles.sectionTitle}>{i18n.t('settings.general_prefs')}</Text>
@@ -530,6 +586,18 @@ export default function SettingsScreen() {
               </Text>
             )}
 
+            <View style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <ThemedText style={styles.settingTitle}>🌙 {i18n.t('settings.dark_mode')}</ThemedText>
+                <Text style={styles.settingSubTitle}>{i18n.t('settings.dark_mode_desc')}</Text>
+              </View>
+              <Switch
+                value={settings.darkMode}
+                onValueChange={v => updateSettings({ darkMode: v })}
+                trackColor={{ false: AppColors.borderLight, true: AppColors.primary }}
+              />
+            </View>
+
             <View style={[styles.settingItem, { flexDirection: 'column', alignItems: 'flex-start' }]}>
               <Text style={[styles.settingTitle, { marginBottom: 12 }]}>{i18n.t('settings.font')}</Text>
               <Text style={[styles.settingSubTitle, { marginBottom: 16 }]}>{i18n.t('settings.choose_style')}</Text>
@@ -604,7 +672,7 @@ export default function SettingsScreen() {
           </View>
 
           {/* GAME SETTINGS */}
-          <View style={styles.section}>
+          <View style={[styles.section, { backgroundColor: colors.surface }]}>
             <View style={styles.sectionHeaderRow}>
               <Clock size={20} color={AppColors.primary} style={{ marginRight: 8 }} />
               <Text style={styles.sectionTitle}>{i18n.t('settings.game_settings')}</Text>
@@ -1097,5 +1165,60 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     fontFamily: 'Lexend',
+  },
+  anonymousConvertCard: {
+    backgroundColor: '#E8F5E9',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: AppColors.success,
+  },
+  anonymousConvertHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
+  anonymousConvertTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: AppColors.text,
+  },
+  anonymousConvertDesc: {
+    fontSize: 14,
+    color: AppColors.textSecondary,
+    marginBottom: 12,
+    lineHeight: 20,
+  },
+  convertButton: {
+    backgroundColor: AppColors.success,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  convertButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  userToggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+    marginTop: 4,
+  },
+  userToggleLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  userToggleLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: AppColors.text,
   },
 });

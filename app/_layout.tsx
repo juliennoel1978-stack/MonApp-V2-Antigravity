@@ -24,6 +24,7 @@ function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerBackTitle: "Retour" }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       <Stack.Screen name="select-user" options={{ headerShown: false }} />
       <Stack.Screen name="user-form" options={{ headerShown: false, presentation: "modal" }} />
       <Stack.Screen name="tables" options={{ headerShown: false }} />
@@ -51,6 +52,13 @@ function RootLayoutNav() {
 
       <Stack.Screen
         name="challenge"
+        options={{
+          headerShown: false,
+          presentation: "card"
+        }}
+      />
+      <Stack.Screen
+        name="challenge-setup"
         options={{
           headerShown: false,
           presentation: "card"

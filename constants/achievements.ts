@@ -56,13 +56,13 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     trigger: 'Score === 100%',
   },
   {
-    id: 'streak_max',
-    type: 'RECURRING',
-    title: 'achievements.streak_max.title',
+    id: 'intrepide',
+    type: 'ONE_SHOT',
+    title: 'achievements.intrepide.title',
     emoji: '🔥',
-    message: 'achievements.streak_max.message',
-    backTitle: 'achievements.streak_max.back_title',
-    trigger: 'Achieve a high streak',
+    message: 'achievements.intrepide.message',
+    backTitle: 'achievements.intrepide.back_title',
+    trigger: 'Complete a challenge with ALL 10 tables selected',
   },
 ];
 

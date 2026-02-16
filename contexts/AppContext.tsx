@@ -10,14 +10,17 @@ const STORAGE_KEYS = {
   BADGES: '@tables_magiques_badges',
   USERS: '@tables_magiques_users',
   CURRENT_USER: '@tables_magiques_current_user',
+  ONBOARDING_COMPLETED: '@tables_magiques_onboarding_completed',
   ANONYMOUS_CHALLENGES: '@tables_magiques_anonymous_challenges',
   ANONYMOUS_ACHIEVEMENTS: '@tables_magiques_anonymous_achievements',
   ANONYMOUS_PLAY_DATES: '@tables_magiques_anonymous_play_dates',
   ANONYMOUS_BADGES: '@tables_magiques_anonymous_badges',
   ANONYMOUS_BEST_STREAK: '@tables_magiques_anonymous_best_streak',
+  ANONYMOUS_DAILY_STREAK: '@tables_magiques_anonymous_daily_streak',
+  ANONYMOUS_LAST_ACTIVITY: '@tables_magiques_anonymous_last_activity',
 } as const;
 
-const DEFAULT_SETTINGS: UserSettings = {
+export const DEFAULT_SETTINGS: UserSettings = {
   voiceEnabled: true,
   voiceGender: 'female',
   fontSize: 'large',
@@ -31,6 +34,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   challengeQuestions: 15,
   badgeTheme: 'space',
   zenMode: false,
+  darkMode: false,
   fontPreference: 'standard',
 };
 
@@ -63,7 +67,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const [anonymousPlayDates, setAnonymousPlayDates] = useState<string[]>([]);
   const [anonymousPersistenceBadges, setAnonymousPersistenceBadges] = useState<PersistenceBadge[]>([]);
   const [anonymousBestStreak, setAnonymousBestStreak] = useState(0);
+  const [anonymousDailyStreak, setAnonymousDailyStreak] = useState(0);
+  const [anonymousLastActivityDate, setAnonymousLastActivityDate] = useState<string | null>(null);
   const [hasSelectedAnonymousMode, setHasSelectedAnonymousMode] = useState(false);
+  const [hasCompletedOnboarding, setHasCompletedOnboardingState] = useState(false);
 
   const usersRef = useRef(users);
   const currentUserRef = useRef(currentUser);
@@ -246,6 +253,22 @@ export const [AppProvider, useApp] = createContextHook(() => {
       if (anonymousBestStreakData) {
         setAnonymousBestStreak(parseInt(anonymousBestStreakData, 10) || 0);
 
+      }
+
+      // Load anonymous daily streak data
+      const anonymousDailyStreakData = await AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_DAILY_STREAK);
+      const anonymousLastActivityData = await AsyncStorage.getItem(STORAGE_KEYS.ANONYMOUS_LAST_ACTIVITY);
+      if (anonymousDailyStreakData) {
+        setAnonymousDailyStreak(parseInt(anonymousDailyStreakData, 10) || 0);
+      }
+      if (anonymousLastActivityData) {
+        setAnonymousLastActivityDate(anonymousLastActivityData);
+      }
+
+      // Load onboarding completed status
+      const onboardingData = await AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
+      if (onboardingData === 'true') {
+        setHasCompletedOnboardingState(true);
       }
     } catch (error) {
       console.error('❌ Error loading data:', error);
@@ -518,6 +541,53 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   }, []);
 
+  // Convert anonymous data to a named profile
+  const convertAnonymousToProfile = useCallback(async (userData: Omit<User, 'id' | 'createdAt' | 'progress' | 'challengesCompleted' | 'bestStreak' | 'persistenceBadges' | 'achievements'>) => {
+    try {
+      // Create new user with anonymous data transferred
+      const newUser: User = {
+        ...userData,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+        progress: progressRef.current, // Transfer anonymous progress
+        challengesCompleted: anonymousChallengesRef.current,
+        bestStreak: anonymousBestStreak,
+        persistenceBadges: anonymousPersistenceBadges,
+        achievements: anonymousAchievements,
+        lastSessionBestTable: 0,
+      };
+
+      // Save the new user
+      const updatedUsers = [...usersRef.current, newUser];
+      await saveUsers(updatedUsers);
+
+      // Select the new user
+      await AsyncStorage.setItem(STORAGE_KEYS.CURRENT_USER, newUser.id);
+      setCurrentUser(newUser);
+      currentUserRef.current = newUser;
+
+      // Clear anonymous data
+      await AsyncStorage.multiRemove([
+        STORAGE_KEYS.ANONYMOUS_CHALLENGES,
+        STORAGE_KEYS.ANONYMOUS_ACHIEVEMENTS,
+        STORAGE_KEYS.ANONYMOUS_PLAY_DATES,
+        STORAGE_KEYS.ANONYMOUS_BADGES,
+        STORAGE_KEYS.ANONYMOUS_BEST_STREAK,
+      ]);
+      setAnonymousChallengesCompleted(0);
+      setAnonymousAchievements([]);
+      setAnonymousPlayDates([]);
+      setAnonymousPersistenceBadges([]);
+      setAnonymousBestStreak(0);
+      anonymousChallengesRef.current = 0;
+
+      return newUser;
+    } catch (error) {
+      console.error('Error converting anonymous to profile:', error);
+      throw error;
+    }
+  }, [saveUsers, anonymousBestStreak, anonymousPersistenceBadges, anonymousAchievements]);
+
   const incrementChallengesCompleted = useCallback(async (): Promise<number> => {
     try {
       const currentU = currentUserRef.current;
@@ -742,6 +812,98 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   }, [updateStateAndStorage]);
 
+  // Helper to get today's date as YYYY-MM-DD
+  const getTodayDate = (): string => {
+    return new Date().toISOString().split('T')[0];
+  };
+
+  // Helper to get yesterday's date as YYYY-MM-DD
+  const getYesterdayDate = (): string => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return yesterday.toISOString().split('T')[0];
+  };
+
+  const getDailyStreak = useCallback((): number => {
+    if (currentUser) {
+      return currentUser.dailyStreak || 0;
+    }
+    return anonymousDailyStreak;
+  }, [currentUser, anonymousDailyStreak]);
+
+  const updateDailyStreak = useCallback(async (): Promise<number> => {
+    try {
+      const today = getTodayDate();
+      const yesterday = getYesterdayDate();
+      const currentU = currentUserRef.current;
+      const currentUsrs = usersRef.current;
+
+      if (currentU) {
+        const lastActivity = currentU.lastActivityDate;
+
+        // Already played today - no change
+        if (lastActivity === today) {
+          return currentU.dailyStreak || 0;
+        }
+
+        let newStreak: number;
+        if (lastActivity === yesterday) {
+          // Consecutive day - increment!
+          newStreak = (currentU.dailyStreak || 0) + 1;
+        } else {
+          // Missed a day or first time - start at 1
+          newStreak = 1;
+        }
+
+        const updatedUser = {
+          ...currentU,
+          dailyStreak: newStreak,
+          lastActivityDate: today
+        };
+        const updatedUsers = currentUsrs.map(u => u.id === currentU.id ? updatedUser : u);
+        await updateStateAndStorage(updatedUser, updatedUsers);
+
+        return newStreak;
+      } else {
+        // Anonymous mode
+        const lastActivity = anonymousLastActivityDate;
+
+        // Already played today - no change
+        if (lastActivity === today) {
+          return anonymousDailyStreak;
+        }
+
+        let newStreak: number;
+        if (lastActivity === yesterday) {
+          // Consecutive day - increment!
+          newStreak = anonymousDailyStreak + 1;
+        } else {
+          // Missed a day or first time - start at 1
+          newStreak = 1;
+        }
+
+        await AsyncStorage.setItem(STORAGE_KEYS.ANONYMOUS_DAILY_STREAK, newStreak.toString());
+        await AsyncStorage.setItem(STORAGE_KEYS.ANONYMOUS_LAST_ACTIVITY, today);
+        setAnonymousDailyStreak(newStreak);
+        setAnonymousLastActivityDate(today);
+
+        return newStreak;
+      }
+    } catch (error) {
+      console.error('Error updating daily streak:', error);
+      return currentUserRef.current?.dailyStreak || anonymousDailyStreak;
+    }
+  }, [anonymousDailyStreak, anonymousLastActivityDate, updateStateAndStorage]);
+
+  const setOnboardingCompleted = useCallback(async (completed: boolean) => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, completed.toString());
+      setHasCompletedOnboardingState(completed);
+    } catch (error) {
+      console.error('Error setting onboarding completed:', error);
+    }
+  }, []);
+
   return {
     progress,
     settings,
@@ -764,6 +926,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     selectUser,
     updateUser,
     clearCurrentUser,
+    convertAnonymousToProfile,
     incrementChallengesCompleted,
     addPersistenceBadge,
     reloadData,
@@ -777,5 +940,9 @@ export const [AppProvider, useApp] = createContextHook(() => {
     updateStrongestTable,
     hasSelectedAnonymousMode,
     setHasSelectedAnonymousMode,
+    hasCompletedOnboarding,
+    setOnboardingCompleted,
+    getDailyStreak,
+    updateDailyStreak,
   };
 });

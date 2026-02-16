@@ -22,6 +22,7 @@ export interface ChallengeContext {
   timerEnabled: boolean;
   scorePercent: number;
   isReviewingErrors: boolean;
+  selectedTablesCount?: number; // Number of tables selected for this challenge
 }
 
 export interface RewardCheckResult {
@@ -198,6 +199,29 @@ export const checkForRewards = (context: ChallengeContext): RewardCheckResult =>
           achievementType: 'RECURRING',
         });
       }
+    }
+  }
+
+  // Intrépide badge: First time completing a challenge with ALL 10 tables selected
+  if (context.selectedTablesCount === 10) {
+    const intrepideAchievement = getAchievementById('intrepide');
+    if (intrepideAchievement && !isAchievementUnlocked('intrepide', context.existingAchievements)) {
+      const achievement: UnlockedAchievement = {
+        id: 'intrepide',
+        unlockedAt: new Date().toISOString(),
+        count: 1,
+      };
+      newAchievements.push(achievement);
+      queue.push({
+        id: 'intrepide',
+        type: 'achievement',
+        priority: PRIORITY.ONE_SHOT_ACHIEVEMENT,
+        icon: intrepideAchievement.emoji,
+        title: intrepideAchievement.title,
+        message: intrepideAchievement.message,
+        headerText: 'badges.new_achievement',
+        achievementType: 'ONE_SHOT',
+      });
     }
   }
 

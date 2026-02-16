@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Delete } from 'lucide-react-native';
 import { AppColors } from '@/constants/colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { ThemedText } from './ThemedText';
 import * as Haptics from 'expo-haptics';
 import i18n from '@/utils/i18n';
@@ -104,6 +105,8 @@ export const Keypad = ({
     color,
     isSubmitDisabled = false
 }: KeypadProps) => {
+    const colors = useThemeColors();
+    const isDark = colors.background !== AppColors.background;
 
     const renderNumberKey = useCallback((num: number) => (
         <AnimatedKey
@@ -111,13 +114,14 @@ export const Keypad = ({
             onPress={() => onKeyPress(num.toString())}
             hapticType="light"
             accessibilityLabel={`Chiffre ${num}`}
+            style={isDark ? { backgroundColor: colors.surface, borderColor: colors.border } : undefined}
         >
-            <ThemedText style={styles.keyText}>{num}</ThemedText>
+            <ThemedText style={[styles.keyText, isDark && { color: colors.text }]}>{num}</ThemedText>
         </AnimatedKey>
     ), [onKeyPress]);
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: isDark ? colors.surface : '#F7F7F9', borderTopColor: colors.border }]}>
             {/* Row 1: 1, 2, 3 */}
             <View style={styles.row}>
                 {[1, 2, 3].map(renderNumberKey)}
@@ -138,11 +142,11 @@ export const Keypad = ({
                 {/* Delete Button - Neutral gray with big icon */}
                 <AnimatedKey
                     onPress={onDelete}
-                    style={styles.keyDelete}
+                    style={[styles.keyDelete, isDark && { backgroundColor: colors.border }]}
                     hapticType="medium"
                     accessibilityLabel={i18n.t('keypad.delete')}
                 >
-                    <Delete size={32} color={AppColors.text} strokeWidth={2.5} />
+                    <Delete size={32} color={colors.text} strokeWidth={2.5} />
                 </AnimatedKey>
 
                 {/* Zero Key */}
@@ -153,7 +157,7 @@ export const Keypad = ({
                     onPress={onSubmit}
                     style={[
                         styles.keySubmit,
-                        { backgroundColor: isSubmitDisabled ? '#CCCCCC' : color },
+                        { backgroundColor: isSubmitDisabled ? (isDark ? colors.border : '#CCCCCC') : color },
                     ]}
                     hapticType={isSubmitDisabled ? 'none' : 'success'}
                     disabled={isSubmitDisabled}

@@ -13,21 +13,94 @@
         "stars": "Stars",
         "tables": "Tables",
         "mission": "Mission: Table of {{number}}",
-        "start": "Start",
-        "challenge": "Challenge"
+        "start": "Practice",
+        "challenge": "Challenge",
+        "daily_streak": {
+            "explanation": "Consecutive practice days",
+            "space": {
+                "singular": "day of space travel!",
+                "plural": "days of space travel!"
+            },
+            "animals": {
+                "singular": "day of roaring!",
+                "plural": "days of roaring!"
+            },
+            "heroes": {
+                "singular": "day of super-powers!",
+                "plural": "days of super-powers!"
+            }
+        },
+        "not_found": {
+            "title": "Oops!",
+            "message": "This page doesn't exist.",
+            "link": "Go to home screen"
+        }
+    },
+    "challenge_setup": {
+        "title": "Challenge",
+        "greeting": "Ready, {{name}}?",
+        "greeting_space": "Ready for takeoff, {{name}}?",
+        "greeting_heroes": "Ready for action, {{name}}?",
+        "greeting_animals": "Ready to roar, {{name}}?",
+        "explanation_sub": "Choose your tables. The ones you know best are already checked, but you can add more!",
+        "tables_selected": "{{count}} table selected",
+        "tables_selected_plural": "{{count}} tables selected",
+        "select_all": "Select All",
+        "my_level": "My Level",
+        "start": "Let's Go!",
+        "no_table_warning": "Select at least one table!",
+        "badge_intrepide_title": "Fearless Badge 🔥",
+        "badge_intrepide_msg": "It's heating up! You're taking on the ultimate challenge!",
+        "badge_btn": "Awesome! 🔥"
     },
     "tables_modal": {
         "title": "My Tables",
         "not_seen": "Not seen",
         "mastered": "Mastered",
         "legend_not_seen": "Not seen",
-        "legend_mastered": "Mastered"
+        "legend_mastered": "Mastered",
+        "techniques": {
+            "1": "the technique: <bold>{{name}}</bold> - the number stays the same",
+            "2": "the technique: <bold>{{name}}</bold> - double the number",
+            "3": "the technique: <bold>{{name}}</bold> - add 3 times",
+            "4": "the technique: <bold>Double</bold>, then <bold>Double</bold> again!",
+            "5": "<bold>Even → 0</bold>, <bold>Odd → 5</bold>",
+            "6": "the technique: <bold>Table of 5</bold> + <bold>the number</bold>",
+            "7": "<bold>The Champions' Table!</bold> 🏆",
+            "8_1": "the technique: Use the <bold>Table of 4</bold>",
+            "8_2": "then <bold>Double</bold>!",
+            "9_1": "The Trick: Use the <bold>Table of 10</bold>",
+            "9_2": "(<bold>10</bold> × <bold>N</bold>) - <bold>N</bold>",
+            "10": "<bold>The Magician</bold> adds a <bold>0</bold>!"
+        }
     },
     "tables_selection": {
         "title": "Choose your table"
     },
     "discovery": {
         "table_not_found": "Table not found"
+    },
+    "onboarding": {
+        "welcome_title": "Welcome to Magic Tables!",
+        "welcome_subtitle": "Learn multiplication tables while having fun!",
+        "feature_discovery": "Discover each table with visual tips and earn ⭐ stars",
+        "feature_challenge": "Take on challenges (timed or not) and collect 🏅 badges",
+        "feature_accessibility": "Designed for everyone, ages 7 to 77, with or without learning difficulties (Dys/ADHD)",
+        "create_profile": "Create my profile",
+        "create_profile_desc": "Save your progress and customize your experience",
+        "play_directly": "Play directly",
+        "later_note": "You can create your profile later in settings",
+        "profile_avatar": "Choose your avatar!",
+        "profile_name": "What's your name?",
+        "profile_name_placeholder": "Your first name",
+        "profile_age": "How old are you?",
+        "profile_age_placeholder": "Your age",
+        "profile_gender": "You are...",
+        "profile_theme": "Choose your universe!",
+        "profile_theme_note": "You can change it anytime",
+        "lets_go": "Let's go!",
+        "welcome_name": "Welcome {{name}}!",
+        "profile_created": "Your profile is ready, let's play!"
     },
     "user_modal": {
         "title": "Who are you?",
@@ -242,10 +315,10 @@
             "message": "Flawless victory.",
             "back_title": "What talent!"
         },
-        "streak_max": {
-            "title": "Max Streak",
-            "message": "What a streak!",
-            "back_title": "Invincible!"
+        "intrepide": {
+            "title": "Fearless",
+            "message": "It's about to heat up! You're taking on the ultimate challenge!",
+            "back_title": "Fearless!"
         }
     },
     "endurance": {
@@ -354,6 +427,8 @@
         "zen_mode": "Zen Mode",
         "less_animations": "Less animations",
         "zen_timer_note": "⏱️ Timer is automatically disabled in Zen Mode.",
+        "dark_mode": "Dark Mode",
+        "dark_mode_desc": "Reduces brightness (eye comfort)",
         "font": "Font Style",
         "choose_style": "Choose the most comfortable text style",
         "font_standard": "Standard",
@@ -363,6 +438,9 @@
         "font_dys": "Dyslexia Friendly",
         "font_opendys": "OpenDyslexic",
         "reset_guest": "Reset Guest Mode",
+        "convert_to_profile": "Save your progress!",
+        "convert_desc": "You completed {{challenges}} challenges in anonymous mode. Create your profile to keep your progress!",
+        "convert_now": "Create my profile now",
         "game_settings": "Game Settings",
         "questions_per_challenge": "Questions per Challenge",
         "badge_theme": "Badge Theme",
@@ -435,7 +513,7 @@
             "example": "3 × 3 = 9 👉 (3 jumps: 3 + 3 + 3)",
             "astuce": "Add 3 each time, like 3, 6, 9, 12...",
             "indice": "Think of multiples of 3: 3, 6, 9, 12, 15...",
-            "erreur": "3 × X = X + X + X. Add 3 each time."
+            "erreur": "3 × X = X + X + X. Add the number 3 times."
         },
         "4": {
             "theme_emoji": "🐇",
@@ -446,7 +524,7 @@
             "example": "4 × 5 👉 Double of 5 is 10 👉 Double of 10 is 20!",
             "astuce": "4, 8, 12, 16... always add 4.",
             "indice": "You can do ×2 then ×2 again: double twice!",
-            "erreur": "4 × X = (2 × X) × 2. Double twice to find the result."
+            "erreur": "It's the double of the double! Double once, then double again."
         },
         "5": {
             "theme_emoji": "✋",
@@ -457,18 +535,18 @@
             "example": "5 × 4 = 20 (Even)\n5 × 7 = 35 (Odd)",
             "astuce": "Results always end in 0 or 5.",
             "indice": "Count by 5s: 5, 10, 15, 20...",
-            "erreur": "5 × X = number ending in 0 or 5. Count by 5s to check."
+            "erreur": "Check if the number is even or odd! Even ends in 0, odd ends in 5."
         },
         "6": {
             "theme_emoji": "🖐️☝️",
-            "theme_name": "The '5 + 1' Technique",
+            "theme_name": "The 5 with a Bonus",
             "story": "6 is 5 with a bonus! Use the table of 5 (which is easy) and add the number once.",
             "tip_title": "Table of 5 + the number",
             "tip": "To multiply by 6: first do ×5, then add the number.",
             "example": "6 × 4 = (5×4) + 4 = 20 + 4 = 24",
             "astuce": "If you know ×3, double the result: 6 = 3+3.",
             "indice": "Do 3 × X, then double it.",
-            "erreur": "6 × X = 3 × X + 3 × X. Double the result of table of 3."
+            "erreur": "6 × X = (5 × X) + X. Do 5 times the number, then add it once more. (Ex: 6×6 is 30 + 6)"
         },
         "7": {
             "theme_emoji": "🏰",
@@ -490,7 +568,7 @@
             "example": "8 × 3 👉 Think 4 × 3 = 12 👉 Double 12 👉 12 + 12 = 24!",
             "astuce": "8 is 2 × 2 × 2: double three times!",
             "indice": "Double, then double, then double again.",
-            "erreur": "8 × X = double 3 times: X → 2X → 4X → 8X."
+            "erreur": "8 × X: Calculate with table of 4 first, then double the result! (Ex: 8×6 → 4×6=24 → 24+24=48)"
         },
         "9": {
             "theme_emoji": "👐",
@@ -501,7 +579,7 @@
             "example": "9 × 7 👉 Do 10 × 7 = 70 👉 Remove 7 👉 70 - 7 = 63",
             "astuce": "The sum of digits often equals 9.",
             "indice": "Ex: 9 × 4 = 36 → 3 + 6 = 9.",
-            "erreur": "Check digit sum: must often be 9 for ×9."
+            "erreur": "Do times 10 and subtract the number!"
         },
         "10": {
             "theme_emoji": "🎩",
@@ -512,7 +590,7 @@
             "example": "10 × 7 = 70 (The 7 gets a 0)",
             "astuce": "Add a 0 at the end.",
             "indice": "10 × X = X with a zero behind.",
-            "erreur": "10 × X = X0. Just write a zero at the end."
+            "erreur": "10 × X: The Magician just adds a zero at the end of the number! (Ex: 7 becomes 70)"
         }
     },
     "practice": {
@@ -597,7 +675,8 @@
         "correction": {
             "title": "Let's correct together ✨",
             "retry_question": "Retry this question",
-            "continue": "Continue"
+            "continue": "Continue",
+            "remember_rule": "Remember the trick:"
         },
         "results": {
             "almost": "Almost!",
@@ -722,6 +801,9 @@
     "user_form": {
         "edit_title": "Edit user",
         "new_title": "New user",
+        "avatar": "Avatar",
+        "choose_avatar": "Choose an avatar",
+        "validate": "Done",
         "photo_gallery": "Gallery",
         "photo_camera": "Camera",
         "first_name": "First name *",
@@ -735,6 +817,8 @@
         "grade_placeholder": "Ex: 3rd Grade",
         "challenge_questions": "Challenge - Number of questions",
         "challenge_questions_sub": "Define how many questions will be asked in the challenge (12-50 questions)",
+        "challenge_formats_title": "Pedagogical Info:",
+        "challenge_formats_text": "The game engine natively handles 3 question formats to vary difficulty:\n• Classic: 3 × 4 = ?\n• Missing Multiplier: 3 × ? = 12\n• Missing Multiplicand: ? × 4 = 12",
         "questions_count": "Questions : {{count}}",
         "badge_theme": "Badge theme",
         "badge_theme_sub": "Choose the style of badges won during challenges",
@@ -794,5 +878,12 @@
     "keypad": {
         "delete": "Delete",
         "validate": "Submit"
+    },
+    "review": {
+        "title": "Your opinion matters!",
+        "message": "If Magic Tables helps your child, a review on the App Store would help us a lot.",
+        "subtitle": "It helps other families discover the app.",
+        "rate_button": "Rate the app",
+        "later_button": "Later"
     }
 }

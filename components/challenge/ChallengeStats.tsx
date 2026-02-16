@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ThemedText } from '../ThemedText';
 import { AppColors } from '@/constants/colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 type ChallengeStatsProps = {
     correct: number;
@@ -15,24 +16,26 @@ import i18n from '@/utils/i18n';
 export const ChallengeStats = ({ correct, incorrect, total, max }: ChallengeStatsProps) => {
     const progressPercent = max > 0 ? (total / max) * 100 : 0;
 
+    const colors = useThemeColors();
+
     return (
-        <View style={styles.statsContainer}>
+        <View style={[styles.statsContainer, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
             <View style={styles.statsBar}>
                 <View style={styles.statBox}>
                     <ThemedText style={styles.statLabel}>{i18n.t('challenge.stats.correct')}</ThemedText>
-                    <ThemedText style={[styles.statValue, { color: AppColors.success }]}>
+                    <ThemedText style={[styles.statValue, { color: colors.success }]}>
                         {correct}
                     </ThemedText>
                 </View>
                 <View style={styles.statBox}>
                     <ThemedText style={styles.statLabel}>{i18n.t('challenge.stats.incorrect')}</ThemedText>
-                    <ThemedText style={[styles.statValue, { color: AppColors.error }]}>
+                    <ThemedText style={[styles.statValue, { color: colors.error }]}>
                         {incorrect}
                     </ThemedText>
                 </View>
                 <View style={styles.statBox}>
                     <ThemedText style={styles.statLabel}>{i18n.t('challenge.stats.total')}</ThemedText>
-                    <ThemedText style={[styles.statValue, { color: AppColors.primary }]}>
+                    <ThemedText style={[styles.statValue, { color: colors.primary }]}>
                         {total}/{max}
                     </ThemedText>
                 </View>

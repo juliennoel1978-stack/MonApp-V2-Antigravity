@@ -59,6 +59,44 @@ export const GradientColors = {
   background: ['#F8F9FE', '#E8ECFF'],
 } as const;
 
+// Dark mode palette – confort visuel enfants photosensibles
+export const DarkAppColors = {
+  primary: '#8B7CF7',
+  secondary: '#FF8BB8',
+  success: '#66BB6A',
+  warning: '#FFD54F',
+  error: '#FF6B6B',
+
+  timerStart: '#66BB6A',
+  timerMiddle: '#FFD54F',
+  timerEnd: '#FF8B5A',
+
+  background: '#121212',
+  surface: '#1E1E1E',
+  surfaceLight: '#2A2A2A',
+
+  text: '#E8E8E8',
+  textSecondary: '#9CA3AF',
+  textLight: '#6B7280',
+
+  border: '#333333',
+  borderLight: '#2A2A2A',
+
+  easy: '#5A9E7C',
+  medium: '#D4B84A',
+  hard: '#D97B83',
+
+  shadow: 'rgba(0, 0, 0, 0.4)',
+  overlay: 'rgba(0, 0, 0, 0.6)',
+} as const;
+
+export const DarkGradientColors = {
+  primary: ['#7B6CE7', '#9B8FFF'],
+  success: ['#388E3C', '#4CAF50'],
+  celebration: ['#D45A7E', '#D48A5A', '#D4B05A'],
+  background: ['#121212', '#1A1A2E'],
+} as const;
+
 export default {
   light: {
     tint: AppColors.primary,

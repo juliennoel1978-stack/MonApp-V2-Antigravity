@@ -1,5 +1,5 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Camera, Image as ImageIcon, Save, X, Clock, Volume2, VolumeX, Mic, Zap, Type, Leaf } from 'lucide-react-native';
+import { Camera, Image as ImageIcon, Save, X, Clock, Volume2, VolumeX, Mic, Zap, Type, Leaf, User as UserIcon, Check } from 'lucide-react-native';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -14,18 +14,22 @@ import {
   KeyboardAvoidingView,
   Keyboard,
   Switch,
+  Modal,
+  InputAccessoryView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { AppColors } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
+import { AVATARS, getAvatarIcon } from '@/constants/avatars';
 import type { BadgeTheme } from '@/types';
 import i18n from '@/utils/i18n';
 
 export default function UserFormScreen() {
   const router = useRouter();
-  const { userId } = useLocalSearchParams<{ userId?: string }>();
-  const { addUser, updateUser, users, selectUser } = useApp();
+  const { userId, convertAnonymous } = useLocalSearchParams<{ userId?: string; convertAnonymous?: string }>();
+  const { addUser, updateUser, users, selectUser, convertAnonymousToProfile } = useApp();
+  const isConvertingAnonymous = convertAnonymous === 'true';
   const [firstName, setFirstName] = useState('');
   const [gender, setGender] = useState<'boy' | 'girl'>('boy');
   const [age, setAge] = useState('');
@@ -44,9 +48,12 @@ export default function UserFormScreen() {
   const [dyslexiaFontEnabled, setDyslexiaFontEnabled] = useState(false);
   const [fontPreference, setFontPreference] = useState<'standard' | 'lexend' | 'opendyslexic'>('standard');
   const [zenMode, setZenMode] = useState(false);
+  const [avatarId, setAvatarId] = useState<string | undefined>(undefined);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
   const firstNameRef = React.useRef<TextInput>(null);
   const ageRef = React.useRef<TextInput>(null);
   const gradeRef = React.useRef<TextInput>(null);
+  const inputAccessoryViewID = 'ageInputAccessory';
 
   useEffect(() => {
     if (userId) {
@@ -81,6 +88,9 @@ export default function UserFormScreen() {
           setFontPreference(user.dyslexiaFontEnabled ? 'lexend' : 'standard');
         }
         setZenMode(user.zenMode ?? false);
+        if (user.avatarId) {
+          setAvatarId(user.avatarId);
+        }
       }
     }
   }, [userId, users]);
@@ -179,6 +189,7 @@ export default function UserFormScreen() {
           age: Number(age),
           grade: grade.trim(),
           photoUri,
+          avatarId,
           timerSettings,
           challengeQuestions,
           badgeTheme,
@@ -192,24 +203,47 @@ export default function UserFormScreen() {
         });
         router.back();
       } else {
-        const newUser = await addUser({
-          firstName: firstName.trim(),
-          gender,
-          age: Number(age),
-          grade: grade.trim(),
-          photoUri,
-          timerSettings,
-          challengeQuestions,
-          badgeTheme,
-          voiceEnabled,
-          voiceGender,
-          soundEnabled,
-          hapticsEnabled,
-          dyslexiaFontEnabled: fontPreference === 'lexend', // Backwards compat
-          fontPreference,
-          zenMode,
-        });
-        await selectUser(newUser.id);
+        // Use conversion if coming from anonymous mode
+        if (isConvertingAnonymous) {
+          await convertAnonymousToProfile({
+            firstName: firstName.trim(),
+            gender,
+            age: Number(age),
+            grade: grade.trim(),
+            photoUri,
+            avatarId,
+            timerSettings,
+            challengeQuestions,
+            badgeTheme,
+            voiceEnabled,
+            voiceGender,
+            soundEnabled,
+            hapticsEnabled,
+            dyslexiaFontEnabled: fontPreference === 'lexend',
+            fontPreference,
+            zenMode,
+          });
+        } else {
+          const newUser = await addUser({
+            firstName: firstName.trim(),
+            gender,
+            age: Number(age),
+            grade: grade.trim(),
+            photoUri,
+            avatarId,
+            timerSettings,
+            challengeQuestions,
+            badgeTheme,
+            voiceEnabled,
+            voiceGender,
+            soundEnabled,
+            hapticsEnabled,
+            dyslexiaFontEnabled: fontPreference === 'lexend', // Backwards compat
+            fontPreference,
+            zenMode,
+          });
+          await selectUser(newUser.id);
+        }
         router.replace('/' as any);
       }
     } catch (error) {
@@ -251,10 +285,16 @@ export default function UserFormScreen() {
             <View style={styles.photoSection}>
               <TouchableOpacity
                 style={styles.photoContainer}
-                onPress={pickImage}
+                onPress={() => setShowAvatarModal(true)}
               >
                 {photoUri ? (
                   <Image source={{ uri: photoUri }} style={styles.photo} />
+                ) : avatarId ? (
+                  <View style={styles.photoPlaceholder}>
+                    <Text style={styles.photoEmoji}>
+                      {getAvatarIcon(avatarId)}
+                    </Text>
+                  </View>
                 ) : (
                   <View style={styles.photoPlaceholder}>
                     <Text style={styles.photoEmoji}>
@@ -265,6 +305,14 @@ export default function UserFormScreen() {
               </TouchableOpacity>
 
               <View style={styles.photoButtons}>
+                <TouchableOpacity
+                  style={styles.photoButton}
+                  onPress={() => setShowAvatarModal(true)}
+                >
+                  <UserIcon size={20} color={AppColors.primary} />
+                  <Text style={styles.photoButtonText}>{i18n.t('user_form.avatar')}</Text>
+                </TouchableOpacity>
+
                 <TouchableOpacity
                   style={styles.photoButton}
                   onPress={pickImage}
@@ -346,9 +394,23 @@ export default function UserFormScreen() {
                 placeholder={i18n.t('user_form.age_placeholder')}
                 placeholderTextColor={AppColors.textSecondary}
                 keyboardType="number-pad"
-                returnKeyType="next"
+                returnKeyType="done"
+                inputAccessoryViewID={inputAccessoryViewID}
                 onSubmitEditing={() => gradeRef.current?.focus()}
               />
+              {Platform.OS === 'ios' && (
+                <InputAccessoryView nativeID={inputAccessoryViewID}>
+                  <View style={styles.accessoryContainer}>
+                    <TouchableOpacity
+                      style={styles.accessoryButton}
+                      onPress={() => gradeRef.current?.focus()}
+                    >
+                      <Text style={styles.accessoryButtonLabel}>{i18n.t('user_form.validate')}</Text>
+                      <Check size={20} color="#FFFFFF" />
+                    </TouchableOpacity>
+                  </View>
+                </InputAccessoryView>
+              )}
             </View>
 
             <View style={styles.section}>
@@ -753,6 +815,68 @@ export default function UserFormScreen() {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
+
+      {/* Avatar Selection Modal */}
+      <Modal
+        visible={showAvatarModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowAvatarModal(false)}
+      >
+        <View style={styles.avatarModalOverlay}>
+          <View style={styles.avatarModalContent}>
+            <View style={styles.avatarModalHeader}>
+              <Text style={styles.avatarModalTitle}>{i18n.t('user_form.choose_avatar')}</Text>
+              <TouchableOpacity onPress={() => setShowAvatarModal(false)}>
+                <X size={24} color={AppColors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.avatarGrid}>
+              {AVATARS.map((avatar) => (
+                <TouchableOpacity
+                  key={avatar.id}
+                  style={[
+                    styles.avatarItem,
+                    avatarId === avatar.id && styles.avatarItemSelected,
+                  ]}
+                  onPress={() => {
+                    setAvatarId(avatar.id);
+                    setPhotoUri(undefined); // Clear photo when selecting avatar
+                    setShowAvatarModal(false);
+                  }}
+                >
+                  <Text style={styles.avatarEmoji}>{avatar.icon}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <View style={styles.avatarModalActions}>
+              <TouchableOpacity
+                style={styles.avatarModalButton}
+                onPress={() => {
+                  setShowAvatarModal(false);
+                  pickImage();
+                }}
+              >
+                <ImageIcon size={20} color={AppColors.primary} />
+                <Text style={styles.avatarModalButtonText}>{i18n.t('user_form.photo_gallery')}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.avatarModalButton}
+                onPress={() => {
+                  setShowAvatarModal(false);
+                  takePhoto();
+                }}
+              >
+                <Camera size={20} color={AppColors.primary} />
+                <Text style={styles.avatarModalButtonText}>{i18n.t('user_form.photo_camera')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View >
   );
 }
@@ -1074,5 +1198,96 @@ const styles = StyleSheet.create({
   },
   badgeThemeButtonTextActive: {
     color: AppColors.primary,
+  },
+  avatarModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  avatarModalContent: {
+    backgroundColor: AppColors.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    paddingBottom: 40,
+  },
+  avatarModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  avatarModalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: AppColors.text,
+  },
+  avatarGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 12,
+    marginBottom: 24,
+  },
+  avatarItem: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: AppColors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: 'transparent',
+  },
+  avatarItemSelected: {
+    borderColor: AppColors.primary,
+    backgroundColor: AppColors.primary + '20',
+  },
+  avatarEmoji: {
+    fontSize: 36,
+  },
+  avatarModalActions: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  avatarModalButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: AppColors.primary,
+    backgroundColor: 'transparent',
+  },
+  avatarModalButtonText: {
+    color: AppColors.primary,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  accessoryContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#EEEEEE',
+  },
+  accessoryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: AppColors.primary,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    gap: 8,
+  },
+  accessoryButtonLabel: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });

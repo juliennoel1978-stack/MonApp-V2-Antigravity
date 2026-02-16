@@ -224,11 +224,13 @@ export default function ChallengeDashboardCard({
         {/* Row 1: Badge Icon + Level Title */}
         <View style={styles.levelRow}>
           <ThemedText style={[styles.badgeIcon, isSmallScreen && styles.badgeIconSmall]}>
-            {currentBadge?.icon || '🌟'}
+            {isZeroState ? '🌟' : (currentBadge?.icon || '🌟')}
           </ThemedText>
           <View style={{ flex: 1 }}>
             <ThemedText style={[styles.levelTitle, isSmallScreen && styles.levelTitleSmall]}>
-              {i18n.t('dashboard.current_level', { level: currentBadge ? i18n.t(currentBadge.title) : i18n.t('dashboard.beginner') })}
+              {isZeroState
+                ? i18n.t('dashboard.current_level', { level: i18n.t('dashboard.beginner') })
+                : i18n.t('dashboard.current_level', { level: currentBadge ? i18n.t(currentBadge.title) : i18n.t('dashboard.beginner') })}
             </ThemedText>
             <ThemedText style={{ fontSize: 11, color: AppColors.textSecondary, marginTop: 2 }}>
               {i18n.t('dashboard.view_collection')}

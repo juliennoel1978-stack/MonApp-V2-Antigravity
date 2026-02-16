@@ -1,7 +1,7 @@
 
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X, Shield, Leaf, Eye, VolumeX } from 'lucide-react-native';
-import React, { useEffect, useCallback, useRef, Suspense, lazy } from 'react';
+import React, { useEffect, useCallback, useRef, Suspense, lazy, useState } from 'react';
 
 import {
   View,
@@ -18,28 +18,196 @@ import i18n from '@/utils/i18n';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors, NumberColors } from '@/constants/colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { useApp } from '@/contexts/AppContext';
 import { BADGE_THRESHOLDS, getBadgeForThreshold, getBadgeIcon, getBadgeTitle } from '@/constants/badges';
+import { getAvatarIcon } from '@/constants/avatars';
 import ChallengeDashboardCard from '@/components/ChallengeDashboardCard';
 import { ParentGateModal } from '@/components/ParentGateModal';
 import { ThemedText } from '@/components/ThemedText';
 import { useResponsive } from '@/hooks/useResponsive';
+import { ReviewRequestModal } from '@/components/ReviewRequestModal';
+import {
+  incrementSessionCount,
+  shouldRequestReview,
+  hasReachedMasteryThreshold,
+} from '@/utils/storeReviewHelper';
 
 // Lazy load modal pour réduire le bundle initial
 const CollectionModal = lazy(() => import('@/components/CollectionModal'));
 
+// Theme-specific streak icons (texts come from i18n)
+const STREAK_ICONS = {
+  space: '🚀',
+  animals: '🐯',
+  heroes: '⚡',
+};
+
+// StreakCard Component with FlipCard functionality
+function StreakCard({ streak, theme }: { streak: number; theme: 'space' | 'animals' | 'heroes' }) {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const flipAnim = useRef(new Animated.Value(0)).current;
+  const autoFlipTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleFlip = useCallback(() => {
+    if (autoFlipTimeout.current) {
+      clearTimeout(autoFlipTimeout.current);
+    }
+
+    const toValue = isFlipped ? 0 : 1;
+    Animated.spring(flipAnim, {
+      toValue,
+      friction: 8,
+      tension: 10,
+      useNativeDriver: true,
+    }).start();
+    setIsFlipped(!isFlipped);
+
+    // Auto-flip back after 3 seconds
+    if (!isFlipped) {
+      autoFlipTimeout.current = setTimeout(() => {
+        Animated.spring(flipAnim, {
+          toValue: 0,
+          friction: 8,
+          tension: 10,
+          useNativeDriver: true,
+        }).start();
+        setIsFlipped(false);
+      }, 3000);
+    }
+  }, [isFlipped, flipAnim]);
+
+  useEffect(() => {
+    return () => {
+      if (autoFlipTimeout.current) {
+        clearTimeout(autoFlipTimeout.current);
+      }
+    };
+  }, []);
+
+  const frontOpacity = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 0, 0],
+  });
+
+  const backOpacity = flipAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0, 0, 1],
+  });
+
+  const themeIcon = STREAK_ICONS[theme];
+  const streakText = streak === 1
+    ? i18n.t(`home.daily_streak.${theme}.singular`)
+    : i18n.t(`home.daily_streak.${theme}.plural`);
+  const explanation = i18n.t('home.daily_streak.explanation');
+
+  return (
+    <TouchableOpacity
+      style={streakCardStyles.container}
+      onPress={handleFlip}
+      activeOpacity={0.8}
+    >
+      {/* Clickable hint */}
+      <View style={streakCardStyles.clickHint}>
+        <View style={streakCardStyles.clickHintDot} />
+      </View>
+
+      {/* Front Face */}
+      <Animated.View
+        style={[streakCardStyles.face, { opacity: frontOpacity }]}
+        pointerEvents={isFlipped ? 'none' : 'auto'}
+      >
+        <ThemedText style={streakCardStyles.icon}>{themeIcon}</ThemedText>
+        <ThemedText style={streakCardStyles.text}>
+          {streak} {streakText}
+        </ThemedText>
+      </Animated.View>
+
+      {/* Back Face */}
+      <Animated.View
+        style={[streakCardStyles.face, streakCardStyles.backFace, { opacity: backOpacity }]}
+        pointerEvents={isFlipped ? 'auto' : 'none'}
+      >
+        <ThemedText style={streakCardStyles.explanation}>
+          {explanation}
+        </ThemedText>
+      </Animated.View>
+    </TouchableOpacity>
+  );
+}
+
+const streakCardStyles = StyleSheet.create({
+  container: {
+    backgroundColor: '#FFF5F0',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 52,
+    borderWidth: 1,
+    borderColor: '#FFD4C4',
+    position: 'relative' as const,
+  },
+  clickHint: {
+    position: 'absolute' as const,
+    top: 8,
+    right: 8,
+  },
+  clickHintDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#FF9B7A',
+    opacity: 0.6,
+  },
+  face: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  backFace: {
+    position: 'absolute' as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 16,
+    justifyContent: 'center',
+  },
+  icon: {
+    fontSize: 20,
+  },
+  text: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+    color: '#E85A30',
+  },
+  explanation: {
+    fontSize: 13,
+    color: '#B84A25',
+    textAlign: 'center' as const,
+    fontWeight: '500' as const,
+  },
+});
+
 export default function HomeScreen() {
   const router = useRouter();
-  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData, settings, anonymousChallengesCompleted, getPersistenceBadges, getBestStreak, hasSelectedAnonymousMode, setHasSelectedAnonymousMode } = useApp();
+  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData, settings, anonymousChallengesCompleted, getPersistenceBadges, getBestStreak, hasSelectedAnonymousMode, setHasSelectedAnonymousMode, hasCompletedOnboarding, getDailyStreak } = useApp();
+  const colors = useThemeColors();
   const { isSmallScreen, isTablet, width, spacing, fontSize, containerMaxWidth } = useResponsive();
   const [showTablesModal, setShowTablesModal] = React.useState(false);
   const [showCollectionModal, setShowCollectionModal] = React.useState(false);
   const [showParentGate, setShowParentGate] = React.useState(false);
+  const [showReviewModal, setShowReviewModal] = React.useState(false);
   const tablesModalOpacity = React.useRef(new Animated.Value(0)).current;
   const tablesModalScale = React.useRef(new Animated.Value(0.9)).current;
 
-  const [showFirstLaunchModal, setShowFirstLaunchModal] = React.useState(false);
   const hasCheckedFirstLaunch = useRef(false);
+  const hasCheckedReview = useRef(false);
 
 
 
@@ -56,12 +224,33 @@ export default function HomeScreen() {
   const settingsProgressAnim = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-
-
     if (!isLoading && !isReady) {
       setIsReady(true);
     }
   }, [isLoading, isReady]);
+
+  // Store Review: Session tracking
+  useEffect(() => {
+    if (isReady && hasCompletedOnboarding && !hasCheckedReview.current) {
+      hasCheckedReview.current = true;
+
+      const checkReview = async () => {
+        // Increment session count
+        await incrementSessionCount();
+
+        // Check if we should show review request
+        const shouldShow = await shouldRequestReview('session');
+        if (shouldShow) {
+          // Delay to let the user see the home screen first
+          setTimeout(() => {
+            setShowReviewModal(true);
+          }, 2000);
+        }
+      };
+
+      checkReview();
+    }
+  }, [isReady, hasCompletedOnboarding]);
 
   useEffect(() => {
 
@@ -69,11 +258,11 @@ export default function HomeScreen() {
     if (isReady && !hasCheckedFirstLaunch.current) {
       hasCheckedFirstLaunch.current = true;
 
-      if (users.length === 0 && !currentUser) {
-
+      // Redirect to onboarding if not completed
+      if (!hasCompletedOnboarding) {
         const timer = setTimeout(() => {
-          setShowFirstLaunchModal(true);
-        }, 600);
+          router.replace('/onboarding' as any);
+        }, 300);
         return () => clearTimeout(timer);
       } else if (users.length > 0 && !currentUser && !hasSelectedAnonymousMode) {
         // Only show if not already in explicit anonymous mode
@@ -83,7 +272,7 @@ export default function HomeScreen() {
         return () => clearTimeout(timer);
       }
     }
-  }, [users, currentUser, isReady, hasSelectedAnonymousMode]);
+  }, [users, currentUser, isReady, hasSelectedAnonymousMode, hasCompletedOnboarding]);
 
   useEffect(() => {
     if (isReady) {
@@ -410,14 +599,14 @@ export default function HomeScreen() {
 
   if (!isReady) {
     return (
-      <View style={{ flex: 1, backgroundColor: AppColors.background, justifyContent: 'center', alignItems: 'center' }}>
-        <ThemedText style={{ fontSize: 24, color: AppColors.text }}>{i18n.t('home.loading')}</ThemedText>
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
+        <ThemedText style={{ fontSize: 24, color: colors.text }}>{i18n.t('home.loading')}</ThemedText>
       </View>
     );
   }
 
   return (
-    <View style={styles.backgroundContainer}>
+    <View style={[styles.backgroundContainer, { backgroundColor: colors.background }]}>
       {isLoading && (
         <View style={{
           position: 'absolute',
@@ -425,12 +614,12 @@ export default function HomeScreen() {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(255,255,255,0.5)',
+          backgroundColor: settings.darkMode ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)',
           justifyContent: 'center',
           alignItems: 'center',
           zIndex: 1000,
         }}>
-          <ThemedText style={{ fontSize: 18, color: AppColors.text }}>{i18n.t('home.updating')}</ThemedText>
+          <ThemedText style={{ fontSize: 18, color: colors.text }}>{i18n.t('home.updating')}</ThemedText>
         </View>
       )}
       <SafeAreaView style={styles.container} edges={['top']}>
@@ -440,7 +629,7 @@ export default function HomeScreen() {
             onPress={handleOpenModal}
             testID="users-button"
           >
-            <Users size={28} color={AppColors.text} />
+            <Users size={28} color={colors.text} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -449,7 +638,7 @@ export default function HomeScreen() {
             testID="settings-button"
           >
             <View style={styles.settingsButtonInner}>
-              <SettingsIcon size={28} color={AppColors.text} />
+              <SettingsIcon size={28} color={colors.text} />
             </View>
           </TouchableOpacity>
         </View>
@@ -475,19 +664,19 @@ export default function HomeScreen() {
             <View style={styles.titleContainer}>
               {!zenMode && (
                 <View style={styles.sparkleLeft}>
-                  <Sparkles size={32} color={AppColors.primary} />
+                  <Sparkles size={32} color={colors.primary} />
                 </View>
               )}
               <View style={styles.titleContent}>
                 <ThemedText
-                  style={[styles.title, isTablet && { fontSize: fontSize(28) }]}
+                  style={[styles.title, isTablet && { fontSize: fontSize(28) }, { color: colors.text }]}
                   numberOfLines={1}
                   adjustsFontSizeToFit
                 >
                   {i18n.t('home.title')}
                 </ThemedText>
                 {currentUser && (
-                  <ThemedText style={styles.userName}>{i18n.t('home.greeting', { name: currentUser.firstName })}</ThemedText>
+                  <ThemedText style={[styles.userName, { color: colors.primary }]}>{i18n.t('home.greeting', { name: currentUser.firstName })}</ThemedText>
                 )}
 
                 {(zenMode || isDyslexic || isMuted) && (
@@ -515,21 +704,21 @@ export default function HomeScreen() {
               </View>
               {!zenMode && (
                 <View style={styles.sparkleRight}>
-                  <Sparkles size={32} color={AppColors.secondary} />
+                  <Sparkles size={32} color={colors.secondary} />
                 </View>
               )}
             </View>
 
             <View style={[styles.subtitleContainer, { gap: spacing(4) }]}>
               <ThemedText
-                style={[styles.subtitleMain, isTablet && { fontSize: fontSize(16) }]}
+                style={[styles.subtitleMain, isTablet && { fontSize: fontSize(16) }, { color: colors.primary }]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
                 {i18n.t('home.subtitle_main')}
               </ThemedText>
               <ThemedText
-                style={[styles.subtitleSecondary, isTablet && { fontSize: fontSize(14) }]}
+                style={[styles.subtitleSecondary, isTablet && { fontSize: fontSize(14) }, { color: colors.textSecondary }]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
@@ -537,19 +726,27 @@ export default function HomeScreen() {
               </ThemedText>
             </View>
 
-            <View style={styles.progressCard}>
+            <View style={[styles.progressCard, { backgroundColor: colors.surface, shadowColor: colors.shadow }]}>
               <View style={styles.progressHeader}>
-                <Trophy size={20} color={AppColors.warning} />
-                <ThemedText style={styles.progressTitle}>{i18n.t('home.progression_title')}</ThemedText>
+                <Trophy size={20} color={colors.warning} />
+                <ThemedText style={[styles.progressTitle, { color: colors.text }]}>{i18n.t('home.progression_title')}</ThemedText>
               </View>
+
+              {/* Daily Streak Card */}
+              {getDailyStreak() > 0 && (
+                <StreakCard
+                  streak={getDailyStreak()}
+                  theme={(currentUser?.badgeTheme || settings.badgeTheme || 'space') as 'space' | 'animals' | 'heroes'}
+                />
+              )}
 
               <View style={styles.statsContainer}>
                 <View style={styles.statItem}>
-                  <ThemedText style={styles.statValue}>{totalStars}</ThemedText>
-                  <ThemedText style={styles.statLabel}>⭐ {i18n.t('home.stars')}</ThemedText>
+                  <ThemedText style={[styles.statValue, { color: colors.text }]}>{totalStars}</ThemedText>
+                  <ThemedText style={[styles.statLabel, { color: colors.textSecondary }]}>⭐ {i18n.t('home.stars')}</ThemedText>
                 </View>
 
-                <View style={styles.statDivider} />
+                <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
 
                 <TouchableOpacity
                   style={styles.statItem}
@@ -557,15 +754,15 @@ export default function HomeScreen() {
                   testID="tables-progress-button"
                   activeOpacity={0.7}
                 >
-                  <ThemedText style={styles.statValue}>
+                  <ThemedText style={[styles.statValue, { color: colors.text }]}>
                     {completedTables}/{totalTables}
                   </ThemedText>
-                  <ThemedText style={styles.statLabel}>{i18n.t('home.tables')}</ThemedText>
+                  <ThemedText style={[styles.statLabel, { color: colors.textSecondary }]}>{i18n.t('home.tables')}</ThemedText>
                 </TouchableOpacity>
               </View>
 
               <View style={styles.progressBarContainer}>
-                <View style={styles.progressBarBackground}>
+                <View style={[styles.progressBarBackground, { backgroundColor: colors.borderLight }]}>
                   <View
                     style={[
                       styles.progressBarFill,
@@ -649,6 +846,11 @@ export default function HomeScreen() {
             setShowParentGate(false);
             router.push('/settings' as any);
           }}
+        />
+
+        <ReviewRequestModal
+          visible={showReviewModal}
+          onClose={() => setShowReviewModal(false)}
         />
 
         {showTablesModal && (
@@ -811,6 +1013,12 @@ export default function HomeScreen() {
                         <View style={styles.modalAvatarContainer}>
                           {user.photoUri ? (
                             <Image source={{ uri: user.photoUri }} style={styles.modalAvatar} />
+                          ) : user.avatarId ? (
+                            <View style={styles.modalAvatarPlaceholder}>
+                              <ThemedText style={styles.modalAvatarEmoji}>
+                                {getAvatarIcon(user.avatarId)}
+                              </ThemedText>
+                            </View>
                           ) : (
                             <View style={styles.modalAvatarPlaceholder}>
                               <ThemedText style={styles.modalAvatarEmoji}>
@@ -857,49 +1065,6 @@ export default function HomeScreen() {
                   </View>
                 </ScrollView>
               </Animated.View>
-            </View>
-          </Modal>
-        )}
-
-        {showFirstLaunchModal && (
-          <Modal
-            visible={true}
-            transparent
-            animationType="fade"
-            onRequestClose={() => { }}
-          >
-            <View style={styles.firstLaunchOverlay}>
-              <View style={styles.firstLaunchContent}>
-                <ThemedText style={styles.firstLaunchEmoji}>👋</ThemedText>
-                <ThemedText style={styles.firstLaunchTitle}>{i18n.t('user_modal.title')}</ThemedText>
-                <ThemedText style={styles.firstLaunchSubtitle}>
-                  {i18n.t('user_modal.first_launch_subtitle')}
-                </ThemedText>
-
-                <TouchableOpacity
-                  style={styles.firstLaunchCreateButton}
-                  onPress={() => {
-                    setShowFirstLaunchModal(false);
-                    router.push('/user-form' as any);
-                  }}
-                  testID="first-launch-create"
-                >
-                  <Plus size={24} color="#FFFFFF" />
-                  <ThemedText style={styles.firstLaunchCreateButtonText}>{i18n.t('user_modal.create_profile_btn')}</ThemedText>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.firstLaunchAnonymousButton}
-                  onPress={() => {
-                    setShowFirstLaunchModal(false);
-                    clearCurrentUser();
-                  }}
-                  testID="first-launch-anonymous"
-                >
-                  <UserX size={20} color={AppColors.textSecondary} />
-                  <ThemedText style={styles.firstLaunchAnonymousButtonText}>{i18n.t('user_modal.anonymous_mode')}</ThemedText>
-                </TouchableOpacity>
-              </View>
             </View>
           </Modal>
         )}

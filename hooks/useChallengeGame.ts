@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Animated } from 'react-native';
+import { Animated, AppState, AppStateStatus } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useApp } from '@/contexts/AppContext';
 import { checkForRewards } from '@/utils/rewardQueue';
@@ -45,6 +45,7 @@ export const useChallengeGame = (selectedTables?: number[]) => {
         batchUpdateTableProgress,
         updateStrongestTable,
         updateUser,
+        updateDailyStreak,
     } = useApp();
 
     const { playSound, playErrorSound } = useAudio();
@@ -116,6 +117,30 @@ export const useChallengeGame = (selectedTables?: number[]) => {
         setIsPaused(false);
         // Timer will restart via useEffect
     }, []);
+
+    // FIX: AppState listener - Pause game when app goes to background (phone call, home button, switch app)
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+            if (nextAppState === 'active') {
+                // App came back to foreground - user will resume manually via Pause modal
+                console.log('Challenge: App returned to foreground');
+            } else if (nextAppState === 'background' || nextAppState === 'inactive') {
+                // App went to background or inactive (phone call) -> PAUSE
+                if (!isPaused && !isFinished) {
+                    setIsPaused(true);
+                    if (timerRef.current) {
+                        clearInterval(timerRef.current);
+                        timerRef.current = null;
+                    }
+                    console.log('Challenge: App went to background -> Game Paused');
+                }
+            }
+        });
+
+        return () => {
+            subscription.remove();
+        };
+    }, [isPaused, isFinished]);
 
     // Initial config
     useEffect(() => {
@@ -334,6 +359,7 @@ export const useChallengeGame = (selectedTables?: number[]) => {
 
         const newTotal = await incrementChallengesCompleted();
         await addPlayDate();
+        await updateDailyStreak(); // Track daily practice streak
         setCompletedChallengeCount(newTotal);
 
         // Save table stats logic...
@@ -406,6 +432,7 @@ export const useChallengeGame = (selectedTables?: number[]) => {
             timerEnabled,
             scorePercent,
             isReviewingErrors: false,
+            selectedTablesCount: selectedTables?.length || 0,
         });
 
         if (queue.length > 0) {

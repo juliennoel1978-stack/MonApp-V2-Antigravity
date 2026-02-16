@@ -13,21 +13,94 @@
         "stars": "Étoiles",
         "tables": "Tables",
         "mission": "Mission : Table de {{number}}",
-        "start": "Commencer",
-        "challenge": "Challenge"
+        "start": "S'entraîner",
+        "challenge": "Défi",
+        "daily_streak": {
+            "explanation": "Jours d'entraînement consécutifs",
+            "space": {
+                "singular": "jour de voyage spatial !",
+                "plural": "jours de voyage spatial !"
+            },
+            "animals": {
+                "singular": "jour de rugissement !",
+                "plural": "jours de rugissement !"
+            },
+            "heroes": {
+                "singular": "jour de super-pouvoirs !",
+                "plural": "jours de super-pouvoirs !"
+            }
+        },
+        "not_found": {
+            "title": "Oups !",
+            "message": "Cette page n'existe pas.",
+            "link": "Retour à l'accueil"
+        }
+    },
+    "challenge_setup": {
+        "title": "Défi",
+        "greeting": "Prêt, {{name}} ?",
+        "greeting_space": "Paré au décollage, {{name}} ?",
+        "greeting_heroes": "Prêt pour l'action, {{name}} ?",
+        "greeting_animals": "Prêt à rugir, {{name}} ?",
+        "explanation_sub": "Choisis tes tables. Celles que tu connais le mieux sont déjà cochées, mais tu peux en ajouter d'autres !",
+        "tables_selected": "{{count}} table sélectionnée",
+        "tables_selected_plural": "{{count}} tables sélectionnées",
+        "select_all": "Tout cocher",
+        "my_level": "Mon Niveau",
+        "start": "C'est parti !",
+        "no_table_warning": "Sélectionne au moins une table !",
+        "badge_intrepide_title": "Badge Intrépide 🔥",
+        "badge_intrepide_msg": "Ça va chauffer ! Tu relèves le défi ultime !",
+        "badge_btn": "Génial ! 🔥"
     },
     "tables_modal": {
         "title": "Mes Tables",
         "not_seen": "Non vue",
         "mastered": "Maîtrisée",
         "legend_not_seen": "Non vue",
-        "legend_mastered": "Maîtrisée"
+        "legend_mastered": "Maîtrisée",
+        "techniques": {
+            "1": "la technique : <bold>{{name}}</bold> - le chiffre reste identique",
+            "2": "la technique : <bold>{{name}}</bold> - on double le nombre",
+            "3": "la technique : <bold>{{name}}</bold> - on ajoute 3 fois",
+            "4": "la technique : <bold>Double</bold>, puis encore <bold>Double</bold> !",
+            "5": "<bold>Pair → 0</bold>, <bold>Impair → 5</bold>",
+            "6": "la technique : <bold>Table de 5</bold> + <bold>le nombre</bold>",
+            "7": "<bold>La Table des Champions !</bold> 🏆",
+            "8_1": "la technique : Utilise la <bold>Table de 4</bold>",
+            "8_2": "puis <bold>Double</bold> !",
+            "9_1": "l'Astuce : Utilise la <bold>Table de 10</bold>",
+            "9_2": "(<bold>10</bold> × <bold>N</bold>) - <bold>N</bold>",
+            "10": "<bold>Le Magicien</bold> ajoute un <bold>0</bold> !"
+        }
     },
     "tables_selection": {
         "title": "Choisis ta table"
     },
     "discovery": {
         "table_not_found": "Table non trouvée"
+    },
+    "onboarding": {
+        "welcome_title": "Bienvenue dans Tables Magiques !",
+        "welcome_subtitle": "Apprends tes tables de multiplication en t'amusant !",
+        "feature_discovery": "Découvre chaque table avec des astuces visuelles et gagne des ⭐ étoiles",
+        "feature_challenge": "Relève des défis (chronométrés ou non) et collecte des 🏅 badges",
+        "feature_accessibility": "Conçu pour tous, de 7 à 77 ans, avec ou sans difficultés d'apprentissage (Dys/TDAH)",
+        "create_profile": "Créer mon profil",
+        "create_profile_desc": "Sauvegarde ta progression et personnalise ton expérience",
+        "play_directly": "Jouer directement",
+        "later_note": "Tu pourras créer ton profil plus tard dans les paramètres",
+        "profile_avatar": "Choisis ton avatar !",
+        "profile_name": "Comment t'appelles-tu ?",
+        "profile_name_placeholder": "Ton prénom",
+        "profile_age": "Quel âge as-tu ?",
+        "profile_age_placeholder": "Ton âge",
+        "profile_gender": "Tu es...",
+        "profile_theme": "Choisis ton univers !",
+        "profile_theme_note": "Tu pourras le changer à tout moment",
+        "lets_go": "C'est parti !",
+        "welcome_name": "Bienvenue {{name}} !",
+        "profile_created": "Ton profil est prêt, à toi de jouer !"
     },
     "user_modal": {
         "title": "Qui es-tu ?",
@@ -242,10 +315,10 @@
             "message": "Un sans faute.",
             "back_title": "Quel talent !"
         },
-        "streak_max": {
-            "title": "Série Max",
-            "message": "Quelle belle série !",
-            "back_title": "Invincible !"
+        "intrepide": {
+            "title": "Intrépide",
+            "message": "Ça va chauffer ! Tu relèves le défi ultime !",
+            "back_title": "Intrépide !"
         }
     },
     "endurance": {
@@ -323,7 +396,7 @@
         "adventure_section": "MON AVENTURE",
         "achievements_section": "MES EXPLOITS",
         "endurance_section": "ENDURANCE",
-        "challenges_suffix": "Challenges"
+        "challenges_suffix": "Défis"
     },
     "settings": {
         "title": "Paramètres",
@@ -354,6 +427,8 @@
         "zen_mode": "Mode Zen",
         "less_animations": "Moins d'animations",
         "zen_timer_note": "⏱️ Le chrono est automatiquement désactivé en mode Zen.",
+        "dark_mode": "Mode Sombre",
+        "dark_mode_desc": "Réduit la luminosité (confort yeux)",
         "font": "Police d'écriture",
         "choose_style": "Choisissez le style de texte le plus confortable",
         "font_standard": "Standard",
@@ -363,6 +438,9 @@
         "font_dys": "Spéciale Dys",
         "font_opendys": "OpenDyslexic",
         "reset_guest": "Réinitialiser mode Invité",
+        "convert_to_profile": "Sauvegarder ta progression !",
+        "convert_desc": "Tu as complété {{challenges}} défis en mode anonyme. Crée ton profil pour ne pas perdre ta progression !",
+        "convert_now": "Créer mon profil maintenant",
         "game_settings": "Paramètres de Jeu",
         "questions_per_challenge": "Questions par Challenge",
         "badge_theme": "Thème des Badges",
@@ -435,7 +513,7 @@
             "example": "3 × 3 = 9 👉 (3 sauts : 3 + 3 + 3)",
             "astuce": "On ajoute 3 à chaque fois, comme 3, 6, 9, 12...",
             "indice": "Pense aux multiples de 3 : 3, 6, 9, 12, 15...",
-            "erreur": "3 × X = X + X + X. On ajoute 3 à chaque fois."
+            "erreur": "3 × X = X + X + X. On additionne le même nombre 3 fois."
         },
         "4": {
             "theme_emoji": "🐇",
@@ -446,29 +524,29 @@
             "example": "4 × 5 👉 Double de 5 c'est 10 👉 Double de 10 c'est 20 !",
             "astuce": "4, 8, 12, 16... on ajoute toujours 4.",
             "indice": "Tu peux faire ×2 puis encore ×2 : on double deux fois !",
-            "erreur": "4 × X = (2 × X) × 2. On double deux fois pour trouver le résultat."
+            "erreur": "C'est le double du double ! Double une première fois, puis double encore."
         },
         "5": {
             "theme_emoji": "✋",
             "theme_name": "Le 'High Five'",
             "story": "Regarde ta main ! On compte de 5 en 5. Ça finit toujours par un 0 ou un 5.",
             "tip_title": "La règle du 0 ou 5",
-            "tip": "Si le chiffre est Pair (2, 4, 6...), ça finit par 0. Si le chiffre est Impair (1, 3, 5...), ça finit par 5.",
+            "tip": "Si le nombre est Pair (2, 4, 6...), ça finit par 0. Si le nombre est Impair (1, 3, 5...), ça finit par 5.",
             "example": "5 × 4 = 20 (Pair)\n5 × 7 = 35 (Impair)",
             "astuce": "Les résultats finissent toujours par 0 ou 5.",
             "indice": "Compte de 5 en 5 : 5, 10, 15, 20...",
-            "erreur": "5 × X = un nombre qui finit par 0 ou 5. Compte de 5 en 5 pour vérifier."
+            "erreur": "Regarde si le nombre est pair ou impair ! Pair finit par 0, impair finit par 5."
         },
         "6": {
             "theme_emoji": "🖐️☝️",
-            "theme_name": "La Technique '5 + 1'",
+            "theme_name": "Le 5 avec un Bonus",
             "story": "Le 6, c'est le 5 avec un bonus ! Utilise la table de 5 (qui est facile) et ajoute le nombre une fois.",
-            "tip_title": "Table de 5 + le chiffre",
+            "tip_title": "Table de 5 + le nombre",
             "tip": "Pour multiplier par 6 : fais d'abord ×5, puis ajoute le nombre.",
             "example": "6 × 4 = (5×4) + 4 = 20 + 4 = 24",
             "astuce": "Si tu connais ×3, double le résultat : 6 = 3+3.",
             "indice": "Fais 3 × X, puis double-le.",
-            "erreur": "6 × X = 3 × X + 3 × X. Double le résultat de la table de 3."
+            "erreur": "6 × X = (5 × X) + X. Fais 5 fois le nombre, et ajoute-le encore une fois."
         },
         "7": {
             "theme_emoji": "🏰",
@@ -490,18 +568,18 @@
             "example": "8 × 3 👉 Pense à 4 × 3 = 12 👉 Double le 12 👉 12 + 12 = 24 !",
             "astuce": "8, c'est 2 × 2 × 2 : on double trois fois !",
             "indice": "Double, puis redouble, puis redouble encore.",
-            "erreur": "8 × X = on double 3 fois : X → 2X → 4X → 8X."
+            "erreur": "8 × X : Calcule d'abord avec la table de 4, puis double le résultat !"
         },
         "9": {
             "theme_emoji": "👐",
             "theme_name": "L'Astuce du 10",
             "story": "Le 9 est presque un 10 ! L'astuce, c'est de faire comme si c'était un 10, puis d'enlever un petit peu.",
             "tip_title": "Fais ×10... et enlève le nombre !",
-            "tip": "Multiplie par 10 (ajoute un 0), puis retire le chiffre une fois.",
+            "tip": "Multiplie par 10 (ajoute un 0), puis retire le nombre une fois.",
             "example": "9 × 7 👉 Fais 10 × 7 = 70 👉 Enlève 7 👉 70 - 7 = 63",
             "astuce": "La somme des chiffres du résultat fait souvent 9.",
-            "indice": "Ex : 9 × 4 = 36 → 3 + 6 = 9.",
-            "erreur": "Vérifie la somme des chiffres : elle doit souvent faire 9 pour ×9."
+            "indice": "Ex: 9 × 4 = 36 → 3 + 6 = 9.",
+            "erreur": "Fais fois 10 et enlève le nombre !"
         },
         "10": {
             "theme_emoji": "🎩",
@@ -512,7 +590,7 @@
             "example": "10 × 7 = 70 (Le 7 gagne un 0)",
             "astuce": "On ajoute un 0 à la fin du nombre.",
             "indice": "10 × X = X avec un zéro derrière.",
-            "erreur": "10 × X = X0. Il suffit d'écrire un zéro à la fin."
+            "erreur": "10 × X : Le Magicien ajoute juste un zéro à la fin du nombre !"
         }
     },
     "practice": {
@@ -597,7 +675,8 @@
         "correction": {
             "title": "On corrige ensemble ✨",
             "retry_question": "Réessayer cette question",
-            "continue": "Continuer"
+            "continue": "Continuer",
+            "remember_rule": "Rappel de l'astuce :"
         },
         "results": {
             "almost": "Presque !",
@@ -633,7 +712,7 @@
         "question_speak": "{{a}} fois {{b}} ?"
     },
     "challenge": {
-        "title": "Challenge",
+        "title": "Défi",
         "boost": {
             "animals": {
                 "title": "Pause Vitaminée !",
@@ -722,6 +801,9 @@
     "user_form": {
         "edit_title": "Modifier utilisateur",
         "new_title": "Nouvel utilisateur",
+        "avatar": "Avatar",
+        "choose_avatar": "Choisir un avatar",
+        "validate": "Valider",
         "photo_gallery": "Galerie",
         "photo_camera": "Photo",
         "first_name": "Prénom *",
@@ -781,18 +863,15 @@
         "medium": "Moyen",
         "hard": "Difficile"
     },
-    "challenge_setup": {
-        "title": "Prépare ton Challenge !",
-        "subtitle": "Sélectionne les tables que tu veux réviser",
-        "select_all": "Tout cocher",
-        "my_level": "Mon Niveau",
-        "start": "C'est parti ! 🚀",
-        "tables_selected": "{{count}} table sélectionnée",
-        "tables_selected_plural": "{{count}} tables sélectionnées",
-        "no_table_warning": "Sélectionne au moins une table"
-    },
     "keypad": {
         "delete": "Effacer",
         "validate": "Valider"
+    },
+    "review": {
+        "title": "Votre avis compte !",
+        "message": "Si Tables Magiques aide votre enfant, un avis sur l'App Store nous aiderait beaucoup.",
+        "subtitle": "Cela aide d'autres familles à découvrir l'application.",
+        "rate_button": "Évaluer l'app",
+        "later_button": "Plus tard"
     }
 }
