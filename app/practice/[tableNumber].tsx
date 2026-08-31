@@ -10,7 +10,6 @@ import {
   TouchableOpacity,
   Animated,
   Dimensions,
-  ScrollView,
   AppState,
   AppStateStatus,
 } from 'react-native';
@@ -44,13 +43,6 @@ import {
 
 
 
-// Coach theme constant for local use in triggerCoachSuccess
-const COACH_THEMES = {
-  animals: '🐒',
-  space: '👽',
-  heroes: '🤖',
-};
-
 const { width } = Dimensions.get('window');
 
 export default function PracticeScreen() {
@@ -60,7 +52,7 @@ export default function PracticeScreen() {
   const { updateTableProgress, unlockBadge, getTableProgress, settings, currentUser, progress: userProgress, updateDailyStreak } = useApp();
   const { playSound, playErrorSound, speak, stopSpeech, isVoiceEnabled } = useAudio();
   const { vibrate } = useHaptics();
-  const { isSmallScreen, isTablet, spacing, fontSize, containerMaxWidth } = useResponsive();
+  const { isTablet, spacing, fontSize } = useResponsive();
   const colors = useThemeColors();
 
   const tableProgress = getTableProgress(Number(tableNumber));
@@ -143,13 +135,11 @@ export default function PracticeScreen() {
           setIsPaused(false);
           // Reset start time to now so we don't count background time
           startTimeRef.current = Date.now();
-          console.log('Practice: App returned to foreground - Timer reset');
         }
       } else if (nextAppState === 'background' || nextAppState === 'inactive') {
         // App went to background or inactive -> PAUSE time tracking
         if (!isPaused && !showResult) {
           setIsPaused(true);
-          console.log('Practice: App went to background -> Session Paused');
         }
       }
     });
@@ -705,7 +695,9 @@ export default function PracticeScreen() {
                 />
               </View>
               <ThemedText style={styles.progressText}>
-                {isReviewMode ? 'Révision' : `Niveau ${level}`} - Question {currentQuestionIndex + 1}/{questions.length}
+                {isReviewMode
+                  ? i18n.t('practice.review_progress', { current: currentQuestionIndex + 1, total: questions.length })
+                  : i18n.t('practice.level_progress', { level, current: currentQuestionIndex + 1, total: questions.length })}
               </ThemedText>
             </View>
 

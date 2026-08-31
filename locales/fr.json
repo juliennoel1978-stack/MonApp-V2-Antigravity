@@ -440,6 +440,7 @@
         "reset_guest": "Réinitialiser mode Invité",
         "convert_to_profile": "Sauvegarder ta progression !",
         "convert_desc": "Tu as complété {{challenges}} défis en mode anonyme. Crée ton profil pour ne pas perdre ta progression !",
+        "convert_desc_stars": "Tu as déjà gagné {{stars}} étoile(s) en mode anonyme. Crée ton profil pour ne pas perdre ta progression !",
         "convert_now": "Créer mon profil maintenant",
         "game_settings": "Paramètres de Jeu",
         "questions_per_challenge": "Questions par Challenge",
@@ -702,6 +703,8 @@
             "other_table_full": "Aller à une autre table"
         },
         "question_label": "Combien font :",
+        "level_progress": "Niveau {{level}} - Question {{current}}/{{total}}",
+        "review_progress": "Révision - Question {{current}}/{{total}}",
         "your_answer": "Ta réponse",
         "correct_excl": "Correct !",
         "speech_correction": {

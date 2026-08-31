@@ -23,7 +23,7 @@ export default function ChallengeSetupScreen() {
     const { progress, currentUser, settings } = useApp();
     const colors = useThemeColors();
     const { vibrate } = useHaptics();
-    const { isSmallScreen, isTablet, spacing, fontSize, containerMaxWidth } = useResponsive();
+    const { isTablet, spacing, fontSize, containerMaxWidth } = useResponsive();
 
     // Animation refs for each table button
     const scaleAnims = useRef(

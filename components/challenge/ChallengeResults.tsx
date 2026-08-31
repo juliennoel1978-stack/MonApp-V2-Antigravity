@@ -54,7 +54,7 @@ export const ChallengeResults = ({
     const [selectedTableNumber, setSelectedTableNumber] = useState<number | null>(null);
 
     // 2. CALC STATS (Only needed for Results mode, but safe to calc always or memoize based on props)
-    const { bestTable, worstTable, bestStreakValue } = React.useMemo(() => {
+    const { bestTable, worstTable } = React.useMemo(() => {
         if (isReviewMode) return { bestTable: -1, worstTable: -1, bestStreakValue: 0 };
 
         let best = -1;
@@ -143,11 +143,13 @@ export const ChallengeResults = ({
         <View style={[styles.backgroundContainer, { backgroundColor: colors.background }]}>
             {/* Modal Table à Surveiller */}
             {selectedTableNumber && (
-                <TableDetailModal
-                    visible={showTableDetailModal}
-                    tableNumber={selectedTableNumber}
-                    onClose={() => setShowTableDetailModal(false)}
-                />
+                <Suspense fallback={null}>
+                    <TableDetailModal
+                        visible={showTableDetailModal}
+                        tableNumber={selectedTableNumber}
+                        onClose={() => setShowTableDetailModal(false)}
+                    />
+                </Suspense>
             )}
             <SafeAreaView style={styles.container} edges={['top']}>
                 <ScrollView

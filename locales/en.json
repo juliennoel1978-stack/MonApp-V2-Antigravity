@@ -440,6 +440,7 @@
         "reset_guest": "Reset Guest Mode",
         "convert_to_profile": "Save your progress!",
         "convert_desc": "You completed {{challenges}} challenges in anonymous mode. Create your profile to keep your progress!",
+        "convert_desc_stars": "You already earned {{stars}} star(s) in anonymous mode. Create your profile to keep your progress!",
         "convert_now": "Create my profile now",
         "game_settings": "Game Settings",
         "questions_per_challenge": "Questions per Challenge",
@@ -702,6 +703,8 @@
             "other_table_full": "Go to another table"
         },
         "question_label": "How much is:",
+        "level_progress": "Level {{level}} - Question {{current}}/{{total}}",
+        "review_progress": "Review - Question {{current}}/{{total}}",
         "your_answer": "Your answer",
         "correct_excl": "Correct !",
         "speech_correction": {
@@ -864,16 +867,6 @@
         "easy": "Easy",
         "medium": "Medium",
         "hard": "Hard"
-    },
-    "challenge_setup": {
-        "title": "Prepare your Challenge!",
-        "subtitle": "Select the tables you want to practice",
-        "select_all": "Select All",
-        "my_level": "My Level",
-        "start": "Let's Go! 🚀",
-        "tables_selected": "{{count}} table selected",
-        "tables_selected_plural": "{{count}} tables selected",
-        "no_table_warning": "Select at least one table"
     },
     "keypad": {
         "delete": "Delete",

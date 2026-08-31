@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, Animated, StyleSheet } from 'react-native';
 import { Check, X, Clock } from 'lucide-react-native';
 import { ThemedText } from '../ThemedText';

@@ -269,6 +269,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
       const onboardingData = await AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
       if (onboardingData === 'true') {
         setHasCompletedOnboardingState(true);
+      } else if (usersData || progressData) {
+        // Migration v1.2 → v1.3: existing users skip onboarding
+        await AsyncStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, 'true');
+        setHasCompletedOnboardingState(true);
       }
     } catch (error) {
       console.error('❌ Error loading data:', error);
@@ -566,19 +570,28 @@ export const [AppProvider, useApp] = createContextHook(() => {
       setCurrentUser(newUser);
       currentUserRef.current = newUser;
 
-      // Clear anonymous data
+      // Clear anonymous data (now owned by newUser) so it doesn't resurface
+      // if the parent switches back to anonymous mode or converts again later
       await AsyncStorage.multiRemove([
+        STORAGE_KEYS.PROGRESS,
         STORAGE_KEYS.ANONYMOUS_CHALLENGES,
         STORAGE_KEYS.ANONYMOUS_ACHIEVEMENTS,
         STORAGE_KEYS.ANONYMOUS_PLAY_DATES,
         STORAGE_KEYS.ANONYMOUS_BADGES,
         STORAGE_KEYS.ANONYMOUS_BEST_STREAK,
+        STORAGE_KEYS.ANONYMOUS_DAILY_STREAK,
+        STORAGE_KEYS.ANONYMOUS_LAST_ACTIVITY,
       ]);
+      // Note: in-memory `progress` is intentionally left untouched here —
+      // it now belongs to newUser (currentUser) and still holds the
+      // transferred data; only the standalone AsyncStorage slot is cleared.
       setAnonymousChallengesCompleted(0);
       setAnonymousAchievements([]);
       setAnonymousPlayDates([]);
       setAnonymousPersistenceBadges([]);
       setAnonymousBestStreak(0);
+      setAnonymousDailyStreak(0);
+      setAnonymousLastActivityDate(null);
       anonymousChallengesRef.current = 0;
 
       return newUser;

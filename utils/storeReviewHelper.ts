@@ -58,7 +58,6 @@ export async function canRequestReview(): Promise<boolean> {
         // Vérifier si l'utilisateur a déjà donné un avis
         const completed = await AsyncStorage.getItem(STORAGE_KEYS.COMPLETED);
         if (completed === 'true') {
-            console.log('[StoreReview] Skipped: user already reviewed');
             return false;
         }
 
@@ -66,7 +65,6 @@ export async function canRequestReview(): Promise<boolean> {
         const declinedStr = await AsyncStorage.getItem(STORAGE_KEYS.DECLINED_COUNT);
         const declinedCount = parseInt(declinedStr || '0', 10) || 0;
         if (declinedCount >= CONFIG.MAX_DECLINED) {
-            console.log('[StoreReview] Skipped: too many declines');
             return false;
         }
 
@@ -77,7 +75,6 @@ export async function canRequestReview(): Promise<boolean> {
             const now = new Date();
             const diffDays = (now.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24);
             if (diffDays < CONFIG.COOLDOWN_DAYS) {
-                console.log(`[StoreReview] Skipped: cooldown active (${Math.ceil(CONFIG.COOLDOWN_DAYS - diffDays)} days remaining)`);
                 return false;
             }
         }
@@ -98,13 +95,10 @@ export async function shouldRequestReview(trigger: 'session' | 'mastery'): Promi
 
     if (trigger === 'session') {
         const sessions = await getSessionCount();
-        const shouldRequest = sessions >= CONFIG.MIN_SESSIONS_BEFORE_PROMPT;
-        console.log(`[StoreReview] Session trigger check: ${sessions} sessions, required: ${CONFIG.MIN_SESSIONS_BEFORE_PROMPT}, result: ${shouldRequest}`);
-        return shouldRequest;
+        return sessions >= CONFIG.MIN_SESSIONS_BEFORE_PROMPT;
     }
 
     // Pour 'mastery', on suppose que l'appelant a déjà vérifié les conditions de tables
-    console.log('[StoreReview] Mastery trigger: eligible');
     return true;
 }
 
@@ -130,7 +124,6 @@ export function hasReachedMasteryThreshold(progress: { tableNumber: number; star
 export async function markReviewRequested(): Promise<void> {
     try {
         await AsyncStorage.setItem(STORAGE_KEYS.LAST_REQUESTED, Date.now().toString());
-        console.log('[StoreReview] Marked as requested');
     } catch (error) {
         console.error('[StoreReview] Error marking review requested:', error);
     }
@@ -143,7 +136,6 @@ export async function markReviewCompleted(): Promise<void> {
     try {
         await AsyncStorage.setItem(STORAGE_KEYS.COMPLETED, 'true');
         await markReviewRequested();
-        console.log('[StoreReview] Marked as completed');
     } catch (error) {
         console.error('[StoreReview] Error marking review completed:', error);
     }
@@ -158,7 +150,6 @@ export async function markReviewDeclined(): Promise<void> {
         const newCount = (parseInt(current || '0', 10) || 0) + 1;
         await AsyncStorage.setItem(STORAGE_KEYS.DECLINED_COUNT, newCount.toString());
         await markReviewRequested(); // Applique aussi le cooldown
-        console.log(`[StoreReview] Marked as declined (${newCount} times)`);
     } catch (error) {
         console.error('[StoreReview] Error marking review declined:', error);
     }
@@ -171,17 +162,14 @@ export async function requestNativeReview(): Promise<boolean> {
     try {
         const isAvailable = await StoreReview.isAvailableAsync();
         if (!isAvailable) {
-            console.log('[StoreReview] Native review not available on this platform');
             return false;
         }
 
         if (await StoreReview.hasAction()) {
             await StoreReview.requestReview();
-            console.log('[StoreReview] Native review triggered');
             return true;
         }
 
-        console.log('[StoreReview] No action available');
         return false;
     } catch (error) {
         console.error('[StoreReview] Error requesting native review:', error);

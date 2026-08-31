@@ -18,10 +18,10 @@ interface Props {
     onFinish: (profileData: ProfileData) => void;
 }
 
-const BADGE_THEMES: { id: BadgeTheme; icon: string; label: string }[] = [
-    { id: 'space', icon: '🚀', label: 'Espace' },
-    { id: 'heroes', icon: '⚡', label: 'Héros' },
-    { id: 'animals', icon: '🐯', label: 'Animaux' },
+const BADGE_THEMES: { id: BadgeTheme; icon: string }[] = [
+    { id: 'space', icon: '🚀' },
+    { id: 'heroes', icon: '⚡' },
+    { id: 'animals', icon: '🐯' },
 ];
 
 export default function OnboardingProfile({ onFinish }: Props) {
@@ -207,7 +207,7 @@ export default function OnboardingProfile({ onFinish }: Props) {
                                         styles.themeText,
                                         selectedTheme === theme.id && styles.themeTextActive,
                                     ]}>
-                                        {theme.label}
+                                        {i18n.t(`settings.themes.${theme.id}`)}
                                     </Text>
                                 </TouchableOpacity>
                             ))}

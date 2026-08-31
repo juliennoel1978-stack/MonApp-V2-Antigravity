@@ -1,26 +1,22 @@
 import '../polyfill';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack, useRouter } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from 'expo-font';
 import { Lexend_400Regular, Lexend_700Bold } from '@expo-google-fonts/lexend';
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { TouchableOpacity, Text, View } from "react-native";
-import { X } from "lucide-react-native";
 import { AppProvider } from "@/contexts/AppContext";
 
 try {
   SplashScreen.preventAutoHideAsync();
-} catch (e) {
-  // console.log('SplashScreen warning:', e);
+} catch {
+  // ignore: splash screen already hidden or unsupported on this platform
 }
 
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
-  const router = useRouter();
-
   return (
     <Stack screenOptions={{ headerBackTitle: "Retour" }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />

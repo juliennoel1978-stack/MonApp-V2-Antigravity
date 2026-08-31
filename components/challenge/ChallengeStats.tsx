@@ -4,14 +4,14 @@ import { ThemedText } from '../ThemedText';
 import { AppColors } from '@/constants/colors';
 import { useThemeColors } from '@/hooks/useThemeColors';
 
+import i18n from '@/utils/i18n';
+
 type ChallengeStatsProps = {
     correct: number;
     incorrect: number;
     total: number;
     max: number;
 };
-
-import i18n from '@/utils/i18n';
 
 export const ChallengeStats = ({ correct, incorrect, total, max }: ChallengeStatsProps) => {
     const progressPercent = max > 0 ? (total / max) * 100 : 0;

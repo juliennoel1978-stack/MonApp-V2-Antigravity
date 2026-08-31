@@ -123,7 +123,6 @@ export const useChallengeGame = (selectedTables?: number[]) => {
         const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
             if (nextAppState === 'active') {
                 // App came back to foreground - user will resume manually via Pause modal
-                console.log('Challenge: App returned to foreground');
             } else if (nextAppState === 'background' || nextAppState === 'inactive') {
                 // App went to background or inactive (phone call) -> PAUSE
                 if (!isPaused && !isFinished) {
@@ -132,7 +131,6 @@ export const useChallengeGame = (selectedTables?: number[]) => {
                         clearInterval(timerRef.current);
                         timerRef.current = null;
                     }
-                    console.log('Challenge: App went to background -> Game Paused');
                 }
             }
         });

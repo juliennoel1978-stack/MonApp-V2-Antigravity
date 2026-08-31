@@ -27,67 +27,6 @@ const TableDetailModal = lazy(() => import('@/components/TableDetailModal'));
 // Keep this for static styles usage, while component uses hook for dynamic updates
 const { width } = Dimensions.get('window');
 
-function getTipExamples(tableNumber: number): string[] {
-  // All examples use consistent ORDER: [Table] × [Multiplier]
-  switch (tableNumber) {
-    case 1:
-      return [
-        '1 × 5 = 5',
-        '1 × 9 = 9'
-      ];
-    case 2:
-      return [
-        '2 × 3 = 6 (3 + 3)',
-        '2 × 5 = 10 (5 + 5)'
-      ];
-    case 3:
-      return [
-        '3 × 3 = 9 (3 + 3 + 3)',
-        '3 × 4 = 12 (4 + 4 + 4)'
-      ];
-    case 4:
-      return [
-        '4 × 3 = 12 (double de 6)',
-        '4 × 5 = 20 (double de 10)'
-      ];
-    case 5:
-      return [
-        '5 × 3 = 15 ✨',
-        '5 × 6 = 30 ✨'
-      ];
-    case 6:
-      return [
-        '6 × 4 = 24 (20 + 4)',
-        '6 × 7 = 42 (35 + 7)'
-      ];
-    case 7:
-      return [
-        '7 × 3 = 21 🎯',
-        '7 × 5 = 35 🎯'
-      ];
-    case 8:
-      return [
-        '8 × 3 = 24 (double de 12)',
-        '8 × 5 = 40 (double de 20)'
-      ];
-    case 9:
-      return [
-        '9 × 2 = 18 (2+8=10→1+8=9)',
-        '9 × 5 = 45 (4+5=9)'
-      ];
-    case 10:
-      return [
-        '10 × 4 = 40 (4 + 0)',
-        '10 × 7 = 70 (7 + 0)'
-      ];
-    default:
-      return [
-        `${tableNumber} × 2 = ${tableNumber * 2}`,
-        `${tableNumber} × 5 = ${tableNumber * 5}`
-      ];
-  }
-}
-
 export default function DiscoveryScreen() {
   const router = useRouter();
   const { tableNumber, step } = useLocalSearchParams();
@@ -108,15 +47,7 @@ export default function DiscoveryScreen() {
   const { speak, stopSpeech } = useAudio();
   const colors = useThemeColors();
 
-  const { width, height } = useWindowDimensions();
-  const isTablet = width > 600;
-
-  // Dynamic columns calculation (legacy, not used for counting grid anymore)
-  const numColumns = isTablet ? 5 : 3;
-  const gap = 8;
-  const containerPadding = 8;
-  const effectiveWidth = Math.min(width, 800);
-  const itemWidth = (effectiveWidth - (containerPadding * 2) - (gap * (numColumns - 1))) / numColumns;
+  const { height } = useWindowDimensions();
 
   // Dynamic card height calculation for "Compte avec moi" grid
   // We need all 10 cards (5 rows × 2 columns) to fit without scrolling
@@ -416,11 +347,13 @@ export default function DiscoveryScreen() {
 
   return (
     <View style={[styles.backgroundContainer, { backgroundColor: colors.background }]}>
-      <TableDetailModal
-        visible={showTableDetail}
-        tableNumber={table.number}
-        onClose={() => setShowTableDetail(false)}
-      />
+      <Suspense fallback={null}>
+        <TableDetailModal
+          visible={showTableDetail}
+          tableNumber={table.number}
+          onClose={() => setShowTableDetail(false)}
+        />
+      </Suspense>
 
       <Modal
         visible={selectedMultiplication !== null}

@@ -73,7 +73,6 @@ export default function SettingsScreen() {
     updateUser,
     anonymousChallengesCompleted,
     progress,
-    convertAnonymousToProfile,
   } = useApp();
   const colors = useThemeColors();
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
@@ -471,7 +470,9 @@ export default function SettingsScreen() {
                   </ThemedText>
                 </View>
                 <ThemedText style={styles.anonymousConvertDesc}>
-                  {i18n.t('settings.convert_desc', { challenges: anonymousChallengesCompleted })}
+                  {anonymousChallengesCompleted > 0
+                    ? i18n.t('settings.convert_desc', { challenges: anonymousChallengesCompleted })
+                    : i18n.t('settings.convert_desc_stars', { stars: progress.reduce((sum, p) => sum + p.starsEarned, 0) })}
                 </ThemedText>
                 <TouchableOpacity
                   style={styles.convertButton}
@@ -810,13 +811,15 @@ export default function SettingsScreen() {
       </SafeAreaView>
 
       {/* RICH BADGE MODAL */}
-      <CollectionModal
-        visible={showBadgeModal}
-        onClose={() => setShowBadgeModal(false)}
-        theme={badgeModalUser?.badgeTheme || settings.badgeTheme || 'space'}
-        gender={badgeModalUser?.gender}
-        targetUser={badgeModalUser}
-      />
+      <Suspense fallback={null}>
+        <CollectionModal
+          visible={showBadgeModal}
+          onClose={() => setShowBadgeModal(false)}
+          theme={badgeModalUser?.badgeTheme || settings.badgeTheme || 'space'}
+          gender={badgeModalUser?.gender}
+          targetUser={badgeModalUser}
+        />
+      </Suspense>
     </View >
   );
 }

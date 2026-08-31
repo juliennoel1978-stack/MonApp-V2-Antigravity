@@ -1,6 +1,6 @@
 
-import { useRouter, useFocusEffect } from 'expo-router';
-import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X, Shield, Leaf, Eye, VolumeX } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { Sparkles, Settings as SettingsIcon, Trophy, Zap, UserX, Users, Plus, X, Leaf, Eye, VolumeX } from 'lucide-react-native';
 import React, { useEffect, useCallback, useRef, Suspense, lazy, useState } from 'react';
 
 import {
@@ -12,7 +12,6 @@ import {
   Modal,
   ScrollView,
   Image,
-  Pressable,
 } from 'react-native';
 import i18n from '@/utils/i18n';
 
@@ -30,7 +29,6 @@ import { ReviewRequestModal } from '@/components/ReviewRequestModal';
 import {
   incrementSessionCount,
   shouldRequestReview,
-  hasReachedMasteryThreshold,
 } from '@/utils/storeReviewHelper';
 
 // Lazy load modal pour réduire le bundle initial
@@ -196,9 +194,9 @@ const streakCardStyles = StyleSheet.create({
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, reloadData, settings, anonymousChallengesCompleted, getPersistenceBadges, getBestStreak, hasSelectedAnonymousMode, setHasSelectedAnonymousMode, hasCompletedOnboarding, getDailyStreak } = useApp();
+  const { totalStars, progress, users, currentUser, selectUser, clearCurrentUser, isLoading, settings, anonymousChallengesCompleted, getPersistenceBadges, getBestStreak, hasSelectedAnonymousMode, setHasSelectedAnonymousMode, hasCompletedOnboarding, getDailyStreak } = useApp();
   const colors = useThemeColors();
-  const { isSmallScreen, isTablet, width, spacing, fontSize, containerMaxWidth } = useResponsive();
+  const { isTablet, spacing, fontSize } = useResponsive();
   const [showTablesModal, setShowTablesModal] = React.useState(false);
   const [showCollectionModal, setShowCollectionModal] = React.useState(false);
   const [showParentGate, setShowParentGate] = React.useState(false);
@@ -219,9 +217,6 @@ export default function HomeScreen() {
   const modalScale = React.useRef(new Animated.Value(0.9)).current;
   const [isReady, setIsReady] = React.useState(false);
   const [showUserModal, setShowUserModal] = React.useState(false);
-  const [settingsProgress, setSettingsProgress] = React.useState(0);
-  const settingsTimerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
-  const settingsProgressAnim = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (!isLoading && !isReady) {
@@ -556,47 +551,6 @@ export default function HomeScreen() {
     return 1; // Fallback
   }, [progress, challengesCompleted]);
 
-  const handleSettingsPressIn = () => {
-
-    setSettingsProgress(0);
-    settingsProgressAnim.setValue(0);
-
-    Animated.timing(settingsProgressAnim, {
-      toValue: 1,
-      duration: 3000,
-      useNativeDriver: false,
-    }).start();
-
-    let currentProgress = 0;
-    settingsTimerRef.current = setInterval(() => {
-      currentProgress += (100 / 30);
-      if (currentProgress >= 100) {
-        if (settingsTimerRef.current) {
-          clearInterval(settingsTimerRef.current);
-          settingsTimerRef.current = null;
-        }
-        setSettingsProgress(0);
-
-        setTimeout(() => {
-          router.push('/settings' as any);
-        }, 0);
-      } else {
-        setSettingsProgress(currentProgress);
-      }
-    }, 100);
-  };
-
-  const handleSettingsPressOut = () => {
-
-    if (settingsTimerRef.current) {
-      clearInterval(settingsTimerRef.current);
-      settingsTimerRef.current = null;
-    }
-    setSettingsProgress(0);
-    settingsProgressAnim.stopAnimation();
-    settingsProgressAnim.setValue(0);
-  };
-
   if (!isReady) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
@@ -832,12 +786,14 @@ export default function HomeScreen() {
           </Animated.View>
         </ScrollView>
 
-        <CollectionModal
-          visible={showCollectionModal}
-          onClose={() => setShowCollectionModal(false)}
-          theme={badgeTheme}
-          gender={gender}
-        />
+        <Suspense fallback={null}>
+          <CollectionModal
+            visible={showCollectionModal}
+            onClose={() => setShowCollectionModal(false)}
+            theme={badgeTheme}
+            gender={gender}
+          />
+        </Suspense>
 
         <ParentGateModal
           visible={showParentGate}

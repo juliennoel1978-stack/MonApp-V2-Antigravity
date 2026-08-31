@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView , Text } from 'react-native';
 import { BookOpen, Zap, Heart } from 'lucide-react-native';
 import { AppColors } from '@/constants/colors';
 import i18n from '@/utils/i18n';

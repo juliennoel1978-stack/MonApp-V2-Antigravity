@@ -1,5 +1,5 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Camera, Image as ImageIcon, Save, X, Clock, Volume2, VolumeX, Mic, Zap, Type, Leaf, User as UserIcon, Check } from 'lucide-react-native';
+import { Camera, Image as ImageIcon, Save, X, Clock, Volume2, VolumeX, Mic, Zap, Leaf, User as UserIcon, Check } from 'lucide-react-native';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -13,7 +13,6 @@ import {
   Image,
   KeyboardAvoidingView,
   Keyboard,
-  Switch,
   Modal,
   InputAccessoryView,
 } from 'react-native';
@@ -28,8 +27,11 @@ import i18n from '@/utils/i18n';
 export default function UserFormScreen() {
   const router = useRouter();
   const { userId, convertAnonymous } = useLocalSearchParams<{ userId?: string; convertAnonymous?: string }>();
-  const { addUser, updateUser, users, selectUser, convertAnonymousToProfile } = useApp();
-  const isConvertingAnonymous = convertAnonymous === 'true';
+  const { addUser, updateUser, users, selectUser, convertAnonymousToProfile, currentUser, hasSelectedAnonymousMode } = useApp();
+  // Any creation flow (not just the dedicated button) must preserve progress
+  // made while playing anonymously, so detect the anonymous session directly
+  // instead of relying on every caller to pass convertAnonymous=true.
+  const isConvertingAnonymous = !userId && (convertAnonymous === 'true' || (!currentUser && hasSelectedAnonymousMode));
   const [firstName, setFirstName] = useState('');
   const [gender, setGender] = useState<'boy' | 'girl'>('boy');
   const [age, setAge] = useState('');
@@ -45,7 +47,6 @@ export default function UserFormScreen() {
   const [voiceGender, setVoiceGender] = useState<'male' | 'female'>('female');
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [hapticsEnabled, setHapticsEnabled] = useState(true);
-  const [dyslexiaFontEnabled, setDyslexiaFontEnabled] = useState(false);
   const [fontPreference, setFontPreference] = useState<'standard' | 'lexend' | 'opendyslexic'>('standard');
   const [zenMode, setZenMode] = useState(false);
   const [avatarId, setAvatarId] = useState<string | undefined>(undefined);
@@ -80,7 +81,6 @@ export default function UserFormScreen() {
         setVoiceGender(user.voiceGender ?? 'female');
         setSoundEnabled(user.soundEnabled ?? true);
         setHapticsEnabled(user.hapticsEnabled ?? true);
-        setDyslexiaFontEnabled(user.dyslexiaFontEnabled ?? false);
         // Migration logic for initial load
         if (user.fontPreference) {
           setFontPreference(user.fontPreference);
